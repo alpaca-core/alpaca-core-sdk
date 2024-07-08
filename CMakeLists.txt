@@ -31,5 +31,9 @@ if(alpacaCoreIsRoot)
 endif()
 
 #################
+# global packages
+CPMAddPackage(gh:iboB/splat@1.3.2)
+
+#################
 # subdirs/targets
 add_subdirectory(poc)
