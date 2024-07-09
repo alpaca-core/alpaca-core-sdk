@@ -1,0 +1,3 @@
+[submodule "inference/ggml"]
+	path = inference/ggml
+	url = https://github.com/alpaca-core/ggml.git
