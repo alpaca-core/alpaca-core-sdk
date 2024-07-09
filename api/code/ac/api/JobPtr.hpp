@@ -1,8 +1,10 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include "Provider.hpp"
+#pragma once
+#include <memory>
 
 namespace ac::api {
-Provider::~Provider() = default; // export vtable from here
+class Job;
+using JobPtr = std::shared_ptr<Job>;
 }

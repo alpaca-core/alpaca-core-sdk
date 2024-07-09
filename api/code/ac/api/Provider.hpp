@@ -3,7 +3,7 @@
 //
 #pragma once
 #include "export.h"
-#include <ac/Dict.hpp>
+#include "Dict.hpp"
 
 namespace ac::api {
 
