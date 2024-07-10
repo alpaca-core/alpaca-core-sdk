@@ -46,4 +46,5 @@ CPMAddPackage(gh:iboB/itlib@1.10.3)
 #################
 # subdirs/targets
 add_subdirectory(api)
+add_subdirectory(inference)
 add_subdirectory(poc)

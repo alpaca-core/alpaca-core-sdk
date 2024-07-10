@@ -10,6 +10,8 @@ class AC_API_EXPORT Job {
 public:
     virtual ~Job();
 
+    // job ops are queued and executed in order
+    // the inner job state is modified by ops and subsequent ones may depend on the results of previous ones
     virtual void runOp(std::string_view op, Dict params, Callback<Dict> cb) = 0;
 
     // wait for all ops to finish
