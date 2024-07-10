@@ -12,6 +12,7 @@
 * The API is a first-class C++ API: It uses classes, throws exceptions, and doesn't shy away from C++ library types like `std::function` or `std::shared_ptr`.
     * **Rationale**: While C *is* the Lingua Franka of software engineering, C++ is simply easier to use. It's much easier to design and maintain a C++ API without paying the price for the abstraction. Templates, and destructors provide a way to expose complex behavior without burdening the users with a huge number of specific functions and gotchas. Exceptions provide a natural way to handle errors. Moreover many languages (like Java, Python, Lua, and others) provide ways to bind a C++ API in a much more natural way than a C one (including higher-order C++ constructs). It would be a shame to miss-out on this. Finally this is not banning a C interface. A C interface will necessarily exist. Many languages would have an easier time with C. Still the "natural" programming language of the API and the only way to access low-level features would be C++.
     * We will provide API wrappers for popular languages
+    * We will provide REST and WebSocket interfaces to the API.
     * The C wrapper will be part of this repo.
     * Wrappers for other languages would come in separate repos using this one as a submodule or package.
 * SDK Glossary:
