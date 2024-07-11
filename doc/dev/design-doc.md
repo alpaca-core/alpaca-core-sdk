@@ -59,6 +59,15 @@ A collection of somewhat loose notes on the design and architecture of the SDK. 
 * All api calls are async, with callbacks
     * Callbacks are not necessarily the best way to approach async programming in C++, but they are the most portable and the easiest to bind to other languages. Moreover they can be wrapped by futures or coroutines (yes, a C++ wrapper of the C++ API, yay).
     * Having all calls async will make the use of the API seamless, regardless of whether the inference is local or remote.
+* Somewhat stringly typed arguments
+    * Given the vast and impossible to foresee number of combinations for API calls, we're providing most params to most ops as key-value maps/dictionaries.
+    * The carrier for these is [nlohmann::json](https://github.com/nlohmann/json)
+        * The type is essentially a key-value BSON compatible map 
+        * Values are number (optionally integer), string, array, object, null, and crucially *blob*.
+        * It supports [JSON Schema](https://json-schema.org/) via [pboettch/json-schema-validator](https://github.com/pboettch/json-schema-validator)
+    * In the initial implementation the C API will use `const char*` JSON strings, with blobs as base64 strings. Later we will provide a C wrapper to set values
+    * The C++ API will use `nlohmann::json` directly `typedef`-ed to `Dict`.
+    * In the future we may provide ways to supply params via Protobuf, Flatbuffers, or even [WIT](https://github.com/WebAssembly/component-model/blob/main/design/mvp/CanonicalABI.md) ([bindgen](https://github.com/bytecodealliance/wit-bindgen))
 
 ## Project Structure
 
