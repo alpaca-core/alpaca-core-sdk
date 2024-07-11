@@ -1,6 +1,6 @@
 # Design and Architecture
 
-A collection of somewhat loose notes on the design and architecture of the SDK. This document is not yet completely structure and will likely be transformed into multiple documents in the future.
+A collection of somewhat loose notes on the design and architecture of the SDK. This document is not yet completely structured and will likely be transformed into multiple documents in the future.
 
 ## Assumptions
 
@@ -26,7 +26,7 @@ A collection of somewhat loose notes on the design and architecture of the SDK. 
       * It's much easier to design and maintain a C++ API without paying the price for the abstraction. Templates, and destructors provide a way to expose complex behavior without burdening the users with a huge number of specific functions and gotchas. Exceptions provide a natural way to handle errors. 
       * Moreover many languages (like Java, Python, Lua, and others) provide ways to bind a C++ API in a much more natural way than a C one (including higher-order C++ constructs). It would be a shame to miss-out on this. 
       * This is not to ban a C interface. A C interface will necessarily exist. Many languages would have an easier time with C. Still the "natural" programming language of the API and the only way to access low-level features would be C++.
-      * There are multiple arguments in favor of going C first if we're shipping a closed-source library. Things to consider in this case would be binaries for special instruction sets, using the library as a plugin with `dlopen`/`dlsym` and more. However this is not the case here. Moreover even if were we could still cover all the needs by using [DynaMix](https://github.com/iboB/dynamix)
+      * There are multiple arguments in favor of going C first if we're shipping a closed-source library. Things to consider in this case would be binaries for special instruction sets, using the library as a plugin with `dlopen`/`dlsym` and more. However this is not the case here. Moreover even if were, we could still cover all the needs by using [DynaMix](https://github.com/iboB/dynamix)
     * We will provide API wrappers for popular languages
     * Eventually we will provide REST and WebSocket interfaces to the API.
     * The C wrapper will be part of this repo.
@@ -47,11 +47,12 @@ A collection of somewhat loose notes on the design and architecture of the SDK. 
         * A model must be loaded to create a...
     * Job: an inference job whose state persists while the job is "alive".
         * Multiple jobs can be created from a model.
-        * Jobs can (in theory) be concurrent
+        * Jobs can be concurrent. At least in theory. Code should treat them as such.
         * Jobs can execute ops.
     * Op: a computation performed by a job
         * Multiple ops can be executed by a job.
-        * The ops in a job are sequential, though queueing multiple ops is supported.
+        * The ops in a job are sequential
+        * Queueing multiple ops is supported.
         * Ops can change the job's state (say kv cache) and this change affects subsequent ops
             * For example a chat would be composed of a job with multiple ops: one for each input by the user.
         * Some ops can, however, clear the state or parts of it
