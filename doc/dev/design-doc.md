@@ -1,5 +1,7 @@
 # Design and Architecture
 
+A collection of somewhat loose notes on the design and architecture of the SDK. This document is not yet completely structure and will likely be transformed into multiple documents in the future.
+
 ## Assumptions
 
 * This is an SDK which is suitable to become *The* AI Inference SDK
@@ -9,10 +11,23 @@
 
 ## API
 
+### Some scenarios
+
+* User loads an LLM, opens a chat job and has a chat
+* User loads an LLM and prompts it to generate some text, then closes the job
+* User loads Whisper, partially and only encodes audio
+    * Then in the future only loads the Whisper decoder and decodes the saved results
+
+### API Design
+
 * The API is a first-class C++ API: It uses classes, throws exceptions, and doesn't shy away from C++ library types like `std::function` or `std::shared_ptr`.
-    * **Rationale**: While C *is* the Lingua Franka of software engineering, C++ is simply easier to use. It's much easier to design and maintain a C++ API without paying the price for the abstraction. Templates, and destructors provide a way to expose complex behavior without burdening the users with a huge number of specific functions and gotchas. Exceptions provide a natural way to handle errors. Moreover many languages (like Java, Python, Lua, and others) provide ways to bind a C++ API in a much more natural way than a C one (including higher-order C++ constructs). It would be a shame to miss-out on this. Finally this is not banning a C interface. A C interface will necessarily exist. Many languages would have an easier time with C. Still the "natural" programming language of the API and the only way to access low-level features would be C++.
+    * **Rationale**: 
+      * While C *is* the Lingua Franka of software engineering, C++ is simply easier to use. 
+      * It's much easier to design and maintain a C++ API without paying the price for the abstraction. Templates, and destructors provide a way to expose complex behavior without burdening the users with a huge number of specific functions and gotchas. Exceptions provide a natural way to handle errors. 
+      * Moreover many languages (like Java, Python, Lua, and others) provide ways to bind a C++ API in a much more natural way than a C one (including higher-order C++ constructs). It would be a shame to miss-out on this. 
+      * This is not to ban a C interface. A C interface will necessarily exist. Many languages would have an easier time with C. Still the "natural" programming language of the API and the only way to access low-level features would be C++.
     * We will provide API wrappers for popular languages
-    * We will provide REST and WebSocket interfaces to the API.
+    * Eventually we will provide REST and WebSocket interfaces to the API.
     * The C wrapper will be part of this repo.
     * Wrappers for other languages would come in separate repos using this one as a submodule or package.
 * SDK Glossary:
@@ -25,9 +40,9 @@
         * Multiple remotes can be assigned to a provider.
     * Remote: a model repository
         * It has a manifest of available models
-        * It supports SQL-like queries for the fields of the model description
+        * It supports queries for the fields of the model description. Think SQL relational databases, though the query language will likely not be SQL.
     * Model: a collection of parameters.
-        * If a model is not loaded it's manifest is available
+        * The model manifest can be available regardless of whether the model is loaded.
         * A model must be loaded to create a...
     * Job: an inference job whose state persists while the job is "alive".
         * Multiple jobs can be created from a model.
@@ -35,14 +50,37 @@
         * Jobs can execute ops.
     * Op: a computation performed by a job
         * Multiple ops can be executed by a job.
-        * The ops in a job are sequential.
+        * The ops in a job are sequential, though queueing multiple ops is supported.
         * Ops can change the job's state (say kv cache) and this change affects subsequent ops
             * For example a chat would be composed of a job with multiple ops: one for each input by the user.
-
-
+        * Some ops can, however, clear the state or parts of it
+            * This will allow the user to mitigate time spent in job allocation an initialization
+* All api calls are async, with callbacks
+    * Callbacks are not necessarily the best way to approach async programming in C++, but they are the most portable and the easiest to bind to other languages. Moreover they can be wrapped by futures or coroutines (yes, a C++ wrapper of the C++ API, yay).
+    * Having all calls async will make the use of the API seamless, regardless of whether the inference is local or remote.
 
 ## Project Structure
 
-## Library
+* The project is composed of multiple libraries and tools. Their build can be controlled by build flavors. For example, one wouldn't (usually) build the server for mobile targets.
+* Inference libraries can be used separately form the API above. One would be able to instantiate, say LLaMa, if they have weights and call functions directly, without worrying about Providers and Remotes.
+* Third party libraries which are likely to be modified by us are forked and added as submodules.
+* Ones that are not likely to be modified are added as dependencies with CPM.cmake (in the future other package managers may be used if there is a need)
 
+## Other
 
+* Coding style:
+    * 4-space indentation
+    * Karisik for C++: 
+        * `.cpp`, `.hpp` file extensions
+        * `PascalCase` for types
+        * `camelCase` for functions and variables
+        * `ALL_CAPS` for macros
+        * `Mixed_Case` for constants. 
+        * No `get` prefix on getters. 
+        * `m_` prefix on members. 
+        * `PascalCase` for filenames. 
+        * `PascalCase.camelCase` for functional extensions
+    * Simple for C
+        * `.c`, `.h` file extensions
+        * `c_case_for_everything` including filenames
+        * ...except macros which are still `ALL_CAPS`
