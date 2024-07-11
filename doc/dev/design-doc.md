@@ -26,6 +26,7 @@ A collection of somewhat loose notes on the design and architecture of the SDK. 
       * It's much easier to design and maintain a C++ API without paying the price for the abstraction. Templates, and destructors provide a way to expose complex behavior without burdening the users with a huge number of specific functions and gotchas. Exceptions provide a natural way to handle errors. 
       * Moreover many languages (like Java, Python, Lua, and others) provide ways to bind a C++ API in a much more natural way than a C one (including higher-order C++ constructs). It would be a shame to miss-out on this. 
       * This is not to ban a C interface. A C interface will necessarily exist. Many languages would have an easier time with C. Still the "natural" programming language of the API and the only way to access low-level features would be C++.
+      * There are multiple arguments in favor of going C first if we're shipping a closed-source library. Things to consider in this case would be binaries for special instruction sets, using the library as a plugin with `dlopen`/`dlsym` and more. However this is not the case here. Moreover even if were we could still cover all the needs by using [DynaMix](https://github.com/iboB/dynamix)
     * We will provide API wrappers for popular languages
     * Eventually we will provide REST and WebSocket interfaces to the API.
     * The C wrapper will be part of this repo.
@@ -64,13 +65,13 @@ A collection of somewhat loose notes on the design and architecture of the SDK. 
 * The project is composed of multiple libraries and tools. Their build can be controlled by build flavors. For example, one wouldn't (usually) build the server for mobile targets.
 * Inference libraries can be used separately form the API above. One would be able to instantiate, say LLaMa, if they have weights and call functions directly, without worrying about Providers and Remotes.
 * Third party libraries which are likely to be modified by us are forked and added as submodules.
-* Ones that are not likely to be modified are added as dependencies with CPM.cmake (in the future other package managers may be used if there is a need)
+* Ones that are not likely to be modified are added as dependencies with [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake) (in the future other package managers may be used if there is a need)
 
 ## Other
 
 * Coding style:
     * 4-space indentation
-    * Karisik for C++: 
+    * [Karisik](https://github.com/iboB/karisik-coding-style) for C++: 
         * `.cpp`, `.hpp` file extensions
         * `PascalCase` for types
         * `camelCase` for functions and variables
@@ -84,3 +85,10 @@ A collection of somewhat loose notes on the design and architecture of the SDK. 
         * `.c`, `.h` file extensions
         * `c_case_for_everything` including filenames
         * ...except macros which are still `ALL_CAPS`
+* Commit messages:
+    * use imperative mood: "add feature", "move functionality to foo"
+    * `topic: short description`
+        * Except when introducing a new topic, where the new topic the message: `add llama inference`. In such cases the implied topic is "project".
+    * Use `, ref #<issue number>` if the commit references an issue
+    * Use `, closes #<issue number>` if the commit closes an issue
+    * Use `, fixes #<issue number>` if the commit fixes a bug
