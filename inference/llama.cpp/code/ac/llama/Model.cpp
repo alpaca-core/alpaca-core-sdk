@@ -16,9 +16,9 @@ llama_model_params llamaFromModelParams(const Model::Params& params)
 } // namespace
 
 Model::Model(const char* pathToGguf, Params params)
-    : m_model(llama_load_model_from_file(pathToGguf, llamaFromModelParams(params)), llama_free_model)
+    : m_lmodel(llama_load_model_from_file(pathToGguf, llamaFromModelParams(params)), llama_free_model)
 {
-    if (!m_model) {
+    if (!m_lmodel) {
         throw std::runtime_error("Failed to load model");
     }
 }

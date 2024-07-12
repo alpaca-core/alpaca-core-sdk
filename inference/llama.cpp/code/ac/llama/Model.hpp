@@ -9,6 +9,8 @@ struct llama_model;
 struct llama_model_params;
 
 namespace ac::llama {
+class Job;
+
 class AC_LLAMA_EXPORT Model {
 public:
     struct Params {
@@ -17,6 +19,7 @@ public:
     explicit Model(const char* pathToGguf, Params params = {});
     ~Model();
 private:
-    astl::c_unique_ptr<llama_model> m_model;
+    friend Job;
+    astl::c_unique_ptr<llama_model> m_lmodel;
 };
 } // namespace ac::llama

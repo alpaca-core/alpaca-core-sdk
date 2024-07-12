@@ -33,6 +33,7 @@ static void llamaLogCb(ggml_log_level level, const char* text, void* /*user_data
 
 void initLibrary() {
     llama_log_set(llamaLogCb, nullptr);
+    llama_backend_init();
 }
 
 } // namespace ac::llama
