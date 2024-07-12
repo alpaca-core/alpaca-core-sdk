@@ -4,5 +4,5 @@
 #include "Logging.hpp"
 
 namespace ac::llama::log {
-extern jalog::Scope scope("ac:llama");
+jalog::Scope scope("ac:llama");
 }
