@@ -26,4 +26,30 @@ Model::Model(const char* pathToGguf, Params params)
 Model::~Model() = default;
 
 
+uint32_t Model::trainCtxLength() const noexcept {
+    return uint32_t(llama_n_ctx_train(m_lmodel.get()));
+}
+
+bool Model::shouldAddBosToken() const noexcept {
+    const int lbos = llama_add_bos_token(m_lmodel.get());
+    if (lbos != -1) return !!lbos;
+
+    return llama_vocab_type(m_lmodel.get()) == LLAMA_VOCAB_TYPE_SPM;
+}
+
+std::string Model::getChatTemplateId() const {
+    // load template from model
+    constexpr size_t bufSize = 2048; // longest known template is about 1200 bytes
+    std::unique_ptr<char[]> tplBuf(new char[bufSize]);
+
+    const char* key = "tokenizer.chat_template";
+
+    int32_t len = llama_model_meta_val_str(m_lmodel.get(), key, tplBuf.get(), bufSize);
+    if (len < 0) {
+        return "chatml"; // default fallback
+    }
+
+    return std::string(tplBuf.get(), len);
+}
+
 } // namespace ac::llama

@@ -4,6 +4,7 @@
 #pragma once
 #include "export.h"
 #include "mem_ext.hpp"
+#include <vector>
 
 struct llama_context;
 
@@ -19,6 +20,9 @@ public:
     ~Job();
 private:
     astl::c_unique_ptr<llama_context> m_lctx;
+
+    using LlamaToken = int32_t;
+    std::vector<LlamaToken> m_inputTokens;
 };
 
 } // namespace ac::llama
