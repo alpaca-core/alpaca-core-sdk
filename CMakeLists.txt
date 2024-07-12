@@ -17,7 +17,7 @@ include(./get_cpm.cmake)
 
 #################
 # cmake lib
-CPMAddPackage(gh:iboB/icm@1.5.0)
+CPMAddPackage(gh:iboB/icm@1.5.1)
 list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake"
     "${icm_SOURCE_DIR}"
@@ -42,6 +42,7 @@ endif()
 CPMAddPackage(gh:iboB/splat@1.3.2)
 CPMAddPackage(gh:nlohmann/json@3.11.3)
 CPMAddPackage(gh:iboB/itlib@1.10.3)
+CPMAddPackage(gh:iboB/jalog@0.4.1)
 
 #################
 # subdirs/targets

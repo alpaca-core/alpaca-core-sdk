@@ -7,11 +7,16 @@ target_include_directories(ac-llama INTERFACE .)
 target_link_libraries(ac-llama
     PRIVATE
         llama
+        jalog::jalog
     PUBLIC
         ac::api
 )
 target_sources(ac-llama PRIVATE
     ac/llama/export.h
+    ac/llama/Init.hpp
+    ac/llama/Init.cpp
+    ac/llama/Logging.hpp
+    ac/llama/Logging.cpp
     ac/llama/Model.hpp
     ac/llama/Model.cpp
 )
