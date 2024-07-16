@@ -34,6 +34,7 @@ static void llamaLogCb(ggml_log_level level, const char* text, void* /*user_data
 void initLibrary() {
     llama_log_set(llamaLogCb, nullptr);
     llama_backend_init();
+    LLAMA_LOG(Info, "cpu info: ", llama_print_system_info());
 }
 
 } // namespace ac::llama

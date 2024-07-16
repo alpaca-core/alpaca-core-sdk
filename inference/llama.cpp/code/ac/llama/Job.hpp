@@ -11,13 +11,16 @@ struct llama_context;
 namespace ac::llama {
 class Model;
 
-class Job {
+class AC_LLAMA_EXPORT Job {
 public:
     struct Params {
     };
 
     explicit Job(Model& model, Params params = {});
     ~Job();
+
+    // do an empty model run to load model data in cache
+    void warmup();
 private:
     astl::c_unique_ptr<llama_context> m_lctx;
 
