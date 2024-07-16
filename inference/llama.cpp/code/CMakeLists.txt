@@ -19,6 +19,8 @@ target_sources(ac-llama PRIVATE
     ac/llama/Logging.cpp
     ac/llama/Model.hpp
     ac/llama/Model.cpp
+    ac/llama/ChatTemplate.hpp
+    ac/llama/ChatTemplate.cpp
     ac/llama/Job.hpp
     ac/llama/Job.cpp
 )
