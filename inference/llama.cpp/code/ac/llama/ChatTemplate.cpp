@@ -4,18 +4,17 @@
 #include "ChatTemplate.hpp"
 #include <llama.h>
 #include <vector>
+#include <cassert>
 #include <stdexcept>
 
 namespace ac::llama {
-ChatTemplate::ChatTemplate(std::string tpl) : m_template(std::move(tpl)) {}
-
-bool ChatTemplate::verify() const noexcept {
+namespace {
+bool verify(const std::string& tpl) {
     const llama_chat_message msg = {"user", "test"};
-    auto res = llama_chat_apply_template(nullptr, m_template.c_str(), &msg, 1, true, nullptr, 0);
+    auto res = llama_chat_apply_template(nullptr, tpl.c_str(), &msg, 1, true, nullptr, 0);
     return res >= 0;
 }
 
-namespace {
 std::pair<std::vector<llama_chat_message>, size_t> fromChatMsg(std::span<const ChatMsg> chat) {
     std::vector<llama_chat_message> lchat;
     size_t size = 0;
@@ -28,6 +27,12 @@ std::pair<std::vector<llama_chat_message>, size_t> fromChatMsg(std::span<const C
     return {lchat, size};
 }
 } // namespace
+
+ChatTemplate::ChatTemplate(std::string tpl) : m_template(std::move(tpl)) {
+    if (!verify(m_template)) {
+        throw std::runtime_error("Unsupported template");
+    }
+}
 
 std::string ChatTemplate::apply(std::span<const ChatMsg> chat, bool addAssistantPrompt) const {
     auto [lchat, size] = fromChatMsg(chat);
@@ -62,19 +67,14 @@ std::string ChatTemplate::apply(std::span<const llama_chat_message> chat, size_t
     int32_t res = llama_chat_apply_template(nullptr, m_template.c_str(), chat.data(), chat.size(),
         addAssistantPrompt, fmt.data(), int32_t(fmt.size()));
 
-    if (res < 0) {
-        throw std::runtime_error("Unsupported template");
-    }
-
-    if (size_t(res) > fmt.size()) {
+    if (res > int32_t(fmt.size())) {
         // optimistic size was not enough
         fmt.resize(res);
         res = llama_chat_apply_template(nullptr, m_template.c_str(), chat.data(), chat.size(),
             addAssistantPrompt, fmt.data(), int32_t(fmt.size()));
-        if (res < 0) {
-            throw std::runtime_error("WTF! Unsupported template on second try?");
-        }
     }
+
+    assert(res >= 0);
 
     fmt.resize(res);
     return fmt;

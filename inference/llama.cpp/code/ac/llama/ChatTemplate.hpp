@@ -15,8 +15,7 @@ public:
     // the template string here can be either an id or a markup
     explicit ChatTemplate(std::string tpl);
 
-    // check if the template is supported
-    bool verify() const noexcept;
+    const std::string& tpl() const noexcept { return m_template; }
 
     // wrapper around llama_chat_apply_template
     // throw an error on unsupported template
