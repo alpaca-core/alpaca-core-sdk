@@ -1,7 +1,7 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include "ChatTemplate.hpp"
+#include "ChatFormat.hpp"
 #include <llama.h>
 #include <vector>
 #include <cassert>
@@ -28,18 +28,18 @@ std::pair<std::vector<llama_chat_message>, size_t> fromChatMsg(std::span<const C
 }
 } // namespace
 
-ChatTemplate::ChatTemplate(std::string tpl) : m_template(std::move(tpl)) {
+ChatFormat::ChatFormat(std::string tpl) : m_template(std::move(tpl)) {
     if (!verify(m_template)) {
         throw std::runtime_error("Unsupported template");
     }
 }
 
-std::string ChatTemplate::apply(std::span<const ChatMsg> chat, bool addAssistantPrompt) const {
+std::string ChatFormat::formatChat(std::span<const ChatMsg> chat, bool addAssistantPrompt) const {
     auto [lchat, size] = fromChatMsg(chat);
     return apply(lchat, size, addAssistantPrompt);
 }
 
-std::string ChatTemplate::format(const ChatMsg& msg, std::span<const ChatMsg> history, bool addAssistantPrompt) const {
+std::string ChatFormat::formatMsg(const ChatMsg& msg, std::span<const ChatMsg> history, bool addAssistantPrompt) const {
     auto [lchat, size] = fromChatMsg(history);
     auto fmtHistory = apply(lchat, size, false);
 
@@ -59,7 +59,7 @@ std::string ChatTemplate::format(const ChatMsg& msg, std::span<const ChatMsg> hi
     return ret;
 }
 
-std::string ChatTemplate::apply(std::span<const llama_chat_message> chat, size_t size, bool addAssistantPrompt) const {
+std::string ChatFormat::apply(std::span<const llama_chat_message> chat, size_t size, bool addAssistantPrompt) const {
     auto allocSize = (size * 5) / 4; // optimistic 25% more than the original size
     std::string fmt(allocSize, '\0');
 

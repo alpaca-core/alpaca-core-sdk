@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include <ac/llama/ChatTemplate.hpp>
+#include <ac/llama/ChatFormat.hpp>
 #include <ac/llama/u8c.h>
 #include <doctest/doctest.h>
 #include <vector>
@@ -114,13 +114,13 @@ TEST_CASE("apply") {
     };
 
     for (const auto& test : tests) {
-        ac::llama::ChatTemplate tpl{test.tpl};
-        CHECK(tpl.tpl() == test.tpl);
-        CHECK(tpl.apply(chat, true) == test.expected);
+        ac::llama::ChatFormat fmt{test.tpl};
+        CHECK(fmt.tpl() == test.tpl);
+        CHECK(fmt.formatChat(chat, true) == test.expected);
     }
 }
 
-TEST_CASE("single") {
+TEST_CASE("formatMsg") {
     const std::vector<ac::llama::ChatMsg> chat = {
         {"system", "You are a helpful assistant"},
         {"user", "Hello"},
@@ -129,9 +129,9 @@ TEST_CASE("single") {
     ac::llama::ChatMsg msg = {"user", "How are you"};
 
     auto test = [&](std::string id) {
-        ac::llama::ChatTemplate tpl{id};
-        CHECK(tpl.tpl() == id);
-        return tpl.format(msg, chat, true);
+        ac::llama::ChatFormat fmt{id};
+        CHECK(fmt.tpl() == id);
+        return fmt.formatMsg(msg, chat, true);
     };
 
     CHECK(test("chatml") == "\n<|im_start|>user\nHow are you<|im_end|>\n<|im_start|>assistant\n");
@@ -142,5 +142,5 @@ TEST_CASE("single") {
 
 TEST_CASE("invalid") {
     std::string badTpl = "bad template";
-    CHECK_THROWS_WITH_AS(ac::llama::ChatTemplate{badTpl}, "Unsupported template", std::runtime_error);
+    CHECK_THROWS_WITH_AS(ac::llama::ChatFormat{badTpl}, "Unsupported template", std::runtime_error);
 }

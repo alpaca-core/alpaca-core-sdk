@@ -5,7 +5,7 @@
 
 #include <ac/llama/Init.hpp>
 #include <ac/llama/Model.hpp>
-#include <ac/llama/ChatTemplate.hpp>
+#include <ac/llama/ChatFormat.hpp>
 #include <ac/llama/Job.hpp>
 
 #include <jalog/Instance.hpp>
@@ -24,6 +24,10 @@ int main() {
     ac::llama::Job job(model);
 
     job.warmup();
+
+    for (auto s : job.run("hello")) {
+        std::cout << s << "\n";
+    }
 
     return 0;
 }
