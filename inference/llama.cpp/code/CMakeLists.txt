@@ -21,6 +21,8 @@ target_sources(ac-llama PRIVATE
     ac/llama/Model.cpp
     ac/llama/ChatFormat.hpp
     ac/llama/ChatFormat.cpp
+    ac/llama/Vocab.hpp
+    ac/llama/Vocab.cpp
     ac/llama/Job.hpp
     ac/llama/Job.cpp
 )

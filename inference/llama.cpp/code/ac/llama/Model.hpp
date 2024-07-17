@@ -25,8 +25,10 @@ public:
 
     // fallback to "chatml" if the uderlying model does not provide a chat template
     std::string getChatTemplateId() const;
+
+    llama_model* lmodel() noexcept { return m_lmodel.get(); }
+    const llama_model* lmodel() const noexcept { return m_lmodel.get(); }
 private:
-    friend Job;
     astl::c_unique_ptr<llama_model> m_lmodel;
 };
 } // namespace ac::llama

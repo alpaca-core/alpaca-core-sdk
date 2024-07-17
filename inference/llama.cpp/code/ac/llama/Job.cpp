@@ -4,23 +4,31 @@
 #include "Job.hpp"
 #include "Model.hpp"
 #include "Logging.hpp"
-#include "ChatMsg.hpp"
+#include "ChatFormat.hpp"
+#include "Vocab.hpp"
+#include "iile.h"
+#include "throw_ex.hpp"
 #include <llama.h>
+#include <cassert>
+
 
 namespace ac::llama {
 
 namespace {
-llama_context_params llamaFromJobParams(const Job::Params& params)
-{
+llama_context_params llamaFromJobInitParams(const Job::InitParams& params) {
     llama_context_params llamaParams = llama_context_default_params();
     return llamaParams;
 }
 } // namespace
 
-Job::Job(Model& model, Params params)
-    : m_lctx(llama_new_context_with_model(model.m_lmodel.get(), llamaFromJobParams(params)), llama_free)
+Job::Job(Model& model, InitParams params)
+    : m_model(model)
+    , m_lctx(llama_new_context_with_model(model.lmodel(), llamaFromJobInitParams(params)), llama_free)
 {
-    static_assert(std::is_same_v<LlamaToken, llama_token>);
+    if (!m_lctx) {
+        throw_ex{} << "Failed to create llama context";
+    }
+    assert(model.lmodel() == llama_get_model(m_lctx.get()));
 
     const auto ctxLen = llama_n_ctx(m_lctx.get());
     const auto ctxTrain = model.trainCtxLength();
@@ -35,7 +43,7 @@ void Job::warmup() {
     LLAMA_LOG(Info, "Running warmup");
 
     auto lctx = m_lctx.get();
-    auto model = llama_get_model(lctx);
+    auto model = m_model.lmodel();
 
     std::vector<llama_token> tmp;
     llama_token bos = llama_token_bos(model);
@@ -61,6 +69,58 @@ void Job::warmup() {
     llama_kv_cache_clear(lctx);
     llama_synchronize(lctx);
     llama_reset_timings(lctx);
+}
+
+itlib::generator<std::string> Job::run(RunParams params) {
+    Vocab vocab(m_model);
+
+    auto lctx = m_lctx.get();
+
+    ChatFormat fmt(m_model.getChatTemplateId());
+    std::vector<ChatMsg> chat;
+    auto chatAddAndFormat = [&](std::string role, std::string text) {
+        ChatMsg newMsg = {std::move(role), std::move(text)};
+        auto ret = fmt.formatMsg(newMsg, chat, newMsg.role == "user");
+        chat.push_back(std::move(newMsg));
+        return ret;
+    };
+
+    std::vector<llama_token> inputTokens;
+    if (!params.prompt.empty()) {
+        if (params.conversation) {
+            auto fmtChat = chatAddAndFormat("system", params.prompt);
+            inputTokens = vocab.tokenize(fmtChat, true, true);
+        }
+        else {
+            inputTokens = vocab.tokenize(params.prompt, true, true);
+        }
+    }
+    else {
+        // Should not run without any tokens
+        inputTokens.push_back(llama_token_bos(m_model.lmodel()));
+    }
+
+    const auto ctxLen = llama_n_ctx(m_lctx.get());
+    if (int(inputTokens.size()) > ctxLen - 4) {
+        throw_ex{} << "Input too long. Got " << inputTokens.size() << " tokens, max: " << ctxLen - 4;
+    }
+
+    const auto numKeepTokens = m_model.shouldAddBosToken() + iile([&]() {
+        if (params.conversation) return 0; // don't keep beginning of convo
+        return int32_t(inputTokens.size());
+    });
+
+    // fix invariants
+    if (params.conversation) {
+        params.interactiveFirst = true;
+    }
+    if (params.interactiveFirst) {
+        params.interactive = true;
+    }
+
+    bool interacting = params.interactive && params.interactiveFirst;
+
+    co_yield "foo";
 }
 
 } // namespace ac::llama

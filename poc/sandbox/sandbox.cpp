@@ -25,7 +25,7 @@ int main() {
 
     job.warmup();
 
-    for (auto s : job.run("hello")) {
+    for (auto s : job.run({})) {
         std::cout << s << "\n";
     }
 

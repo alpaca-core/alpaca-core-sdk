@@ -12,3 +12,4 @@ As mentioned in the discussion the (maybe distant) future plan is to ditch llama
 * Better error handling, please
 * GGUF metadata access (`llama_model_meta_*`) is not great. We should provide a better interface
 * `llama_chat_apply_template` does not handle memory allocation optimally. There's a lot of room for improvement
+* Give vocab more visibility

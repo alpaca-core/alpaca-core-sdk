@@ -4,7 +4,8 @@
 #pragma once
 #include "export.h"
 #include "mem_ext.hpp"
-#include <vector>
+#include <itlib/generator.hpp>
+#include <string>
 
 struct llama_context;
 
@@ -13,19 +14,28 @@ class Model;
 
 class AC_LLAMA_EXPORT Job {
 public:
-    struct Params {
+    struct InitParams {
     };
 
-    explicit Job(Model& model, Params params = {});
+    explicit Job(Model& model, InitParams params = {});
     ~Job();
 
     // do an empty model run to load model data in cache
     void warmup();
-private:
-    astl::c_unique_ptr<llama_context> m_lctx;
 
-    using LlamaToken = int32_t;
-    std::vector<LlamaToken> m_inputTokens;
+    struct RunParams {
+        std::string prompt;
+
+        bool conversation = false;
+        bool interactive = false;
+        bool interactiveFirst = false;
+    };
+
+    itlib::generator<std::string> run(RunParams rp);
+
+private:
+    Model& m_model;
+    astl::c_unique_ptr<llama_context> m_lctx;
 };
 
 } // namespace ac::llama
