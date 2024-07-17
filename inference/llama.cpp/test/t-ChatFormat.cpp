@@ -142,5 +142,5 @@ TEST_CASE("formatMsg") {
 
 TEST_CASE("invalid") {
     std::string badTpl = "bad template";
-    CHECK_THROWS_WITH_AS(ac::llama::ChatFormat{badTpl}, "Unsupported template", std::runtime_error);
+    CHECK_THROWS_WITH_AS(ac::llama::ChatFormat{badTpl}, "Unsupported template: bad template", std::runtime_error);
 }

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #include "ChatFormat.hpp"
+#include "throw_ex.hpp"
 #include <llama.h>
 #include <vector>
 #include <cassert>
@@ -30,7 +31,7 @@ std::pair<std::vector<llama_chat_message>, size_t> fromChatMsg(std::span<const C
 
 ChatFormat::ChatFormat(std::string tpl) : m_template(std::move(tpl)) {
     if (!verify(m_template)) {
-        throw std::runtime_error("Unsupported template");
+        throw_ex{} << "Unsupported template: " << m_template;
     }
 }
 
