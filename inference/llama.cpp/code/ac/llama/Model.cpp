@@ -37,6 +37,10 @@ bool Model::shouldAddBosToken() const noexcept {
     return llama_vocab_type(m_lmodel.get()) == LLAMA_VOCAB_TYPE_SPM;
 }
 
+bool Model::hasEncoder() const noexcept {
+    return llama_model_has_encoder(m_lmodel.get());
+}
+
 std::string Model::getChatTemplateId() const {
     // load template from model
     constexpr size_t bufSize = 2048; // longest known template is about 1200 bytes

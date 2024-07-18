@@ -29,6 +29,13 @@ public:
         bool conversation = false;
         bool interactive = false;
         bool interactiveFirst = false;
+
+        int numTokensToPredict = -1;
+
+        uint32_t gaFactor = 1; // group-attention factor
+        uint32_t gaWidth = 512; // group-attention width
+
+        uint32_t batchSize = 2048; // logical batch size for prompt processing (must be >=32 to use BLAS)
     };
 
     itlib::generator<std::string> run(RunParams rp);

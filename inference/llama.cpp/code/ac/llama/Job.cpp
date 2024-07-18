@@ -105,7 +105,7 @@ itlib::generator<std::string> Job::run(RunParams params) {
         throw_ex{} << "Input too long. Got " << inputTokens.size() << " tokens, max: " << ctxLen - 4;
     }
 
-    const auto numKeepTokens = m_model.shouldAddBosToken() + iile([&]() {
+    const auto numKeep = m_model.shouldAddBosToken() + iile([&]() {
         if (params.conversation) return 0; // don't keep beginning of convo
         return int32_t(inputTokens.size());
     });
@@ -118,7 +118,140 @@ itlib::generator<std::string> Job::run(RunParams params) {
         params.interactive = true;
     }
 
+    // group-attention state
+    // number of grouped KV tokens so far (used only if params.grp_attn_n > 1)
+    uint32_t gaIndex = 0;
+
+    const uint32_t gaFactor = params.gaFactor;
+    const uint32_t gaWidth = params.gaWidth;
+
+    if (gaFactor != 1) {
+        if (gaWidth % gaFactor != 0) {
+            throw_ex{} << "Group-attention width " << gaWidth << " must be a multiple of group-attention factor " << gaFactor;
+        }
+        LLAMA_LOG(Info, "self-extend: train = ", m_model.trainCtxLength(), ", gaFactor = ", gaFactor,  ", gaWidth = ", gaWidth);
+    }
+
     bool interacting = params.interactive && params.interactiveFirst;
+
+    uint32_t numPast = 0;
+    uint32_t numRemaining = uint32_t(params.numTokensToPredict);
+    uint32_t numConsumed = 0;
+
+    std::vector<Token> tokens;
+
+    if (m_model.hasEncoder()) {
+        auto batch = llama_batch_get_one(inputTokens.data(), int32_t(inputTokens.size()), 0, 0);
+        auto res = llama_encode(lctx, batch);
+        if (res != 0) {
+            throw_ex{} << "Failed to encode input";
+        }
+        inputTokens.clear();
+        inputTokens.push_back(vocab.decoderStartToken());
+    }
+
+    const auto batchSize = params.batchSize;
+
+    while (true) {
+        if (!tokens.empty()) {
+            // predict
+
+            const auto maxTokens = ctxLen - 4; // matching limit from above
+
+            // Ensure the input doesn't exceed the context size by truncating embd if necessary.
+            if (tokens.size() > maxTokens) {
+                const auto skipped = tokens.size() - maxTokens;
+                tokens.resize(maxTokens);
+                LLAMA_LOG(Warning, "Input too long. Skipping ", skipped, " tokens");
+            }
+
+            bool haveFullContextMitigation = false;
+            if (gaFactor == 1) {
+                // infinite text generation via context shifting
+                // if we run out of context:
+                // - take the n_keep first tokens from the original prompt (via numPast)
+                // - take half of the last (n_ctx - n_keep) tokens and recompute the logits in batches
+                const auto num = numPast + tokens.size();
+                if (num >= ctxLen) {
+                    if (params.numTokensToPredict == -2) {
+                        LLAMA_LOG(Warning, "Context is full and infinite context was rejected => stopping");
+                        break;
+                    }
+
+                    const auto numLeft = numPast - numKeep;
+                    const int numDiscard = numLeft / 2; // somewhat arbitrary
+
+                    LLAMA_LOG(Debug, "Context is full. Swapping: past = ", numPast, ", numLeft: ", numLeft,
+                        ", ctxLen: ", ctxLen, ", numKeep: ", numKeep, ", numDiscard: ", numDiscard);
+
+                    llama_kv_cache_seq_rm(lctx, 0, numKeep, numKeep + numDiscard);
+                    llama_kv_cache_seq_add(lctx, 0, numKeep + numDiscard, numPast, -numDiscard);
+
+                    numPast -= numDiscard;
+                    haveFullContextMitigation = true;
+                }
+            }
+            else {
+                while (numPast >= gaIndex + gaWidth) {
+                    // context extension via Self-Extend
+                    const int ib = (gaFactor * gaIndex) / gaWidth;
+                    const int bd = (gaWidth / gaFactor) * (gaFactor - 1);
+                    const int dd = (gaWidth / gaFactor) - ib * bd - gaWidth;
+
+                    LLAMA_LOG(Debug, "Group attention shift: ib = ", ib, ", bd = ", bd, ", dd = ", dd);
+
+                    llama_kv_cache_seq_add(lctx, 0, gaIndex, numPast, ib * bd);
+                    llama_kv_cache_seq_div(lctx, 0, gaIndex + ib * bd, gaIndex + ib * bd + gaWidth, gaFactor);
+                    llama_kv_cache_seq_add(lctx, 0, gaIndex + ib * bd + gaWidth, numPast + ib * bd, dd);
+
+                    numPast -= bd;
+
+                    gaIndex += gaWidth / gaFactor;
+                    haveFullContextMitigation = true;
+                }
+            }
+
+            if (haveFullContextMitigation) {
+                LLAMA_LOG(Info, "Context full mitigation performed: past = ", numPast, ", tokens = ", tokens.size());
+            }
+
+            for (uint32_t i = 0; i < tokens.size(); i += batchSize) {
+                const auto numEval = std::min(batchSize, uint32_t(tokens.size() - i));
+
+                auto batch = llama_batch_get_one(tokens.data() + i, numEval, numPast, 0);
+                if (llama_decode(lctx, batch) != 0) {
+                    throw_ex{} << "Failed to decode tokens";
+                }
+
+                numPast += numEval;
+            }
+        }
+
+        tokens.clear();
+
+        bool produced = false; // has the model produced any output or is this just the input echo
+
+        if (inputTokens.size() <= numConsumed && !interacting) {
+            const auto id = Token(0); // sample
+            --numRemaining; // dec remaining sampling budget
+            produced = true;
+        }
+        else {
+            // some user input remains from prompt or interaction, forward it to processing
+            while (inputTokens.size() > numConsumed) {
+                tokens.push_back(inputTokens[numConsumed]);
+
+                // push the prompt in the sampling context in order to apply repetition penalties later
+                // for the prompt, we don't apply grammar rules
+                //llama_sampling_accept(ctx_sampling, ctx, embd_inp[n_consumed], /* apply_grammar= */ false);
+
+                ++numConsumed;
+                if (tokens.size() >= batchSize) {
+                    break;
+                }
+            }
+        }
+    }
 
     co_yield "foo";
 }

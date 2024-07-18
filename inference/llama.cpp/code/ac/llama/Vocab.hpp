@@ -3,6 +3,7 @@
 //
 #pragma once
 #include "export.h"
+#include "Token.hpp"
 #include <vector>
 #include <string_view>
 
@@ -12,12 +13,12 @@ class Model;
 
 struct AC_LLAMA_EXPORT Vocab {
 public:
-    using Token = int32_t;
-
     Vocab(const Model& model);
     ~Vocab();
 
     std::vector<Token> tokenize(std::string_view text, bool addSpecial, bool parseSpecial) const;
+
+    Token decoderStartToken() const noexcept; // fallback to bos if not available
 
 private:
     const Model& m_model;
