@@ -6,6 +6,7 @@
 #include "Logging.hpp"
 #include "ChatFormat.hpp"
 #include "Vocab.hpp"
+#include "Sampler.hpp"
 #include "iile.h"
 #include "throw_ex.hpp"
 #include <llama.h>
@@ -73,6 +74,8 @@ void Job::warmup() {
 
 itlib::generator<std::string> Job::run(RunParams params) {
     Vocab vocab(m_model);
+
+    Sampler sampler({});
 
     auto lctx = m_lctx.get();
 
