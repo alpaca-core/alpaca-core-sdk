@@ -13,3 +13,4 @@ As mentioned in the discussion the (maybe distant) future plan is to ditch llama
 * GGUF metadata access (`llama_model_meta_*`) is not great. We should provide a better interface
 * `llama_chat_apply_template` does not handle memory allocation optimally. There's a lot of room for improvement
 * Give vocab more visibility
+* The sampling prev buffer is a `vector` but is essentially a ring buffer. That's because `llama_sample_repetition_penalties` accepts a span. Can we do something about that and use an actual ring buffer?
