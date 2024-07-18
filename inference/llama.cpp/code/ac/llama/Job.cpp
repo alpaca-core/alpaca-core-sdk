@@ -104,7 +104,7 @@ itlib::generator<std::string> Job::run(RunParams params) {
     }
 
     const auto ctxLen = llama_n_ctx(m_lctx.get());
-    if (int(inputTokens.size()) > ctxLen - 4) {
+    if (inputTokens.size() > ctxLen - 4) {
         throw_ex{} << "Input too long. Got " << inputTokens.size() << " tokens, max: " << ctxLen - 4;
     }
 

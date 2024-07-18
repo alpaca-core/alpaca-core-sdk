@@ -43,7 +43,7 @@ option(AC_BUILD_TESTS "${CMAKE_PROJECT_NAME}: build tests" ${alpacaCoreIsRoot})
 # global packages
 CPMAddPackage(gh:iboB/splat@1.3.2)
 CPMAddPackage(gh:nlohmann/json@3.11.3)
-CPMAddPackage(gh:iboB/itlib@1.11.0)
+CPMAddPackage(gh:iboB/itlib@1.11.1)
 CPMAddPackage(gh:iboB/jalog@0.4.1)
 
 if(AC_BUILD_TESTS)
