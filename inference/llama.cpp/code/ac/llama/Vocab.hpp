@@ -20,6 +20,7 @@ public:
 
     Token decoderStartToken() const noexcept; // fallback to bos if not available
 
+    bool isEog(Token token) const noexcept;
 private:
     const Model& m_model;
 };

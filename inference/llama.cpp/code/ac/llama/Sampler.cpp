@@ -162,4 +162,11 @@ Token Sampler::sample(llama_context* lctx, llama_context* cfgCtx, int idx) {
     return sampleImpl(lctx, cfgCtx, idx, false);
 }
 
+void Sampler::reset() {
+    m_prev.clear();
+    m_prev.push_back(0);
+    m_cur.clear();
+    m_numValidTokens = 0;
+}
+
 } // namespace ac::llama

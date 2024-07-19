@@ -109,7 +109,7 @@ private:
 
     size_t m_numValidTokens = 0; // number of correct top tokens with correct probs
 
-    float m_mirostatMu; // optionally used for mirostat sampling
+    float m_mirostatMu = 0; // optionally used for mirostat sampling
 
     std::minstd_rand m_rng;
 

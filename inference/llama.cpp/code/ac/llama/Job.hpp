@@ -3,6 +3,7 @@
 //
 #pragma once
 #include "export.h"
+#include "Token.hpp"
 #include "mem_ext.hpp"
 #include <itlib/generator.hpp>
 #include <string>
@@ -38,7 +39,7 @@ public:
         uint32_t batchSize = 2048; // logical batch size for prompt processing (must be >=32 to use BLAS)
     };
 
-    itlib::generator<std::string> run(RunParams rp);
+    itlib::generator<Token> run(RunParams rp);
 
 private:
     Model& m_model;

@@ -72,7 +72,7 @@ void Job::warmup() {
     llama_reset_timings(lctx);
 }
 
-itlib::generator<std::string> Job::run(RunParams params) {
+itlib::generator<Token> Job::run(RunParams params) {
     Vocab vocab(m_model);
 
     Sampler sampler({});
@@ -235,7 +235,11 @@ itlib::generator<std::string> Job::run(RunParams params) {
         bool produced = false; // has the model produced any output or is this just the input echo
 
         if (inputTokens.size() <= numConsumed && !interacting) {
-            const auto id = Token(0); // sample
+            const auto token = sampler.sample(lctx);
+            sampler.accept(token);
+
+            tokens.push_back(token);
+
             --numRemaining; // dec remaining sampling budget
             produced = true;
         }
@@ -246,7 +250,7 @@ itlib::generator<std::string> Job::run(RunParams params) {
 
                 // push the prompt in the sampling context in order to apply repetition penalties later
                 // for the prompt, we don't apply grammar rules
-                //llama_sampling_accept(ctx_sampling, ctx, embd_inp[n_consumed], /* apply_grammar= */ false);
+                sampler.accept(inputTokens[numConsumed]);
 
                 ++numConsumed;
                 if (tokens.size() >= batchSize) {
@@ -254,9 +258,45 @@ itlib::generator<std::string> Job::run(RunParams params) {
                 }
             }
         }
-    }
 
-    co_yield "foo";
+        if (produced) {
+            for (auto id : tokens) {
+                co_yield id;
+            }
+        }
+
+        // if not currently processing queued inputs;
+        if (inputTokens.size() <= numConsumed) {
+            // deal with end of generation tokens in interactive mode
+            if (vocab.isEog(sampler.last()) && params.interactive) {
+                if (params.conversation) {
+                    // so here we add just some random message to the conversation to keep the flow of the conversation
+                    // it is not going to be used otherwise
+                    chatAddAndFormat("assistant", "msg");
+                }
+                interacting = true;
+            }
+
+            if (numPast > 0) {
+                if (interacting) {
+                    // wait for user input
+                    sampler.reset();
+                }
+                interacting = false;
+            }
+        }
+
+        if (!tokens.empty() && vocab.isEog(tokens.back()) && !params.interactive) {
+            co_return;
+        }
+
+        // In interactive mode, respect the maximum number of tokens and drop back to user input when reached.
+        // We skip this logic when n_predict == -1 (infinite) or -2 (stop at context size).
+        if (params.interactive && numRemaining <= 0 && params.numTokensToPredict >= 0) {
+            numRemaining = params.numTokensToPredict;
+            interacting = true;
+        }
+    }
 }
 
 } // namespace ac::llama

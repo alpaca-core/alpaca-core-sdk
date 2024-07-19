@@ -21,6 +21,10 @@ Token Vocab::decoderStartToken() const noexcept {
     return llama_token_bos(model);
 }
 
+bool Vocab::isEog(Token token) const noexcept {
+    return llama_token_is_eog(m_model.lmodel(), token);
+}
+
 std::vector<Token> Vocab::tokenize(std::string_view text, bool addSpecial, bool parseSpecial) const {
     int32_t numTokens = int32_t(text.length()) + 2 * addSpecial; // optimistic max
     std::vector<Token> ret(numTokens);
