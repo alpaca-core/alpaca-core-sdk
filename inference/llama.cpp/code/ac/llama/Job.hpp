@@ -28,7 +28,6 @@ public:
         std::string prompt;
 
         bool conversation = false;
-        bool interactive = false;
         bool interactiveFirst = false;
 
         int numTokensToPredict = -1;

@@ -113,9 +113,6 @@ itlib::generator<Token> Job::run(RunParams params) {
     if (params.conversation) {
         params.interactiveFirst = true;
     }
-    if (params.interactiveFirst) {
-        params.interactive = true;
-    }
 
     // group-attention state
     // number of grouped KV tokens so far (used only if params.grp_attn_n > 1)
@@ -131,7 +128,7 @@ itlib::generator<Token> Job::run(RunParams params) {
         LLAMA_LOG(Info, "self-extend: train = ", m_model.trainCtxLength(), ", gaFactor = ", gaFactor,  ", gaWidth = ", gaWidth);
     }
 
-    bool interacting = params.interactive && params.interactiveFirst;
+    bool interacting = params.interactiveFirst;
 
     uint32_t numPast = 0;
     uint32_t numRemaining = uint32_t(params.numTokensToPredict);
@@ -228,8 +225,6 @@ itlib::generator<Token> Job::run(RunParams params) {
 
         tokens.clear();
 
-        bool produced = false; // has the model produced any output or is this just the input echo
-
         if (inputTokens.size() <= numConsumed && !interacting) {
             const auto token = sampler.sample(lctx);
             sampler.accept(token);
@@ -237,7 +232,7 @@ itlib::generator<Token> Job::run(RunParams params) {
             tokens.push_back(token);
 
             --numRemaining; // dec remaining sampling budget
-            produced = true;
+            co_yield token;
         }
         else {
             // some user input remains from prompt or interaction, forward it to processing
@@ -255,16 +250,10 @@ itlib::generator<Token> Job::run(RunParams params) {
             }
         }
 
-        if (produced) {
-            for (auto id : tokens) {
-                co_yield id;
-            }
-        }
-
         // if not currently processing queued inputs;
         if (inputTokens.size() <= numConsumed) {
-            // deal with end of generation tokens in interactive mode
-            if (vocab.isEog(sampler.last()) && params.interactive) {
+            // deal with end of generation tokens
+            if (vocab.isEog(sampler.last())) {
                 if (params.conversation) {
                     // so here we add just some random message to the conversation to keep the flow of the conversation
                     // it is not going to be used otherwise
@@ -273,28 +262,14 @@ itlib::generator<Token> Job::run(RunParams params) {
                 interacting = true;
             }
 
-            if (numPast > 0) {
-                if (interacting) {
-                    // wait for user input
-                    sampler.reset();
-                }
-                interacting = false;
+            if (numPast > 0 && interacting) {
+                break;
             }
         }
 
-        if (!tokens.empty() && vocab.isEog(tokens.back()) && !params.interactive) {
-            co_return;
-        }
-
-        // In interactive mode, respect the maximum number of tokens and drop back to user input when reached.
-        // We skip this logic when n_predict == -1 (infinite) or -2 (stop at context size).
-        if (params.interactive && numRemaining <= 0 && params.numTokensToPredict >= 0) {
-            numRemaining = params.numTokensToPredict;
-            interacting = true;
-        }
-
         if (numRemaining == 0) {
-            co_return;
+            // max tokens reached
+            break;
         }
     }
 }
