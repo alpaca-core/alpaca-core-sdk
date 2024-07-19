@@ -4,6 +4,7 @@
 #pragma once
 #include "export.h"
 #include "mem_ext.hpp"
+#include "Vocab.hpp"
 #include <string>
 
 struct llama_model;
@@ -29,7 +30,11 @@ public:
 
     llama_model* lmodel() noexcept { return m_lmodel.get(); }
     const llama_model* lmodel() const noexcept { return m_lmodel.get(); }
+
+    const Vocab& vocab() const noexcept { return m_vocab; }
 private:
     astl::c_unique_ptr<llama_model> m_lmodel;
+
+    Vocab m_vocab{*this};
 };
 } // namespace ac::llama

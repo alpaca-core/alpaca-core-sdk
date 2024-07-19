@@ -5,7 +5,6 @@
 #include "Model.hpp"
 #include "Logging.hpp"
 #include "ChatFormat.hpp"
-#include "Vocab.hpp"
 #include "Sampler.hpp"
 #include "iile.h"
 #include "throw_ex.hpp"
@@ -73,7 +72,7 @@ void Job::warmup() {
 }
 
 itlib::generator<Token> Job::run(RunParams params) {
-    Vocab vocab(m_model);
+    auto& vocab = m_model.vocab();
 
     Sampler sampler({});
 
