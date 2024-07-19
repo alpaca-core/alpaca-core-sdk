@@ -11,6 +11,7 @@ find_package(CUDAToolkit)
 if(CUDAToolkit_FOUND)
     set(haveCuda YES)
     enable_language(CUDA)
+    set(CMAKE_CUDA_ARCHITECTURES 70)
     message(STATUS "${CMAKE_PROJECT_NAME}: system CUDA found")
     # we should add -forward-unknown-to-host-compiler but it somehow works without it
     # could it be that it depends on the CMake version?
