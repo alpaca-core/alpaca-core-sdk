@@ -89,7 +89,11 @@ itlib::generator<Token> Job::run(RunParams params) {
     };
 
     std::vector<llama_token> inputTokens;
-    if (!params.prompt.empty()) {
+    if (params.prompt.empty()) {
+        // Should not run without any tokens
+        inputTokens.push_back(llama_token_bos(m_model.lmodel()));
+    }
+    else {
         if (params.conversation) {
             auto fmtChat = chatAddAndFormat("system", params.prompt);
             inputTokens = vocab.tokenize(fmtChat, true, true);
@@ -98,20 +102,13 @@ itlib::generator<Token> Job::run(RunParams params) {
             inputTokens = vocab.tokenize(params.prompt, true, true);
         }
     }
-    else {
-        // Should not run without any tokens
-        inputTokens.push_back(llama_token_bos(m_model.lmodel()));
-    }
 
     const auto ctxLen = llama_n_ctx(m_lctx.get());
     if (inputTokens.size() > ctxLen - 4) {
         throw_ex{} << "Input too long. Got " << inputTokens.size() << " tokens, max: " << ctxLen - 4;
     }
 
-    const auto numKeep = m_model.shouldAddBosToken() + iile([&]() {
-        if (params.conversation) return 0; // don't keep beginning of convo
-        return int32_t(inputTokens.size());
-    });
+    const auto numKeep = int32_t(inputTokens.size());
 
     // fix invariants
     if (params.conversation) {
@@ -295,6 +292,10 @@ itlib::generator<Token> Job::run(RunParams params) {
         if (params.interactive && numRemaining <= 0 && params.numTokensToPredict >= 0) {
             numRemaining = params.numTokensToPredict;
             interacting = true;
+        }
+
+        if (numRemaining == 0) {
+            co_return;
         }
     }
 }

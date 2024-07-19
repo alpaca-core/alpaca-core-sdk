@@ -11,6 +11,7 @@ namespace {
 llama_model_params llamaFromModelParams(const Model::Params& params)
 {
     llama_model_params llamaParams = llama_model_default_params();
+    llamaParams.n_gpu_layers = 10000;
     return llamaParams;
 }
 } // namespace

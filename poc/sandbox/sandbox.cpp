@@ -19,13 +19,14 @@ int main() {
 
     ac::llama::initLibrary();
 
-    ac::llama::Model model("D:/mod/Mistral-7B-v0.1-GGUF/mistral-7b-v0.1.Q6_K.gguf");
+    //ac::llama::Model model("D:/mod/Mistral-7B-v0.1-GGUF/mistral-7b-v0.1.Q6_K.gguf");
+    ac::llama::Model model("D:/mod/gpt2/gguf/gpt2.Q6_K.gguf");
 
     ac::llama::Job job(model);
 
     job.warmup();
 
-    for (auto s : job.run({})) {
+    for (auto s : job.run({.prompt="The rain in Spain", .numTokensToPredict = 100})) {
         std::cout << s << "\n";
     }
 
