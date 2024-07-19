@@ -41,4 +41,26 @@ std::vector<Token> Vocab::tokenize(std::string_view text, bool addSpecial, bool 
     return ret;
 }
 
+std::string Vocab::tokenToString(Token token, bool special) const {
+    auto model = m_model.lmodel();
+    std::string ret;
+
+    auto to_piece = [&]() {
+        return llama_token_to_piece(model, token, ret.data(), int32_t(ret.size()), 0, special);
+    };
+
+    ret.resize(ret.capacity()); // make use of small string optimization
+    const auto len = to_piece();
+    if (len < 0) {
+        ret.resize(-len);
+        auto check = to_piece();
+        assert(check == -len);
+    }
+    else {
+        ret.resize(len);
+    }
+
+    return ret;
+}
+
 } // namespace ac::llama

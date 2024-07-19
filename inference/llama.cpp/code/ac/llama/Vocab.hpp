@@ -5,6 +5,7 @@
 #include "export.h"
 #include "Token.hpp"
 #include <vector>
+#include <string>
 #include <string_view>
 
 namespace ac::llama {
@@ -21,6 +22,8 @@ public:
     Token decoderStartToken() const noexcept; // fallback to bos if not available
 
     bool isEog(Token token) const noexcept;
+
+    std::string tokenToString(Token token, bool special = true) const;
 private:
     const Model& m_model;
 };

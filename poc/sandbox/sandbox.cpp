@@ -26,9 +26,10 @@ int main() {
 
     job.warmup();
 
-    for (auto s : job.run({.prompt="The rain in Spain", .numTokensToPredict = 100})) {
-        std::cout << s << "\n";
+    for (auto s : job.run({.prompt="The rain in Spain", .numTokensToPredict=100})) {
+        std::cout << model.vocab().tokenToString(s);
     }
+    std::cout << std::endl;
 
     return 0;
 }
