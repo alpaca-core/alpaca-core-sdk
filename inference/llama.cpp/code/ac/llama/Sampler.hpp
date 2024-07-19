@@ -98,7 +98,8 @@ public:
 private:
     const Params m_params;
 
-    llama_token_data_array llama_sampling_prepare(llama_context* lctx, llama_context* cfgCtx, int idx);
+    llama_token_data_array prepareSampling(llama_context* lctx, llama_context* cfgCtx, int idx);
+    Token sampleImpl(llama_context* lctx, llama_context* cfgCtx, int idx, bool resample);
 
     // previously sampled tokens (ring buffer but kept as vector because of llama_sample_repetition_penalties)
     // used for repetition penalties and antiprompts
