@@ -149,6 +149,10 @@ void Job::doDecode(std::span<Token> tokens) {
     // first try to expand the context if needed
     tryExpandContext(tokens);
 
+    for (auto t : tokens) {
+        m_sessionData.sampler.accept(t);
+    }
+
     auto lctx = m_lctx.get();
     auto& numPast = m_sessionData.numPast;
     const auto batchSize = llama_n_batch(lctx);
@@ -166,89 +170,88 @@ void Job::doDecode(std::span<Token> tokens) {
     }
 }
 
-void Job::resetSession() {
-    // otherwise reset and initialize
-    m_sessionData.~SessionData();
-    new (&m_sessionData) SessionData();
-
+void Job::setup(std::string_view prompt, const RunParams& params) {
     auto lctx = m_lctx.get();
-    llama_kv_cache_clear(lctx);
-    llama_synchronize(lctx);
-    llama_reset_timings(lctx);
-}
 
-void Job::decode(std::string_view prompt, const RunParams& params) {
-    std::vector<llama_token> inputTokens;
+    if (m_sessionData.initialized) {
+        m_sessionData.~SessionData();
+        new (&m_sessionData) SessionData();
 
+        llama_kv_cache_clear(lctx);
+        llama_synchronize(lctx);
+        llama_reset_timings(lctx);
+    }
     m_sessionData.params = params;
+
+    std::vector<llama_token> inputTokens;
 
     auto& vocab = m_model.vocab();
 
-    if (m_sessionData.sessionInitialized) {
-        if (m_sessionData.params.conversation) {
-            auto fmtChat = chatAddAndFormat("user", std::string(prompt));
-            inputTokens = vocab.tokenize(fmtChat, false, true);
-        }
-        else {
-            inputTokens = vocab.tokenize(prompt, false, false);
-        }
-
-        // reset sampling and don't allow previous inputs to affect the generation
-        m_sessionData.sampler.reset();
+    if (prompt.empty()) {
+        // Should not run without any tokens
+        inputTokens.push_back(llama_token_bos(m_model.lmodel()));
     }
     else {
-        auto lctx = m_lctx.get();
-
-        if (prompt.empty()) {
-            // Should not run without any tokens
-            inputTokens.push_back(llama_token_bos(m_model.lmodel()));
+        if (params.conversation) {
+            auto fmtChat = chatAddAndFormat("system", std::string(prompt));
+            inputTokens = vocab.tokenize(fmtChat, true, true);
         }
         else {
-            if (params.conversation) {
-                auto fmtChat = chatAddAndFormat("system", std::string(prompt));
-                inputTokens = vocab.tokenize(fmtChat, true, true);
-            }
-            else {
-                inputTokens = vocab.tokenize(prompt, true, true);
-            }
+            inputTokens = vocab.tokenize(prompt, true, true);
         }
-
-        const auto ctxLen = llama_n_ctx(lctx);
-        if (inputTokens.size() > ctxLen - 4) {
-            throw_ex{} << "Input too long. Got " << inputTokens.size() << " tokens, max: " << ctxLen - 4;
-        }
-
-        m_sessionData.numKeep = int32_t(inputTokens.size());
-
-        if (params.gaFactor != 1) {
-            const uint32_t gaFactor = params.gaFactor;
-            const uint32_t gaWidth = params.gaWidth;
-            if (gaWidth % gaFactor != 0) {
-                throw_ex{} << "Group-attention width " << gaWidth << " must be a multiple of group-attention factor " << gaFactor;
-            }
-            LLAMA_LOG(Info, "self-extend: train = ", m_model.trainCtxLength(), ", gaFactor = ", gaFactor, ", gaWidth = ", gaWidth);
-        }
-
-        m_sessionData.numRemaining = uint32_t(params.numTokensToPredict);
-
-        if (m_model.hasEncoder()) {
-            auto batch = llama_batch_get_one(inputTokens.data(), int32_t(inputTokens.size()), 0, 0);
-            auto res = llama_encode(lctx, batch);
-            if (res != 0) {
-                throw_ex{} << "Failed to encode input";
-            }
-            inputTokens.clear();
-            inputTokens.push_back(vocab.decoderStartToken());
-        }
-
-        m_sessionData.sessionInitialized = true;
     }
 
-
-    for (auto t : inputTokens) {
-        m_sessionData.sampler.accept(t);
+    const auto ctxLen = llama_n_ctx(lctx);
+    if (inputTokens.size() > ctxLen - 4) {
+        throw_ex{} << "Input too long. Got " << inputTokens.size() << " tokens, max: " << ctxLen - 4;
     }
+
+    m_sessionData.numKeep = int32_t(inputTokens.size());
+
+    if (params.gaFactor != 1) {
+        const uint32_t gaFactor = params.gaFactor;
+        const uint32_t gaWidth = params.gaWidth;
+        if (gaWidth % gaFactor != 0) {
+            throw_ex{} << "Group-attention width " << gaWidth << " must be a multiple of group-attention factor " << gaFactor;
+        }
+        LLAMA_LOG(Info, "self-extend: train = ", m_model.trainCtxLength(), ", gaFactor = ", gaFactor, ", gaWidth = ", gaWidth);
+    }
+
+    if (m_model.hasEncoder()) {
+        auto batch = llama_batch_get_one(inputTokens.data(), int32_t(inputTokens.size()), 0, 0);
+        auto res = llama_encode(lctx, batch);
+        if (res != 0) {
+            throw_ex{} << "Failed to encode input";
+        }
+        inputTokens.clear();
+        inputTokens.push_back(vocab.decoderStartToken());
+    }
+
+    m_sessionData.initialized = true;
+
     doDecode(inputTokens);
+}
+
+void Job::decode(std::string_view prompt) {
+    if (!m_sessionData.initialized) {
+        throw_ex{} << "Job hasn't been set up";
+    }
+
+    auto& vocab = m_model.vocab();
+    std::vector<Token> promptTokens;
+
+    if (m_sessionData.params.conversation) {
+        auto fmtChat = chatAddAndFormat("user", std::string(prompt));
+        promptTokens = vocab.tokenize(fmtChat, false, true);
+    }
+    else {
+        promptTokens = vocab.tokenize(prompt, false, false);
+    }
+
+    // reset sampling and don't allow previous inputs to affect the generation
+    m_sessionData.sampler.reset();
+
+    doDecode(promptTokens);
 }
 
 std::string Job::chatAddAndFormat(std::string role, std::string text) {
@@ -258,16 +261,15 @@ std::string Job::chatAddAndFormat(std::string role, std::string text) {
     return ret;
 }
 
-itlib::generator<Token> Job::generate() {
+itlib::generator<Token> Job::generate(uint32_t maxTokens) {
     auto lctx = m_lctx.get();
     auto& sampler = m_sessionData.sampler;
-    auto& numRemaining = m_sessionData.numRemaining;
     auto& vocab = m_model.vocab();
 
-    while (numRemaining) {
+    while (maxTokens) {
         auto token = sampler.sample(lctx);
         sampler.accept(token);
-        --numRemaining;
+        --maxTokens;
         co_yield token;
 
         if (vocab.isEog(token)) {

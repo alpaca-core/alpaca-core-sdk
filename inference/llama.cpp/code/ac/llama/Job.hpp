@@ -41,19 +41,18 @@ public:
         bool infiniteContext = true;
     };
 
-    void decode(std::string_view prompt, const RunParams& params);
-    itlib::generator<Token> generate();
+    void setup(std::string_view prompt, const RunParams& params);
+    void decode(std::string_view prompt);
+    itlib::generator<Token> generate(uint32_t maxTokens = uint32_t(-1));
 
 private:
     Model& m_model;
     astl::c_unique_ptr<llama_context> m_lctx;
 
-    void tryExpandContext(std::span<const Token> tokens); // try to expand context to accomodate tokens
+    void tryExpandContext(std::span<const Token> tokens); // try to expand context to accommodate tokens
 
     // we should have a `const Token` span but llama_batch doesn't let us
     void doDecode(std::span<Token> tokens);
-
-    void resetSession();
 
     std::string chatAddAndFormat(std::string role, std::string text);
 
@@ -64,13 +63,12 @@ private:
         Sampler sampler;
         std::vector<ChatMsg> chat;
         uint32_t numKeep = 0; // number of tokens to keep in the context in case we overflow
-        uint32_t numPast = 0; // number of tokens in the context
-        uint32_t numRemaining = 0; // session-wide remaining tokens to predict
+        uint32_t numPast = 0; // number of tokens in the context (that's prompts + generated)
 
         // group attention state
         uint32_t gaIndex = 0; // number of grouped KV tokens (only used if params.gaFactor > 1)
 
-        bool sessionInitialized = false;
+        bool initialized = false;
     };
     SessionData m_sessionData;
 };

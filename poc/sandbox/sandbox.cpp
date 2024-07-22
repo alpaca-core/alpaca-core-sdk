@@ -19,16 +19,16 @@ int main() {
 
     ac::llama::initLibrary();
 
-    ac::llama::Model model("D:/mod/Mistral-7B-Instruct-v0.1-GGUF/mistral-7b-instruct-v0.1.Q8_0.gguf");
+    //ac::llama::Model model("D:/mod/Mistral-7B-Instruct-v0.1-GGUF/mistral-7b-instruct-v0.1.Q8_0.gguf");
     //ac::llama::Model model("D:/mod/gpt2/gguf/gpt2.Q6_K.gguf");
-    //ac::llama::Model model("D:/mod/gpt2/gguf-gpt2-chatbot/gpt2-chatbot.Q8_0.gguf");
+    ac::llama::Model model("D:/mod/gpt2/gguf-gpt2-chatbot/gpt2-chatbot.Q8_0.gguf");
 
     ac::llama::Job job(model);
 
     job.warmup();
 
-    job.decode("A chat between a user and a helpful AI assistant", {.conversation=true});
-    job.decode("How to get to the moon?", {.conversation=true});
+    job.setup("A chat between a user and a helpful AI assistant", {.conversation = true});
+    job.decode("How to get to the moon?");
 
     for (auto s : job.generate()) {
         std::cout << model.vocab().tokenToString(s);
@@ -36,7 +36,7 @@ int main() {
 
     std::cout << std::endl;
 
-    job.decode("Can I join NASA?", { .conversation = true });
+    job.decode("Can I join NASA?");
 
     for (auto s : job.generate()) {
         std::cout << model.vocab().tokenToString(s);
