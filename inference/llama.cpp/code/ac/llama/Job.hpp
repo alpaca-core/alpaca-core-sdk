@@ -49,6 +49,9 @@ private:
     Model& m_model;
     astl::c_unique_ptr<llama_context> m_lctx;
 
+    void tryExpandContext(std::span<const Token> tokens); // try to expand context to accomodate tokens
+
+    // we should have a `const Token` span but llama_batch doesn't let us
     void doDecode(std::span<Token> tokens);
 
     ChatFormat m_chatFmt;

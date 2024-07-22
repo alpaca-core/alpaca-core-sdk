@@ -73,81 +73,90 @@ void Job::warmup() {
     llama_reset_timings(lctx);
 }
 
-void Job::doDecode(std::span<Token> tokens) {
+void Job::tryExpandContext(std::span<const Token> tokens) {
     auto lctx = m_lctx.get();
 
     const auto ctxLen = llama_n_ctx(lctx);
-    const auto batchSize = llama_n_batch(lctx);
     const auto numKeep = m_sessionData.numKeep;
 
     const auto gaFactor = m_sessionData.params.gaFactor;
 
     auto& numPast = m_sessionData.numPast;
 
+    const auto maxTokens = ctxLen - 4; // ref #16
+
+    // Ensure the input doesn't exceed the context size by truncating embd if necessary.
+    if (tokens.size() > maxTokens) {
+        const auto skipped = tokens.size() - maxTokens;
+        tokens = tokens.first(maxTokens);
+        LLAMA_LOG(Warning, "Input too long. Skipping ", skipped, " tokens");
+    }
+
+    bool haveFullContextMitigation = false;
+    if (gaFactor == 1) {
+        // infinite text generation via context shifting
+        // if we run out of context:
+        // - take the n_keep first tokens from the original prompt (via numPast)
+        // - take half of the last (n_ctx - n_keep) tokens and recompute the logits in batches
+        const auto num = numPast + tokens.size();
+        if (num >= ctxLen) {
+            if (!m_sessionData.params.infiniteContext) {
+                throw_ex{} << "context limit of " << ctxLen << " reached";
+            }
+
+            const auto numLeft = numPast - numKeep;
+            const int numDiscard = numLeft / 2; // somewhat arbitrary
+
+            LLAMA_LOG(Debug, "Context is full. Swapping: past = ", numPast, ", numLeft: ", numLeft,
+                ", ctxLen: ", ctxLen, ", numKeep: ", numKeep, ", numDiscard: ", numDiscard);
+
+            llama_kv_cache_seq_rm(lctx, 0, numKeep, numKeep + numDiscard);
+            llama_kv_cache_seq_add(lctx, 0, numKeep + numDiscard, numPast, -numDiscard);
+
+            numPast -= numDiscard;
+            haveFullContextMitigation = true;
+        }
+    }
+    else {
+        const uint32_t gaWidth = m_sessionData.params.gaWidth;
+        uint32_t& gaIndex = m_sessionData.gaIndex;
+
+        while (numPast >= gaIndex + gaWidth) {
+            // context extension via Self-Extend
+            const int ib = (gaFactor * gaIndex) / gaWidth;
+            const int bd = (gaWidth / gaFactor) * (gaFactor - 1);
+            const int dd = (gaWidth / gaFactor) - ib * bd - gaWidth;
+
+            LLAMA_LOG(Debug, "Group attention shift: ib = ", ib, ", bd = ", bd, ", dd = ", dd);
+
+            llama_kv_cache_seq_add(lctx, 0, gaIndex, numPast, ib * bd);
+            llama_kv_cache_seq_div(lctx, 0, gaIndex + ib * bd, gaIndex + ib * bd + gaWidth, gaFactor);
+            llama_kv_cache_seq_add(lctx, 0, gaIndex + ib * bd + gaWidth, numPast + ib * bd, dd);
+
+            numPast -= bd;
+
+            gaIndex += gaWidth / gaFactor;
+            haveFullContextMitigation = true;
+        }
+    }
+
+    if (haveFullContextMitigation) {
+        LLAMA_LOG(Info, "Context full mitigation performed: past = ", numPast, ", tokens = ", tokens.size());
+    }
+}
+
+void Job::doDecode(std::span<Token> tokens) {
+    // first try to expand the context if needed
+    tryExpandContext(tokens);
+
+    auto lctx = m_lctx.get();
+    auto& numPast = m_sessionData.numPast;
+    const auto batchSize = llama_n_batch(lctx);
+
+    // decode with batches of batchSize
     while (!tokens.empty()) {
         auto batchTokens = tokens.size() > batchSize ? tokens.first(batchSize) : tokens;
         tokens = tokens.subspan(batchTokens.size());
-
-        const auto maxTokens = ctxLen - 4; // ref #16
-
-        // Ensure the input doesn't exceed the context size by truncating embd if necessary.
-        if (tokens.size() > maxTokens) {
-            const auto skipped = tokens.size() - maxTokens;
-            tokens = tokens.first(maxTokens);
-            LLAMA_LOG(Warning, "Input too long. Skipping ", skipped, " tokens");
-        }
-
-        bool haveFullContextMitigation = false;
-        if (gaFactor == 1) {
-            // infinite text generation via context shifting
-            // if we run out of context:
-            // - take the n_keep first tokens from the original prompt (via numPast)
-            // - take half of the last (n_ctx - n_keep) tokens and recompute the logits in batches
-            const auto num = numPast + tokens.size();
-            if (num >= ctxLen) {
-                if (!m_sessionData.params.infiniteContext) {
-                    throw_ex{} << "context limit of " << ctxLen << " reached";
-                }
-
-                const auto numLeft = numPast - numKeep;
-                const int numDiscard = numLeft / 2; // somewhat arbitrary
-
-                LLAMA_LOG(Debug, "Context is full. Swapping: past = ", numPast, ", numLeft: ", numLeft,
-                    ", ctxLen: ", ctxLen, ", numKeep: ", numKeep, ", numDiscard: ", numDiscard);
-
-                llama_kv_cache_seq_rm(lctx, 0, numKeep, numKeep + numDiscard);
-                llama_kv_cache_seq_add(lctx, 0, numKeep + numDiscard, numPast, -numDiscard);
-
-                numPast -= numDiscard;
-                haveFullContextMitigation = true;
-            }
-        }
-        else {
-            const uint32_t gaWidth = m_sessionData.params.gaWidth;
-            uint32_t& gaIndex = m_sessionData.gaIndex;
-
-            while (numPast >= gaIndex + gaWidth) {
-                // context extension via Self-Extend
-                const int ib = (gaFactor * gaIndex) / gaWidth;
-                const int bd = (gaWidth / gaFactor) * (gaFactor - 1);
-                const int dd = (gaWidth / gaFactor) - ib * bd - gaWidth;
-
-                LLAMA_LOG(Debug, "Group attention shift: ib = ", ib, ", bd = ", bd, ", dd = ", dd);
-
-                llama_kv_cache_seq_add(lctx, 0, gaIndex, numPast, ib * bd);
-                llama_kv_cache_seq_div(lctx, 0, gaIndex + ib * bd, gaIndex + ib * bd + gaWidth, gaFactor);
-                llama_kv_cache_seq_add(lctx, 0, gaIndex + ib * bd + gaWidth, numPast + ib * bd, dd);
-
-                numPast -= bd;
-
-                gaIndex += gaWidth / gaFactor;
-                haveFullContextMitigation = true;
-            }
-        }
-
-        if (haveFullContextMitigation) {
-            LLAMA_LOG(Info, "Context full mitigation performed: past = ", numPast, ", tokens = ", tokens.size());
-        }
 
         auto batch = llama_batch_get_one(batchTokens.data(), int(batchTokens.size()), numPast, 0);
         if (llama_decode(lctx, batch) != 0) {
