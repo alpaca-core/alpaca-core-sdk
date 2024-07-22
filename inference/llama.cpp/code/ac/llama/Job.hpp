@@ -52,6 +52,12 @@ private:
     // we should have a `const Token` span but llama_batch doesn't let us
     void doDecode(std::span<Token> tokens);
 
+    void decode(std::string_view prompt, const RunParams& params);
+
+    void resetSession();
+
+    std::string chatAddAndFormat(std::string role, std::string text);
+
     ChatFormat m_chatFmt;
 
     struct SessionData {

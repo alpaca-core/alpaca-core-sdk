@@ -13,6 +13,7 @@ As mentioned in the discussion the (maybe distant) future plan is to ditch llama
 * GGUF metadata access (`llama_model_meta_*`) is not great. We should provide a better interface
 * `llama_chat_apply_template` does not handle memory allocation optimally. There's a lot of room for improvement
     * as a whole, chat management is not very efficient. `llama_chat_format_single` doing a full chat format for a single message is terrible
+* Chat templates can't be used to escape special tokens. If the user actually enters some, this just messes-up the resulting formatted text.
 * Give vocab more visibility
 * The sampling prev buffer is a `vector` but is essentially a ring buffer. That's because `llama_sample_repetition_penalties` accepts a span. Can we do something about that and use an actual ring buffer?
 * Token-to-text can be handled much more elegantly by using plain ol' `string_view` instead of copying strings. It's not like tokens are going to be modified once the model is loaded
