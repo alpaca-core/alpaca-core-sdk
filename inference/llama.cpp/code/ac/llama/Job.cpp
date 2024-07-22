@@ -268,15 +268,15 @@ itlib::generator<Token> Job::generate(uint32_t maxTokens) {
 
     while (maxTokens) {
         auto token = sampler.sample(lctx);
-        sampler.accept(token);
-        --maxTokens;
         co_yield token;
 
         if (vocab.isEog(token)) {
             break;
         }
 
+        sampler.accept(token);
         doDecode({&token, 1});
+        --maxTokens;
     }
 
     if (m_sessionData.params.conversation) {
