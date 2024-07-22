@@ -41,7 +41,8 @@ public:
         bool infiniteContext = true;
     };
 
-    itlib::generator<Token> run(std::string_view prompt, const RunParams rp);
+    void decode(std::string_view prompt, const RunParams& params);
+    itlib::generator<Token> generate();
 
 private:
     Model& m_model;
@@ -51,8 +52,6 @@ private:
 
     // we should have a `const Token` span but llama_batch doesn't let us
     void doDecode(std::span<Token> tokens);
-
-    void decode(std::string_view prompt, const RunParams& params);
 
     void resetSession();
 

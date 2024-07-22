@@ -186,12 +186,15 @@ void Job::decode(std::string_view prompt, const RunParams& params) {
 
     if (m_sessionData.sessionInitialized) {
         if (m_sessionData.params.conversation) {
-            auto fmtChat = chatAddAndFormat("system", std::string(prompt));
+            auto fmtChat = chatAddAndFormat("user", std::string(prompt));
             inputTokens = vocab.tokenize(fmtChat, false, true);
         }
         else {
             inputTokens = vocab.tokenize(prompt, false, false);
         }
+
+        // reset sampling and don't allow previous inputs to affect the generation
+        m_sessionData.sampler.reset();
     }
     else {
         auto lctx = m_lctx.get();
@@ -241,6 +244,7 @@ void Job::decode(std::string_view prompt, const RunParams& params) {
         m_sessionData.sessionInitialized = true;
     }
 
+
     for (auto t : inputTokens) {
         m_sessionData.sampler.accept(t);
     }
@@ -254,26 +258,19 @@ std::string Job::chatAddAndFormat(std::string role, std::string text) {
     return ret;
 }
 
-itlib::generator<Token> Job::run(std::string_view prompt, const RunParams params) {
-    decode(prompt, params);
-
+itlib::generator<Token> Job::generate() {
     auto lctx = m_lctx.get();
     auto& sampler = m_sessionData.sampler;
     auto& numRemaining = m_sessionData.numRemaining;
     auto& vocab = m_model.vocab();
 
-    while (true) {
+    while (numRemaining) {
         auto token = sampler.sample(lctx);
         sampler.accept(token);
         --numRemaining;
         co_yield token;
 
         if (vocab.isEog(token)) {
-            break;
-        }
-
-        if (numRemaining == 0) {
-            // max tokens reached
             break;
         }
 
