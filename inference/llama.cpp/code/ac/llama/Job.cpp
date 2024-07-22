@@ -166,7 +166,7 @@ void Job::doDecode(std::span<Token> tokens) {
     }
 }
 
-itlib::generator<Token> Job::run(const RunParams params) {
+itlib::generator<Token> Job::run(std::string_view prompt, const RunParams params) {
     auto& vocab = m_model.vocab();
 
     m_sessionData.params = params;
@@ -183,17 +183,17 @@ itlib::generator<Token> Job::run(const RunParams params) {
     };
 
     std::vector<llama_token> inputTokens;
-    if (params.prompt.empty()) {
+    if (prompt.empty()) {
         // Should not run without any tokens
         inputTokens.push_back(llama_token_bos(m_model.lmodel()));
     }
     else {
         if (params.conversation) {
-            auto fmtChat = chatAddAndFormat("system", params.prompt);
+            auto fmtChat = chatAddAndFormat("system", std::string(prompt));
             inputTokens = vocab.tokenize(fmtChat, true, true);
         }
         else {
-            inputTokens = vocab.tokenize(params.prompt, true, true);
+            inputTokens = vocab.tokenize(prompt, true, true);
         }
     }
 

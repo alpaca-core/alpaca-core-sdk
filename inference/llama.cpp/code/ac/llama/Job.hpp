@@ -29,8 +29,6 @@ public:
     void warmup();
 
     struct RunParams {
-        std::string prompt;
-
         bool conversation = false;
 
         int numTokensToPredict = -1;
@@ -43,7 +41,7 @@ public:
         bool infiniteContext = true;
     };
 
-    itlib::generator<Token> run(const RunParams rp);
+    itlib::generator<Token> run(std::string_view prompt, const RunParams rp);
 
 private:
     Model& m_model;
@@ -67,7 +65,7 @@ private:
         // group attention state
         uint32_t gaIndex = 0; // number of grouped KV tokens (only used if params.gaFactor > 1)
 
-        bool initialized = false;
+        bool sessionInitialized = false;
     };
     SessionData m_sessionData;
 };
