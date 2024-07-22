@@ -74,7 +74,7 @@ public:
         std::vector<Token> penaltyPromptTokens;
     };
 
-    Sampler(Params params);
+    explicit Sampler(Params params = {});
     ~Sampler();
 
     Sampler(const Sampler&) = delete;

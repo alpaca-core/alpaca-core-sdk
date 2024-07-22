@@ -4,9 +4,12 @@
 #pragma once
 #include "export.h"
 #include "Token.hpp"
+#include "Sampler.hpp"
+#include "ChatFormat.hpp"
 #include "mem_ext.hpp"
 #include <itlib/generator.hpp>
 #include <string>
+#include <span>
 
 struct llama_context;
 
@@ -16,6 +19,7 @@ class Model;
 class AC_LLAMA_EXPORT Job {
 public:
     struct InitParams {
+        uint32_t batchSize = 2048; // logical batch size for prompt processing (must be >=32 to use BLAS)
     };
 
     explicit Job(Model& model, InitParams params = {});
@@ -28,21 +32,41 @@ public:
         std::string prompt;
 
         bool conversation = false;
-        bool interactiveFirst = false;
 
         int numTokensToPredict = -1;
 
         uint32_t gaFactor = 1; // group-attention factor
         uint32_t gaWidth = 512; // group-attention width
 
-        uint32_t batchSize = 2048; // logical batch size for prompt processing (must be >=32 to use BLAS)
+        // if true, the inference tries to extend the context by truncating previous tokens
+        // only used if gaFactor == 1
+        bool infiniteContext = true;
     };
 
-    itlib::generator<Token> run(RunParams rp);
+    itlib::generator<Token> run(const RunParams rp);
 
 private:
     Model& m_model;
     astl::c_unique_ptr<llama_context> m_lctx;
+
+    void doDecode(std::span<Token> tokens);
+
+    ChatFormat m_chatFmt;
+
+    struct SessionData {
+        RunParams params;
+        Sampler sampler;
+        std::vector<ChatMsg> chat;
+        uint32_t numKeep = 0; // number of tokens to keep in the context in case we overflow
+        uint32_t numPast = 0; // number of tokens in the context
+        uint32_t numRemaining = 0; // session-wide remaining tokens to predict
+
+        // group attention state
+        uint32_t gaIndex = 0; // number of grouped KV tokens (only used if params.gaFactor > 1)
+
+        bool initialized = false;
+    };
+    SessionData m_sessionData;
 };
 
 } // namespace ac::llama
