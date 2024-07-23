@@ -16,6 +16,8 @@ class Job;
 class AC_LLAMA_EXPORT Model {
 public:
     struct Params {
+        bool gpu = true; // try to load data on gpu
+        bool vocabOnly = false; // do not load model, only vocab
     };
 
     explicit Model(const char* pathToGguf, Params params = {});
