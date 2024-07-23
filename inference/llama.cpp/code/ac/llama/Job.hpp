@@ -19,7 +19,9 @@ class Model;
 class AC_LLAMA_EXPORT Job {
 public:
     struct InitParams {
-        uint32_t batchSize = 2048; // logical batch size for prompt processing (must be >=32 to use BLAS)
+        uint32_t ctxSize = 0; // context size for the model (0 = maximum allowed by model)
+        uint32_t batchSize = 2048; // logical batch size for prompt processing (may be silently truncated to ctxSize)
+        uint32_t ubatchSize = 0; // physical batch size for prompt processing (0 = batchSize)
     };
 
     explicit Job(Model& model, InitParams params = {});

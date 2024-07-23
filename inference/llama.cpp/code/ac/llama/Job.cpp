@@ -17,7 +17,9 @@ namespace ac::llama {
 namespace {
 llama_context_params llamaFromJobInitParams(const Job::InitParams& params) {
     llama_context_params llamaParams = llama_context_default_params();
+    llamaParams.n_ctx = params.ctxSize;
     llamaParams.n_batch = params.batchSize;
+    llamaParams.n_ubatch = params.ubatchSize;
     return llamaParams;
 }
 } // namespace
