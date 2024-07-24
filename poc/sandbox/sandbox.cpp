@@ -13,51 +13,31 @@
 
 #include <vector>
 
-ac::llama::SessionCoroutine s() {
-    while (true) {
-        auto& str = co_await ac::llama::SessionCoroutine::Prompt{};
-        if (str == "exit") {
-            co_return;
-        }
-        co_yield ac::llama::Token(str.length());
-    }
-}
-
 int main() {
     jalog::Instance jl;
     jl.setup().add<jalog::sinks::ColorSink>();
 
     ac::llama::initLibrary();
 
-    auto coro = s();
-    for (int i = 0; i < 10; ++i) {
-        if (i == 2) {
-            coro.setPrompt("Hello");
-        }
-        if (i == 5) {
-            coro.setPrompt("exit");
-        }
-        auto val = coro.next();
-        std::cout << val << ", ";
-    }
-    std::cout << std::endl;
-
     //ac::llama::Model model("D:/mod/Mistral-7B-Instruct-v0.1-GGUF/mistral-7b-instruct-v0.1.Q8_0.gguf");
-    //ac::llama::Model model("D:/mod/gpt2/gguf/gpt2.Q6_K.gguf");
-    ////ac::llama::Model model("D:/mod/gpt2/gguf-gpt2-chatbot/gpt2-chatbot.Q8_0.gguf");
+    ac::llama::Model model("D:/mod/gpt2/gguf/gpt2.Q6_K.gguf");
+    //ac::llama::Model model("D:/mod/gpt2/gguf-gpt2-chatbot/gpt2-chatbot.Q8_0.gguf");
 
-    //ac::llama::Job job(model);
+    ac::llama::Job job(model);
 
-    //job.warmup();
+    job.warmup();
 
-    //job.setup("The rain in Turkey", {});
-    ////job.decode("How to get to the moon?");
+    auto s = job.newSession("The rain in Turkey", {});
 
-    //for (auto s : job.generate(100)) {
-    //    std::cout << model.vocab().tokenToString(s);
-    //}
+    for (int i= 0; i < 100; ++i) {
+        auto t = s.getToken();
+        if (t == ac::llama::Token_Invalid) {
+            break;
+        }
+        std::cout << model.vocab().tokenToString(t);
+    }
 
-    //std::cout << std::endl;
+    std::cout << std::endl;
 
     //job.decode("Can I join NASA?");
 

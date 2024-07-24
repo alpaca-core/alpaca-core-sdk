@@ -9,8 +9,8 @@
 #include "iile.h"
 #include "throw_ex.hpp"
 #include <llama.h>
+#include <itlib/sentry.hpp>
 #include <cassert>
-
 
 namespace ac::llama {
 
@@ -27,7 +27,6 @@ llama_context_params llamaFromJobInitParams(const Job::InitParams& params) {
 Job::Job(Model& model, InitParams params)
     : m_model(model)
     , m_lctx(llama_new_context_with_model(model.lmodel(), llamaFromJobInitParams(params)), llama_free)
-    , m_chatFmt(model.getChatTemplateId())
 {
     if (!m_lctx) {
         throw_ex{} << "Failed to create llama context";
@@ -75,140 +74,51 @@ void Job::warmup() {
     llama_reset_timings(lctx);
 }
 
-void Job::tryExpandContext(std::span<const Token> tokens) {
-    auto lctx = m_lctx.get();
-
-    const auto ctxLen = llama_n_ctx(lctx);
-    const auto numKeep = m_sessionData.numKeep;
-
-    const auto gaFactor = m_sessionData.params.gaFactor;
-
-    auto& numPast = m_sessionData.numPast;
-
-    const auto maxTokens = ctxLen - 4; // ref #16
-
-    // Ensure the input doesn't exceed the context size by truncating embd if necessary.
-    if (tokens.size() > maxTokens) {
-        const auto skipped = tokens.size() - maxTokens;
-        tokens = tokens.first(maxTokens);
-        LLAMA_LOG(Warning, "Input too long. Skipping ", skipped, " tokens");
+SessionCoroutine Job::newSession(std::string initialPrompt, const SessionParams params) {
+    if (m_hasActiveSession) {
+        throw_ex{} << "Job already has an active session";
     }
-
-    bool haveFullContextMitigation = false;
-    if (gaFactor == 1) {
-        // infinite text generation via context shifting
-        // if we run out of context:
-        // - take the n_keep first tokens from the original prompt (via numPast)
-        // - take half of the last (n_ctx - n_keep) tokens and recompute the logits in batches
-        const auto num = numPast + tokens.size();
-        if (num >= ctxLen) {
-            if (!m_sessionData.params.infiniteContext) {
-                throw_ex{} << "context limit of " << ctxLen << " reached";
-            }
-
-            const auto numLeft = numPast - numKeep;
-            const int numDiscard = numLeft / 2; // somewhat arbitrary
-
-            LLAMA_LOG(Debug, "Context is full. Swapping: past = ", numPast, ", numLeft: ", numLeft,
-                ", ctxLen: ", ctxLen, ", numKeep: ", numKeep, ", numDiscard: ", numDiscard);
-
-            llama_kv_cache_seq_rm(lctx, 0, numKeep, numKeep + numDiscard);
-            llama_kv_cache_seq_add(lctx, 0, numKeep + numDiscard, numPast, -numDiscard);
-
-            numPast -= numDiscard;
-            haveFullContextMitigation = true;
-        }
-    }
-    else {
-        const uint32_t gaWidth = m_sessionData.params.gaWidth;
-        uint32_t& gaIndex = m_sessionData.gaIndex;
-
-        while (numPast >= gaIndex + gaWidth) {
-            // context extension via Self-Extend
-            const int ib = (gaFactor * gaIndex) / gaWidth;
-            const int bd = (gaWidth / gaFactor) * (gaFactor - 1);
-            const int dd = (gaWidth / gaFactor) - ib * bd - gaWidth;
-
-            LLAMA_LOG(Debug, "Group attention shift: ib = ", ib, ", bd = ", bd, ", dd = ", dd);
-
-            llama_kv_cache_seq_add(lctx, 0, gaIndex, numPast, ib * bd);
-            llama_kv_cache_seq_div(lctx, 0, gaIndex + ib * bd, gaIndex + ib * bd + gaWidth, gaFactor);
-            llama_kv_cache_seq_add(lctx, 0, gaIndex + ib * bd + gaWidth, numPast + ib * bd, dd);
-
-            numPast -= bd;
-
-            gaIndex += gaWidth / gaFactor;
-            haveFullContextMitigation = true;
-        }
-    }
-
-    if (haveFullContextMitigation) {
-        LLAMA_LOG(Info, "Context full mitigation performed: past = ", numPast, ", tokens = ", tokens.size());
-    }
-}
-
-void Job::doDecode(std::span<Token> tokens) {
-    // first try to expand the context if needed
-    tryExpandContext(tokens);
-
-    for (auto t : tokens) {
-        m_sessionData.sampler.accept(t);
-    }
+    m_hasActiveSession = true;
+    itlib::sentry closeSessionSentry([this] { m_hasActiveSession = false; });
 
     auto lctx = m_lctx.get();
-    auto& numPast = m_sessionData.numPast;
-    const auto batchSize = llama_n_batch(lctx);
-
-    // decode with batches of batchSize
-    while (!tokens.empty()) {
-        auto batchTokens = tokens.size() > batchSize ? tokens.first(batchSize) : tokens;
-        tokens = tokens.subspan(batchTokens.size());
-
-        auto batch = llama_batch_get_one(batchTokens.data(), int(batchTokens.size()), numPast, 0);
-        if (llama_decode(lctx, batch) != 0) {
-            throw_ex{} << "Failed to decode tokens";
-        }
-        numPast += uint32_t(batchTokens.size());
-    }
-}
-
-void Job::setup(std::string_view prompt, const RunParams& params) {
-    auto lctx = m_lctx.get();
-
-    if (m_sessionData.initialized) {
-        m_sessionData.~SessionData();
-        new (&m_sessionData) SessionData();
-
-        llama_kv_cache_clear(lctx);
-        llama_synchronize(lctx);
-        llama_reset_timings(lctx);
-    }
-    m_sessionData.params = params;
-
-    std::vector<llama_token> inputTokens;
-
     auto& vocab = m_model.vocab();
 
-    if (prompt.empty()) {
+    llama_kv_cache_clear(lctx);
+    llama_synchronize(lctx);
+    llama_reset_timings(lctx);
+
+    ChatFormat chatFmt(m_model.getChatTemplateId());
+    std::vector<ChatMsg> chatMsgs;
+    auto chatAddAndFormat = [&](std::string role, std::string text) {
+        ChatMsg newMsg = { std::move(role), std::move(text) };
+        auto ret = chatFmt.formatMsg(newMsg, chatMsgs, newMsg.role == "user");
+        chatMsgs.push_back(std::move(newMsg));
+        return ret;
+    };
+
+    std::vector<Token> tokens;
+    if (initialPrompt.empty()) {
         // Should not run without any tokens
-        inputTokens.push_back(llama_token_bos(m_model.lmodel()));
+        tokens.push_back(llama_token_bos(m_model.lmodel()));
     }
     else {
         if (params.conversation) {
-            auto fmtChat = chatAddAndFormat("system", std::string(prompt));
-            inputTokens = vocab.tokenize(fmtChat, true, true);
+            auto fmtChat = chatAddAndFormat("system", std::move(initialPrompt));
+            tokens = vocab.tokenize(fmtChat, true, true);
         }
         else {
-            inputTokens = vocab.tokenize(prompt, true, true);
+            tokens = vocab.tokenize(initialPrompt, true, true);
         }
     }
 
     const auto ctxLen = llama_n_ctx(lctx);
-    if (inputTokens.size() > ctxLen - 4) {
-        throw_ex{} << "Input too long. Got " << inputTokens.size() << " tokens, max: " << ctxLen - 4;
+    const auto maxTokens = ctxLen - 4; // ref #16
+    if (tokens.size() > maxTokens) {
+        throw_ex{} << "Input too long. Got " << tokens.size() << " tokens, max: " << ctxLen - 4;
     }
 
-    m_sessionData.numKeep = int32_t(inputTokens.size());
+    const auto numKeep = int32_t(tokens.size()); // number of tokens to keep in the context in case we overflow
 
     if (params.gaFactor != 1) {
         const uint32_t gaFactor = params.gaFactor;
@@ -220,71 +130,133 @@ void Job::setup(std::string_view prompt, const RunParams& params) {
     }
 
     if (m_model.hasEncoder()) {
-        auto batch = llama_batch_get_one(inputTokens.data(), int32_t(inputTokens.size()), 0, 0);
+        auto batch = llama_batch_get_one(tokens.data(), int32_t(tokens.size()), 0, 0);
         auto res = llama_encode(lctx, batch);
         if (res != 0) {
             throw_ex{} << "Failed to encode input";
         }
-        inputTokens.clear();
-        inputTokens.push_back(vocab.decoderStartToken());
+        tokens.clear();
+        tokens.push_back(vocab.decoderStartToken());
     }
 
-    m_sessionData.initialized = true;
+    Sampler sampler;
 
-    doDecode(inputTokens);
-}
+    // group attention state
+    uint32_t gaIndex = 0; // number of grouped KV tokens (only used if params.gaFactor > 1)
+    uint32_t numPast = 0; // number of tokens in the context (that's prompts + generated)
 
-void Job::decode(std::string_view prompt) {
-    if (!m_sessionData.initialized) {
-        throw_ex{} << "Job hasn't been set up";
-    }
+    auto doDecode = [&](std::span<Token> tokens) {
+        // first try to expand the context if needed
+        const auto gaFactor = params.gaFactor;
 
-    auto& vocab = m_model.vocab();
-    std::vector<Token> promptTokens;
-
-    if (m_sessionData.params.conversation) {
-        auto fmtChat = chatAddAndFormat("user", std::string(prompt));
-        promptTokens = vocab.tokenize(fmtChat, false, true);
-    }
-    else {
-        promptTokens = vocab.tokenize(prompt, false, false);
-    }
-
-    // reset sampling and don't allow previous inputs to affect the generation
-    m_sessionData.sampler.reset();
-
-    doDecode(promptTokens);
-}
-
-std::string Job::chatAddAndFormat(std::string role, std::string text) {
-    ChatMsg newMsg = { std::move(role), std::move(text) };
-    auto ret = m_chatFmt.formatMsg(newMsg, m_sessionData.chat, newMsg.role == "user");
-    m_sessionData.chat.push_back(std::move(newMsg));
-    return ret;
-}
-
-SessionCoroutine Job::generate(uint32_t maxTokens) {
-    auto lctx = m_lctx.get();
-    auto& sampler = m_sessionData.sampler;
-    auto& vocab = m_model.vocab();
-
-    while (maxTokens) {
-        auto token = sampler.sample(lctx);
-        co_yield token;
-
-        if (vocab.isEog(token)) {
-            break;
+        // Ensure the input doesn't exceed the context size by truncating embd if necessary.
+        if (tokens.size() > maxTokens) {
+            const auto skipped = tokens.size() - maxTokens;
+            tokens = tokens.first(maxTokens);
+            LLAMA_LOG(Warning, "Input too long. Skipping ", skipped, " tokens");
         }
 
-        sampler.accept(token);
-        doDecode({&token, 1});
-        --maxTokens;
-    }
+        bool haveFullContextMitigation = false;
+        if (gaFactor == 1) {
+            // infinite text generation via context shifting
+            // if we run out of context:
+            // - take the n_keep first tokens from the original prompt (via numPast)
+            // - take half of the last (n_ctx - n_keep) tokens and recompute the logits in batches
+            const auto num = numPast + tokens.size();
+            if (num >= ctxLen) {
+                if (!params.infiniteContext) {
+                    throw_ex{} << "context limit of " << ctxLen << " reached";
+                }
 
-    if (m_sessionData.params.conversation) {
-        // so here we add just some random message to the conversation to keep the flow of the conversation
-        // it is not going to be used otherwise
-        chatAddAndFormat("assistant", "msg");
+                const auto numLeft = numPast - numKeep;
+                const int numDiscard = numLeft / 2; // somewhat arbitrary
+
+                LLAMA_LOG(Debug, "Context is full. Swapping: past = ", numPast, ", numLeft: ", numLeft,
+                    ", ctxLen: ", ctxLen, ", numKeep: ", numKeep, ", numDiscard: ", numDiscard);
+
+                llama_kv_cache_seq_rm(lctx, 0, numKeep, numKeep + numDiscard);
+                llama_kv_cache_seq_add(lctx, 0, numKeep + numDiscard, numPast, -numDiscard);
+
+                numPast -= numDiscard;
+                haveFullContextMitigation = true;
+            }
+        }
+        else {
+            const uint32_t gaWidth = params.gaWidth;
+
+            while (numPast >= gaIndex + gaWidth) {
+                // context extension via Self-Extend
+                const int ib = (gaFactor * gaIndex) / gaWidth;
+                const int bd = (gaWidth / gaFactor) * (gaFactor - 1);
+                const int dd = (gaWidth / gaFactor) - ib * bd - gaWidth;
+
+                LLAMA_LOG(Debug, "Group attention shift: ib = ", ib, ", bd = ", bd, ", dd = ", dd);
+
+                llama_kv_cache_seq_add(lctx, 0, gaIndex, numPast, ib * bd);
+                llama_kv_cache_seq_div(lctx, 0, gaIndex + ib * bd, gaIndex + ib * bd + gaWidth, gaFactor);
+                llama_kv_cache_seq_add(lctx, 0, gaIndex + ib * bd + gaWidth, numPast + ib * bd, dd);
+
+                numPast -= bd;
+
+                gaIndex += gaWidth / gaFactor;
+                haveFullContextMitigation = true;
+            }
+        }
+
+        if (haveFullContextMitigation) {
+            LLAMA_LOG(Info, "Context full mitigation performed: past = ", numPast, ", tokens = ", tokens.size());
+        }
+
+        // add to sampler
+        for (auto t : tokens) {
+            sampler.accept(t);
+        }
+
+        // decode
+        const auto batchSize = llama_n_batch(lctx);
+
+        // decode with batches of batchSize
+        while (!tokens.empty()) {
+            auto batchTokens = tokens.size() > batchSize ? tokens.first(batchSize) : tokens;
+            tokens = tokens.subspan(batchTokens.size());
+
+            auto batch = llama_batch_get_one(batchTokens.data(), int(batchTokens.size()), numPast, 0);
+            if (llama_decode(lctx, batch) != 0) {
+                throw_ex{} << "Failed to decode tokens";
+            }
+            numPast += uint32_t(batchTokens.size());
+        }
+    };
+
+    doDecode(tokens);
+
+    while (true) {
+        auto& prompt = co_await SessionCoroutine::Prompt{};
+        if (!prompt.empty()) {
+            if (params.conversation) {
+                chatAddAndFormat("assistant", "msg");
+                auto fmtChat = chatAddAndFormat("user", prompt);
+                tokens = vocab.tokenize(fmtChat, false, true);
+            }
+            else {
+                tokens = vocab.tokenize(prompt, false, false);
+            }
+
+            // reset sampling and don't allow previous inputs to affect the generation
+            sampler.reset();
+
+            doDecode(tokens);
+        }
+
+        auto token = sampler.sample(lctx);
+        if (vocab.isEog(token)) {
+            co_yield Token_Invalid;
+        }
+        else {
+            co_yield token;
+            sampler.accept(token);
+            doDecode({&token, 1});
+        }
     }
 }
 

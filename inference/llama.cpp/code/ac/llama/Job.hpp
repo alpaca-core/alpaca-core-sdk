@@ -4,12 +4,10 @@
 #pragma once
 #include "export.h"
 #include "Token.hpp"
-#include "Sampler.hpp"
-#include "ChatFormat.hpp"
 #include "mem_ext.hpp"
-#include <itlib/generator.hpp>
 #include <string>
 #include <span>
+#include <coroutine>
 
 struct llama_context;
 
@@ -79,38 +77,15 @@ public:
 
     explicit operator bool() const noexcept { return !!m_handle; }
 
-    void setPrompt(std::string_view prompt) {
+    void pushPrompt(std::string_view prompt) {
         m_handle.promise().setPrompt(prompt);
     }
 
-    Token next() {
+    Token getToken() {
         if (m_handle.done()) return Token_Invalid;
         m_handle.resume();
         return std::move(m_handle.promise().value());
     }
-
-    class PseudoIterator {
-        Handle m_handle;
-    public:
-        using value_type = Token;
-
-        PseudoIterator() noexcept = default;
-        PseudoIterator(Handle handle) noexcept : m_handle(handle) {}
-
-        Token operator*() const noexcept { return m_handle.promise().value(); }
-        PseudoIterator& operator++() {
-            m_handle.resume();
-            return *this;
-        }
-
-        bool operator==(std::default_sentinel_t) const noexcept { return m_handle.done(); }
-    };
-
-    PseudoIterator begin() {
-        m_handle.resume();
-        return PseudoIterator{m_handle};
-    }
-    std::default_sentinel_t end() noexcept { return {}; }
 
 private:
     Handle m_handle;
@@ -130,7 +105,7 @@ public:
     // do an empty model run to load model data in cache
     void warmup();
 
-    struct RunParams {
+    struct SessionParams {
         bool conversation = false;
 
         int numTokensToPredict = -1;
@@ -143,36 +118,13 @@ public:
         bool infiniteContext = true;
     };
 
-    void setup(std::string_view prompt, const RunParams& params);
-    void decode(std::string_view prompt);
-    SessionCoroutine generate(uint32_t maxTokens = uint32_t(-1));
+    SessionCoroutine newSession(std::string initialPrompt, const SessionParams params);
 
 private:
     Model& m_model;
     astl::c_unique_ptr<llama_context> m_lctx;
 
-    void tryExpandContext(std::span<const Token> tokens); // try to expand context to accommodate tokens
-
-    // we should have a `const Token` span but llama_batch doesn't let us
-    void doDecode(std::span<Token> tokens);
-
-    std::string chatAddAndFormat(std::string role, std::string text);
-
-    ChatFormat m_chatFmt;
-
-    struct SessionData {
-        RunParams params;
-        Sampler sampler;
-        std::vector<ChatMsg> chat;
-        uint32_t numKeep = 0; // number of tokens to keep in the context in case we overflow
-        uint32_t numPast = 0; // number of tokens in the context (that's prompts + generated)
-
-        // group attention state
-        uint32_t gaIndex = 0; // number of grouped KV tokens (only used if params.gaFactor > 1)
-
-        bool initialized = false;
-    };
-    SessionData m_sessionData;
+    bool m_hasActiveSession = false;
 };
 
 } // namespace ac::llama
