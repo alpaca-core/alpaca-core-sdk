@@ -263,7 +263,7 @@ std::string Job::chatAddAndFormat(std::string role, std::string text) {
     return ret;
 }
 
-itlib::generator<Token> Job::generate(uint32_t maxTokens) {
+SessionCoroutine Job::generate(uint32_t maxTokens) {
     auto lctx = m_lctx.get();
     auto& sampler = m_sessionData.sampler;
     auto& vocab = m_model.vocab();
