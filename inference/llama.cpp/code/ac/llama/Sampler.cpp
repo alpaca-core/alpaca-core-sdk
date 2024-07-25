@@ -37,7 +37,7 @@ llama_token_data_array Sampler::prepareSampling(llama_context* lctx, llama_conte
     auto logits = llama_get_logits_ith(lctx, idx);
 
     // apply bias if any
-    for (const auto [token, bias] : m_params.logitBias) {
+    for (const auto& [token, bias] : m_params.logitBias) {
         logits[token] += bias;
     }
 
@@ -64,7 +64,7 @@ llama_token_data_array Sampler::prepareSampling(llama_context* lctx, llama_conte
             penaltyTokens = m_params.penaltyPromptTokens;
         }
 
-        if (m_params.repetitionPenalty.numTokens > 0 && m_params.repetitionPenalty.numTokens < penaltyTokens.size()) {
+        if (m_params.repetitionPenalty.numTokens > 0 && m_params.repetitionPenalty.numTokens < int(penaltyTokens.size())) {
             // take last n tokens
             penaltyTokens = penaltyTokens.subspan(penaltyTokens.size() - m_params.repetitionPenalty.numTokens);
         }

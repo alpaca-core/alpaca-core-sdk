@@ -99,7 +99,7 @@ public:
         uint32_t ubatchSize = 0; // physical batch size for prompt processing (0 = batchSize)
     };
 
-    explicit Job(Model& model, InitParams params = {});
+    explicit Job(Model& model, InitParams params);
     ~Job();
 
     // do an empty model run to load model data in cache

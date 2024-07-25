@@ -139,7 +139,7 @@ SessionCoroutine Job::newSession(std::string initialPrompt, const SessionParams 
         tokens.push_back(vocab.decoderStartToken());
     }
 
-    Sampler sampler;
+    Sampler sampler({});
 
     // group attention state
     uint32_t gaIndex = 0; // number of grouped KV tokens (only used if params.gaFactor > 1)

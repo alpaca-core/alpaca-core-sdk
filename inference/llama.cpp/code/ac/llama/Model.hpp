@@ -20,7 +20,7 @@ public:
         bool vocabOnly = false; // do not load model, only vocab
     };
 
-    explicit Model(const char* pathToGguf, Params params = {});
+    explicit Model(const char* pathToGguf, Params params);
     ~Model();
 
     uint32_t trainCtxLength() const noexcept;
