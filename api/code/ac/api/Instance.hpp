@@ -22,4 +22,4 @@ public:
     virtual void initiateAbort(Callback<void> cb) = 0;
 };
 
-}
+} // namespace ac::api
