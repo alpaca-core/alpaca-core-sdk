@@ -3,8 +3,8 @@
 //
 #pragma once
 #include "export.h"
-#include "mem_ext.hpp"
 #include "Vocab.hpp"
+#include <astl/mem_ext.hpp>
 #include <string>
 
 struct llama_model;

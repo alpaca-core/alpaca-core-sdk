@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 //
 #include "ChatFormat.hpp"
-#include "throw_ex.hpp"
 #include <llama.h>
+#include <astl/throw_ex.hpp>
 #include <vector>
 #include <cassert>
 #include <stdexcept>

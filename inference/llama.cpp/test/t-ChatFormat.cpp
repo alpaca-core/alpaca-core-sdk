@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #include <ac/llama/ChatFormat.hpp>
-#include <ac/llama/u8c.h>
+#include <astl/u8c.h>
 #include <doctest/doctest.h>
 #include <vector>
 

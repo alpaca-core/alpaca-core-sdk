@@ -8,6 +8,7 @@ target_link_libraries(ac-api
     PUBLIC
         splat::splat
         itlib::itlib
+        ac::astl
         nlohmann_json::nlohmann_json
 )
 target_sources(ac-api PRIVATE

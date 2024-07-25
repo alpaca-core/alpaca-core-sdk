@@ -3,4 +3,4 @@
 #
 add_subdirectory(llama.cpp)
 add_subdirectory(code)
-add_subdirectory(test)
+ac_add_test_subdir()

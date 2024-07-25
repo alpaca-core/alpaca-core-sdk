@@ -24,6 +24,7 @@ list(APPEND CMAKE_MODULE_PATH
 )
 
 include(icm_add_lib)
+include(ac_lib_subdirs)
 
 #################
 # cfg
@@ -54,6 +55,7 @@ endif()
 
 #################
 # subdirs/targets
+add_subdirectory(common)
 add_subdirectory(api)
 add_subdirectory(inference)
 add_subdirectory(poc)
