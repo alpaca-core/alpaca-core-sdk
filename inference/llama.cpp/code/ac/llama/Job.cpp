@@ -11,6 +11,7 @@
 #include <llama.h>
 #include <itlib/sentry.hpp>
 #include <cassert>
+#include <span>
 
 namespace ac::llama {
 
@@ -74,7 +75,7 @@ void Job::warmup() {
     llama_reset_timings(lctx);
 }
 
-SessionCoroutine Job::newSession(std::string initialPrompt, const SessionParams params) {
+JobSession Job::newSession(std::string initialPrompt, const SessionParams params) {
     if (m_hasActiveSession) {
         throw_ex{} << "Job already has an active session";
     }
@@ -231,7 +232,7 @@ SessionCoroutine Job::newSession(std::string initialPrompt, const SessionParams 
     doDecode(tokens);
 
     while (true) {
-        auto& prompt = co_await SessionCoroutine::Prompt{};
+        auto& prompt = co_await JobSession::Prompt{};
         if (!prompt.empty()) {
             if (params.conversation) {
                 chatAddAndFormat("assistant", "msg");

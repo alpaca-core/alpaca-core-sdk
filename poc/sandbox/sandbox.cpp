@@ -19,9 +19,9 @@ int main() {
 
     ac::llama::initLibrary();
 
-    //ac::llama::Model model("D:/mod/Mistral-7B-Instruct-v0.1-GGUF/mistral-7b-instruct-v0.1.Q8_0.gguf");
-    ac::llama::Model model("D:/mod/gpt2/gguf/gpt2.Q6_K.gguf", {});
-    //ac::llama::Model model("D:/mod/gpt2/gguf-gpt2-chatbot/gpt2-chatbot.Q8_0.gguf");
+    ac::llama::Model model("D:/mod/Mistral-7B-Instruct-v0.1-GGUF/mistral-7b-instruct-v0.1.Q8_0.gguf", {});
+    //ac::llama::Model model("D:/mod/gpt2/gguf/gpt2.Q6_K.gguf", {});
+    //ac::llama::Model model("D:/mod/gpt2/gguf-gpt2-chatbot/gpt2-chatbot.Q8_0.gguf", {});
 
     ac::llama::Job job(model, {});
 
@@ -29,7 +29,7 @@ int main() {
 
     auto s = job.newSession("The rain in Turkey", {});
 
-    for (int i= 0; i < 100; ++i) {
+    for (int i= 0; i < 8; ++i) {
         auto t = s.getToken();
         if (t == ac::llama::Token_Invalid) {
             break;
@@ -39,13 +39,17 @@ int main() {
 
     std::cout << std::endl;
 
-    //job.decode("Can I join NASA?");
+    s.pushPrompt(" caused massive");
 
-    //for (auto s : job.generate()) {
-    //    std::cout << model.vocab().tokenToString(s);
-    //}
+    for (int i = 0; i < 20; ++i) {
+        auto t = s.getToken();
+        if (t == ac::llama::Token_Invalid) {
+            break;
+        }
+        std::cout << model.vocab().tokenToString(t);
+    }
 
-    //std::cout << std::endl;
+    std::cout << std::endl;
 
     return 0;
 }
