@@ -25,6 +25,7 @@ target_sources(ac-llama PRIVATE
     ac/llama/Vocab.cpp
     ac/llama/Sampler.hpp
     ac/llama/Sampler.cpp
-    ac/llama/Job.hpp
-    ac/llama/Job.cpp
+    ac/llama/Instance.hpp
+    ac/llama/Instance.cpp
+    ac/llama/Session.hpp
 )

@@ -3,12 +3,12 @@
 //
 #include "Provider.hpp"
 #include "Model.hpp"
-#include "Job.hpp"
+#include "Instance.hpp"
 
 // export vtables for classes which only have that
 
 namespace ac::api {
 Provider::~Provider() = default;
 Model::~Model() = default;
-Job::~Job() = default;
+Instance::~Instance() = default;
 }

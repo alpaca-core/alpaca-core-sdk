@@ -6,7 +6,7 @@
 #include <ac/llama/Init.hpp>
 #include <ac/llama/Model.hpp>
 #include <ac/llama/ChatFormat.hpp>
-#include <ac/llama/Job.hpp>
+#include <ac/llama/Instance.hpp>
 
 #include <jalog/Instance.hpp>
 #include <jalog/sinks/ColorSink.hpp>
@@ -23,11 +23,11 @@ int main() {
     //ac::llama::Model model("D:/mod/gpt2/gguf/gpt2.Q6_K.gguf", {});
     //ac::llama::Model model("D:/mod/gpt2/gguf-gpt2-chatbot/gpt2-chatbot.Q8_0.gguf", {});
 
-    ac::llama::Job job(model, {});
+    ac::llama::Instance inst(model, {});
 
-    job.warmup();
+    inst.warmup();
 
-    auto s = job.newSession("The rain in Turkey", {});
+    auto s = inst.newSession("The rain in Turkey", {});
 
     for (int i= 0; i < 8; ++i) {
         auto t = s.getToken();

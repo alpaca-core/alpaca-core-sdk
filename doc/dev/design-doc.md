@@ -13,8 +13,8 @@ A collection of somewhat loose notes on the design and architecture of the SDK. 
 
 ### Some scenarios
 
-* User loads an LLM, opens a chat job and has a chat
-* User loads an LLM and prompts it to generate some text, then closes the job
+* User loads an LLM, creates an instance and has a chat session
+* User loads an LLM and prompts it to generate some text, then closes the instance
 * User loads Whisper, partially and only encodes audio
     * Then in the future only loads the Whisper decoder and decodes the saved results
 
@@ -45,18 +45,20 @@ A collection of somewhat loose notes on the design and architecture of the SDK. 
     * Model: a collection of parameters.
         * The model manifest can be available regardless of whether the model is loaded.
         * A model must be loaded to create a...
-    * Job: an inference job whose state persists while the job is "alive".
-        * Multiple jobs can be created from a model.
-        * Jobs can be concurrent. At least in theory. Code should treat them as such.
-        * Jobs can execute ops.
-    * Op: a computation performed by a job
-        * Multiple ops can be executed by a job.
-        * The ops in a job are sequential
+    * Intance: an inference instance whose state persists while the instance is still "alive".
+        * Multiple instances can be created from a model.
+        * Instances can have inference sessions. Multiple consecutive sessions are allowed for an instance.
+        * Different instances and their respective sessions can be concurrent. At least in theory. Code should treat them as such.
+        * Sessions can execute ops.
+    * Op: a computation performed by an instance session
+        * Multiple ops can be executed during a session.
+        * The ops in a session are sequential
         * Queueing multiple ops is supported.
-        * Ops can change the job's state (say kv cache) and this change affects subsequent ops
-            * For example a chat would be composed of a job with multiple ops: one for each input by the user.
+        * Ops can change the session state (say kv cache) and this change affects subsequent ops
+            * For example a chat would be composed of a session with multiple ops: one for each input by the user.
         * Some ops can, however, clear the state or parts of it
-            * This will allow the user to mitigate time spent in job allocation an initialization
+            * The most basic example is starting a new session
+            * Thus instances can be reused to save time spent on initialization (kv cache, etc)
 * All api calls are async, with callbacks
     * Callbacks are not necessarily the best way to approach async programming in C++, but they are the most portable and the easiest to bind to other languages. Moreover they can be wrapped by futures or coroutines (yes, a C++ wrapper of the C++ API, yay).
     * Having all calls async will make the use of the API seamless, regardless of whether the inference is local or remote.

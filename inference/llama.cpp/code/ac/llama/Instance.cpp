@@ -1,7 +1,7 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include "Job.hpp"
+#include "Instance.hpp"
 #include "Model.hpp"
 #include "Logging.hpp"
 #include "ChatFormat.hpp"
@@ -16,7 +16,7 @@
 namespace ac::llama {
 
 namespace {
-llama_context_params llamaFromJobInitParams(const Job::InitParams& params) {
+llama_context_params llamaFromInstanceInitParams(const Instance::InitParams& params) {
     llama_context_params llamaParams = llama_context_default_params();
     llamaParams.n_ctx = params.ctxSize;
     llamaParams.n_batch = params.batchSize;
@@ -25,9 +25,9 @@ llama_context_params llamaFromJobInitParams(const Job::InitParams& params) {
 }
 } // namespace
 
-Job::Job(Model& model, InitParams params)
+Instance::Instance(Model& model, InitParams params)
     : m_model(model)
-    , m_lctx(llama_new_context_with_model(model.lmodel(), llamaFromJobInitParams(params)), llama_free)
+    , m_lctx(llama_new_context_with_model(model.lmodel(), llamaFromInstanceInitParams(params)), llama_free)
 {
     if (!m_lctx) {
         throw_ex{} << "Failed to create llama context";
@@ -37,13 +37,13 @@ Job::Job(Model& model, InitParams params)
     const auto ctxLen = llama_n_ctx(m_lctx.get());
     const auto ctxTrain = model.trainCtxLength();
     if (ctxLen > ctxTrain) {
-        LLAMA_LOG(Warning, "Job requested context length ", ctxLen, " is greater than the model's training context length ", ctxTrain);
+        LLAMA_LOG(Warning, "Instance requested context length ", ctxLen, " is greater than the model's training context length ", ctxTrain);
     }
 }
 
-Job::~Job() = default;
+Instance::~Instance() = default;
 
-void Job::warmup() {
+void Instance::warmup() {
     LLAMA_LOG(Info, "Running warmup");
 
     auto lctx = m_lctx.get();
@@ -75,9 +75,9 @@ void Job::warmup() {
     llama_reset_timings(lctx);
 }
 
-JobSession Job::newSession(std::string initialPrompt, const SessionParams params) {
+Session Instance::newSession(std::string initialPrompt, const SessionParams params) {
     if (m_hasActiveSession) {
-        throw_ex{} << "Job already has an active session";
+        throw_ex{} << "Instance already has an active session";
     }
     m_hasActiveSession = true;
     itlib::sentry closeSessionSentry([this] { m_hasActiveSession = false; });
@@ -232,7 +232,7 @@ JobSession Job::newSession(std::string initialPrompt, const SessionParams params
     doDecode(tokens);
 
     while (true) {
-        auto& prompt = co_await JobSession::Prompt{};
+        auto& prompt = co_await Session::Prompt{};
         if (!prompt.empty()) {
             if (params.conversation) {
                 chatAddAndFormat("assistant", "msg");

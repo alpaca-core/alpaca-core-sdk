@@ -8,7 +8,7 @@
 
 namespace ac::llama {
 
-class JobSession {
+class Session {
 public:
     struct Prompt {}; // sentinel for co_await
 
@@ -17,8 +17,8 @@ public:
 
         std::string m_currentPrompt, m_pendingPrompt;
     public:
-        JobSession get_return_object() noexcept {
-            return JobSession{std::coroutine_handle<promise_type>::from_promise(*this)};
+        Session get_return_object() noexcept {
+            return Session{std::coroutine_handle<promise_type>::from_promise(*this)};
         }
 
         Token value() const noexcept { return m_value; }
@@ -55,8 +55,8 @@ public:
 
     using Handle = std::coroutine_handle<promise_type>;
 
-    JobSession(Handle handle) : m_handle(handle) {}
-    ~JobSession() {
+    Session(Handle handle) : m_handle(handle) {}
+    ~Session() {
         if (m_handle) {
             m_handle.destroy();
         }

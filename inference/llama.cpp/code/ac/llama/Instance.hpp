@@ -3,7 +3,7 @@
 //
 #pragma once
 #include "export.h"
-#include "JobSession.hpp"
+#include "Session.hpp"
 #include "mem_ext.hpp"
 
 struct llama_context;
@@ -11,7 +11,7 @@ struct llama_context;
 namespace ac::llama {
 class Model;
 
-class AC_LLAMA_EXPORT Job {
+class AC_LLAMA_EXPORT Instance {
 public:
     struct InitParams {
         uint32_t ctxSize = 0; // context size for the model (0 = maximum allowed by model)
@@ -19,8 +19,8 @@ public:
         uint32_t ubatchSize = 0; // physical batch size for prompt processing (0 = batchSize)
     };
 
-    explicit Job(Model& model, InitParams params);
-    ~Job();
+    explicit Instance(Model& model, InitParams params);
+    ~Instance();
 
     // do an empty model run to load model data in cache
     void warmup();
@@ -39,7 +39,7 @@ public:
     };
 
     // only one session per job can be active at a time
-    JobSession newSession(std::string initialPrompt, const SessionParams params);
+    Session newSession(std::string initialPrompt, const SessionParams params);
 
 private:
     Model& m_model;

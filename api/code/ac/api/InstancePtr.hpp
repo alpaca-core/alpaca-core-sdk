@@ -5,6 +5,6 @@
 #include <memory>
 
 namespace ac::api {
-class Job;
-using JobPtr = std::shared_ptr<Job>;
+class Instance;
+using InstancePtr = std::shared_ptr<Instance>;
 }

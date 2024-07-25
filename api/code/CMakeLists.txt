@@ -15,8 +15,8 @@ target_sources(ac-api PRIVATE
     ac/api/Callback.hpp
     ac/api/Dict.hpp
     ac/api/Provider.hpp
-    ac/api/JobPtr.hpp
-    ac/api/Job.hpp
+    ac/api/InstancePtr.hpp
+    ac/api/Instance.hpp
     ac/api/Model.hpp
     ac/api/VtableExports.cpp
 )
