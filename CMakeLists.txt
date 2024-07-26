@@ -25,6 +25,8 @@ list(APPEND CMAKE_MODULE_PATH
 
 include(icm_add_lib)
 include(ac_lib_subdirs)
+include(icm_testing)
+include(icm_build_failure_testing)
 
 #################
 # cfg

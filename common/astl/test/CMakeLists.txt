@@ -7,6 +7,15 @@ endmacro()
 
 astl_test(iile)
 astl_test(mem_ext)
+astl_test(move)
 astl_test(move_capture)
 astl_test(throw_ex)
 astl_test(u8c)
+
+icm_add_multiple_build_failure_tests(
+    SOURCES
+        t-move-bf.cpp
+    LIBRARIES astl
+    PREFIX astl
+    FOLDER bf-test
+)
