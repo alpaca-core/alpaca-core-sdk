@@ -81,7 +81,7 @@ public:
             try {
                 auto instance = self->m_imodel->createInstance(type, astl::move(params));
                 assert(instance);
-                InstancePtr ptr = std::make_unique<LocalInstance>(astl::move(instance), self->m_executor);
+                InstancePtr ptr = std::make_shared<LocalInstance>(astl::move(instance), self->m_executor);
                 cb.resultCb(astl::move(ptr));
             }
             catch (std::exception& ex) {
@@ -128,7 +128,7 @@ public:
                 });
                 assert(model);
 
-                ModelPtr ptr = std::make_unique<LocalModel>(astl::move(model), m_executor);
+                ModelPtr ptr = std::make_shared<LocalModel>(astl::move(model), m_executor);
                 cb.resultCb(astl::move(ptr));
             }
             catch (std::exception& ex) {
