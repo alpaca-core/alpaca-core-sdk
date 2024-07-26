@@ -7,5 +7,6 @@ endmacro()
 
 astl_test(iile)
 astl_test(mem_ext)
+astl_test(move_capture)
 astl_test(throw_ex)
 astl_test(u8c)
