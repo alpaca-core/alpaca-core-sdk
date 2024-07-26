@@ -12,7 +12,7 @@ public:
 
     // ops are queued and executed in order
     // the inner state is modified by ops and subsequent ones may depend on the results of previous ones
-    virtual void runOp(std::string_view op, Dict params, Callback<Dict> cb) = 0;
+    virtual void runOp(std::string_view op, Dict params, Callback<void, Dict> cb) = 0;
 
     // wait for all ops to finish
     virtual void synchronize() = 0;
