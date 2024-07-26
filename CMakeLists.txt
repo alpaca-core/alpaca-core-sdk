@@ -57,5 +57,6 @@ endif()
 # subdirs/targets
 add_subdirectory(common)
 add_subdirectory(api)
+add_subdirectory(local-provider)
 add_subdirectory(inference)
 add_subdirectory(poc)
