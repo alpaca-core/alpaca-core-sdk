@@ -33,7 +33,7 @@ class LocalInstance : public Instance, public itlib::enable_shared_from {
     const xec::TaskExecutor::task_ctoken m_opTaskToken;
 public:
     LocalInstance(std::unique_ptr<LocalInferenceInstance> iinstance, xec::TaskExecutor& executor)
-        : m_iinstance(std::move(iinstance))
+        : m_iinstance(astl::move(iinstance))
         , m_executor(executor)
         , m_opTaskToken(1 + Instance_OpTaskToken.fetch_add(1, std::memory_order_relaxed))
 
@@ -42,8 +42,8 @@ public:
     virtual void runOp(std::string_view op, Dict params, Callback<void, Dict> cb) override {
         m_executor.pushTask([selfcap, op = std::string(op), movecap(params, cb)]() mutable {
             try {
-                self->m_iinstance->runOp(op, std::move(params), [&](Dict result) {
-                    cb.progressCb(std::move(result));
+                self->m_iinstance->runOp(op, astl::move(params), [&](Dict result) {
+                    cb.progressCb(astl::move(result));
                 });
                 cb.resultCb({});
             }
@@ -71,17 +71,17 @@ class LocalModel : public Model, public itlib::enable_shared_from {
     xec::TaskExecutor& m_executor;
 public:
     LocalModel(std::unique_ptr<LocalInferenceModel> imodel, xec::TaskExecutor& executor)
-        : m_imodel(std::move(imodel))
+        : m_imodel(astl::move(imodel))
         , m_executor(executor)
     {}
 
     virtual void createInstance(std::string_view type, Dict params, Callback<InstancePtr> cb) override {
         m_executor.pushTask([selfcap, type = std::string(type), movecap(params, cb)]() mutable {
             try {
-                auto instance = self->m_imodel->createInstance(type, std::move(params));
+                auto instance = self->m_imodel->createInstance(type, astl::move(params));
                 assert(instance);
-                InstancePtr ptr = std::make_unique<LocalInstance>(std::move(instance), self->m_executor);
-                cb.resultCb(std::move(ptr));
+                InstancePtr ptr = std::make_unique<LocalInstance>(astl::move(instance), self->m_executor);
+                cb.resultCb(astl::move(ptr));
             }
             catch (std::exception& ex) {
                 cb.resultCb(itlib::unexpected(ac::Error{0, ex.what()}));
@@ -104,7 +104,7 @@ public:
 
     void addLocalInferenceLoader(std::string_view type, LocalInferenceModelLoader& loader) {
         m_executor.pushTask([this, type = std::string(type), &loader]() mutable {
-            m_loaders[std::move(type)] = &loader;
+            m_loaders[astl::move(type)] = &loader;
         });
     }
 
@@ -118,7 +118,7 @@ public:
             }
             auto& loader = *it->second;
             try {
-                auto model = loader.loadModel(std::move(params), [&](float progress) {
+                auto model = loader.loadModel(astl::move(params), [&](float progress) {
                     assert(std::this_thread::get_id() == m_execution.threadId());
                     if (cb.progressCb) {
                         cb.progressCb(progress);
@@ -126,8 +126,8 @@ public:
                 });
                 assert(model);
 
-                ModelPtr ptr = std::make_unique<LocalModel>(std::move(model), m_executor);
-                cb.resultCb(std::move(ptr));
+                ModelPtr ptr = std::make_unique<LocalModel>(astl::move(model), m_executor);
+                cb.resultCb(astl::move(ptr));
             }
             catch (std::exception& ex) {
                 cb.resultCb(itlib::unexpected(ac::Error{0, ex.what()}));
@@ -141,7 +141,7 @@ LocalProvider::LocalProvider() : m_impl(std::make_unique<Impl>()) {}
 LocalProvider::~LocalProvider() = default;
 
 void LocalProvider::createModel(Dict params, Callback<ModelPtr> cb) {
-    m_impl->createModel(std::move(params), std::move(cb));
+    m_impl->createModel(astl::move(params), astl::move(cb));
 }
 
 void LocalProvider::addLocalInferenceLoader(std::string_view type, LocalInferenceModelLoader& loader) {

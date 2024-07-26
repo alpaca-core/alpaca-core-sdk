@@ -4,6 +4,7 @@
 #include "ChatFormat.hpp"
 #include <llama.h>
 #include <astl/throw_ex.hpp>
+#include <astl/move.hpp>
 #include <vector>
 #include <cassert>
 #include <stdexcept>
@@ -29,7 +30,7 @@ std::pair<std::vector<llama_chat_message>, size_t> fromChatMsg(std::span<const C
 }
 } // namespace
 
-ChatFormat::ChatFormat(std::string tpl) : m_template(std::move(tpl)) {
+ChatFormat::ChatFormat(std::string tpl) : m_template(astl::move(tpl)) {
     if (!verify(m_template)) {
         throw_ex{} << "Unsupported template: " << m_template;
     }

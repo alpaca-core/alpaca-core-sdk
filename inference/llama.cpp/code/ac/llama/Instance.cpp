@@ -9,6 +9,7 @@
 #include <llama.h>
 #include <astl/throw_ex.hpp>
 #include <astl/iile.h>
+#include <astl/move.hpp>
 #include <itlib/sentry.hpp>
 #include <cassert>
 #include <span>
@@ -92,9 +93,9 @@ Session Instance::newSession(std::string initialPrompt, const SessionParams para
     ChatFormat chatFmt(m_model.getChatTemplateId());
     std::vector<ChatMsg> chatMsgs;
     auto chatAddAndFormat = [&](std::string role, std::string text) {
-        ChatMsg newMsg = { std::move(role), std::move(text) };
+        ChatMsg newMsg = {astl::move(role), astl::move(text)};
         auto ret = chatFmt.formatMsg(newMsg, chatMsgs, newMsg.role == "user");
-        chatMsgs.push_back(std::move(newMsg));
+        chatMsgs.push_back(astl::move(newMsg));
         return ret;
     };
 
@@ -105,7 +106,7 @@ Session Instance::newSession(std::string initialPrompt, const SessionParams para
     }
     else {
         if (params.conversation) {
-            auto fmtChat = chatAddAndFormat("system", std::move(initialPrompt));
+            auto fmtChat = chatAddAndFormat("system", astl::move(initialPrompt));
             tokens = vocab.tokenize(fmtChat, true, true);
         }
         else {
