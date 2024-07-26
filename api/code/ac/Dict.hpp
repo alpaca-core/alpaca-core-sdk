@@ -4,6 +4,6 @@
 #pragma once
 #include <nlohmann/json.hpp>
 
-namespace ac::api {
+namespace ac {
 using Dict = nlohmann::json;
 }

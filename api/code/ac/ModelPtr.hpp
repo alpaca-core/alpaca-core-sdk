@@ -4,7 +4,7 @@
 #pragma once
 #include <memory>
 
-namespace ac::api {
+namespace ac {
 class Model;
 using ModelPtr = std::shared_ptr<Model>;
 }

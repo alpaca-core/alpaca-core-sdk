@@ -12,12 +12,12 @@ target_link_libraries(ac-api
         nlohmann_json::nlohmann_json
 )
 target_sources(ac-api PRIVATE
-    ac/api/export.h
-    ac/api/Callback.hpp
-    ac/api/Dict.hpp
-    ac/api/Provider.hpp
-    ac/api/InstancePtr.hpp
-    ac/api/Instance.hpp
-    ac/api/Model.hpp
-    ac/api/VtableExports.cpp
+    ac/export.h
+    ac/Callback.hpp
+    ac/Dict.hpp
+    ac/Provider.hpp
+    ac/InstancePtr.hpp
+    ac/Instance.hpp
+    ac/Model.hpp
+    ac/VtableExports.cpp
 )

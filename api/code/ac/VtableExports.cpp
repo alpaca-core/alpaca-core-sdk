@@ -7,7 +7,7 @@
 
 // export vtables for classes which only have that
 
-namespace ac::api {
+namespace ac {
 Provider::~Provider() = default;
 Model::~Model() = default;
 Instance::~Instance() = default;

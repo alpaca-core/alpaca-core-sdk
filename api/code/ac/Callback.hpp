@@ -7,7 +7,7 @@
 #include <functional>
 #include <string_view>
 
-namespace ac::api {
+namespace ac {
 
 template <typename R>
 using CallbackResult = itlib::expected<R, Error>;

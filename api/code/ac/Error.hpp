@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <string>
 
-namespace ac::api {
+namespace ac {
 struct Error {
     int32_t code;
     std::string text;

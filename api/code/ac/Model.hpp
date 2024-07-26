@@ -7,7 +7,7 @@
 #include "Callback.hpp"
 #include "Dict.hpp"
 
-namespace ac::api {
+namespace ac {
 class AC_API_EXPORT Model {
 public:
     virtual ~Model();

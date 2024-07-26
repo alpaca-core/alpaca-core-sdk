@@ -4,7 +4,7 @@
 #pragma once
 #include "export.h"
 
-namespace ac::api {
+namespace ac {
 
 class AC_API_EXPORT Instance {
 public:
@@ -22,4 +22,4 @@ public:
     virtual void initiateAbort(Callback<void> cb) = 0;
 };
 
-} // namespace ac::api
+} // namespace ac
