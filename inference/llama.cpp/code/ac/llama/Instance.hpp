@@ -41,6 +41,8 @@ public:
     // only one session per job can be active at a time
     Session newSession(std::string initialPrompt, const SessionParams params);
 
+    const Model& model() const noexcept { return m_model; }
+
 private:
     Model& m_model;
     astl::c_unique_ptr<llama_context> m_lctx;

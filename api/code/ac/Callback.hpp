@@ -9,9 +9,12 @@
 
 namespace ac {
 
+template <typename R>
+using CallbackResult = itlib::expected<R, Error>;
+
 template <typename R, typename S = float>
 struct Callback {
-    using ResultCb = std::function<void(itlib::expected<R, Error>)>;
+    using ResultCb = std::function<void(CallbackResult<R>)>;
     ResultCb resultCb;
     using StreamCb = std::function<void(S)>;
     StreamCb progressCb;

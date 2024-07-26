@@ -15,6 +15,7 @@
 #endif
 
 
-namespace ac::local {
-AC_LOCAL_LLAMA_EXPORT void addLocalLlamaInference();
+namespace ac {
+class LocalProvider;
+AC_LOCAL_LLAMA_EXPORT void addLocalLlamaInference(LocalProvider& provider);
 }

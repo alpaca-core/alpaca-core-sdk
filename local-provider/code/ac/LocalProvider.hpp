@@ -13,7 +13,7 @@ namespace ac {
 
 class LocalInferenceModelLoader;
 
-class AC_LOCAL_EXPORT LocalProvider : public Provider {
+class AC_LOCAL_EXPORT LocalProvider final : public Provider {
 public:
     LocalProvider();
     ~LocalProvider();

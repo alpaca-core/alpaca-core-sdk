@@ -15,6 +15,9 @@
 
 namespace ac {
 
+namespace {
+
+// TODO move to astl if used somewhere else
 struct transparent_sting_hash : public std::hash<std::string_view> {
     using hash_type = std::hash<std::string_view>;
     using hash_type::operator();
@@ -23,11 +26,9 @@ struct transparent_sting_hash : public std::hash<std::string_view> {
 
 #define selfcap self = shared_from(this)
 
-namespace {
-
 std::atomic_uint32_t Instance_OpTaskToken = {};
 
-class LocalInstance : public Instance, public itlib::enable_shared_from {
+class LocalInstance final : public Instance, public itlib::enable_shared_from {
     std::unique_ptr<LocalInferenceInstance> m_iinstance;
     xec::TaskExecutor& m_executor;
     const xec::TaskExecutor::task_ctoken m_opTaskToken;
@@ -66,7 +67,7 @@ public:
     }
 };
 
-class LocalModel : public Model, public itlib::enable_shared_from {
+class LocalModel final : public Model, public itlib::enable_shared_from {
     std::unique_ptr<LocalInferenceModel> m_imodel;
     xec::TaskExecutor& m_executor;
 public:
@@ -110,14 +111,15 @@ public:
 
     void createModel(Dict params, Callback<ModelPtr> cb) {
         m_executor.pushTask([this, movecap(params, cb)]() mutable {
-            auto type = params.at("type").get<std::string_view>();
-            auto it = m_loaders.find(type);
-            if (it == m_loaders.end()) {
-                cb.resultCb(itlib::unexpected(ac::Error{0, "Unknown model type"}));
-                return;
-            }
-            auto& loader = *it->second;
             try {
+                auto type = params.at("type").get<std::string_view>();
+                auto it = m_loaders.find(type);
+                if (it == m_loaders.end()) {
+                    cb.resultCb(itlib::unexpected(ac::Error{ 0, "Unknown model type" }));
+                    return;
+                }
+                auto& loader = *it->second;
+
                 auto model = loader.loadModel(astl::move(params), [&](float progress) {
                     assert(std::this_thread::get_id() == m_execution.threadId());
                     if (cb.progressCb) {
