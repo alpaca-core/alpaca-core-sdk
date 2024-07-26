@@ -1,0 +1,15 @@
+# Copyright (c) Alpaca Core
+# SPDX-License-Identifier: MIT
+#
+icm_add_lib(ac-local-llama AC_LOCAL_LLAMA)
+add_library(ac::local-llama ALIAS ac-local-llama)
+
+target_sources(ac-local-llama PRIVATE
+    code/ac/LocalLlama.hpp
+    code/ac/LocalLlama.cpp
+)
+
+target_link_libraries(ac-local-llama
+    PRIVATE
+        ac::llama
+)
