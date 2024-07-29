@@ -2,11 +2,11 @@
 # SPDX-License-Identifier: MIT
 #
 
-add_executable(ac-example-llama-basic e-basic.cpp)
-target_link_libraries(ac-example-llama-basic PRIVATE
+add_executable(example-ac-llama-basic e-basic.cpp)
+target_link_libraries(example-ac-llama-basic PRIVATE
     ac::llama
     ac-test-data::llama
     jalog::jalog
     jalog::sinklib
 )
-set_target_properties(ac-example-llama-basic PROPERTIES FOLDER example)
+set_target_properties(example-ac-llama-basic PROPERTIES FOLDER example)
