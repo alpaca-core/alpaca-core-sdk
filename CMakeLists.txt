@@ -41,6 +41,7 @@ if(alpacaCoreIsRoot)
 endif()
 
 option(AC_BUILD_TESTS "${CMAKE_PROJECT_NAME}: build tests" ${alpacaCoreIsRoot})
+option(AC_BUILD_EXAMPLES "${CMAKE_PROJECT_NAME}: build examples" ${alpacaCoreIsRoot})
 
 #################
 # global packages
@@ -52,7 +53,8 @@ CPMAddPackage(gh:iboB/xec@1.5.1)
 
 if(AC_BUILD_TESTS)
     CPMAddPackage(gh:iboB/doctest-util@0.1.2)
-
+    set_target_properties(doctest PROPERTIES FOLDER test)
+    set_target_properties(doctest-main PROPERTIES FOLDER test)
     enable_testing()
 endif()
 
