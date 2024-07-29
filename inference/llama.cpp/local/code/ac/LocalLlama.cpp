@@ -89,7 +89,7 @@ public:
 
 class LlamaModelLoader final : public LocalInferenceModelLoader {
 public:
-    virtual std::unique_ptr<LocalInferenceModel> loadModel(Dict params, std::function<void(float)> progress) override {
+    virtual std::unique_ptr<LocalInferenceModel> loadModel(Dict params, std::function<void(float)>) override {
         auto gguf = params.at("gguf").get<std::string>();
         return std::make_unique<LlamaModel>(gguf);
     }
