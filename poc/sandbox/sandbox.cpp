@@ -78,7 +78,7 @@ int main() {
 
             auto model = result.value();
             model->createInstance("xxx", {}, {
-                [](ac::CallbackResult<ac::InstancePtr> result) {
+                [model](ac::CallbackResult<ac::InstancePtr> result) {
                     if (result.has_error()) {
                         std::cout << "instance create error: " << result.error().text << "\n";
                         return;
@@ -87,7 +87,7 @@ int main() {
                     auto inst = result.value();
 
                     inst->runOp("run", {}, {
-                        [](ac::CallbackResult<void> result) {
+                        [model, inst](ac::CallbackResult<void> result) {
                             if (result.has_error()) {
                                 std::cout << "run error: " << result.error().text << "\n";
                                 return;
