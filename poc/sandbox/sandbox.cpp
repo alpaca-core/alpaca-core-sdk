@@ -19,7 +19,7 @@
 #include <vector>
 #include <thread>
 
-int main() {
+int main() try {
     jalog::Instance jl;
     jl.setup().add<jalog::sinks::ColorSink>();
 
@@ -69,7 +69,7 @@ int main() {
     ac::LocalProvider lp;
     ac::addLocalLlamaInference(lp);
 
-    lp.createModel({{"type", "llama.cpp"}}, {
+    lp.createModel({{"type", "llama.cpp"}, {"gguf", "D:/mod/gpt2/gguf/gpt2.Q6_K.gguf"}}, {
         [&](ac::CallbackResult<ac::ModelPtr> result) {
             if (result.has_error()) {
                 std::cout << "model load error: " << result.error().text << "\n";
@@ -112,4 +112,8 @@ int main() {
     }
 
     return 0;
+}
+catch (std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
 }

@@ -51,8 +51,8 @@ public:
 class LlamaModel final : public LocalInferenceModel {
     llama::Model m_model;
 public:
-    LlamaModel()
-        : m_model("D:/mod/gpt2/gguf/gpt2.Q6_K.gguf", {})
+    LlamaModel(const std::string& gguf)
+        : m_model(gguf.c_str(), {})
     {}
 
     virtual std::unique_ptr<LocalInferenceInstance> createInstance(std::string_view type, Dict params) override {
@@ -63,7 +63,8 @@ public:
 class LlamaModelLoader final : public LocalInferenceModelLoader {
 public:
     virtual std::unique_ptr<LocalInferenceModel> loadModel(Dict params, std::function<void(float)> progress) override {
-        return std::make_unique<LlamaModel>();
+        auto gguf = params.at("gguf").get<std::string>();
+        return std::make_unique<LlamaModel>(gguf);
     }
 };
 }
