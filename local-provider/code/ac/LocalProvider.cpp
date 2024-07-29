@@ -66,6 +66,9 @@ public:
     }
     virtual void initiateAbort(Callback<void> cb) override {
         m_executor.cancelTasksWithToken(m_opTaskToken);
+        m_executor.pushTask([movecap(cb)]() mutable {
+            cb.resultCb({});
+        });
     }
 };
 

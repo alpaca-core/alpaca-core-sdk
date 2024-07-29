@@ -79,7 +79,7 @@ public:
         : m_model(gguf.c_str(), {})
     {}
 
-    virtual std::unique_ptr<LocalInferenceInstance> createInstance(std::string_view type, Dict params) override {
+    virtual std::unique_ptr<LocalInferenceInstance> createInstance(std::string_view type, Dict) override {
         if (type != "general") {
             throw_ex{} << "llama: unknown instance type: " << type;
         }

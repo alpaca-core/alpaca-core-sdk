@@ -99,7 +99,7 @@ int main() try {
                             std::cout << "run progress: " << result.dump(2) << "\n";
                         }
                     });
-                }
+                },
             });
         },
         [](float f) {
