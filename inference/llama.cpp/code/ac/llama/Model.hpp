@@ -23,6 +23,8 @@ public:
     explicit Model(const char* pathToGguf, Params params);
     ~Model();
 
+    const Params& params() const noexcept { return m_params; }
+
     uint32_t trainCtxLength() const noexcept;
     bool shouldAddBosToken() const noexcept;
     bool hasEncoder() const noexcept;
@@ -35,6 +37,7 @@ public:
 
     const Vocab& vocab() const noexcept { return m_vocab; }
 private:
+    const Params m_params;
     astl::c_unique_ptr<llama_model> m_lmodel;
 
     Vocab m_vocab{*this};

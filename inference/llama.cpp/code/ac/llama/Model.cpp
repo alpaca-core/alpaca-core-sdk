@@ -3,6 +3,7 @@
 //
 #include "Model.hpp"
 #include <llama.h>
+#include <astl/move.hpp>
 #include <stdexcept>
 
 namespace ac::llama {
@@ -23,7 +24,8 @@ llama_model_params llamaFromModelParams(const Model::Params& params)
 } // namespace
 
 Model::Model(const char* pathToGguf, Params params)
-    : m_lmodel(llama_load_model_from_file(pathToGguf, llamaFromModelParams(params)), llama_free_model)
+    : m_params(astl::move(params))
+    , m_lmodel(llama_load_model_from_file(pathToGguf, llamaFromModelParams(m_params)), llama_free_model)
 {
     if (!m_lmodel) {
         throw std::runtime_error("Failed to load model");

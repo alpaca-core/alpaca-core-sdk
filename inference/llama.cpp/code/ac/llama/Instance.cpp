@@ -17,18 +17,19 @@
 namespace ac::llama {
 
 namespace {
-llama_context_params llamaFromInstanceInitParams(const Instance::InitParams& params) {
+llama_context_params llamaFromInstanceInitParams(Model& model, const Instance::InitParams& params) {
     llama_context_params llamaParams = llama_context_default_params();
     llamaParams.n_ctx = params.ctxSize;
     llamaParams.n_batch = params.batchSize;
     llamaParams.n_ubatch = params.ubatchSize;
+    llamaParams.flash_attn = model.params().gpu;
     return llamaParams;
 }
 } // namespace
 
 Instance::Instance(Model& model, InitParams params)
     : m_model(model)
-    , m_lctx(llama_new_context_with_model(model.lmodel(), llamaFromInstanceInitParams(params)), llama_free)
+    , m_lctx(llama_new_context_with_model(model.lmodel(), llamaFromInstanceInitParams(model, params)), llama_free)
 {
     if (!m_lctx) {
         throw_ex{} << "Failed to create llama context";
