@@ -6,4 +6,5 @@
 
 namespace ac {
 using Dict = nlohmann::json;
+using Blob = std::vector<uint8_t>;
 }
