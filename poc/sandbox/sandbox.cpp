@@ -19,6 +19,8 @@
 #include <vector>
 #include <thread>
 
+#include "ac-test-data-llama-dir.h"
+
 int main() try {
     jalog::Instance jl;
     jl.setup().add<jalog::sinks::ColorSink>();
@@ -69,7 +71,9 @@ int main() try {
     ac::LocalProvider lp;
     ac::addLocalLlamaInference(lp);
 
-    lp.createModel({{"type", "llama.cpp"}, {"gguf", "D:/mod/gpt2/gguf/gpt2.Q6_K.gguf"}}, {
+    std::string gguf = AC_TEST_DATA_LLAMA_DIR "/gpt2-117m-q6_k.gguf";
+
+    lp.createModel({{"type", "llama.cpp"}, {"gguf", gguf}}, {
         [&](ac::CallbackResult<ac::ModelPtr> result) {
             if (result.has_error()) {
                 std::cout << "model load error: " << result.error().text << "\n";

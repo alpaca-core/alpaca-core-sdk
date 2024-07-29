@@ -5,4 +5,5 @@ target_link_libraries(ac-sandbox
     ac::local-llama
     jalog::jalog
     jalog::sinklib
+    ac-test-data::llama
 )
