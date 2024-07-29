@@ -9,11 +9,29 @@
 
 #include <ac/LocalProvider.hpp>
 #include <ac/LocalInference.hpp>
+
 #include <astl/move.hpp>
+#include <astl/iile.h>
+#include <astl/throw_ex.hpp>
 
 namespace ac {
 
 namespace {
+llama::Instance::SessionParams SessionParams_fromDict(const Dict& d) {
+    llama::Instance::SessionParams ret;
+    auto f = d.find("conversation");
+    if (f != d.end()) {
+        ret.conversation = f->get<bool>();
+    }
+
+    f = d.find("num_tokens");
+    if (f != d.end()) {
+        ret.numTokensToPredict = f->get<int>();
+    }
+
+    return ret;
+}
+
 class LlamaInstance final : public LocalInferenceInstance {
     llama::Instance m_instance;
 public:
@@ -22,7 +40,13 @@ public:
     {}
 
     void run(Dict params, std::function<void(Dict)> streamCb) {
-        auto s = m_instance.newSession("The rain in Turkey", {});
+        auto prompt = iile([&]() -> std::string {
+            auto f = params.find("prompt");
+            if (f == params.end()) return {};
+            return astl::move(f->get<std::string>());
+        });
+
+        auto s = m_instance.newSession(astl::move(prompt), SessionParams_fromDict(params));
 
         auto& model = m_instance.model();
 
@@ -43,7 +67,7 @@ public:
             run(astl::move(params), astl::move(streamCb));
         }
         else {
-            throw std::runtime_error("unknown op");
+            throw_ex{} << "llama: unknown op: " << op;
         }
     }
 };
@@ -56,6 +80,9 @@ public:
     {}
 
     virtual std::unique_ptr<LocalInferenceInstance> createInstance(std::string_view type, Dict params) override {
+        if (type != "general") {
+            throw_ex{} << "llama: unknown instance type: " << type;
+        }
         return std::make_unique<LlamaInstance>(m_model);
     }
 };

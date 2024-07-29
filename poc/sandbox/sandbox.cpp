@@ -77,7 +77,7 @@ int main() try {
             }
 
             auto model = result.value();
-            model->createInstance("xxx", {}, {
+            model->createInstance("general", {}, {
                 [](ac::CallbackResult<ac::InstancePtr> result) {
                     if (result.has_error()) {
                         std::cout << "instance create error: " << result.error().text << "\n";
@@ -86,7 +86,7 @@ int main() try {
 
                     auto inst = result.value();
 
-                    inst->runOp("run", {}, {
+                    inst->runOp("run", {{"prompt", "The rain in Turkey"}}, {
                         [](ac::CallbackResult<void> result) {
                             if (result.has_error()) {
                                 std::cout << "run error: " << result.error().text << "\n";
