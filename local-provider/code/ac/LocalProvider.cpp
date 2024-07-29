@@ -29,12 +29,14 @@ struct transparent_sting_hash : public std::hash<std::string_view> {
 std::atomic_uint32_t Instance_OpTaskToken = {};
 
 class LocalInstance final : public Instance, public itlib::enable_shared_from {
+    ModelPtr m_model; // used to keep the model alive if the user drops the reference
     std::unique_ptr<LocalInferenceInstance> m_iinstance;
     xec::TaskExecutor& m_executor;
     const xec::TaskExecutor::task_ctoken m_opTaskToken;
 public:
-    LocalInstance(std::unique_ptr<LocalInferenceInstance> iinstance, xec::TaskExecutor& executor)
-        : m_iinstance(astl::move(iinstance))
+    LocalInstance(ModelPtr model, std::unique_ptr<LocalInferenceInstance> iinstance, xec::TaskExecutor& executor)
+        : m_model(astl::move(model))
+        , m_iinstance(astl::move(iinstance))
         , m_executor(executor)
         , m_opTaskToken(1 + Instance_OpTaskToken.fetch_add(1, std::memory_order_relaxed))
 
@@ -81,7 +83,7 @@ public:
             try {
                 auto instance = self->m_imodel->createInstance(type, astl::move(params));
                 assert(instance);
-                InstancePtr ptr = std::make_shared<LocalInstance>(astl::move(instance), self->m_executor);
+                InstancePtr ptr = std::make_shared<LocalInstance>(self, astl::move(instance), self->m_executor);
                 cb.resultCb(astl::move(ptr));
             }
             catch (std::exception& ex) {
