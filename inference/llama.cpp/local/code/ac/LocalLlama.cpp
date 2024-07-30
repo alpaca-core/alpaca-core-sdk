@@ -24,11 +24,6 @@ llama::Instance::SessionParams SessionParams_fromDict(const Dict& d) {
         ret.conversation = f->get<bool>();
     }
 
-    f = d.find("num_tokens");
-    if (f != d.end()) {
-        ret.numTokensToPredict = f->get<int>();
-    }
-
     return ret;
 }
 

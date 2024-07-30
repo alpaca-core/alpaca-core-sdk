@@ -28,8 +28,6 @@ public:
     struct SessionParams {
         bool conversation = false;
 
-        int numTokensToPredict = -1;
-
         uint32_t gaFactor = 1; // group-attention factor
         uint32_t gaWidth = 512; // group-attention width
 
