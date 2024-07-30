@@ -10,3 +10,13 @@ target_link_libraries(example-ac-llama-basic PRIVATE
     jalog::sinklib
 )
 set_target_properties(example-ac-llama-basic PROPERTIES FOLDER example)
+
+add_executable(example-ac-llama-gui e-gui.cpp)
+target_link_libraries(example-ac-llama-gui PRIVATE
+    ac::llama
+    ac-test-data::llama
+    jalog::jalog
+    jalog::sinklib
+    ac::imgui
+)
+set_target_properties(example-ac-llama-gui PROPERTIES FOLDER example)
