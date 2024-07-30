@@ -6,3 +6,4 @@ macro(llama_test test)
 endmacro()
 
 llama_test(ChatFormat)
+llama_test(Session)
