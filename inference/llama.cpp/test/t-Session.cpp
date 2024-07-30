@@ -72,7 +72,14 @@ TEST_CASE("split") {
 
 TEST_CASE("session") {
     {
+        ac::llama::Session s;
+        CHECK(!s);
+    }
+
+    {
         auto session = TestSession("i am");
+        CHECK(session);
+
         CHECK(session.getToken() == 1);
         CHECK(session.getToken() == 2);
         CHECK(session.getToken() == ac::llama::Token_Invalid);
@@ -109,5 +116,8 @@ TEST_CASE("session") {
         CHECK(session.getToken() == ac::llama::Token_Invalid);
         CHECK(session.getToken() == 11);
         CHECK(session.getToken() == ac::llama::Token_Invalid);
+
+        session = TestSession("aaa a");
+        CHECK(session.getToken() == 3);
     }
 }

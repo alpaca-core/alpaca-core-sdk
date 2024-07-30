@@ -4,6 +4,7 @@
 #pragma once
 #include "Token.hpp"
 #include <string>
+#include <utility>
 #include <coroutine>
 
 namespace ac::llama {
@@ -55,7 +56,19 @@ public:
 
     using Handle = std::coroutine_handle<promise_type>;
 
+    Session() = default;
     Session(Handle handle) : m_handle(handle) {}
+
+    Session(Session&& other) noexcept : m_handle(std::exchange(other.m_handle, nullptr)) {}
+    Session& operator=(Session&& other) noexcept {
+        if (this == &other) return *this;
+        if (m_handle) {
+            m_handle.destroy();
+        }
+        m_handle = std::exchange(other.m_handle, nullptr);
+        return *this;
+    }
+
     ~Session() {
         if (m_handle) {
             m_handle.destroy();
