@@ -87,17 +87,17 @@ ac_dict_ref ac_dict_at_index(ac_dict_ref d, int index) {
 
 ac_dict_value_type ac_dict_get_type(ac_dict_ref d) {
     switch (r(d)->type()) {
-        case ac::Dict::value_t::null: return ac_value_type_null;
-        case ac::Dict::value_t::boolean: return ac_value_type_bool;
-        case ac::Dict::value_t::number_integer: return ac_value_type_number_int;
-        case ac::Dict::value_t::number_unsigned: return ac_value_type_number_unsigned;
-        case ac::Dict::value_t::number_float: return ac_value_type_number_double;
-        case ac::Dict::value_t::string: return ac_value_type_string;
-        case ac::Dict::value_t::array: return ac_value_type_array;
-        case ac::Dict::value_t::object: return ac_value_type_object;
+        case ac::Dict::value_t::null: return ac_dict_value_type_null;
+        case ac::Dict::value_t::boolean: return ac_dict_value_type_bool;
+        case ac::Dict::value_t::number_integer: return ac_dict_value_type_number_int;
+        case ac::Dict::value_t::number_unsigned: return ac_dict_value_type_number_unsigned;
+        case ac::Dict::value_t::number_float: return ac_dict_value_type_number_double;
+        case ac::Dict::value_t::string: return ac_dict_value_type_string;
+        case ac::Dict::value_t::array: return ac_dict_value_type_array;
+        case ac::Dict::value_t::object: return ac_dict_value_type_object;
         default:
             dict_last_error = "Unsupported type";
-            return ac_value_type_null;
+            return ac_dict_value_type_null;
     }
 }
 

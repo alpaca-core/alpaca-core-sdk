@@ -40,15 +40,15 @@ AC_API_EXPORT ac_dict_ref ac_dict_at_key(ac_dict_ref d, const char* key); // ret
 AC_API_EXPORT ac_dict_ref ac_dict_at_index(ac_dict_ref d, int index); // return null if not found
 
 typedef enum ac_dict_value_type {
-    ac_value_type_null,
-    ac_value_type_bool,
-    ac_value_type_number_int,
-    ac_value_type_number_unsigned,
-    ac_value_type_number_double,
-    ac_value_type_string,
-    ac_value_type_array,
-    ac_value_type_object,
-    ac_value_type_binary,
+    ac_dict_value_type_null,
+    ac_dict_value_type_bool,
+    ac_dict_value_type_number_int,
+    ac_dict_value_type_number_unsigned,
+    ac_dict_value_type_number_double,
+    ac_dict_value_type_string,
+    ac_dict_value_type_array,
+    ac_dict_value_type_object,
+    ac_dict_value_type_binary,
 } ac_dict_value_type;
 
 AC_API_EXPORT ac_dict_value_type ac_dict_get_type(ac_dict_ref d);
