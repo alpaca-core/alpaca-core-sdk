@@ -13,6 +13,7 @@ target_link_libraries(ac-api
 )
 target_sources(ac-api PRIVATE
     ac/export.h
+
     ac/Callback.hpp
     ac/Dict.hpp
     ac/Provider.hpp
@@ -20,4 +21,7 @@ target_sources(ac-api PRIVATE
     ac/Instance.hpp
     ac/Model.hpp
     ac/VtableExports.cpp
+
+    ac/dict.h
+    ac/c-api.cpp
 )
