@@ -58,6 +58,13 @@ TEST_CASE("from json") {
     CHECK(f->at(0).get<int>() == 1);
     CHECK(f->at(2).get<std::string_view>() == "three");
     CHECK_THROWS(f->at(3));
+
+    CHECK(ac::Dict_optValueAt(d, "key", std::string("default")) == "value");
+    CHECK_THROWS(ac::Dict_optValueAt(d, "key", 7));
+    CHECK(ac::Dict_optValueAt(d, "mey", std::string("default")) == "default");
+
+    CHECK(ac::Dict_optValueAt(d, "seven", 6) == 7);
+    CHECK(ac::Dict_optValueAt(d, "eight", 8) == 8);
 }
 
 TEST_CASE("to json") {
