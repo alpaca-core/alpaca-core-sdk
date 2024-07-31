@@ -51,7 +51,7 @@ public:
                 cb.resultCb({});
             }
             catch (std::exception& ex) {
-                cb.resultCb(itlib::unexpected(ac::Error{0, ex.what()}));
+                cb.resultCb(itlib::unexpected(ac::Error{ex.what()}));
                 return;
             }
         }, m_opTaskToken);
@@ -90,7 +90,7 @@ public:
                 cb.resultCb(astl::move(ptr));
             }
             catch (std::exception& ex) {
-                cb.resultCb(itlib::unexpected(ac::Error{0, ex.what()}));
+                cb.resultCb(itlib::unexpected(ac::Error{ex.what()}));
                 return;
             }
         });
@@ -120,7 +120,7 @@ public:
                 auto type = params.at("type").get<std::string_view>();
                 auto it = m_loaders.find(type);
                 if (it == m_loaders.end()) {
-                    cb.resultCb(itlib::unexpected(ac::Error{ 0, "Unknown model type" }));
+                    cb.resultCb(itlib::unexpected(ac::Error{"Unknown model type"}));
                     return;
                 }
                 auto& loader = *it->second;
@@ -137,7 +137,7 @@ public:
                 cb.resultCb(astl::move(ptr));
             }
             catch (std::exception& ex) {
-                cb.resultCb(itlib::unexpected(ac::Error{0, ex.what()}));
+                cb.resultCb(itlib::unexpected(ac::Error{ex.what()}));
                 return;
             }
         });

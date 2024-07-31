@@ -7,7 +7,6 @@
 
 namespace ac {
 struct Error {
-    int32_t code;
     std::string text;
 };
 }
