@@ -115,6 +115,10 @@ Session Instance::newSession(std::string initialPrompt, const SessionParams para
         }
     }
 
+    if (tokens.empty()) {
+        throw_ex{} << "Empty initial prompt";
+    }
+
     const auto ctxLen = llama_n_ctx(lctx);
     const auto maxTokens = ctxLen - 4; // ref #16
     if (tokens.size() > maxTokens) {
