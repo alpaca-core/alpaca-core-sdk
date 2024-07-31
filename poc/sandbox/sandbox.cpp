@@ -90,7 +90,7 @@ int main() try {
 
                     auto inst = result.value();
 
-                    inst->runOp("run", {{"prompt", "The rain in Turkey"}}, {
+                    inst->runOp("run", {{"prompt", "The rain in Turkey"}, {"max_tokens", 20}}, {
                         [](ac::CallbackResult<void> result) {
                             if (result.has_error()) {
                                 std::cout << "run error: " << result.error().text << "\n";

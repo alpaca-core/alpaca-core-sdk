@@ -35,18 +35,15 @@ public:
     {}
 
     void run(Dict params, std::function<void(Dict)> streamCb) {
-        auto prompt = iile([&]() -> std::string {
-            auto f = params.find("prompt");
-            if (f == params.end()) return {};
-            return astl::move(f->get<std::string>());
-        });
+        auto prompt = Dict_optValueAt(params, "prompt", std::string{});
+        const uint32_t maxTokens = Dict_optValueAt(params, "max_tokens", 2000u); // somewhat arbitrary, see #37
 
         auto s = m_instance.newSession(astl::move(prompt), SessionParams_fromDict(params));
 
         auto& model = m_instance.model();
 
         std::string result;
-        for (int i = 0; i < 8; ++i) {
+        for (uint32_t i = 0; i < maxTokens; ++i) {
             auto t = s.getToken();
             if (t == ac::llama::Token_Invalid) {
                 break;
