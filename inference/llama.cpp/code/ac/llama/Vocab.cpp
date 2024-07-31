@@ -3,7 +3,7 @@
 //
 #include "Vocab.hpp"
 #include "Model.hpp"
-#include <llama.h>
+#include <llama-vocab.h>
 #include <type_traits>
 #include <cassert>
 

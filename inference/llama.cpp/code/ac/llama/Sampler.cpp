@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #include "Sampler.hpp"
-#include <llama.h>
+#include <llama-sampling.h>
 #include <itlib/qalgorithm.hpp>
 #include <itlib/stride_span.hpp>
 #include <span>
