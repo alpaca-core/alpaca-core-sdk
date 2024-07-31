@@ -120,7 +120,23 @@ TEST_CASE("apply") {
     }
 }
 
-TEST_CASE("formatMsg") {
+TEST_CASE("formatMsg - system") {
+    std::vector<ac::llama::ChatMsg> emptyChat = {};
+    ac::llama::ChatMsg msg = {"system", "You are a helpful assistant"};
+
+    auto test = [&](std::string id) {
+        ac::llama::ChatFormat fmt{id};
+        CHECK(fmt.tpl() == id);
+        return fmt.formatMsg(msg, emptyChat, false);
+    };
+
+    CHECK(test("chatml") == "<|im_start|>system\nYou are a helpful assistant<|im_end|>\n");
+    CHECK(test("llama2") == "[INST] You are a helpful assistant\n");
+    CHECK(test("gemma") == ""); // for gemma, system message is merged with user message
+    CHECK(test("llama3") == "<|start_header_id|>system<|end_header_id|>\n\nYou are a helpful assistant<|eot_id|>");
+}
+
+TEST_CASE("formatMsg - chat") {
     const std::vector<ac::llama::ChatMsg> chat = {
         {"system", "You are a helpful assistant"},
         {"user", "Hello"},

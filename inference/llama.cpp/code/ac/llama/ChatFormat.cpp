@@ -62,6 +62,8 @@ std::string ChatFormat::formatMsg(const ChatMsg& msg, std::span<const ChatMsg> h
 }
 
 std::string ChatFormat::apply(std::span<const llama_chat_message> chat, size_t size, bool addAssistantPrompt) const {
+    if (size == 0) return {};
+
     auto allocSize = (size * 5) / 4; // optimistic 25% more than the original size
     std::string fmt(allocSize, '\0');
 
