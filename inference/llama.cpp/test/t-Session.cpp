@@ -56,6 +56,9 @@ ac::llama::Session TestSession(std::string initialPrompt) {
             yieldedInvalid = true;
         }
         else {
+            if (current.front() == "throw") {
+                throw std::runtime_error("test exception");
+            }
             co_yield ac::llama::Token(current.front().size());
             current.pop_front();
         }
@@ -100,6 +103,7 @@ TEST_CASE("session") {
         CHECK(session.getToken() == 2);
         CHECK(session.getToken() == 5);
 
+        session.pushPrompt("ignore this one");
         session.pushPrompt("blue whale");
         CHECK(session.getToken() == 1);
         CHECK(session.getToken() == 2);
@@ -120,4 +124,15 @@ TEST_CASE("session") {
         session = TestSession("aaa a");
         CHECK(session.getToken() == 3);
     }
+}
+
+TEST_CASE("exceptions") {
+    auto session = TestSession("i am throw");
+    CHECK(session.getToken() == 1);
+    CHECK(session.getToken() == 2);
+    CHECK_THROWS_WITH_AS(session.getToken(), "test exception", std::runtime_error);
+    CHECK(session.getToken() == -1);
+
+    session.pushPrompt("red panda");
+    CHECK(session.getToken() == -1); // dead
 }
