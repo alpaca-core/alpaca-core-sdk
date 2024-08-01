@@ -99,10 +99,12 @@ public:
 } // anonymous namespace
 
 class LocalProvider::Impl {
+    std::unordered_map<std::string, LocalInferenceModelLoader*, transparent_sting_hash, std::equal_to<>> m_loaders;
+
+    // these must the last members (first to be destroyed)
+    // if there are pending tasks, they will be finalized here and they may access other members
     xec::TaskExecutor m_executor;
     xec::ThreadExecution m_execution;
-
-    std::unordered_map<std::string, LocalInferenceModelLoader*, transparent_sting_hash, std::equal_to<>> m_loaders;
 public:
     Impl() : m_execution(m_executor) {
         m_execution.launchThread("ac-inference");
