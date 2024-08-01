@@ -4,6 +4,7 @@
 #include "api.h"
 #include "dict.h"
 #include "DictCUtil.hpp"
+#include "ApiCUtil.hpp"
 #include "Instance.hpp"
 #include "Model.hpp"
 #include "Provider.hpp"
@@ -11,6 +12,15 @@
 #include <astl/move.hpp>
 
 #include <cassert>
+
+namespace ac::cutil {
+Provider* Provider_from_provider(ac_api_provider* p) {
+    return reinterpret_cast<Provider*>(p);
+}
+ac_api_provider* Provider_to_provider(Provider* p) {
+    return reinterpret_cast<ac_api_provider*>(p);
+}
+}
 
 using namespace ac::cutil;
 
@@ -25,7 +35,7 @@ struct ac_instance {
 extern "C" {
 
 void ac_free_api_provider(ac_api_provider* p) {
-    auto provider = reinterpret_cast<ac::Provider*>(p);
+    auto provider = Provider_from_provider(p);
     delete provider;
 }
 
@@ -41,7 +51,7 @@ void ac_create_model_json_params(
     void (*progress_cb)(float progress, void* user_data),
     void* cb_user_data
 ) {
-    auto provider = reinterpret_cast<ac::Provider*>(p);
+    auto provider = Provider_from_provider(p);
     provider->createModel(Dict_parse(json, json_end), {
         [=](ac::CallbackResult<ac::ModelPtr> result) {
             if (result.has_value()) {

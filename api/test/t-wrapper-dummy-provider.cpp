@@ -7,7 +7,7 @@
 #include <ac/Provider.hpp>
 #include <ac/Model.hpp>
 #include <ac/Instance.hpp>
-#include <ac/api.h>
+#include <ac/ApiCUtil.hpp>
 
 namespace {
 class DummyInstance final : public ac::Instance {
@@ -67,5 +67,5 @@ class DummyProvider final : public ac::Provider {
 } // anonymous namespace
 
 extern "C" ac_api_provider* create_dummy_provider() {
-    return reinterpret_cast<ac_api_provider*>(new DummyProvider);
+    return ac::cutil::Provider_to_provider(new DummyProvider);
 }
