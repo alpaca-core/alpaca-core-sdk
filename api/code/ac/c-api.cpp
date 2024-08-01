@@ -4,10 +4,19 @@
 #include "dict.h"
 #include "Dict.hpp"
 
+#include <splat/warnings.h>
+
 #include <string.h>
+
+DISABLE_MSVC_WARNING(4996) // posix name deprecated
 
 struct ac_dict_root {
     ac::Dict dict;
+};
+
+struct ac_dict_iter {
+    ac::Dict::iterator it;
+    ac::Dict::iterator end;
 };
 
 namespace {
@@ -53,21 +62,22 @@ void ac_dict_free_root(ac_dict_root* d) {
     delete d;
 }
 
-ac_dict_root* ac_dict_new_root_from_json(const char* json, const char* json_end) {
+bool ac_dict_parse_json(ac_dict_ref target, const char* json, const char* json_end) {
     if (!json_end) {
         json_end = json + strlen(json);
     }
     return dict_try_catch([&] {
-        return new ac_dict_root{ac::Dict::parse(json, json_end)};
+        *r(target) = ac::Dict::parse(json, json_end);
+        return true;
     });
 }
 
-ac_dict_root* ac_dict_new_root_from_ref_copy(ac_dict_ref d) {
-    return new ac_dict_root{*r(d)};
+void ac_dict_copy(ac_dict_ref target, ac_dict_ref source) {
+    *r(target) = *r(source);
 }
 
-ac_dict_root* ac_dict_new_root_from_ref_take(ac_dict_ref d) {
-    return new ac_dict_root{std::move(*r(d))};
+void ac_dict_take(ac_dict_ref target, ac_dict_ref source) {
+    *r(target) = std::move(*r(source));
 }
 
 ac_dict_ref ac_dict_make_ref(ac_dict_root* d) {
@@ -96,6 +106,7 @@ ac_dict_value_type ac_dict_get_type(ac_dict_ref d) {
         case ac::Dict::value_t::string: return ac_dict_value_type_string;
         case ac::Dict::value_t::array: return ac_dict_value_type_array;
         case ac::Dict::value_t::object: return ac_dict_value_type_object;
+        case ac::Dict::value_t::binary: return ac_dict_value_type_binary;
         default:
             dict_last_error = "Unsupported type";
             return ac_dict_value_type_null;
@@ -143,11 +154,6 @@ ac_dict_binary_buf ac_dict_get_binary_value(ac_dict_ref d) {
     });
 }
 
-struct ac_dict_iter {
-    ac::Dict::iterator it;
-    ac::Dict::iterator end;
-};
-
 ac_dict_iter* ac_dict_new_iter(ac_dict_ref d) {
     return new ac_dict_iter{r(d)->begin(), r(d)->end()};
 }
@@ -173,6 +179,70 @@ const char* ac_dict_iter_get_key(ac_dict_iter* it) {
 
 ac_dict_ref ac_dict_iter_get_value(ac_dict_iter* it) {
     return mr(it->it.value());
+}
+
+void ac_dict_set_null(ac_dict_ref parent) {
+    *r(parent) = nullptr;
+}
+
+void ac_dict_set_bool(ac_dict_ref parent, bool value) {
+    *r(parent) = value;
+}
+
+void ac_dict_set_int(ac_dict_ref parent, int value) {
+    *r(parent) = value;
+}
+
+void ac_dict_set_unsigned(ac_dict_ref parent, unsigned value) {
+    *r(parent) = value;
+}
+
+void ac_dict_set_double(ac_dict_ref parent, double value) {
+    *r(parent) = value;
+}
+
+void ac_dict_set_string(ac_dict_ref parent, const char* value, const char* end) {
+    if (!end) {
+        end = value + strlen(value);
+    }
+    *r(parent) = std::string(value, end);
+}
+
+void ac_dict_set_array(ac_dict_ref parent) {
+    *r(parent) = ac::Dict::array();
+}
+
+void ac_dict_set_object(ac_dict_ref parent) {
+    *r(parent) = ac::Dict::object();
+}
+
+void ac_dict_set_binary(ac_dict_ref parent, const uint8_t* data, uint32_t size) {
+    *r(parent) = ac::Dict::binary(ac::Blob(data, data + size));
+}
+
+ac_dict_ref ac_dict_add_child(ac_dict_ref parent, const char* key) {
+    return dict_try_catch([&] {
+        if (key) {
+            return mr(r(parent)->operator[](key));
+        }
+        else {
+            return mr(r(parent)->emplace_back(ac::Dict()));
+        }
+    });
+}
+
+char* ac_dict_dump(ac_dict_ref d, int indent) {
+    auto dump = r(d)->dump(indent);
+    return strdup(dump.c_str());
+}
+
+int ac_dict_dump_to(ac_dict_ref d, int indent, char* buf, int buf_size) {
+    auto dump = r(d)->dump(indent);
+    const int s = int(dump.size());
+    if (s < buf_size) {
+        memcpy(buf, dump.c_str(), dump.size() + 1);
+    }
+    return s;
 }
 
 } // extern "C"

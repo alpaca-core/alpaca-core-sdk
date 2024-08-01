@@ -24,5 +24,9 @@
 #define CHECK_SUCCESS(x) CHECK_EQ(0, x)
 #define CHECK_FAIL(x)    TEST_ASSERT_NOT_EQUAL(0, x)
 
+#define CHECK_MEM_EQ TEST_ASSERT_EQUAL_MEMORY
+
+#define CHECK_AR_ALL_PTR TEST_ASSERT_EACH_EQUAL_PTR
+
 #include <splat/warnings.h>
 DISABLE_GCC_AND_CLANG_WARNING("-Wmissing-field-initializers")

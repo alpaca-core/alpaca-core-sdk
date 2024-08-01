@@ -19,22 +19,22 @@ typedef void* ac_dict_ref;
 // otherwise return a thread-local string with the error
 // every dict function invalidates the previous error
 // note, every dict function which takes a dict_ref expects a valid one and will just UB (likely crash) on invalid refs
-AC_API_EXPORT const char* ac_dict_get_last_error();
+AC_API_EXPORT const char* ac_dict_get_last_error(void);
 
-AC_API_EXPORT ac_dict_root* ac_dict_new_root();
+AC_API_EXPORT ac_dict_root* ac_dict_new_root(void);
 AC_API_EXPORT void ac_dict_free_root(ac_dict_root* d);
-
-// set json_end to nullptr to treat the string as zero-terminated
-AC_API_EXPORT ac_dict_root* ac_dict_new_root_from_json(const char* json, const char* json_end);
-
-// deep copy of the dict pointed by ref into a new root
-AC_API_EXPORT ac_dict_root* ac_dict_new_root_from_ref_copy(ac_dict_ref d);
-
-// creat a new root from the ref taking the data, leaving ref null
-AC_API_EXPORT ac_dict_root* ac_dict_new_root_from_ref_take(ac_dict_ref d);
 
 // return a ref to the dict
 AC_API_EXPORT ac_dict_ref ac_dict_make_ref(ac_dict_root* d);
+
+// set json_end to nullptr to treat the string as zero-terminated return false on error
+AC_API_EXPORT bool ac_dict_parse_json(ac_dict_ref target, const char* json, const char* json_end);
+
+// deep copy source into target
+AC_API_EXPORT void ac_dict_copy(ac_dict_ref target, ac_dict_ref source);
+
+// move the data from source into target, leaving it null
+AC_API_EXPORT void ac_dict_take(ac_dict_ref target, ac_dict_ref source);
 
 // query
 
@@ -110,6 +110,16 @@ AC_API_EXPORT void ac_dict_set_binary(ac_dict_ref parent, const uint8_t* data, u
 // set key as null to make array elements
 // return a null value on error
 AC_API_EXPORT ac_dict_ref ac_dict_add_child(ac_dict_ref parent, const char* key);
+
+// dump
+// indent = -1 for compact, 0 for pretty, 1+ for pretty with indent
+
+// return null on error, caller must free
+AC_API_EXPORT char* ac_dict_dump(ac_dict_ref d, int indent);
+
+// return snprintf-like output (-1 = error, >=0 = number of characters that would've been written ignoring buf_size)
+AC_API_EXPORT int ac_dict_dump_to(ac_dict_ref d, int indent, char* buf, int buf_size);
+
 
 #if defined(__cplusplus)
 }
