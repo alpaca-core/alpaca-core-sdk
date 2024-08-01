@@ -4,3 +4,6 @@
 [submodule "inference/llama.cpp/llama.cpp"]
 	path = inference/llama.cpp/llama.cpp
 	url = https://github.com/alpaca-core/llama.cpp.git
+[submodule "inference/whisper/whisper.cpp"]
+	path = inference/whisper/whisper.cpp
+	url = https://github.com/alpaca-core/whisper.cpp.git
