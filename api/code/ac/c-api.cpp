@@ -36,7 +36,8 @@ auto dict_try_catch(F&& f) noexcept -> decltype(f()) {
     }
     return {};
 }
-}
+
+} // namespace
 
 const char* ac_dict_get_last_error() {
     if (dict_last_error.empty()) return nullptr;
@@ -101,6 +102,10 @@ ac_dict_value_type ac_dict_get_type(ac_dict_ref d) {
     }
 }
 
+int ac_dict_get_size(ac_dict_ref d) {
+    return int(r(d)->size());
+}
+
 bool ac_dict_get_bool_value(ac_dict_ref d) {
     return dict_try_catch([&] {
         return r(d)->get<bool>();
@@ -136,6 +141,38 @@ ac_dict_binary_buf ac_dict_get_binary_value(ac_dict_ref d) {
         auto& bin = r(d)->get_binary();
         return ac_dict_binary_buf{bin.data(), uint32_t(bin.size())};
     });
+}
+
+struct ac_dict_iter {
+    ac::Dict::iterator it;
+    ac::Dict::iterator end;
+};
+
+ac_dict_iter* ac_dict_new_iter(ac_dict_ref d) {
+    return new ac_dict_iter{r(d)->begin(), r(d)->end()};
+}
+
+ac_dict_iter* ac_dict_iter_next(ac_dict_iter* it) {
+    ++it->it;
+    if (it->it == it->end) {
+        delete it;
+        return nullptr;
+    }
+    return it;
+}
+
+void ac_dict_free_iter(ac_dict_iter* it) {
+    delete it;
+}
+
+const char* ac_dict_iter_get_key(ac_dict_iter* it) {
+    return dict_try_catch([&] {
+        return it->it.key().data();
+    });
+}
+
+ac_dict_ref ac_dict_iter_get_value(ac_dict_iter* it) {
+    return mr(it->it.value());
 }
 
 } // extern "C"

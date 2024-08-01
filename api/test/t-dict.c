@@ -23,13 +23,14 @@ void parse(void) {
     CHECK_NOT_NULL(root);
     ac_dict_ref rr = ac_dict_make_ref(root);
     CHECK_NOT_NULL(rr);
-
     CHECK(ac_dict_get_type(rr) == ac_dict_value_type_object);
+    CHECK(ac_dict_get_size(rr) == 6);
+
 
     ac_dict_ref key = ac_dict_at_key(rr, "key");
     CHECK_NOT_NULL(key);
     CHECK(ac_dict_get_type(key) == ac_dict_value_type_string);
-
+    CHECK(ac_dict_get_size(key) == 1);
     const char* key_str = ac_dict_get_string_value(key);
     CHECK_EQ_STR("value", key_str);
 
@@ -41,6 +42,7 @@ void parse(void) {
     ac_dict_ref obj = ac_dict_at_key(rr, "obj");
     CHECK_NOT_NULL(obj);
     CHECK(ac_dict_get_type(obj) == ac_dict_value_type_object);
+    CHECK(ac_dict_get_size(obj) == 2);
 
     ac_dict_ref nested = ac_dict_at_key(obj, "nested");
     CHECK_NOT_NULL(nested);
@@ -55,6 +57,7 @@ void parse(void) {
     ac_dict_ref none = ac_dict_at_key(rr, "none");
     CHECK_NOT_NULL(none);
     CHECK(ac_dict_get_type(none) == ac_dict_value_type_null);
+    CHECK(ac_dict_get_size(none) == 0);
 
     ac_dict_ref pi = ac_dict_at_key(rr, "pi");
     CHECK_NOT_NULL(pi);
@@ -64,6 +67,7 @@ void parse(void) {
     ac_dict_ref ar = ac_dict_at_key(rr, "ar");
     CHECK_NOT_NULL(ar);
     CHECK(ac_dict_get_type(ar) == ac_dict_value_type_array);
+    CHECK(ac_dict_get_size(ar) == 3);
 
     ac_dict_ref ar0 = ac_dict_at_index(ar, 0);
     CHECK_NOT_NULL(ar0);
@@ -79,6 +83,22 @@ void parse(void) {
     CHECK_NOT_NULL(ar2);
     CHECK(ac_dict_get_type(ar2) == ac_dict_value_type_string);
     CHECK_EQ_STR("three", ac_dict_get_string_value(ar2));
+
+    // iteration
+    const ac_dict_value_type expected_ar_types[] = {
+        ac_dict_value_type_number_unsigned,
+        ac_dict_value_type_number_int,
+        ac_dict_value_type_string
+    };
+
+    int i = 0;
+    for (ac_dict_iter* it = ac_dict_new_iter(ar); it; it = ac_dict_iter_next(it)) {
+        const char* k = ac_dict_iter_get_key(it);
+        ac_dict_ref v = ac_dict_iter_get_value(it);
+        CHECK_NULL(k);
+        CHECK_NOT_NULL(v);
+        CHECK(ac_dict_get_type(v) == expected_ar_types[i++]);
+    }
 
     ac_dict_free_root(root);
 }

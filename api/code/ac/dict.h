@@ -53,6 +53,12 @@ typedef enum ac_dict_value_type {
 
 AC_API_EXPORT ac_dict_value_type ac_dict_get_type(ac_dict_ref d);
 
+// return
+// 0 for null
+// 1 for bool, number, string
+// number of elements for array and object
+AC_API_EXPORT int ac_dict_get_size(ac_dict_ref d);
+
 AC_API_EXPORT bool ac_dict_get_bool_value(ac_dict_ref d); // silently fails returning false
 AC_API_EXPORT int ac_dict_get_int_value(ac_dict_ref d); // silently fails returning 0
 AC_API_EXPORT unsigned ac_dict_get_unsigned_value(ac_dict_ref d); // silently fails returning 0
@@ -70,12 +76,14 @@ AC_API_EXPORT ac_dict_binary_buf ac_dict_get_binary_value(ac_dict_ref d);
 
 // iterate
 typedef struct ac_dict_iter ac_dict_iter;
-AC_API_EXPORT ac_dict_iter* ac_dict_begin_iteration(ac_dict_ref d);
-AC_API_EXPORT ac_dict_ref ac_dict_iter_current(ac_dict_iter* it);
-AC_API_EXPORT bool ac_dict_iter_next(ac_dict_iter* it); // return false when there are no more elements
-AC_API_EXPORT void ac_dict_end_iteration(ac_dict_iter* it);
-AC_API_EXPORT const char* ac_dict_iter_get_key(ac_dict_iter d); // return null if not an object
-AC_API_EXPORT ac_dict_ref ac_dict_iter_get_value(ac_dict_iter d);
+AC_API_EXPORT ac_dict_iter* ac_dict_new_iter(ac_dict_ref d); // create iterator pointing to the first element
+
+// when there are no more elements free and invalidate iterator and return null
+// otherwise return the iterator
+AC_API_EXPORT ac_dict_iter* ac_dict_iter_next(ac_dict_iter* it);
+AC_API_EXPORT void ac_dict_free_iter(ac_dict_iter* it); // free iterator, safe to call on null
+AC_API_EXPORT const char* ac_dict_iter_get_key(ac_dict_iter* d); // return null if not an object
+AC_API_EXPORT ac_dict_ref ac_dict_iter_get_value(ac_dict_iter* d);
 
 // create
 
