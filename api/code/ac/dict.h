@@ -36,8 +36,15 @@ AC_API_EXPORT ac_dict_root* ac_dict_new_root_from_ref_take(ac_dict_ref d);
 // return a ref to the dict
 AC_API_EXPORT ac_dict_ref ac_dict_make_ref(ac_dict_root* d);
 
-AC_API_EXPORT ac_dict_ref ac_dict_at_key(ac_dict_ref d, const char* key); // return null if not found
-AC_API_EXPORT ac_dict_ref ac_dict_at_index(ac_dict_ref d, int index); // return null if not found
+// query
+
+// return element at key of object
+// return null on error (not object or key not found)
+AC_API_EXPORT ac_dict_ref ac_dict_at_key(ac_dict_ref d, const char* key);
+
+// return element at index of array
+// return null on error (not array or index out of bounds)
+AC_API_EXPORT ac_dict_ref ac_dict_at_index(ac_dict_ref d, int index);
 
 typedef enum ac_dict_value_type {
     ac_dict_value_type_null,
@@ -92,7 +99,10 @@ AC_API_EXPORT void ac_dict_set_bool(ac_dict_ref parent, bool value);
 AC_API_EXPORT void ac_dict_set_int(ac_dict_ref parent, int value);
 AC_API_EXPORT void ac_dict_set_unsigned(ac_dict_ref parent, unsigned value);
 AC_API_EXPORT void ac_dict_set_double(ac_dict_ref parent, double value);
-AC_API_EXPORT void ac_dict_set_string(ac_dict_ref parent, const char* value);
+
+// copy string to dict
+// end can be null to treat the string as zero-terminated
+AC_API_EXPORT void ac_dict_set_string(ac_dict_ref parent, const char* value, const char* end);
 AC_API_EXPORT void ac_dict_set_array(ac_dict_ref parent); // set to empty array
 AC_API_EXPORT void ac_dict_set_object(ac_dict_ref parent); // set to empty object
 AC_API_EXPORT void ac_dict_set_binary(ac_dict_ref parent, const uint8_t* data, uint32_t size); // copy data to dict

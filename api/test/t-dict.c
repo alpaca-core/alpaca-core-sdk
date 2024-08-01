@@ -85,6 +85,8 @@ void parse(void) {
     CHECK_EQ_STR("three", ac_dict_get_string_value(ar2));
 
     // iteration
+    ac_dict_free_iter(NULL); // should be safe
+
     const ac_dict_value_type expected_ar_types[] = {
         ac_dict_value_type_number_unsigned,
         ac_dict_value_type_number_int,
