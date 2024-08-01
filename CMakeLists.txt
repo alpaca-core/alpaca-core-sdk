@@ -48,7 +48,7 @@ option(AC_BUILD_EXAMPLES "${CMAKE_PROJECT_NAME}: build examples" ${alpacaCoreIsR
 CPMAddPackage(gh:iboB/splat@1.3.3)
 CPMAddPackage(gh:nlohmann/json@3.11.3)
 CPMAddPackage(gh:iboB/itlib@1.11.1)
-CPMAddPackage(gh:iboB/jalog@0.4.1)
+CPMAddPackage(gh:iboB/jalog@0.4.2)
 CPMAddPackage(gh:iboB/xec@1.5.1)
 
 if(AC_BUILD_TESTS)
