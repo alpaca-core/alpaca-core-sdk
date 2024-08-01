@@ -240,7 +240,7 @@ void binary(void) {
     ac_dict_ref blob = ac_dict_add_child(rr, "blob");
 
     uint8_t buf[100];
-    for (int i = 0; i < sizeof(buf); ++i) {
+    for (int i = 0; i < (int)sizeof(buf); ++i) {
         buf[i] = (uint8_t)(i + 5);
     }
 
@@ -249,6 +249,7 @@ void binary(void) {
     ac_dict_binary_buf b = ac_dict_get_binary_value(blob);
     CHECK_EQ(sizeof(buf), b.size);
     CHECK_MEM_EQ(buf, b.data, sizeof(buf));
+    ac_dict_free_root(root);
 }
 
 int main(void) {
