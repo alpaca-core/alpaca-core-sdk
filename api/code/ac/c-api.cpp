@@ -2,8 +2,13 @@
 // SPDX-License-Identifier: MIT
 //
 #include "dict.h"
+#include "api.h"
 #include "Dict.hpp"
+#include "Instance.hpp"
+#include "Model.hpp"
+#include "Provider.hpp"
 
+#include <astl/move.hpp>
 #include <splat/warnings.h>
 
 #include <string.h>
@@ -17,6 +22,14 @@ struct ac_dict_root {
 struct ac_dict_iter {
     ac::Dict::iterator it;
     ac::Dict::iterator end;
+};
+
+struct ac_model {
+    ac::ModelPtr model;
+};
+
+struct ac_instance {
+    ac::InstancePtr instance;
 };
 
 namespace {
@@ -46,7 +59,17 @@ auto dict_try_catch(F&& f) noexcept -> decltype(f()) {
     return {};
 }
 
+ac::Dict ac_dict_parse(const char* json, const char* json_end) {
+    if (!json_end) {
+        json_end = json + strlen(json);
+    }
+    return ac::Dict::parse(json, json_end);
+}
+
 } // namespace
+
+///////////////////////////////////////////////
+// dict
 
 const char* ac_dict_get_last_error() {
     if (dict_last_error.empty()) return nullptr;
@@ -63,11 +86,8 @@ void ac_dict_free_root(ac_dict_root* d) {
 }
 
 bool ac_dict_parse_json(ac_dict_ref target, const char* json, const char* json_end) {
-    if (!json_end) {
-        json_end = json + strlen(json);
-    }
     return dict_try_catch([&] {
-        *r(target) = ac::Dict::parse(json, json_end);
+        *r(target) = ac_dict_parse(json, json_end);
         return true;
     });
 }
@@ -77,7 +97,7 @@ void ac_dict_copy(ac_dict_ref target, ac_dict_ref source) {
 }
 
 void ac_dict_take(ac_dict_ref target, ac_dict_ref source) {
-    *r(target) = std::move(*r(source));
+    *r(target) = astl::move(*r(source));
 }
 
 ac_dict_ref ac_dict_make_ref(ac_dict_root* d) {
@@ -243,6 +263,122 @@ int ac_dict_dump_to(ac_dict_ref d, int indent, char* buf, int buf_size) {
         memcpy(buf, dump.c_str(), dump.size() + 1);
     }
     return s;
+}
+
+///////////////////////////////////////////////
+// api
+
+void ac_free_api_provider(ac_api_provider* p) {
+    auto provider = reinterpret_cast<ac::Provider*>(p);
+    delete provider;
+}
+
+void ac_free_model(ac_model* m) {
+    delete m;
+}
+
+void ac_create_model_json_params(
+    ac_api_provider* p,
+    const char* json,
+    const char* json_end,
+    void (*result_cb)(ac_model* m, const char* error, void* user_data),
+    void (*progress_cb)(float progress, void* user_data),
+    void* cb_user_data
+) {
+    auto provider = reinterpret_cast<ac::Provider*>(p);
+    provider->createModel(ac_dict_parse(json, json_end), {
+        [=](ac::CallbackResult<ac::ModelPtr> result) {
+            if (result.has_value()) {
+                result_cb(new ac_model{astl::move(result.value())}, nullptr, cb_user_data);
+            }
+            else {
+                result_cb(nullptr, result.error().text.c_str(), cb_user_data);
+            }
+        },
+        [=](float progress) {
+            if (progress_cb) {
+                progress_cb(progress, cb_user_data);
+            }
+        }
+    });
+}
+
+void ac_free_instance(ac_instance* i) {
+    delete i;
+}
+
+void ac_create_instance_json_params(
+    ac_model* m,
+    const char* instance_type,
+    const char* json,
+    const char* json_end,
+    void (*result_cb)(ac_instance* i, const char* error, void* user_data),
+    void (*progress_cb)(float progress, void* user_data),
+    void* cb_user_data
+) {
+    m->model->createInstance(instance_type, ac_dict_parse(json, json_end), {
+        [=](ac::CallbackResult<ac::InstancePtr> result) {
+            if (result.has_value()) {
+                result_cb(new ac_instance{astl::move(result.value())}, nullptr, cb_user_data);
+            }
+            else {
+                result_cb(nullptr, result.error().text.c_str(), cb_user_data);
+            }
+        },
+        [=](float progress) {
+            if (progress_cb) {
+                progress_cb(progress, cb_user_data);
+            }
+        }
+    });
+}
+
+void ac_run_op_json_params(
+    ac_instance* i,
+    const char* op,
+    const char* json,
+    const char* json_end,
+    void (*result_cb)(const char* error, void* user_data),
+    void (*stream_cb)(ac_dict_ref dict, void* user_data),
+    void* cb_user_data
+) {
+    i->instance->runOp(op, ac_dict_parse(json, json_end), {
+        [=](ac::CallbackResult<void> result) {
+            if (result.has_value()) {
+                result_cb(nullptr, cb_user_data);
+            }
+            else {
+                result_cb(result.error().text.c_str(), cb_user_data);
+            }
+        },
+        [=](ac::Dict dict) {
+            if (stream_cb) {
+                stream_cb(mr(dict), cb_user_data);
+            }
+        }
+    });
+}
+
+void ac_synchronize_instance(ac_instance* i) {
+    i->instance->synchronize();
+}
+
+void ac_initiate_instance_abort(
+    ac_instance* i,
+    void (*done_cb)(const char* error, void* user_data),
+    void* cb_user_data
+) {
+    i->instance->initiateAbort({
+        [=](ac::CallbackResult<void> result) {
+            if (result.has_value()) {
+                done_cb(nullptr, cb_user_data);
+            }
+            else {
+                done_cb(result.error().text.c_str(), cb_user_data);
+            }
+        },
+        {}
+    });
 }
 
 } // extern "C"
