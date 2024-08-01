@@ -7,8 +7,11 @@ add_library(ac::local-llama ALIAS ac-local-llama)
 target_include_directories(ac-local-llama PUBLIC code)
 
 target_sources(ac-local-llama PRIVATE
+    code/ac/export.h
     code/ac/LocalLlama.hpp
     code/ac/LocalLlama.cpp
+    code/ac/local_llama.h
+    code/ac/local_llama.cpp
 )
 
 target_link_libraries(ac-local-llama

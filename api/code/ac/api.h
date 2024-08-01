@@ -3,6 +3,7 @@
 //
 #pragma once
 #include "export.h"
+#include "api_provider.h"
 #include "dict_ref.h"
 
 // functions implemented in c-api.cpp
@@ -17,8 +18,6 @@ extern "C" {
 #endif
 
 // to obtain a provider use a library which can create it
-
-typedef struct ac_api_provider ac_api_provider;
 AC_API_EXPORT void ac_free_api_provider(ac_api_provider* p);
 
 typedef struct ac_model ac_model;

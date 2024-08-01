@@ -12,8 +12,12 @@ target_link_libraries(ac-local
 )
 target_sources(ac-local PRIVATE
     ac/export.h
+
     ac/LocalProvider.hpp
     ac/LocalProvider.cpp
     ac/LocalInference.hpp
     ac/LocalInference.cpp
+
+    ac/local_provider.h
+    ac/local_provider.cpp
 )
