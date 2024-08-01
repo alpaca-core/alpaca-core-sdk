@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include "dict.h"
+#include "export.h"
+#include "dict_ref.h"
 
 // functions implemented in c-api.cpp
 

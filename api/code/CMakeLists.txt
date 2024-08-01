@@ -22,6 +22,9 @@ target_sources(ac-api PRIVATE
     ac/Model.hpp
     ac/VtableExports.cpp
 
+    ac/dict_ref.h
     ac/dict.h
-    ac/c-api.cpp
+    ac/dict-c.cpp
+    ac/api.h
+    ac/api-c.cpp
 )

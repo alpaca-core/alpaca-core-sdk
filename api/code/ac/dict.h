@@ -3,6 +3,7 @@
 //
 #pragma once
 #include "export.h"
+#include "dict_ref.h"
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -13,7 +14,6 @@ extern "C" {
 #endif
 
 typedef struct ac_dict_root ac_dict_root;
-typedef void* ac_dict_ref;
 
 // return null when there is no error
 // otherwise return a thread-local string with the error
