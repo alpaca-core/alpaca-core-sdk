@@ -15,9 +15,13 @@ macro(api_c_test test)
             unity::framework
             ac::api
         SOURCES
-            t-${test}.c
+            ${ARGN}
         FOLDER test
     )
 endmacro()
 
-api_c_test(dict)
+api_c_test(dict t-dict.c)
+api_c_test(wrapper
+    t-wrapper.c
+    t-wrapper-dummy-provider.cpp
+)
