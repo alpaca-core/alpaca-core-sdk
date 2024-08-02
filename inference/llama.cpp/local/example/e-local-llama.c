@@ -34,7 +34,9 @@ void free_state(app_state* state) {
     ac_free_instance(state->instance);
 }
 
-void spin_lock_step(app_state* state) {
+void wait_for_step(app_state* state) {
+    // just spin lock
+    // it's the easiest way and effective resource management is not a priority in this demo
     while (!atomic_load(&state->cur_step_done)) {
         // spin
     }
@@ -105,7 +107,7 @@ int main(void) {
         on_progress,
         &state
     );
-    spin_lock_step(&state);
+    wait_for_step(&state);
     if (!state.model) {
         ret = 1;
         goto cleanup;
@@ -120,7 +122,7 @@ int main(void) {
         on_progress,
         &state
     );
-    spin_lock_step(&state);
+    wait_for_step(&state);
     if (!state.instance) {
         ret = 1;
         goto cleanup;
@@ -137,7 +139,7 @@ int main(void) {
         on_op_stream,
         &state
     );
-    spin_lock_step(&state);
+    wait_for_step(&state);
 
 cleanup:
     free_state(&state);
