@@ -30,4 +30,4 @@ target_link_libraries(imgui
         SDL2::SDL2main
 )
 target_compile_definitions(imgui PUBLIC IMGUI_USER_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/imgui_userconfig.h")
-add_library(ac::imgui ALIAS imgui)
+add_library(ac-dev::imgui ALIAS imgui)

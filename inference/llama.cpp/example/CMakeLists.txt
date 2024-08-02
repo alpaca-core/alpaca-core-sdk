@@ -17,6 +17,6 @@ target_link_libraries(example-ac-llama-gui PRIVATE
     ac-test-data::llama
     jalog::jalog
     jalog::sinklib
-    ac::imgui
+    ac-dev::imgui
 )
 set_target_properties(example-ac-llama-gui PROPERTIES FOLDER example)
