@@ -4,6 +4,7 @@
 
 # public
 add_subdirectory(astl)
+add_subdirectory(jalogc)
 
 # dev-only
 add_subdirectory(imgui)
