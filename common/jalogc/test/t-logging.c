@@ -19,7 +19,7 @@ int entry_count = 0;
 void run_cpp_logs(int n);
 
 void log_callback(const char* scope, jalogc_log_level level, uint64_t timestamp, const char* message) {
-    if (entry_count >= sizeof(entries) / sizeof(entries[0])) {
+    if (entry_count >= (int)(sizeof(entries) / sizeof(entries[0]))) {
         TEST_FAIL_MESSAGE("too many entries");
         return;
     }

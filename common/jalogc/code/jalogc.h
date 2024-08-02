@@ -45,7 +45,7 @@ JALOGC_EXPORT void jalogc_init(jalogc_init_params params);
 JALOGC_EXPORT void jalogc_shutdown(); // joins async thread if async_logging is enabled
 
 #if defined(__GNUC__)
-#   define I_JALOGC_PRINTF_FMT __attribute__((format(printf, 3, 4)))
+#   define I_JALOGC_PRINTF_FMT __attribute__((format(printf, 2, 3)))
 #   define _Printf_format_string_
 #else
 #   define I_JALOGC_PRINTF_FMT
