@@ -14,6 +14,7 @@ macro(api_c_test test)
         LIBRARIES
             unity::framework
             ac::api
+            ac-dev::test-util
         SOURCES
             ${ARGN}
         FOLDER test

@@ -3,7 +3,7 @@
 //
 #include <ac/api.h>
 #include <ac/dict.h>
-#include "s-unity.h"
+#include <ac-test-util/unity.h>
 #include <string.h>
 
 ac_api_provider* create_dummy_provider(void);

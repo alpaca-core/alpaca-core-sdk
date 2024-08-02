@@ -9,3 +9,4 @@ add_subdirectory(jalogc)
 # dev-only
 add_subdirectory(imgui)
 add_subdirectory(ac-repo-root)
+add_subdirectory(ac-test-util)
