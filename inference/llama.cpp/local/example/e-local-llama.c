@@ -6,6 +6,8 @@
 #include <ac/local_provider.h>
 #include <ac/local_llama.h>
 
+#include <jalogc.h>
+
 #include <stdio.h>
 #include <assert.h>
 #include <stdbool.h>
@@ -91,6 +93,8 @@ void on_op_stream(ac_dict_ref dict, void* user_data) {
 
 
 int main(void) {
+    jalogc_init((jalogc_init_params) { .add_default_sink = true });
+
     ac_api_provider* local_provider = ac_new_local_api_provider();
     app_state state;
 

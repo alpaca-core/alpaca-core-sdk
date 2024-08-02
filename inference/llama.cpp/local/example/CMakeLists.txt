@@ -15,6 +15,7 @@ add_executable(example-ac-c-local-llama e-local-llama.c)
 target_link_libraries(example-ac-c-local-llama PRIVATE
     ac::local
     ac::local-llama
+    ac::jalogc
     ac-test-data::llama
 )
 set_target_properties(example-ac-c-local-llama PROPERTIES FOLDER example)
