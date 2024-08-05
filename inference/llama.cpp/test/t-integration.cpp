@@ -56,21 +56,21 @@ TEST_CASE("inference") {
         inst.warmup(); // should be safe
 
         // choose a very, very suggestive prompt and hope that all architectures will agree
-        auto s = inst.newSession("The capital of Turkey,", {});
+        auto s = inst.newSession("President George Walker", {});
         {
             auto t = s.getToken();
             REQUIRE(t != ac::llama::Token_Invalid);
             auto text = model.vocab().tokenToString(t);
-            CHECK(text == " Ankara");
+            CHECK(text == " Bush");
         }
 
         // add more very suggestive stuff
-        s.pushPrompt("was hit by torrential");
+        s.pushPrompt(" sent troops to Cleveland which was hit by torrential");
         {
             auto t = s.getToken();
             REQUIRE(t != ac::llama::Token_Invalid);
             auto text = model.vocab().tokenToString(t);
-            CHECK(text == " rain");
+            CHECK(text.starts_with(" rain")); // could be rains
         }
     }
 }
