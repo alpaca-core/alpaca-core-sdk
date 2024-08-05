@@ -68,7 +68,9 @@ CPMAddPackage(
     GIT_TAG e6860e89d869ea815a4107bce3bb41af9ad1c1f0
 )
 
-add_subdirectory(tmp/ac-test-data-whisper)
+if (EXISTS tmp/ac-test-data-whisper)
+    add_subdirectory(tmp/ac-test-data-whisper)
+endif()
 
 #################
 # subdirs/targets
