@@ -39,82 +39,25 @@ int main() try {
     ////ac::llama::Model model("D:/mod/Mistral-7B-Instruct-v0.1-GGUF/mistral-7b-instruct-v0.1.Q8_0.gguf", {});
     //ac::llama::Model model("D:/mod/gpt2/gguf/gpt2.Q6_K.gguf", {});
     ////ac::llama::Model model("D:/mod/gpt2/gguf-gpt2-chatbot/gpt2-chatbot.Q8_0.gguf", {});
+    ac::llama::Model model(AC_TEST_DATA_LLAMA_DIR "/gpt2-117m-q6_k.gguf", {});
 
-    //ac::llama::Instance inst(model, {});
+    auto hl = model.vocab().tokenize("hello world", true, true);
 
-    //inst.warmup();
+    ac::llama::Instance inst(model, {});
 
-    //auto s = inst.newSession("The rain in Turkey", {});
+    inst.warmup();
 
-    //for (int i= 0; i < 8; ++i) {
-    //    auto t = s.getToken();
-    //    if (t == ac::llama::Token_Invalid) {
-    //        break;
-    //    }
-    //    std::cout << model.vocab().tokenToString(t);
-    //}
+    auto s = inst.newSession("The capital of Turkey,", {});
 
-    //std::cout << std::endl;
-
-    //s.pushPrompt(" thousand in Ankara");
-
-    //for (int i = 0; i < 20; ++i) {
-    //    auto t = s.getToken();
-    //    if (t == ac::llama::Token_Invalid) {
-    //        break;
-    //    }
-    //    std::cout << model.vocab().tokenToString(t);
-    //}
-
-    //std::cout << std::endl;
-
-    ac::LocalProvider lp;
-    ac::addLocalLlamaInference(lp);
-
-    std::string gguf = AC_TEST_DATA_LLAMA_DIR "/gpt2-117m-q6_k.gguf";
-
-    lp.createModel({{"type", "llama.cpp"}, {"gguf", gguf}}, {
-        [&](ac::CallbackResult<ac::ModelPtr> result) {
-            if (result.has_error()) {
-                std::cout << "model load error: " << result.error().text << "\n";
-                return;
-            }
-
-            auto model = result.value();
-            model->createInstance("general", {}, {
-                [](ac::CallbackResult<ac::InstancePtr> result) {
-                    if (result.has_error()) {
-                        std::cout << "instance create error: " << result.error().text << "\n";
-                        return;
-                    }
-
-                    auto inst = result.value();
-
-                    inst->runOp("run", {{"prompt", "The rain in Turkey"}, {"max_tokens", 20}}, {
-                        [](ac::CallbackResult<void> result) {
-                            if (result.has_error()) {
-                                std::cout << "run error: " << result.error().text << "\n";
-                                return;
-                            }
-
-                            std::cout << "run success\n";
-                        },
-                        [](ac::Dict result) {
-                            std::cout << "run progress: " << result.dump(2) << "\n";
-                        }
-                    });
-                },
-            });
-        },
-        [](float f) {
-            std::cout << "model load progress: " << f << "\n";
+    for (int i= 0; i < 18; ++i) {
+        auto t = s.getToken();
+        if (t == ac::llama::Token_Invalid) {
+            break;
         }
-    });
-
-    while (true) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        std::cout << model.vocab().tokenToString(t);
     }
 
+    std::cout << std::endl;
     return 0;
 }
 catch (std::exception& e) {

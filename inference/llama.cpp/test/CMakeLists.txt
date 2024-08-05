@@ -7,3 +7,10 @@ endmacro()
 
 llama_test(ChatFormat)
 llama_test(Session)
+
+add_doctest_lib_test(integration ac-llama
+    SOURCES
+        t-integration.cpp
+    LIBRARIES
+        ac-test-data::llama
+)
