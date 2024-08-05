@@ -3,6 +3,7 @@
 //
 #include <ac/llama/Init.hpp>
 #include <ac/llama/Model.hpp>
+#include <ac/llama/Instance.hpp>
 
 #include <doctest/doctest.h>
 
@@ -36,3 +37,40 @@ TEST_CASE("vocab only") {
     CHECK(vocab.tokenize("hello world", true, true) == std::vector<ac::llama::Token>{31373, 995});
 }
 
+TEST_CASE("inference") {
+    ac::llama::Model model(Model_117m_q6_k, {});
+    CHECK(!!model.lmodel());
+
+    auto& params = model.params();
+    CHECK(params.gpu);
+    CHECK_FALSE(params.vocabOnly);
+
+    CHECK(model.trainCtxLength() == 1024);
+    CHECK_FALSE(model.shouldAddBosToken());
+    CHECK_FALSE(model.hasEncoder());
+
+
+    // general inference
+    {
+        ac::llama::Instance inst(model, {});
+        inst.warmup(); // should be safe
+
+        // choose a very, very suggestive prompt and hope that all architectures will agree
+        auto s = inst.newSession("The capital of Turkey,", {});
+        {
+            auto t = s.getToken();
+            REQUIRE(t != ac::llama::Token_Invalid);
+            auto text = model.vocab().tokenToString(t);
+            CHECK(text == " Ankara");
+        }
+
+        // add more very suggestive stuff
+        s.pushPrompt("was hit by torrential");
+        {
+            auto t = s.getToken();
+            REQUIRE(t != ac::llama::Token_Invalid);
+            auto text = model.vocab().tokenToString(t);
+            CHECK(text == " rain");
+        }
+    }
+}
