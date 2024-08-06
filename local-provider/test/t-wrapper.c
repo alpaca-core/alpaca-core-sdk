@@ -6,7 +6,11 @@
 #include <ac-test-util/unity.h>
 
 #include <string.h>
+#if defined(__clang__)
+#include <pthread.h>
+#else
 #include <threads.h>
+#endif
 
 ac_api_provider* create_dummy_provider(void);
 void ac_add_local_inference(ac_api_provider* local_provider);
@@ -23,7 +27,11 @@ typedef struct state {
 } state;
 
 unsigned workToDo = 0;
+#if defined(__clang__)
+uint64_t mainThreadId;
+#else
 thrd_t mainThread;
+#endif
 
 void set_error(state* s, const char* error) {
     if (error) {
@@ -47,8 +55,15 @@ void on_model_result(ac_model* m, const char* error, void* user_data) {
     s->model = m;
     set_error(s, error);
 
+#if defined(__clang__)
+    uint64_t currentThreadId;
+    pthread_threadid_np(NULL, &currentThreadId);
+    TEST_ASSERT_NOT_EQUAL_UINT64(mainThreadId, currentThreadId);
+#else
     thrd_t currentThread = thrd_current();
     TEST_ASSERT_NOT_EQUAL_UINT64(mainThread._Tid, currentThread._Tid);
+#endif
+
     workToDo--;
 }
 
@@ -58,8 +73,15 @@ void on_instance_result(ac_instance* i, const char* error, void* user_data) {
     s->instance = i;
     set_error(s, error);
 
+#if defined(__clang__)
+    uint64_t currentThreadId;
+    pthread_threadid_np(NULL, &currentThreadId);
+    TEST_ASSERT_NOT_EQUAL_UINT64(mainThreadId, currentThreadId);
+#else
     thrd_t currentThread = thrd_current();
     TEST_ASSERT_NOT_EQUAL_UINT64(mainThread._Tid, currentThread._Tid);
+#endif
+
     workToDo--;
 }
 
@@ -68,8 +90,15 @@ void on_op_result(const char* error, void* user_data) {
     s->last_progress = 0;
     set_error(s, error);
 
+#if defined(__clang__)
+    uint64_t currentThreadId;
+    pthread_threadid_np(NULL, &currentThreadId);
+    TEST_ASSERT_NOT_EQUAL_UINT64(mainThreadId, currentThreadId);
+#else
     thrd_t currentThread = thrd_current();
     TEST_ASSERT_NOT_EQUAL_UINT64(mainThread._Tid, currentThread._Tid);
+#endif
+
     workToDo--;
 }
 
@@ -82,8 +111,14 @@ void on_op_stream(ac_dict_ref dict, void* user_data) {
     s->dict = ac_dict_make_ref(s->dict_root);
     ac_dict_take(s->dict, dict);
 
+#if defined(__clang__)
+    uint64_t currentThreadId;
+    pthread_threadid_np(NULL, &currentThreadId);
+    TEST_ASSERT_NOT_EQUAL_UINT64(mainThreadId, currentThreadId);
+#else
     thrd_t currentThread = thrd_current();
     TEST_ASSERT_NOT_EQUAL_UINT64(mainThread._Tid, currentThread._Tid);
+#endif
 }
 
 void prepareForTest(state* s)
@@ -105,7 +140,11 @@ void dummy_provider(void) {
     ac_add_local_inference(provider);
 
     state s = {0};
+#if defined(__clang__)
+    pthread_threadid_np(NULL, &mainThreadId);
+#else
     mainThread = thrd_current();
+#endif
 
     {
         prepareForTest(&s);
@@ -163,7 +202,7 @@ void dummy_provider(void) {
     }
 
     {
-        prepareForTest(&s, 2);
+        prepareForTest(&s);
         ac_run_op_json_params(s.instance, "op", "{}", NULL, on_op_result, on_op_stream, &s);
         waitForCompletion();
 
@@ -174,7 +213,7 @@ void dummy_provider(void) {
     }
 
     {
-        prepareForTest(&s, 2);
+        prepareForTest(&s);
         ac_run_op_json_params(s.instance, "error", "{\"error\": \"bad op\"}", NULL, on_op_result, on_op_stream, &s);
         waitForCompletion();
 
@@ -185,7 +224,7 @@ void dummy_provider(void) {
     }
 
     {
-        prepareForTest(&s, 2);
+        prepareForTest(&s);
         ac_run_op_json_params(s.instance, "more", "{}", NULL, on_op_result, on_op_stream, &s);
         waitForCompletion();
 
@@ -196,7 +235,7 @@ void dummy_provider(void) {
     }
 
     {
-        prepareForTest(&s, 3);
+        prepareForTest(&s);
         ac_run_op_json_params(s.instance, "insta", "{}", NULL, on_op_result, on_op_stream, &s);
         waitForCompletion();
 
