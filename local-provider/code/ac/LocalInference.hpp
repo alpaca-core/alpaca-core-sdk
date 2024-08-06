@@ -18,21 +18,21 @@ class AC_LOCAL_EXPORT LocalInferenceInstance {
 public:
     virtual ~LocalInferenceInstance();
 
-    virtual void runOp(std::string_view op, Dict params, std::function<void(Dict)> streamCb) = 0;
+    virtual void runOpSync(std::string_view op, Dict params, std::function<void(Dict)> streamCb) = 0;
 };
 
 class AC_LOCAL_EXPORT LocalInferenceModel {
 public:
     virtual ~LocalInferenceModel();
 
-    virtual std::unique_ptr<LocalInferenceInstance> createInstance(std::string_view type, Dict params) = 0;
+    virtual std::unique_ptr<LocalInferenceInstance> createInstanceSync(std::string_view type, Dict params) = 0;
 };
 
 class AC_LOCAL_EXPORT LocalInferenceModelLoader {
 public:
     virtual ~LocalInferenceModelLoader();
 
-    virtual std::unique_ptr<LocalInferenceModel> loadModel(Dict params, std::function<void(float)> progress) = 0;
+    virtual std::unique_ptr<LocalInferenceModel> loadModelSync(Dict params, std::function<void(float)> progress) = 0;
 };
 
 }

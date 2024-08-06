@@ -54,7 +54,7 @@ public:
         streamCb({{"result", astl::move(result)}});
     }
 
-    virtual void runOp(std::string_view op, Dict params, std::function<void(Dict)> streamCb) override {
+    virtual void runOpSync(std::string_view op, Dict params, std::function<void(Dict)> streamCb) override {
         if (op == "run") {
             run(astl::move(params), astl::move(streamCb));
         }
@@ -71,7 +71,7 @@ public:
         : m_model(gguf.c_str(), {})
     {}
 
-    virtual std::unique_ptr<LocalInferenceInstance> createInstance(std::string_view type, Dict) override {
+    virtual std::unique_ptr<LocalInferenceInstance> createInstanceSync(std::string_view type, Dict) override {
         if (type != "general") {
             throw_ex{} << "llama: unknown instance type: " << type;
         }
@@ -81,7 +81,7 @@ public:
 
 class LlamaModelLoader final : public LocalInferenceModelLoader {
 public:
-    virtual std::unique_ptr<LocalInferenceModel> loadModel(Dict params, std::function<void(float)>) override {
+    virtual std::unique_ptr<LocalInferenceModel> loadModelSync(Dict params, std::function<void(float)>) override {
         auto gguf = params.at("gguf").get<std::string>();
         return std::make_unique<LlamaModel>(gguf);
     }

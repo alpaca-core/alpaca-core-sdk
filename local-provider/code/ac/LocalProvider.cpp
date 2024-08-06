@@ -45,7 +45,7 @@ public:
     virtual void runOp(std::string_view op, Dict params, Callback<void, Dict> cb) override {
         m_executor.pushTask([selfcap, op = std::string(op), movecap(params, cb)]() mutable {
             try {
-                self->m_iinstance->runOp(op, astl::move(params), [&](Dict result) {
+                self->m_iinstance->runOpSync(op, astl::move(params), [&](Dict result) {
                     cb.progressCb(astl::move(result));
                 });
                 cb.resultCb({});
@@ -84,8 +84,14 @@ public:
     virtual void createInstance(std::string_view type, Dict params, Callback<InstancePtr> cb) override {
         m_executor.pushTask([selfcap, type = std::string(type), movecap(params, cb)]() mutable {
             try {
-                auto instance = self->m_imodel->createInstance(type, astl::move(params));
-                assert(instance);
+                auto instance = self->m_imodel->createInstanceSync(type, astl::move(params));
+
+                if (!instance)
+                {
+                    cb.resultCb(itlib::unexpected(ac::Error{ "Instance couldn't be created!" }));
+                    return;
+                }
+
                 InstancePtr ptr = std::make_shared<LocalInstance>(self, astl::move(instance), self->m_executor);
                 cb.resultCb(astl::move(ptr));
             }
@@ -127,13 +133,18 @@ public:
                 }
                 auto& loader = *it->second;
 
-                auto model = loader.loadModel(astl::move(params), [&](float progress) {
+                auto model = loader.loadModelSync(astl::move(params), [&](float progress) {
                     assert(std::this_thread::get_id() == m_execution.threadId());
                     if (cb.progressCb) {
                         cb.progressCb(progress);
                     }
                 });
-                assert(model);
+
+                if (!model)
+                {
+                    cb.resultCb(itlib::unexpected(ac::Error{ "Model couldn't be loaded!"}));
+                    return;
+                }
 
                 ModelPtr ptr = std::make_shared<LocalModel>(astl::move(model), m_executor);
                 cb.resultCb(astl::move(ptr));
