@@ -19,6 +19,10 @@ llama_model_params llamaFromModelParams(const Model::Params& params)
 #ifndef NDEBUG
     llamaParams.check_tensors = true;
 #endif
+
+    llamaParams.progress_callback = params.progressCallback;
+    llamaParams.progress_callback_user_data = params.progressCallbackUserData;
+
     return llamaParams;
 }
 } // namespace

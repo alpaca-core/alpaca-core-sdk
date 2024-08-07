@@ -28,7 +28,12 @@ int main() try {
 
     // load model
     std::string modelGguf = AC_TEST_DATA_LLAMA_DIR "/gpt2-117m-q6_k.gguf";
-    ac::llama::Model model(modelGguf.c_str(), {});
+    ac::llama::Model::Params modelParams;
+    modelParams.progressCallback = [](float progress, void*) {
+        std::cout << "model load progress: " << progress << "\n";
+        return true;
+    };
+    ac::llama::Model model(modelGguf.c_str(), modelParams);
 
     // create inference instance
     ac::llama::Instance instance(model, {});

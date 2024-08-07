@@ -13,11 +13,15 @@ struct llama_model_params;
 namespace ac::llama {
 class Job;
 
+typedef bool (*llama_progress_callback)(float progress, void * user_data);
+
 class AC_LLAMA_EXPORT Model {
 public:
     struct Params {
         bool gpu = true; // try to load data on gpu
         bool vocabOnly = false; // do not load model, only vocab
+        llama_progress_callback progressCallback = nullptr; // callback for progress
+        void* progressCallbackUserData = nullptr;
     };
 
     explicit Model(const char* pathToGguf, Params params);
