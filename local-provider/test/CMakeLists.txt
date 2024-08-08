@@ -1,7 +1,7 @@
 # Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
-macro(api_c_test test)
+macro(local_provider_c_test test)
     icm_add_test(
         NAME ac-local-provider-c-${test}
         TARGET test-ac-local-provider-c-${test}
@@ -16,7 +16,15 @@ macro(api_c_test test)
     )
 endmacro()
 
-api_c_test(wrapper
+local_provider_c_test(wrapper
     t-wrapper.c
     t-wrapper-dummy-provider.cpp
+)
+
+add_doctest_lib_test(inference-provider ac-local
+    SOURCES
+        t-inference-provider.cpp
+    LIBRARIES
+        ac::local
+        ac::api
 )
