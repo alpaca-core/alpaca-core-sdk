@@ -86,7 +86,7 @@ public:
         llama::Model::Params modelParams;
         modelParams.progressCallbackUserData = (void*)&progressCb;
         modelParams.progressCallback = [](float progress, void* userData) {
-            std::function<void(float)>* progressCallback = (std::function<void(float)>*)userData;
+            auto progressCallback = reinterpret_cast<std::function<void(float)>*>(userData);
             (*progressCallback)(progress);
             return true;
         };

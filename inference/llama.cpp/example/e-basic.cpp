@@ -30,7 +30,16 @@ int main() try {
     std::string modelGguf = AC_TEST_DATA_LLAMA_DIR "/gpt2-117m-q6_k.gguf";
     ac::llama::Model::Params modelParams;
     modelParams.progressCallback = [](float progress, void*) {
-        std::cout << "model load progress: " << progress << "\n";
+        const int barWidth = 50;
+        static float currProgress = 0;
+        auto delta = std::floor(progress * barWidth) - std::floor(currProgress * barWidth);
+        if (delta) {
+            printf("%s", std::string(delta, '=').c_str());
+        }
+        currProgress = progress;
+        if (progress == 1.f) {
+            std::cout << '\n';
+        }
         return true;
     };
     ac::llama::Model model(modelGguf.c_str(), modelParams);

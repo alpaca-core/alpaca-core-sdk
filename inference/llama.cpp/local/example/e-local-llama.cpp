@@ -33,8 +33,17 @@ int main() {
             modelResult = std::move(result);
             latch->count_down();
         },
-        [](float f) {
-            std::cout << "model load progress: " << f << "\n";
+        [](float progress) {
+            const int barWidth = 50;
+            static float currProgress = 0;
+            auto delta = std::floor(progress * barWidth) - std::floor(currProgress * barWidth);
+            if (delta) {
+                printf("%s", std::string(delta, '=').c_str());
+            }
+            currProgress = progress;
+            if (progress == 1.f) {
+                std::cout << '\n';
+            }
         }
     });
 
