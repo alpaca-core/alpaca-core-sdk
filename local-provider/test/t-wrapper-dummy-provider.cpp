@@ -11,6 +11,8 @@
 #include <ac/LocalProvider.hpp>
 #include <ac/LocalInference.hpp>
 
+#include <thread>
+
 namespace {
 
 class DummyLocalInferenceInstance final : public ac::LocalInferenceInstance {
@@ -36,7 +38,7 @@ public:
 class DummyLocalInferenceModel final : public ac::LocalInferenceModel {
 public:
 
-    virtual std::unique_ptr<ac::LocalInferenceInstance> createInstanceSync(std::string_view type, ac::Dict params) override {
+    virtual std::unique_ptr<ac::LocalInferenceInstance> createInstanceSync(std::string_view, ac::Dict params) override {
 
         if (ac::Dict_optValueAt(params, "error", false)) {
             return nullptr;
@@ -64,6 +66,11 @@ public:
 DummyLocalInferenceModelLoader loader;
 
 } // anonymous namespace
+
+extern "C" uint64_t get_thread_id()
+{
+    return std::hash<std::thread::id>{}(std::this_thread::get_id());
+}
 
 extern "C" ac_api_provider* create_dummy_provider() {
     return ac::cutil::Provider_to_provider(new ac::LocalProvider);
