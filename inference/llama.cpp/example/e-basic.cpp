@@ -32,7 +32,7 @@ int main() try {
     modelParams.progressCallback = [](float progress, void*) {
         const int barWidth = 50;
         static float currProgress = 0;
-        auto delta = std::floor(progress * barWidth) - std::floor(currProgress * barWidth);
+        auto delta = int(progress * barWidth) - int(currProgress * barWidth);
         if (delta) {
             printf("%s", std::string(delta, '=').c_str());
         }

@@ -197,9 +197,6 @@ int main(int, char**) {
     ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer2_Init(renderer);
 
-    // ui helpers
-    ImVec2 stretch = {-1, -1};
-
     // app state
 
     auto models = std::to_array({
