@@ -43,8 +43,8 @@ public:
 
     class State {
     public:
-        State(const std::string& ggufPath)
-            : m_model(ggufPath.c_str(), {})
+        State(const std::string& ggufPath, const ac::llama::Model::Params& modelParams)
+            : m_model(ggufPath.c_str(), modelParams)
         {}
 
         class Instance {
@@ -57,10 +57,11 @@ public:
 
             class Session {
             public:
-                Session(ac::llama::Instance& instance, std::string prompt, ac::llama::Instance::SessionParams params)
+                Session(ac::llama::Instance& instance, std::string prompt, std::string antiPrompt, ac::llama::Instance::SessionParams params)
                     : m_vocab(instance.model().vocab())
                     , m_params(std::move(params))
                     , m_text(std::move(prompt))
+                    , m_antiprompt(std::move(antiPrompt))
                     , m_session(instance.newSession(m_text, m_params))
                 {}
 
@@ -76,7 +77,13 @@ public:
                         return;
                     }
 
-                    m_text += m_vocab.tokenToString(token);
+                    auto tokenStr = m_vocab.tokenToString(token);
+                    if (!m_antiprompt.empty() && tokenStr.find(m_antiprompt) != std::string::npos) {
+                        m_numTokens = 0;
+                        return;
+                    }
+
+                    m_text += tokenStr;
                     --m_numTokens;
                 }
 
@@ -95,6 +102,7 @@ public:
                 const ac::llama::Vocab& m_vocab;
                 ac::llama::Instance::SessionParams m_params;
                 std::string m_text;
+                std::string m_antiprompt;
                 ac::llama::Session m_session;
                 uint32_t m_numTokens = 0;
             };
@@ -102,8 +110,8 @@ public:
             const std::string& name() const { return m_name; }
             Session* session() { return m_session.get(); }
 
-            void startSession(std::string prompt, ac::llama::Instance::SessionParams params) {
-                m_session.reset(new Session(m_instance, prompt, params));
+            void startSession(std::string prompt, std::string antiPrompt, ac::llama::Instance::SessionParams params) {
+                m_session.reset(new Session(m_instance, prompt, antiPrompt, params));
             }
 
             void stopSession() {
@@ -144,7 +152,27 @@ public:
         JALOG(Info, "unloaded ", m_name);
     }
     void load() {
-        m_state.reset(new State(m_ggufPath));
+        ac::llama::Model::Params modelParams;
+        modelParams.progressCallback = [](float progress, void*){
+            const int barWidth = 50;
+            static float currProgress = 0;
+
+            auto delta = int(progress * barWidth) - int(currProgress * barWidth);
+
+            if (delta) {
+                printf("%s", std::string(delta, '=').c_str());
+            }
+
+            currProgress = progress;
+
+            if (progress == 1.f) {
+                std::cout << '\n';
+                currProgress = 0.f;
+            }
+
+            return true;
+        };
+        m_state.reset(new State(m_ggufPath, modelParams));
     }
 private:
     std::string m_ggufPath;
@@ -211,6 +239,7 @@ int main(int, char**) {
 
     std::string initialPrompt;
     std::string additionalPrompt;
+    std::string antiPrompt;
     uint32_t maxTokensToGenerate = 20;
 
     // main loop
@@ -328,13 +357,14 @@ int main(int, char**) {
                         session->params().conversation, session->params().gaFactor, session->params().gaWidth, session->params().infiniteContext);
 
                     ImGui::Separator();
-                    ImGui::TextWrapped(session->text().c_str());
+                    ImGui::TextWrapped("%s", session->text().c_str());
                     ImGui::Separator();
 
                     ImGui::InputTextMultiline("prompt", &additionalPrompt, {0, 50});
                     if (ImGui::Button("Push prompt")) {
                         session->pushPrompt(additionalPrompt);
                     }
+
                     ImGui::InputScalar("numTokens", ImGuiDataType_U32, &maxTokensToGenerate);
                     ImGui::SameLine();
                     if (ImGui::Button("Generate")) {
@@ -354,9 +384,10 @@ int main(int, char**) {
                     ImGui::InputScalar("gaWidth", ImGuiDataType_U32, &newSessionParams.gaWidth);
                     ImGui::Checkbox("infiniteContext", &newSessionParams.infiniteContext);
                     ImGui::InputTextMultiline("Initial prompt", &initialPrompt);
+                    ImGui::InputText("Anti prompt", &antiPrompt);
 
                     if (ImGui::Button("Start")) {
-                        selectedInstance->startSession(initialPrompt, newSessionParams);
+                        selectedInstance->startSession(initialPrompt, antiPrompt, newSessionParams);
                     }
                 }
             }
