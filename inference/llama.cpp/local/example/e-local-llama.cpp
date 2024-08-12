@@ -72,13 +72,16 @@ int main() {
     }
     auto instance = std::move(instanceResult.value());
 
-    std::string prompt = "The first person to";
+    const std::string prompt = "The first person to";
+    const std::string antiPrompt = "user:"; // change it to "name" to break the token generation with the default input
+
     std::cout << "Prompt: " << prompt << "\n";
-    std::cout << "Generation: ";
+    std::cout << "Antiprompt: " << antiPrompt << "\n";
+    std::cout << "Generation: " << "<prompt>" << prompt << "</prompt> ";
 
     std::string opError;
     latch.emplace(1);
-    instance->runOp("run", {{"prompt", prompt}, {"max_tokens", 20}}, {
+    instance->runOp("run", {{"prompt", prompt}, {"max_tokens", 20}, {"antiPrompt", antiPrompt}}, {
         [&](ac::CallbackResult<void> result) {
             if (result.has_error()) {
                 opError = std::move(result.error().text);
