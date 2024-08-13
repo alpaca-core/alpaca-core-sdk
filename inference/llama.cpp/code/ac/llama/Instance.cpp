@@ -5,7 +5,6 @@
 #include "Model.hpp"
 #include "Logging.hpp"
 #include "ChatFormat.hpp"
-#include "Sampler.hpp"
 #include <llama.h>
 #include <astl/throw_ex.hpp>
 #include <astl/iile.h>
@@ -29,6 +28,7 @@ llama_context_params llamaFromInstanceInitParams(Model& model, const Instance::I
 
 Instance::Instance(Model& model, InitParams params)
     : m_model(model)
+    , m_sampler({})
     , m_lctx(llama_new_context_with_model(model.lmodel(), llamaFromInstanceInitParams(model, params)), llama_free)
 {
     if (!m_lctx) {
@@ -75,6 +75,10 @@ void Instance::warmup() {
     llama_kv_cache_clear(lctx);
     llama_synchronize(lctx);
     llama_reset_timings(lctx);
+}
+
+void Instance::reset() {
+    m_sampler.reset();
 }
 
 Session Instance::newSession(std::string initialPrompt, const SessionParams params) {
@@ -146,8 +150,6 @@ Session Instance::newSession(std::string initialPrompt, const SessionParams para
         tokens.push_back(vocab.decoderStartToken());
     }
 
-    Sampler sampler({});
-
     // group attention state
     uint32_t gaIndex = 0; // number of grouped KV tokens (only used if params.gaFactor > 1)
     uint32_t numPast = 0; // number of tokens in the context (that's prompts + generated)
@@ -216,7 +218,7 @@ Session Instance::newSession(std::string initialPrompt, const SessionParams para
 
         // add to sampler
         for (auto t : tokens) {
-            sampler.accept(t);
+            m_sampler.accept(t);
         }
 
         // decode
@@ -250,19 +252,18 @@ Session Instance::newSession(std::string initialPrompt, const SessionParams para
             }
 
             // reset sampling and don't allow previous inputs to affect the generation
-            sampler.reset();
+            m_sampler.reset();
 
             doDecode(tokens);
         }
 
-        auto token = sampler.sample(lctx);
+        auto token = m_sampler.sample(lctx);
         if (vocab.isEog(token)) {
             co_yield Token_Invalid;
         }
         else {
-            co_yield token;
-            sampler.accept(token);
             doDecode({&token, 1});
+            co_yield token;
         }
     }
 }

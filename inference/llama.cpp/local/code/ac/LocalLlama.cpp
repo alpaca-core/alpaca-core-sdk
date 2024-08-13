@@ -36,7 +36,7 @@ public:
 
     void run(Dict params, std::function<void(Dict)> streamCb) {
         auto prompt = Dict_optValueAt(params, "prompt", std::string{});
-        auto antiPrompt = Dict_optValueAt(params, "antiPrompt", std::string{});
+        auto antiPrompts = Dict_optValueAt(params, "antiPrompts", std::vector<std::string>{});
         const uint32_t maxTokens = Dict_optValueAt(params, "max_tokens", 2000u); // somewhat arbitrary, see #37
 
         auto s = m_instance.newSession(astl::move(prompt), SessionParams_fromDict(params));
@@ -49,10 +49,24 @@ public:
             if (t == ac::llama::Token_Invalid) {
                 break;
             }
+
             auto tokenStr = model.vocab().tokenToString(t);
-            if (tokenStr.find(antiPrompt) != std::string::npos) {
-                break;
+            if (!antiPrompts.empty()) {
+                const uint32_t prevTokensToCheckCount = 16;
+                auto prevTokens = m_instance.sampler().prevTokens(prevTokensToCheckCount);
+                auto prevTokensStr = model.vocab().tokensToString(prevTokens);
+                for (uint32_t j = 0; j < antiPrompts.size(); j++)
+                {
+                    // set the start position to search in the end of the sentence,
+                    // where it's possible to be located the antiprompt.
+                    // We cannot search only the last token because the anti prompt might be a couple of words
+                    const auto startPos = prevTokensStr.length() - antiPrompts[j].length();
+                    if (prevTokensStr.find(antiPrompts[j].c_str(), startPos, antiPrompts[j].length()) != std::string::npos) {
+                        break;
+                    }
+                }
             }
+
             result += model.vocab().tokenToString(t);
         }
 

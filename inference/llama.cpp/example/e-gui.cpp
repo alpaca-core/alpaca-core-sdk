@@ -57,12 +57,13 @@ public:
 
             class Session {
             public:
-                Session(ac::llama::Instance& instance, std::string prompt, std::string antiPrompt, ac::llama::Instance::SessionParams params)
+                Session(ac::llama::Instance& instance, std::string prompt, std::vector<std::string> antiPrompts, ac::llama::Instance::SessionParams params)
                     : m_vocab(instance.model().vocab())
                     , m_params(std::move(params))
                     , m_text(std::move(prompt))
-                    , m_antiprompt(std::move(antiPrompt))
+                    , m_antiPrompts(std::move(antiPrompts))
                     , m_session(instance.newSession(m_text, m_params))
+                    , m_instance(instance)
                 {}
 
                 const std::string& text() const { return m_text; }
@@ -77,13 +78,24 @@ public:
                         return;
                     }
 
-                    auto tokenStr = m_vocab.tokenToString(token);
-                    if (!m_antiprompt.empty() && tokenStr.find(m_antiprompt) != std::string::npos) {
-                        m_numTokens = 0;
-                        return;
+                    if (!m_antiPrompts.empty()) {
+                        const uint32_t prevTokensToCheckCount = 16;
+                        auto prevTokens = m_instance.sampler().prevTokens(prevTokensToCheckCount);
+                        auto prevTokensStr = m_vocab.tokensToString(prevTokens);
+                        for (uint32_t i = 0; i < m_antiPrompts.size(); i++)
+                        {
+                            // set the start position to search in the end of the sentence,
+                            // where it's possible to be located the antiprompt.
+                            // We cannot search only the last token because the anti prompt might be a couple of words
+                            const auto startPos = prevTokensStr.length() - m_antiPrompts[i].length();
+                            if (prevTokensStr.find(m_antiPrompts[i].c_str(), startPos, m_antiPrompts[i].length()) != std::string::npos) {
+                                m_numTokens = 0;
+                                return;
+                            }
+                        }
                     }
 
-                    m_text += tokenStr;
+                    m_text += m_vocab.tokenToString(token);
                     --m_numTokens;
                 }
 
@@ -102,20 +114,22 @@ public:
                 const ac::llama::Vocab& m_vocab;
                 ac::llama::Instance::SessionParams m_params;
                 std::string m_text;
-                std::string m_antiprompt;
+                std::vector<std::string> m_antiPrompts;
                 ac::llama::Session m_session;
+                ac::llama::Instance& m_instance;
                 uint32_t m_numTokens = 0;
             };
 
             const std::string& name() const { return m_name; }
             Session* session() { return m_session.get(); }
 
-            void startSession(std::string prompt, std::string antiPrompt, ac::llama::Instance::SessionParams params) {
-                m_session.reset(new Session(m_instance, prompt, antiPrompt, params));
+            void startSession(std::string prompt, std::vector<std::string> antiPrompts, ac::llama::Instance::SessionParams params) {
+                m_session.reset(new Session(m_instance, prompt, antiPrompts, params));
             }
 
             void stopSession() {
                 m_session.reset();
+                m_instance.reset();
             }
 
         private:
@@ -384,10 +398,25 @@ int main(int, char**) {
                     ImGui::InputScalar("gaWidth", ImGuiDataType_U32, &newSessionParams.gaWidth);
                     ImGui::Checkbox("infiniteContext", &newSessionParams.infiniteContext);
                     ImGui::InputTextMultiline("Initial prompt", &initialPrompt);
-                    ImGui::InputText("Anti prompt", &antiPrompt);
+                    ImGui::InputTextMultiline("Anti prompt", &antiPrompt);
 
+                    std::vector<std::string> antiPrompts;
+                    auto splitAntiPrompts = [&]() {
+                        std::string tmp;
+                        size_t processedChars = 0;
+                        while(processedChars <= antiPrompt.size()) {
+                            if (antiPrompt[processedChars] == '\n' || (processedChars == antiPrompt.size())) {
+                                antiPrompts.push_back(tmp);
+                                tmp.clear();
+                                processedChars++;
+                                continue;
+                            }
+                            tmp.push_back(antiPrompt[processedChars++]);
+                        }
+                    };
+                    splitAntiPrompts();
                     if (ImGui::Button("Start")) {
-                        selectedInstance->startSession(initialPrompt, antiPrompt, newSessionParams);
+                        selectedInstance->startSession(initialPrompt, antiPrompts, newSessionParams);
                     }
                 }
             }

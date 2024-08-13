@@ -63,4 +63,13 @@ std::string Vocab::tokenToString(Token token, bool special) const {
     return ret;
 }
 
+std::string Vocab::tokensToString(std::vector<Token> tokens, bool special) const {
+    std::string result;
+    for (size_t i = 0; i < tokens.size(); i++) {
+        result += tokenToString(tokens[i], special);
+    }
+
+    return result;
+}
+
 } // namespace ac::llama

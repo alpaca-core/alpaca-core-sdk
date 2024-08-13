@@ -4,6 +4,7 @@
 #pragma once
 #include "export.h"
 #include "Session.hpp"
+#include "Sampler.hpp"
 #include <astl/mem_ext.hpp>
 
 struct llama_context;
@@ -25,6 +26,9 @@ public:
     // do an empty model run to load model data in cache
     void warmup();
 
+    // reset sampler
+    void reset();
+
     struct SessionParams {
         bool conversation = false;
 
@@ -40,9 +44,11 @@ public:
     Session newSession(std::string initialPrompt, const SessionParams params);
 
     const Model& model() const noexcept { return m_model; }
+    const Sampler& sampler() const noexcept { return m_sampler; }
 
 private:
     Model& m_model;
+    Sampler m_sampler;
     astl::c_unique_ptr<llama_context> m_lctx;
 
     bool m_hasActiveSession = false;
