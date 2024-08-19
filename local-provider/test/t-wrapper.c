@@ -27,7 +27,7 @@ uint64_t mainThreadId;
 
 void set_error(state* s, const char* error) {
     if (error) {
-        int size = strlen(error) + 1;
+        size_t size = strlen(error) + 1;
         strncpy(s->last_error, error, size);
     }
     else {

@@ -36,9 +36,9 @@ int main() {
         [](float progress) {
             const int barWidth = 50;
             static float currProgress = 0;
-            auto delta = std::floor(progress * barWidth) - std::floor(currProgress * barWidth);
-            if (delta) {
-                printf("%s", std::string(delta, '=').c_str());
+            auto delta = int(progress * barWidth) - int(currProgress * barWidth);
+            for (int i = 0; i < delta; i++) {
+                std::cout.put('=');
             }
             currProgress = progress;
             if (progress == 1.f) {
