@@ -5,6 +5,7 @@
 #include "export.h"
 #include <vector>
 #include <queue>
+#include <string>
 #include <string_view>
 
 namespace ac::llama {
