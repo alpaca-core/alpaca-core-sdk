@@ -9,24 +9,11 @@
 void setUp(void) {}
 void tearDown(void) {}
 
-void parse(void) {
-    const char* json = "{"
-        "\"key\": \"value\","
-        "\"seven\" : 7,"
-        "\"obj\" : {"
-            "\"nested\": \"nv\","
-            "\"nested_bool\" : true"
-        "},"
-        "\"none\" : null,"
-        "\"pi\" : 3.14159,"
-        "\"ar\" : [1, -2, \"three\"]"
-    "}";
-    ac_dict_root* root = ac_dict_new_root();
+void do_parse_test(ac_dict_root* root) {
     CHECK_NOT_NULL(root);
     ac_dict_ref rr = ac_dict_make_ref(root);
     CHECK_NOT_NULL(rr);
 
-    CHECK_TRUE(ac_dict_parse_json(rr, json, NULL));
     CHECK_NULL(ac_dict_get_last_error());
 
     CHECK_EQ(ac_dict_value_type_object, ac_dict_get_type(rr));
@@ -155,8 +142,46 @@ void parse(void) {
     int ei = ac_dict_get_int_value(key);
     CHECK_EQ(0, ei);
     CHECK_NOT_NULL(ac_dict_get_last_error());
+}
+
+const char* JSON_TEXT = "{"
+    "\"key\": \"value\","
+    "\"seven\" : 7,"
+    "\"obj\" : {"
+        "\"nested\": \"nv\","
+        "\"nested_bool\" : true"
+    "},"
+    "\"none\" : null,"
+    "\"pi\" : 3.14159,"
+    "\"ar\" : [1, -2, \"three\"]"
+"}";
+
+void parse_basic(void) {
+    ac_dict_root* root = ac_dict_new_root();
+    CHECK_NOT_NULL(root);
+    ac_dict_ref rr = ac_dict_make_ref(root);
+    CHECK_NOT_NULL(rr);
+
+    CHECK_TRUE(ac_dict_parse_json(rr, JSON_TEXT, NULL));
+
+    do_parse_test(root);
 
     ac_dict_free_root(root);
+}
+
+void parse_copy_move(void) {
+    ac_dict_root* root = ac_dict_new_root_from_json(JSON_TEXT, NULL);
+    do_parse_test(root);
+
+    ac_dict_root* root2 = ac_dict_new_root_from_copy(ac_dict_make_ref(root));
+    do_parse_test(root2);
+
+    ac_dict_root* root3 = ac_dict_new_root_from_take(ac_dict_make_ref(root));
+    CHECK(ac_dict_get_type(ac_dict_make_ref(root)) == ac_dict_value_type_null);
+    do_parse_test(root3);
+
+    ac_dict_free_root(root);
+    ac_dict_free_root(root2);
 }
 
 void build(void) {
@@ -254,7 +279,8 @@ void binary(void) {
 
 int main(void) {
     UNITY_BEGIN();
-    RUN_TEST(parse);
+    RUN_TEST(parse_basic);
+    RUN_TEST(parse_copy_move);
     RUN_TEST(build);
     RUN_TEST(binary);
     return UNITY_END();

@@ -4,6 +4,7 @@
 #pragma once
 #include "export.h"
 #include "dict_ref.h"
+#include <astl/inline.h>
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -35,6 +36,35 @@ AC_API_EXPORT void ac_dict_copy(ac_dict_ref target, ac_dict_ref source);
 
 // move the data from source into target, leaving it null
 AC_API_EXPORT void ac_dict_take(ac_dict_ref target, ac_dict_ref source);
+
+// utils
+
+AC_INLINE ac_dict_root* ac_dict_new_root_from_json(const char* json, const char* json_end) {
+    ac_dict_root* root = ac_dict_new_root();
+    if (root) {
+        if (!ac_dict_parse_json(ac_dict_make_ref(root), json, json_end)) {
+            ac_dict_free_root(root);
+            root = NULL;
+        }
+    }
+    return root;
+}
+
+AC_INLINE ac_dict_root* ac_dict_new_root_from_copy(ac_dict_ref source) {
+    ac_dict_root* root = ac_dict_new_root();
+    if (root) {
+        ac_dict_copy(ac_dict_make_ref(root), source);
+    }
+    return root;
+}
+
+AC_INLINE ac_dict_root* ac_dict_new_root_from_take(ac_dict_ref source) {
+    ac_dict_root* root = ac_dict_new_root();
+    if (root) {
+        ac_dict_take(ac_dict_make_ref(root), source);
+    }
+    return root;
+}
 
 // query
 

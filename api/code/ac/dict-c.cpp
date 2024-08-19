@@ -66,7 +66,9 @@ const char* ac_dict_get_last_error() {
 
 extern "C" {
 ac_dict_root* ac_dict_new_root() {
-    return new ac_dict_root();
+    return dict_try_catch([] {
+        return new ac_dict_root();
+    });
 }
 
 void ac_dict_free_root(ac_dict_root* d) {
