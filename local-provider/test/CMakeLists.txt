@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: MIT
 #
 add_library(test-ac-dummy-local-provider STATIC
-    t-dummy-local-provider.h
-    t-dummy-local-provider.hpp
-    t-dummy-local-provider.cpp
+    tl-dummy-local-provider.h
+    tl-dummy-local-provider.hpp
+    tl-dummy-local-provider.cpp
 )
 target_link_libraries(test-ac-dummy-local-provider
     PUBLIC
