@@ -1,30 +1,32 @@
 # Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
-macro(local_provider_c_test test)
-    icm_add_test(
-        NAME ac-local-provider-c-${test}
-        TARGET test-ac-local-provider-c-${test}
-        LIBRARIES
-            unity::framework
-            ac::api
-            ac::local
-            ac-dev::test-util
-        SOURCES
-            ${ARGN}
-        FOLDER test
-    )
-endmacro()
-
-local_provider_c_test(wrapper
-    t-wrapper.c
-    t-wrapper-dummy-provider.cpp
+add_library(test-ac-dummy-local-provider STATIC
+    t-dummy-local-provider.h
+    t-dummy-local-provider.hpp
+    t-dummy-local-provider.cpp
 )
-
-add_doctest_lib_test(inference-provider ac-local
-    SOURCES
-        t-inference-provider.cpp
-    LIBRARIES
+target_link_libraries(test-ac-dummy-local-provider
+    PUBLIC
         ac::local
         ac::api
+)
+
+icm_add_test(
+    NAME ac-local-provider-c
+    TARGET test-ac-local-provider-c
+    SOURCES
+        t-local-provider.c
+    LIBRARIES
+        unity::framework
+        ac-dev::test-util
+        test-ac-dummy-local-provider
+    FOLDER test
+)
+
+add_doctest_lib_test(provider ac-local
+    SOURCES
+        t-local-provider.cpp
+    LIBRARIES
+        test-ac-dummy-local-provider
 )

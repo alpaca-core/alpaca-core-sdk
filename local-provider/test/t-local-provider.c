@@ -1,15 +1,12 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include <ac/api.h>
+#include "t-dummy-local-provider.h"
 #include <ac/dict.h>
 #include <ac-test-util/unity.h>
 
 #include <string.h>
 
-uint64_t get_thread_id();
-ac_api_provider* create_dummy_provider(void);
-void ac_add_local_inference(ac_api_provider* local_provider);
 void setUp(void) {}
 void tearDown(void) {}
 
@@ -85,14 +82,12 @@ void on_op_stream(ac_dict_ref dict, void* user_data) {
     TEST_ASSERT_NOT_EQUAL_UINT64(mainThreadId, get_thread_id());
 }
 
-void prepareForTest(state* s)
-{
+void prepareForTest(state* s) {
     s->last_progress = 0;
     workToDo = 1;
 }
 
-void waitForCompletion()
-{
+void waitForCompletion() {
     while (workToDo) {
         continue;
     }
