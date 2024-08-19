@@ -7,6 +7,7 @@
 #include <astl/inline.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stddef.h>
 
 // functions implemented in c-api.cpp
 
