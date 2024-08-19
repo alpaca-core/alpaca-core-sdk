@@ -73,19 +73,19 @@ int main() {
     auto instance = std::move(instanceResult.value());
 
     const std::string prompt = "The first person to";
-    std::vector<std::string> antiPrompts;
-    antiPrompts.push_back("user:");// change it to "name" to break the token generation with the default input
+    std::vector<std::string> antiprompts;
+    antiprompts.push_back("user:");// change it to "name" to break the token generation with the default input
 
     std::cout << "Prompt: " << prompt << "\n";
-    for (size_t i = 0; i < antiPrompts.size(); i++)
+    for (size_t i = 0; i < antiprompts.size(); i++)
     {
-        std::cout << "Antiprompt "<<"[" << i << "]" <<": \"" << antiPrompts[i] << "\"\n";
+        std::cout << "Antiprompt "<<"[" << i << "]" <<": \"" << antiprompts[i] << "\"\n";
     }
     std::cout << "Generation: " << "<prompt>" << prompt << "</prompt> ";
 
     std::string opError;
     latch.emplace(1);
-    instance->runOp("run", {{"prompt", prompt}, {"max_tokens", 20}, {"antiPrompts", antiPrompts}}, {
+    instance->runOp("run", {{"prompt", prompt}, {"max_tokens", 20}, {"antiprompts", antiprompts}}, {
         [&](ac::CallbackResult<void> result) {
             if (result.has_error()) {
                 opError = std::move(result.error().text);
