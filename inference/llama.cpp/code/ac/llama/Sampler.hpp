@@ -92,8 +92,6 @@ public:
     // idx is optional for sampling from the logits of the ith token
     Token sample(llama_context* lctx, llama_context* cfgCtx = nullptr, int idx = -1);
 
-    std::vector<Token> prevTokens(uint32_t n) const noexcept;
-
     // accept token as sampled (add to prev)
     void accept(Token id);
 

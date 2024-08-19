@@ -262,8 +262,8 @@ Session Instance::newSession(std::string initialPrompt, const SessionParams para
             co_yield Token_Invalid;
         }
         else {
-            doDecode({&token, 1});
             co_yield token;
+            doDecode({&token, 1});
         }
     }
 }

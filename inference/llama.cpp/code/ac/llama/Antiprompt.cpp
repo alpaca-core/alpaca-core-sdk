@@ -12,11 +12,11 @@ Antiprompt::Antiprompt(std::vector<std::string> antiprompts)
     : m_antiprompts(std::move(antiprompts))
 {}
 
-void Antiprompt::addAntiPromptStr(const std::string& antiprompt) {
-    m_antiprompts.push_back(antiprompt);
+void Antiprompt::addAntiPromptStr(std::string_view antiprompt) {
+    m_antiprompts.push_back(std::string(antiprompt));
 }
 
-void Antiprompt::addTokenStr(const std::string& tokenStr) {
+void Antiprompt::addTokenStr(std::string_view tokenStr) {
     if (m_tokensSizes.size() == m_maxPrevTokens) {
         m_prevTokensStr.erase(m_prevTokensStr.begin(), m_prevTokensStr.begin() + m_tokensSizes.front());
         m_tokensSizes.pop();

@@ -5,6 +5,7 @@
 #include "export.h"
 #include <vector>
 #include <queue>
+#include <string_view>
 
 namespace ac::llama {
 class AC_LLAMA_EXPORT Antiprompt {
@@ -12,9 +13,9 @@ public:
     Antiprompt();
     Antiprompt(std::vector<std::string> antiprompts);
 
-    void addAntiPromptStr(const std::string& antiPrompt);
+    void addAntiPromptStr(std::string_view antiPrompt);
 
-    void addTokenStr(const std::string& tokenStr);
+    void addTokenStr(std::string_view tokenStr);
 
     bool shouldStop();
 private:

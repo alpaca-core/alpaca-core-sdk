@@ -162,13 +162,6 @@ Token Sampler::sample(llama_context* lctx, llama_context* cfgCtx, int idx) {
     return sampleImpl(lctx, cfgCtx, idx, false);
 }
 
-std::vector<Token> Sampler::prevTokens(uint32_t n) const noexcept {
-    if (m_prev.size() < size_t(n)) {
-        return m_prev;
-    }
-    return std::vector<Token>(m_prev.begin(), m_prev.begin() + n);
-}
-
 void Sampler::reset() {
     m_prev.clear();
     m_prev.push_back(0);
