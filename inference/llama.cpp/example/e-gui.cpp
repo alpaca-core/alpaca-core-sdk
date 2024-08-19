@@ -4,6 +4,7 @@
 #include <ac/llama/Init.hpp>
 #include <ac/llama/Model.hpp>
 #include <ac/llama/Instance.hpp>
+#include <ac/llama/Antiprompt.hpp>
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -61,9 +62,8 @@ public:
                     : m_vocab(instance.model().vocab())
                     , m_params(std::move(params))
                     , m_text(std::move(prompt))
-                    , m_antiprompts(std::move(antiprompts))
                     , m_session(instance.newSession(m_text, m_params))
-                    , m_instance(instance)
+                    , m_antiprompt(std::move(antiprompts))
                 {}
 
                 const std::string& text() const { return m_text; }
@@ -77,25 +77,16 @@ public:
                         m_numTokens = 0;
                         return;
                     }
+                    auto tokenStr = m_vocab.tokenToString(token);
 
-                    if (!m_antiprompts.empty()) {
-                        const uint32_t prevTokensToCheckCount = 16;
-                        auto prevTokens = m_instance.sampler().prevTokens(prevTokensToCheckCount);
-                        auto prevTokensStr = m_vocab.tokensToString(prevTokens);
-                        for (uint32_t i = 0; i < m_antiprompts.size(); i++)
-                        {
-                            // set the start position to search in the end of the sentence,
-                            // where it's possible to be located the antiprompt.
-                            // We cannot search only the last token because the anti prompt might be a couple of words
-                            const auto startPos = prevTokensStr.length() - m_antiprompts[i].length();
-                            if (prevTokensStr.find(m_antiprompts[i].c_str(), startPos, m_antiprompts[i].length()) != std::string::npos) {
-                                m_numTokens = 0;
-                                return;
-                            }
-                        }
+                    m_antiprompt.addTokenStr(tokenStr);
+
+                    if (m_antiprompt.shouldStop()) {
+                        m_numTokens = 0;
+                        return;
                     }
 
-                    m_text += m_vocab.tokenToString(token);
+                    m_text += tokenStr;
                     --m_numTokens;
                 }
 
@@ -114,9 +105,8 @@ public:
                 const ac::llama::Vocab& m_vocab;
                 ac::llama::Instance::SessionParams m_params;
                 std::string m_text;
-                std::vector<std::string> m_antiprompts;
                 ac::llama::Session m_session;
-                ac::llama::Instance& m_instance;
+                ac::llama::Antiprompt m_antiprompt;
                 uint32_t m_numTokens = 0;
             };
 

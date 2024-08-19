@@ -6,6 +6,7 @@
 #include <ac/llama/Instance.hpp>
 #include <ac/llama/Init.hpp>
 #include <ac/llama/Model.hpp>
+#include <ac/llama/Antiprompt.hpp>
 
 #include <ac/LocalProvider.hpp>
 #include <ac/LocalInference.hpp>
@@ -42,6 +43,7 @@ public:
         auto s = m_instance.newSession(astl::move(prompt), SessionParams_fromDict(params));
 
         auto& model = m_instance.model();
+        auto antiprompt = ac::llama::Antiprompt(std::move(antiprompts));
 
         std::string result;
         for (uint32_t i = 0; i < maxTokens; ++i) {
@@ -51,20 +53,9 @@ public:
             }
 
             auto tokenStr = model.vocab().tokenToString(t);
-            if (!antiprompts.empty()) {
-                const uint32_t prevTokensToCheckCount = 16;
-                auto prevTokens = m_instance.sampler().prevTokens(prevTokensToCheckCount);
-                auto prevTokensStr = model.vocab().tokensToString(prevTokens);
-                for (uint32_t j = 0; j < antiprompts.size(); j++)
-                {
-                    // set the start position to search in the end of the sentence,
-                    // where it's possible to be located the antiprompt.
-                    // We cannot search only the last token because the anti prompt might be a couple of words
-                    const auto startPos = prevTokensStr.length() - antiprompts[j].length();
-                    if (prevTokensStr.find(antiprompts[j].c_str(), startPos, antiprompts[j].length()) != std::string::npos) {
-                        break;
-                    }
-                }
+            antiprompt.addTokenStr(tokenStr);
+            if (antiprompt.shouldStop()) {
+                break;
             }
 
             result += model.vocab().tokenToString(t);

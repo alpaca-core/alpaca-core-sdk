@@ -24,7 +24,6 @@ public:
     bool isEog(Token token) const noexcept;
 
     std::string tokenToString(Token token, bool special = true) const;
-    std::string tokensToString(std::vector<Token> tokens, bool special = true) const;
 private:
     const Model& m_model;
 };

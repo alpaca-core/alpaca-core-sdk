@@ -8,7 +8,7 @@
 #include <string>
 
 struct llama_model;
-struct llama_model_params;
+//struct llama_model_params;
 
 namespace ac::llama {
 class Job;
