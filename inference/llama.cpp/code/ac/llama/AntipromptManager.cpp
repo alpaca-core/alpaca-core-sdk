@@ -10,8 +10,9 @@ void AntipromptManager::addAntiprompt(std::string_view antiprompt) {
 }
 
 bool AntipromptManager::feedGeneratedText(std::string_view text) {
-    for (uint32_t i = 0; i < m_antiprompts.size(); i++) {
-        if (m_antiprompts[i].feedText(text)) {
+    for (auto& ap : m_antiprompts) {
+        if (ap.feedText(text)) {
+            reset();
             return true;
         }
     }
@@ -20,6 +21,12 @@ bool AntipromptManager::feedGeneratedText(std::string_view text) {
 }
 
 void AntipromptManager::reset() {
+    for (auto& ap : m_antiprompts) {
+        ap.reset();
+    }
+}
+
+void AntipromptManager::clear() {
     m_antiprompts.clear();
 }
 

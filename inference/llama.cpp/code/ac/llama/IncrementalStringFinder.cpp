@@ -37,4 +37,8 @@ bool IncrementalStringFinder::feedText(std::string_view text) {
 
     return false;
 }
+
+void IncrementalStringFinder::reset() {
+    m_currentPos = 0;
+}
 }

@@ -71,16 +71,20 @@ TEST_CASE("antiprompt manager - incremental feed") {
     CHECK_FALSE(am.feedGeneratedText("shut"));   // Partial match, so false
     CHECK(am.feedGeneratedText("down"));    // Completes the match, so true
 
-    // CHECK_FALSE(am.feedGeneratedText("stream")); // state should be reset after match
+    CHECK_FALSE(am.feedGeneratedText("stream")); // state should be reset after match
 }
 
-TEST_CASE("antiprompt manager - reset") {
+TEST_CASE("antiprompt manager - reset/clear") {
     ac::llama::AntipromptManager am;
     am.addAntiprompt("cancel");
 
     CHECK_FALSE(am.feedGeneratedText("cance"));  // Partial match, so false
-    am.reset();  // Reset the manager's state, clear antiprompts
-    CHECK_FALSE(am.feedGeneratedText("cancel")); // Should not match, since the state was reset
+    am.reset();  // Reset the manager's antiprompts state
+    CHECK(am.feedGeneratedText("cancel")); // Should match, since the state was reset
+
+    am.clear();  // Clear the manager's antiprompts
+    CHECK_FALSE(am.feedGeneratedText("cancel")); // Should match, since the state was reset
+
     am.addAntiprompt("cancel");// add the antiprompt again
     CHECK(am.feedGeneratedText("cancel"));
 }
