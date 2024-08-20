@@ -122,20 +122,18 @@ TEST_CASE("run ops") {
     ac::Dict opResult;
     unsigned resultsCount = 0;
 
-    h.latch.emplace(1);
     instance->runOp("insta", {{}}, {
         [&](ac::CallbackResult<void> result) {
             if (result.has_error()) {
                 opError = std::move(result.error().text);
                 return;
             }
-            h.latch->count_down();
         },
         [&](ac::Dict result) {
             opResult[resultsCount++] = result;
         }
     });
-    h.latch->wait();
+    instance->synchronize();
 
     CHECK(resultsCount == 1);
     CHECK(opResult[0]["insta"] == "success");
@@ -143,20 +141,18 @@ TEST_CASE("run ops") {
     resultsCount = 0;
     opResult = {};
 
-    h.latch.emplace(1);
     instance->runOp("more", {{}}, {
         [&](ac::CallbackResult<void> result) {
             if (result.has_error()) {
                 opError = std::move(result.error().text);
                 return;
             }
-            h.latch->count_down();
         },
         [&](ac::Dict result) {
             opResult[resultsCount++] = result;
         }
     });
-    h.latch->wait();
+    instance->synchronize();
 
     CHECK(resultsCount == 2);
     CHECK(opResult[0]["some"] == 42);

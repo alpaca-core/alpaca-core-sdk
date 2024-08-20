@@ -159,7 +159,7 @@ void dummy_provider(void) {
     {
         prepareForTest(&s);
         ac_run_op_json_params(s.instance, "op", "{}", NULL, on_op_result, on_op_stream, &s);
-        waitForCompletion();
+        ac_synchronize_instance(s.instance);
 
         ac_dict_ref some = ac_dict_at_key(s.dict, "some");
         CHECK_NOT_NULL(some);
@@ -170,7 +170,7 @@ void dummy_provider(void) {
     {
         prepareForTest(&s);
         ac_run_op_json_params(s.instance, "error", "{\"error\": \"bad op\"}", NULL, on_op_result, on_op_stream, &s);
-        waitForCompletion();
+        ac_synchronize_instance(s.instance);
 
         ac_dict_ref error = ac_dict_at_key(s.dict, "error");
         CHECK_NOT_NULL(error);
@@ -181,7 +181,7 @@ void dummy_provider(void) {
     {
         prepareForTest(&s);
         ac_run_op_json_params(s.instance, "more", "{}", NULL, on_op_result, on_op_stream, &s);
-        waitForCompletion();
+        ac_synchronize_instance(s.instance);
 
         ac_dict_ref more = ac_dict_at_key(s.dict, "more");
         CHECK_NOT_NULL(more);
@@ -192,7 +192,7 @@ void dummy_provider(void) {
     {
         prepareForTest(&s);
         ac_run_op_json_params(s.instance, "insta", "{}", NULL, on_op_result, on_op_stream, &s);
-        waitForCompletion();
+        ac_synchronize_instance(s.instance);
 
         ac_dict_ref insta = ac_dict_at_key(s.dict, "insta");
         CHECK_NOT_NULL(insta);

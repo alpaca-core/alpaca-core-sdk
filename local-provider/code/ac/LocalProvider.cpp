@@ -10,7 +10,7 @@
 #include <astl/move_capture.hpp>
 #include <itlib/shared_from.hpp>
 #include <unordered_map>
-#include <future>
+#include <latch>
 #include <atomic>
 
 namespace ac {
@@ -57,12 +57,11 @@ public:
         }, m_opTaskToken);
     }
     virtual void synchronize() override {
-        std::promise<void> p;
-        auto f = p.get_future();
-        m_executor.pushTask([selfcap, movecap(p)]() mutable {
-            p.set_value();
+        std::latch l(1);
+        m_executor.pushTask([&]() mutable {
+            l.count_down();
         });
-        f.wait();
+        l.wait();
     }
     virtual void initiateAbort(Callback<void> cb) override {
         m_executor.cancelTasksWithToken(m_opTaskToken);
