@@ -65,10 +65,13 @@ TEST_CASE("antiprompt manager - detect") {
 
 TEST_CASE("antiprompt manager - incremental feed") {
     ac::llama::AntipromptManager am;
+    am.addAntiprompt("downstream");
     am.addAntiprompt("shutdown");
 
     CHECK_FALSE(am.feedGeneratedText("shut"));   // Partial match, so false
     CHECK(am.feedGeneratedText("down"));    // Completes the match, so true
+
+    // CHECK_FALSE(am.feedGeneratedText("stream")); // state should be reset after match
 }
 
 TEST_CASE("antiprompt manager - reset") {
