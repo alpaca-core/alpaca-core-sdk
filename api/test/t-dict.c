@@ -182,6 +182,7 @@ void parse_copy_move(void) {
 
     ac_dict_free_root(root);
     ac_dict_free_root(root2);
+    ac_dict_free_root(root3);
 }
 
 void build(void) {
