@@ -4,6 +4,7 @@
 #pragma once
 #include "export.h"
 
+#include <cstdint>
 #include <string>
 #include <string_view>
 

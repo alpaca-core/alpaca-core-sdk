@@ -10,7 +10,6 @@
 #include <string>
 #include <string_view>
 
-
 namespace ac::llama {
 class AC_LLAMA_EXPORT AntipromptManager {
 public:
