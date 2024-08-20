@@ -6,7 +6,7 @@
 #include <ac/llama/Instance.hpp>
 #include <ac/llama/Init.hpp>
 #include <ac/llama/Model.hpp>
-#include <ac/llama/Antiprompt.hpp>
+#include <ac/llama/AntipromptManager.hpp>
 
 #include <ac/LocalProvider.hpp>
 #include <ac/LocalInference.hpp>
@@ -43,7 +43,7 @@ public:
         auto s = m_instance.newSession(astl::move(prompt), SessionParams_fromDict(params));
 
         auto& model = m_instance.model();
-        auto antiprompt = ac::llama::Antiprompt(std::move(antiprompts));
+        auto antiprompt = ac::llama::AntipromptManager(antiprompts);
 
         std::string result;
         for (uint32_t i = 0; i < maxTokens; ++i) {
@@ -53,8 +53,7 @@ public:
             }
 
             auto tokenStr = model.vocab().tokenToString(t);
-            antiprompt.addTokenStr(tokenStr);
-            if (antiprompt.shouldStop()) {
+            if (antiprompt.feedGeneratedText(tokenStr)) {
                 break;
             }
 

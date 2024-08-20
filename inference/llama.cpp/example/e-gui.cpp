@@ -4,7 +4,7 @@
 #include <ac/llama/Init.hpp>
 #include <ac/llama/Model.hpp>
 #include <ac/llama/Instance.hpp>
-#include <ac/llama/Antiprompt.hpp>
+#include <ac/llama/AntipromptManager.hpp>
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -77,11 +77,9 @@ public:
                         m_numTokens = 0;
                         return;
                     }
+
                     auto tokenStr = m_vocab.tokenToString(token);
-
-                    m_antiprompt.addTokenStr(tokenStr);
-
-                    if (m_antiprompt.shouldStop()) {
+                    if (m_antiprompt.feedGeneratedText(tokenStr)) {
                         m_numTokens = 0;
                         return;
                     }
@@ -106,7 +104,7 @@ public:
                 ac::llama::Instance::SessionParams m_params;
                 std::string m_text;
                 ac::llama::Session m_session;
-                ac::llama::Antiprompt m_antiprompt;
+                ac::llama::AntipromptManager m_antiprompt;
                 uint32_t m_numTokens = 0;
             };
 
