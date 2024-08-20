@@ -173,10 +173,10 @@ void parse_copy_move(void) {
     ac_dict_root* root = ac_dict_new_root_from_json(JSON_TEXT, NULL);
     do_parse_test(root);
 
-    ac_dict_root* root2 = ac_dict_new_root_from_copy(ac_dict_make_ref(root));
+    ac_dict_root* root2 = ac_dict_new_root_by_copy(ac_dict_make_ref(root));
     do_parse_test(root2);
 
-    ac_dict_root* root3 = ac_dict_new_root_from_take(ac_dict_make_ref(root));
+    ac_dict_root* root3 = ac_dict_new_root_by_take(ac_dict_make_ref(root));
     CHECK(ac_dict_get_type(ac_dict_make_ref(root)) == ac_dict_value_type_null);
     do_parse_test(root3);
 

@@ -51,7 +51,7 @@ AC_INLINE ac_dict_root* ac_dict_new_root_from_json(const char* json, const char*
     return root;
 }
 
-AC_INLINE ac_dict_root* ac_dict_new_root_from_copy(ac_dict_ref source) {
+AC_INLINE ac_dict_root* ac_dict_new_root_by_copy(ac_dict_ref source) {
     ac_dict_root* root = ac_dict_new_root();
     if (root) {
         ac_dict_copy(ac_dict_make_ref(root), source);
@@ -59,7 +59,7 @@ AC_INLINE ac_dict_root* ac_dict_new_root_from_copy(ac_dict_ref source) {
     return root;
 }
 
-AC_INLINE ac_dict_root* ac_dict_new_root_from_take(ac_dict_ref source) {
+AC_INLINE ac_dict_root* ac_dict_new_root_by_take(ac_dict_ref source) {
     ac_dict_root* root = ac_dict_new_root();
     if (root) {
         ac_dict_take(ac_dict_make_ref(root), source);
