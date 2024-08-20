@@ -43,7 +43,12 @@ public:
         auto s = m_instance.newSession(astl::move(prompt), SessionParams_fromDict(params));
 
         auto& model = m_instance.model();
-        auto antiprompt = ac::llama::AntipromptManager(antiprompts);
+        ac::llama::AntipromptManager antiprompt;
+        for (uint32_t i = 0; i < antiprompts.size(); i++)
+        {
+            antiprompt.addAntiprompt(antiprompts[i]);
+        }
+
 
         std::string result;
         for (uint32_t i = 0; i < maxTokens; ++i) {

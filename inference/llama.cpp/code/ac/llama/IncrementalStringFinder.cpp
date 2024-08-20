@@ -11,7 +11,11 @@ IncrementalStringFinder::IncrementalStringFinder(std::string searchStr)
 {}
 
 bool IncrementalStringFinder::feedText(std::string_view text) {
-    uint32_t promptPos = m_currentPos ? 0 : std::max(int32_t(text.length() - m_searchStr.length()), 0);
+    if (m_searchStr.length() == 0) {
+        return false;
+    }
+
+    uint32_t promptPos = 0;
 
     while(promptPos < text.length() && m_currentPos < m_searchStr.length()) {
         if (m_searchStr[m_currentPos] == text[promptPos]) {

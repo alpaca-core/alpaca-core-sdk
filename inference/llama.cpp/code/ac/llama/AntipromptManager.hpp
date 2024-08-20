@@ -14,7 +14,7 @@
 namespace ac::llama {
 class AC_LLAMA_EXPORT AntipromptManager {
 public:
-    explicit AntipromptManager(const std::vector<std::string>& antiprompts);
+    AntipromptManager() = default;
 
     // adds new antiprompt to check
     void addAntiprompt(std::string_view antiprompt);

@@ -81,8 +81,13 @@ public:
                     , m_params(std::move(params))
                     , m_text(std::move(prompt))
                     , m_session(instance.newSession(m_text, m_params))
-                    , m_antiprompt(std::move(antiprompts))
-                {}
+                {
+                    for (uint32_t i = 0; i < antiprompts.size(); i++)
+                    {
+                        m_antiprompt.addAntiprompt(antiprompts[i]);
+                    }
+
+                }
 
                 const std::string& text() const { return m_text; }
                 const ac::llama::Instance::SessionParams& params() const { return m_params; }

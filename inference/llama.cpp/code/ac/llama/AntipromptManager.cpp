@@ -5,14 +5,6 @@
 
 namespace ac::llama {
 
-AntipromptManager::AntipromptManager(const std::vector<std::string>& antiprompts)
-{
-    m_antiprompts.reserve(antiprompts.size());
-    for (uint32_t i = 0; i < antiprompts.size(); i++) {
-        m_antiprompts.push_back(antiprompts[i]);
-    }
-}
-
 void AntipromptManager::addAntiprompt(std::string_view antiprompt) {
     m_antiprompts.push_back(std::string(antiprompt));
 }
