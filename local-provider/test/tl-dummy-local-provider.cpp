@@ -69,9 +69,13 @@ extern "C" ac_api_provider* create_dummy_provider() {
     return ac::cutil::Provider_to_provider(new ac::LocalProvider);
 }
 
-extern "C" void ac_add_local_inference(ac_api_provider* local_provider) {
+extern "C" void add_dummy_inference(ac_api_provider* local_provider) {
     static DummyLocalInferenceModelLoader loader;
     auto localProvider = dynamic_cast<ac::LocalProvider*>(ac::cutil::Provider_from_provider(local_provider));
     assert(localProvider);
-    localProvider->addLocalInferenceLoader("llama.cpp", loader);
+    localProvider->addLocalInferenceLoader("dummy", loader);
+
+    localProvider->addLocalModel("empty", {});
+    localProvider->addLocalModel("error", {{"type", "dummy"}, {"error", true}});
+    localProvider->addLocalModel("model", {{"type", "dummy"}});
 }

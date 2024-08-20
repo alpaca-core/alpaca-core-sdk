@@ -81,12 +81,18 @@ void dummy_provider(void) {
     CHECK_NOT_NULL(provider);
 
     state s = {0};
-    ac_create_model_json_params(provider, "{\"error\": true}", NULL, on_model_result, on_progress, &s);
-    CHECK_EQ_STR("dummy error", s.last_error);
+    ac_create_model_json_params(provider, "error", "{\"error\": true}", NULL, on_model_result, on_progress, &s);
+    CHECK_EQ_STR("dummy id error", s.last_error);
+    CHECK_NULL(s.model);
+    CHECK_CLOSE(1e-5, 0.2, s.last_progress);
+    s.last_progress = 0;
+
+    ac_create_model_json_params(provider, "model", "{\"error\": true}", NULL, on_model_result, on_progress, &s);
+    CHECK_EQ_STR("dummy param error", s.last_error);
     CHECK_NULL(s.model);
     s.last_progress = 0;
 
-    ac_create_model_json_params(provider, "{}", NULL, on_model_result, on_progress, &s);
+    ac_create_model_json_params(provider, "model", "{}", NULL, on_model_result, on_progress, &s);
     CHECK_EQ_STR("", s.last_error);
     CHECK_NOT_NULL(s.model);
 

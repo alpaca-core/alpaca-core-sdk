@@ -6,4 +6,4 @@
 
 uint64_t get_thread_id(void);
 ac_api_provider* create_dummy_provider(void);
-void ac_add_local_inference(ac_api_provider* local_provider);
+void add_dummy_inference(ac_api_provider* local_provider);

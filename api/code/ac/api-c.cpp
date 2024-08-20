@@ -45,6 +45,7 @@ void ac_free_model(ac_model* m) {
 
 void ac_create_model_json_params(
     ac_api_provider* p,
+    const char* model_id,
     const char* json,
     const char* json_end,
     void (*result_cb)(ac_model* m, const char* error, void* user_data),
@@ -52,7 +53,7 @@ void ac_create_model_json_params(
     void* cb_user_data
 ) {
     auto provider = Provider_from_provider(p);
-    provider->createModel(Dict_parse(json, json_end), {
+    provider->createModel(model_id, Dict_parse(json, json_end), {
         [=](ac::CallbackResult<ac::ModelPtr> result) {
             if (result.has_value()) {
                 result_cb(new ac_model{astl::move(result.value())}, nullptr, cb_user_data);

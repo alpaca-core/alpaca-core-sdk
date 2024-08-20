@@ -91,14 +91,14 @@ void wait_for_cur_step(state* s) {
 void dummy_provider(void) {
     ac_api_provider* provider = create_dummy_provider();
     CHECK_NOT_NULL(provider);
-    ac_add_local_inference(provider);
+    add_dummy_inference(provider);
 
     state s = {0};
     s.main_thread_id = get_thread_id();
     atomic_init(&s.cur_step_done, false);
 
     {
-        ac_create_model_json_params(provider, "{\"type\": \"llama.cpp\", \"error\": true}", NULL, on_model_result, on_progress, &s);
+        ac_create_model_json_params(provider, "error", "{}", NULL, on_model_result, on_progress, &s);
         wait_for_cur_step(&s);
 
         CHECK_EQ_STR("Model couldn't be loaded!", s.last_error);
@@ -108,7 +108,27 @@ void dummy_provider(void) {
     }
 
     {
-        ac_create_model_json_params(provider, "{}", NULL, on_model_result, on_progress, &s);
+        ac_create_model_json_params(provider, "empty", "{\"type\": \"dummy\", \"error\": true}", NULL, on_model_result, on_progress, &s);
+        wait_for_cur_step(&s);
+
+        CHECK_EQ_STR("Model couldn't be loaded!", s.last_error);
+        CHECK_EQ_FLT(0.5f, s.last_progress);
+        CHECK_NULL(s.model);
+        s.last_progress = 0;
+    }
+
+    {
+        ac_create_model_json_params(provider, "model", "{\"error\": true}", NULL, on_model_result, on_progress, &s);
+        wait_for_cur_step(&s);
+
+        CHECK_EQ_STR("Model couldn't be loaded!", s.last_error);
+        CHECK_EQ_FLT(0.5f, s.last_progress);
+        CHECK_NULL(s.model);
+        s.last_progress = 0;
+    }
+
+    {
+        ac_create_model_json_params(provider, "empty", "{}", NULL, on_model_result, on_progress, &s);
         wait_for_cur_step(&s);
 
         CHECK_EQ_STR("[json.exception.out_of_range.403] key 'type' not found", s.last_error);
@@ -116,7 +136,7 @@ void dummy_provider(void) {
     }
 
     {
-        ac_create_model_json_params(provider, "{\"type\": \"llama.cpp\"}", NULL, on_model_result, on_progress, &s);
+        ac_create_model_json_params(provider, "model", "{}", NULL, on_model_result, on_progress, &s);
         wait_for_cur_step(&s);
 
         CHECK_EQ_STR("", s.last_error);

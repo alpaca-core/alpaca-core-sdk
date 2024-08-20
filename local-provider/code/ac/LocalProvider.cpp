@@ -87,7 +87,7 @@ public:
 
                 if (!instance)
                 {
-                    cb.resultCb(itlib::unexpected(ac::Error{ "Instance couldn't be created!" }));
+                    cb.resultCb(itlib::unexpected(ac::Error{"Instance couldn't be created!"}));
                     return;
                 }
 
@@ -105,6 +105,7 @@ public:
 
 class LocalProvider::Impl {
     std::unordered_map<std::string, LocalInferenceModelLoader*, transparent_string_hash, std::equal_to<>> m_loaders;
+    std::unordered_map<std::string, Dict, transparent_string_hash, std::equal_to<>> m_localModels;
 
     // these must the last members (first to be destroyed)
     // if there are pending tasks, they will be finalized here and they may access other members
@@ -121,9 +122,29 @@ public:
         });
     }
 
-    void createModel(Dict params, Callback<ModelPtr> cb) {
-        m_executor.pushTask([this, movecap(params, cb)]() mutable {
+    void addLocalModel(std::string_view id, Dict baseParams) {
+        m_executor.pushTask([this, id = std::string(id), baseParams = astl::move(baseParams)]() mutable {
+            m_localModels[astl::move(id)] = astl::move(baseParams);
+        });
+    }
+
+    void createModel(std::string_view id, Dict params, Callback<ModelPtr> cb) {
+        m_executor.pushTask([this, id = std::string(id), movecap(params, cb)]() mutable {
             try {
+                auto f = m_localModels.find(id);
+                if (f == m_localModels.end()) {
+                    cb.resultCb(itlib::unexpected(ac::Error{"Unknown model id"}));
+                    return;
+                }
+                auto& baseParams = f->second;
+                if (params.is_null()) {
+                    params = Dict::object();
+                }
+
+                if (!baseParams.is_null()) {
+                    params.update(baseParams); // merge with base params (assume object)
+                }
+
                 auto type = params.at("type").get<std::string_view>();
                 auto it = m_loaders.find(type);
                 if (it == m_loaders.end()) {
@@ -141,7 +162,7 @@ public:
 
                 if (!model)
                 {
-                    cb.resultCb(itlib::unexpected(ac::Error{ "Model couldn't be loaded!"}));
+                    cb.resultCb(itlib::unexpected(ac::Error{"Model couldn't be loaded!"}));
                     return;
                 }
 
@@ -159,8 +180,12 @@ public:
 LocalProvider::LocalProvider() : m_impl(std::make_unique<Impl>()) {}
 LocalProvider::~LocalProvider() = default;
 
-void LocalProvider::createModel(Dict params, Callback<ModelPtr> cb) {
-    m_impl->createModel(astl::move(params), astl::move(cb));
+void LocalProvider::addLocalModel(std::string_view id, Dict baseParams) {
+    m_impl->addLocalModel(id, astl::move(baseParams));
+}
+
+void LocalProvider::createModel(std::string_view id, Dict params, Callback<ModelPtr> cb) {
+    m_impl->createModel(id, astl::move(params), astl::move(cb));
 }
 
 void LocalProvider::addLocalInferenceLoader(std::string_view type, LocalInferenceModelLoader& loader) {

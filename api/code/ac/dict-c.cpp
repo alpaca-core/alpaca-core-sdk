@@ -22,6 +22,12 @@ struct ac_dict_iter {
 };
 
 namespace ac::cutil {
+Dict Dict_from_dict_root_consume(ac_dict_root* d) {
+    if (!d) return {};
+    auto ret = std::move(d->dict);
+    ac_dict_free_root(d);
+    return ret;
+}
 ac::Dict& Dict_from_dict_ref(ac_dict_ref ref) {
     assert(ref); // should never be null here
     return *reinterpret_cast<ac::Dict*>(ref);

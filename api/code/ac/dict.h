@@ -4,6 +4,7 @@
 #pragma once
 #include "export.h"
 #include "dict_ref.h"
+#include "dict_root.h"
 #include <astl/inline.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -14,8 +15,6 @@
 #if defined(__cplusplus)
 extern "C" {
 #endif
-
-typedef struct ac_dict_root ac_dict_root;
 
 // return null when there is no error
 // otherwise return a thread-local string with the error

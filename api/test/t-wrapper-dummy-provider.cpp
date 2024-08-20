@@ -50,12 +50,18 @@ class DummyModel final : public ac::Model {
 };
 
 class DummyProvider final : public ac::Provider {
-    void createModel(ac::Dict params, ac::Callback<ac::ModelPtr> cb) override {
+    void createModel(std::string_view id, ac::Dict params, ac::Callback<ac::ModelPtr> cb) override {
         cb.progressCb(0.2f);
+
+        if (id == "error") {
+            cb.resultCb(itlib::unexpected(ac::Error{"dummy id error"}));
+            return;
+        }
+
         cb.progressCb(0.5f);
 
         if (ac::Dict_optValueAt(params, "error", false)) {
-            cb.resultCb(itlib::unexpected(ac::Error{"dummy error"}));
+            cb.resultCb(itlib::unexpected(ac::Error{"dummy param error"}));
             return;
         }
 

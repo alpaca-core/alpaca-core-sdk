@@ -24,6 +24,7 @@ typedef struct ac_model ac_model;
 AC_API_EXPORT void ac_free_model(ac_model* m);
 AC_API_EXPORT void ac_create_model_json_params(
     ac_api_provider* p,
+    const char* model_id,
     const char* json,
     const char* json_end,
     void (*result_cb)(ac_model* m, const char* error, void* user_data),

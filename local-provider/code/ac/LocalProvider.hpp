@@ -17,8 +17,9 @@ class AC_LOCAL_EXPORT LocalProvider final : public Provider {
 public:
     LocalProvider();
     ~LocalProvider();
-    virtual void createModel(Dict params, Callback<ModelPtr> cb) override;
+    virtual void createModel(std::string_view id, Dict params, Callback<ModelPtr> cb) override;
 
+    void addLocalModel(std::string_view id, Dict baseParams);
     void addLocalInferenceLoader(std::string_view type, LocalInferenceModelLoader& loader);
 private:
     class Impl;

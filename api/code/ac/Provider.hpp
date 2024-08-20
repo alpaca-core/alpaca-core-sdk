@@ -13,7 +13,7 @@ class AC_API_EXPORT Provider {
 public:
     virtual ~Provider();
 
-    virtual void createModel(Dict params, Callback<ModelPtr> cb) = 0;
+    virtual void createModel(std::string_view id, Dict params, Callback<ModelPtr> cb) = 0;
 };
 
 }

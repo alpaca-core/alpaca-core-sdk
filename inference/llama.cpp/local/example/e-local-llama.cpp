@@ -22,13 +22,16 @@ int main() {
 
     ac::LocalProvider provider;
     ac::addLocalLlamaInference(provider);
+    provider.addLocalModel(
+        "gpt2",
+        {{"type", "llama.cpp"}, {"gguf", AC_TEST_DATA_LLAMA_DIR "/gpt2-117m-q6_k.gguf"}}
+    );
 
     std::optional<std::latch> latch;
 
     ac::CallbackResult<ac::ModelPtr> modelResult;
     latch.emplace(1);
-    std::string gguf = AC_TEST_DATA_LLAMA_DIR "/gpt2-117m-q6_k.gguf";
-    provider.createModel({{"type", "llama.cpp"}, {"gguf", gguf}}, {
+    provider.createModel("gpt2", {}, {
         [&](ac::CallbackResult<ac::ModelPtr> result) {
             modelResult = std::move(result);
             latch->count_down();
