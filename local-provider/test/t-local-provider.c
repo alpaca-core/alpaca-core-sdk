@@ -6,6 +6,7 @@
 #include <ac-test-util/unity.h>
 
 #include <string.h>
+#include <stdatomic.h>
 
 void setUp(void) {}
 void tearDown(void) {}
@@ -17,10 +18,9 @@ typedef struct state {
     ac_dict_ref dict;
     char last_error[1024];
     float last_progress;
+    atomic_bool cur_step_done;
+    uint64_t main_thread_id;
 } state;
-
-unsigned workToDo = 0;
-uint64_t mainThreadId;
 
 void set_error(state* s, const char* error) {
     if (error) {
@@ -44,9 +44,8 @@ void on_model_result(ac_model* m, const char* error, void* user_data) {
     s->model = m;
     set_error(s, error);
 
-    TEST_ASSERT_NOT_EQUAL_UINT64(mainThreadId, get_thread_id());
-
-    workToDo--;
+    TEST_ASSERT_NOT_EQUAL_UINT64(s->main_thread_id, get_thread_id());
+    atomic_store(&s->cur_step_done, true);
 }
 
 void on_instance_result(ac_instance* i, const char* error, void* user_data) {
@@ -55,9 +54,8 @@ void on_instance_result(ac_instance* i, const char* error, void* user_data) {
     s->instance = i;
     set_error(s, error);
 
-    TEST_ASSERT_NOT_EQUAL_UINT64(mainThreadId, get_thread_id());
-
-    workToDo--;
+    TEST_ASSERT_NOT_EQUAL_UINT64(s->main_thread_id, get_thread_id());
+    atomic_store(&s->cur_step_done, true);
 }
 
 void on_op_result(const char* error, void* user_data) {
@@ -65,9 +63,8 @@ void on_op_result(const char* error, void* user_data) {
     s->last_progress = 0;
     set_error(s, error);
 
-    TEST_ASSERT_NOT_EQUAL_UINT64(mainThreadId, get_thread_id());
-
-    workToDo--;
+    TEST_ASSERT_NOT_EQUAL_UINT64(s->main_thread_id, get_thread_id());
+    atomic_store(&s->cur_step_done, true);
 }
 
 void on_op_stream(ac_dict_ref dict, void* user_data) {
@@ -79,18 +76,16 @@ void on_op_stream(ac_dict_ref dict, void* user_data) {
     s->dict = ac_dict_make_ref(s->dict_root);
     ac_dict_take(s->dict, dict);
 
-    TEST_ASSERT_NOT_EQUAL_UINT64(mainThreadId, get_thread_id());
+    TEST_ASSERT_NOT_EQUAL_UINT64(s->main_thread_id, get_thread_id());
 }
 
-void prepareForTest(state* s) {
-    s->last_progress = 0;
-    workToDo = 1;
-}
-
-void waitForCompletion() {
-    while (workToDo) {
-        continue;
+void wait_for_cur_step(state* s) {
+    // just spin lock
+    // it's the easiest way and effective resource management is not a priority in this test
+    while (!atomic_load(&s->cur_step_done)) {
+        // spin
     }
+    atomic_store(&s->cur_step_done, false); // prepare next step
 }
 
 void dummy_provider(void) {
@@ -99,65 +94,60 @@ void dummy_provider(void) {
     ac_add_local_inference(provider);
 
     state s = {0};
-    mainThreadId = get_thread_id();
+    s.main_thread_id = get_thread_id();
+    atomic_init(&s.cur_step_done, false);
 
     {
-        prepareForTest(&s);
         ac_create_model_json_params(provider, "{\"type\": \"llama.cpp\", \"error\": true}", NULL, on_model_result, on_progress, &s);
-        waitForCompletion();
+        wait_for_cur_step(&s);
 
         CHECK_EQ_STR("Model couldn't be loaded!", s.last_error);
         CHECK_EQ_FLT(0.5f, s.last_progress);
         CHECK_NULL(s.model);
+        s.last_progress = 0;
     }
 
     {
-        prepareForTest(&s);
         ac_create_model_json_params(provider, "{}", NULL, on_model_result, on_progress, &s);
-        waitForCompletion();
+        wait_for_cur_step(&s);
 
         CHECK_EQ_STR("[json.exception.out_of_range.403] key 'type' not found", s.last_error);
         CHECK_NULL(s.model);
     }
 
     {
-        prepareForTest(&s);
         ac_create_model_json_params(provider, "{\"type\": \"llama.cpp\"}", NULL, on_model_result, on_progress, &s);
-        waitForCompletion();
+        wait_for_cur_step(&s);
 
         CHECK_EQ_STR("", s.last_error);
         CHECK_NOT_NULL(s.model);
     }
 
     {
-        prepareForTest(&s);
         ac_create_instance_json_params(s.model, "error", "{\"error\": \"bad inst\"}", NULL, on_instance_result, on_progress, &s);
-        waitForCompletion();
+        wait_for_cur_step(&s);
 
         CHECK_EQ_STR("[json.exception.type_error.302] type must be boolean, but is string", s.last_error);
         CHECK_NULL(s.instance);
     }
 
     {
-        prepareForTest(&s);
         ac_create_instance_json_params(s.model, "error", "{\"error\": true}", NULL, on_instance_result, on_progress, &s);
-        waitForCompletion();
+        wait_for_cur_step(&s);
 
         CHECK_EQ_STR("Instance couldn't be created!", s.last_error);
         CHECK_NULL(s.instance);
     }
 
     {
-        prepareForTest(&s);
         ac_create_instance_json_params(s.model, "insta", "{}", NULL, on_instance_result, on_progress, &s);
-        waitForCompletion();
+        wait_for_cur_step(&s);
 
         CHECK_EQ_STR("", s.last_error);
         CHECK_NOT_NULL(s.instance);
     }
 
     {
-        prepareForTest(&s);
         ac_run_op_json_params(s.instance, "op", "{}", NULL, on_op_result, on_op_stream, &s);
         ac_synchronize_instance(s.instance);
 
@@ -168,7 +158,6 @@ void dummy_provider(void) {
     }
 
     {
-        prepareForTest(&s);
         ac_run_op_json_params(s.instance, "error", "{\"error\": \"bad op\"}", NULL, on_op_result, on_op_stream, &s);
         ac_synchronize_instance(s.instance);
 
@@ -179,7 +168,6 @@ void dummy_provider(void) {
     }
 
     {
-        prepareForTest(&s);
         ac_run_op_json_params(s.instance, "more", "{}", NULL, on_op_result, on_op_stream, &s);
         ac_synchronize_instance(s.instance);
 
@@ -190,7 +178,6 @@ void dummy_provider(void) {
     }
 
     {
-        prepareForTest(&s);
         ac_run_op_json_params(s.instance, "insta", "{}", NULL, on_op_result, on_op_stream, &s);
         ac_synchronize_instance(s.instance);
 

@@ -23,6 +23,9 @@ icm_add_test(
         test-ac-dummy-local-provider
     FOLDER test
 )
+if(MSVC)
+    target_compile_options(test-ac-local-provider-c PRIVATE -experimental:c11atomics)
+endif()
 
 add_doctest_lib_test(provider ac-local
     SOURCES
