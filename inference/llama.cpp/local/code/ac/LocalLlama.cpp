@@ -76,8 +76,8 @@ public:
 class LlamaModel final : public LocalInferenceModel {
     llama::Model m_model;
 public:
-    LlamaModel(const std::string& gguf, llama::Model::Params params)
-        : m_model(gguf.c_str(), params)
+    LlamaModel(const std::string& gguf, llama::ModelLoadProgressCb pcb, llama::Model::Params params)
+        : m_model(gguf.c_str(), std::move(pcb), params)
     {}
 
     virtual std::unique_ptr<LocalInferenceInstance> createInstanceSync(std::string_view type, Dict) override {
@@ -93,14 +93,7 @@ public:
     virtual std::unique_ptr<LocalInferenceModel> loadModelSync(Dict params, std::function<void(float)> progressCb) override {
         auto gguf = params.at("gguf").get<std::string>();
         llama::Model::Params modelParams;
-        modelParams.progressCallbackUserData = (void*)&progressCb;
-        modelParams.progressCallback = [](float progress, void* userData) {
-            auto progressCallback = reinterpret_cast<std::function<void(float)>*>(userData);
-            (*progressCallback)(progress);
-            return true;
-        };
-
-        return std::make_unique<LlamaModel>(gguf, modelParams);
+        return std::make_unique<LlamaModel>(gguf, std::move(progressCb), modelParams);
     }
 };
 }

@@ -32,6 +32,24 @@ std::string_view get_filename(std::string_view path) {
     return path.substr(path.find_last_of('/') + 1);
 }
 
+void printModelLoadProgress(float progress) {
+    const int barWidth = 50;
+    static float currProgress = 0;
+
+    auto delta = int(progress * barWidth) - int(currProgress * barWidth);
+
+    if (delta) {
+        printf("%s", std::string(delta, '=').c_str());
+    }
+
+    currProgress = progress;
+
+    if (progress == 1.f) {
+        std::cout << '\n';
+        currProgress = 0.f;
+    }
+};
+
 // unloadable model
 class UModel {
 public:
@@ -45,7 +63,7 @@ public:
     class State {
     public:
         State(const std::string& ggufPath, const ac::llama::Model::Params& modelParams)
-            : m_model(ggufPath.c_str(), modelParams)
+            : m_model(ggufPath.c_str(), printModelLoadProgress, modelParams)
         {}
 
         class Instance {
@@ -155,25 +173,6 @@ public:
     }
     void load() {
         ac::llama::Model::Params modelParams;
-        modelParams.progressCallback = [](float progress, void*){
-            const int barWidth = 50;
-            static float currProgress = 0;
-
-            auto delta = int(progress * barWidth) - int(currProgress * barWidth);
-
-            if (delta) {
-                printf("%s", std::string(delta, '=').c_str());
-            }
-
-            currProgress = progress;
-
-            if (progress == 1.f) {
-                std::cout << '\n';
-                currProgress = 0.f;
-            }
-
-            return true;
-        };
         m_state.reset(new State(m_ggufPath, modelParams));
     }
 private:

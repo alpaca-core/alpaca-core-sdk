@@ -9,7 +9,7 @@
 namespace ac::llama {
 
 namespace {
-llama_model_params llamaFromModelParams(const Model::Params& params)
+llama_model_params llamaFromModelParams(const Model::Params& params, ModelLoadProgressCb& loadProgressCb)
 {
     llama_model_params llamaParams = llama_model_default_params();
     if (params.gpu) {
@@ -20,16 +20,22 @@ llama_model_params llamaFromModelParams(const Model::Params& params)
     llamaParams.check_tensors = true;
 #endif
 
-    llamaParams.progress_callback = params.progressCallback;
-    llamaParams.progress_callback_user_data = params.progressCallbackUserData;
+    if (loadProgressCb) {
+        llamaParams.progress_callback = +[](float progress, void* userData) {
+            auto progressCallback = reinterpret_cast<ModelLoadProgressCb*>(userData);
+            (*progressCallback)(progress);
+            return true;
+        };
+        llamaParams.progress_callback_user_data = &loadProgressCb;
+    }
 
     return llamaParams;
 }
 } // namespace
 
-Model::Model(const char* pathToGguf, Params params)
+Model::Model(const char* pathToGguf, ModelLoadProgressCb loadProgressCb, Params params)
     : m_params(astl::move(params))
-    , m_lmodel(llama_load_model_from_file(pathToGguf, llamaFromModelParams(m_params)), llama_free_model)
+    , m_lmodel(llama_load_model_from_file(pathToGguf, llamaFromModelParams(m_params, loadProgressCb)), llama_free_model)
 {
     if (!m_lmodel) {
         throw std::runtime_error("Failed to load model");

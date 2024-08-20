@@ -39,7 +39,7 @@ int main() try {
     ////ac::llama::Model model("D:/mod/Mistral-7B-Instruct-v0.1-GGUF/mistral-7b-instruct-v0.1.Q8_0.gguf", {});
     //ac::llama::Model model("D:/mod/gpt2/gguf/gpt2.Q6_K.gguf", {});
     ////ac::llama::Model model("D:/mod/gpt2/gguf-gpt2-chatbot/gpt2-chatbot.Q8_0.gguf", {});
-    ac::llama::Model model(AC_TEST_DATA_LLAMA_DIR "/gpt2-117m-q6_k.gguf", {});
+    ac::llama::Model model(AC_TEST_DATA_LLAMA_DIR "/gpt2-117m-q6_k.gguf", {}, {});
 
     auto hl = model.vocab().tokenize("hello world", true, true);
 

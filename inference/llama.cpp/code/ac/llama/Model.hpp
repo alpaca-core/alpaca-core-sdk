@@ -6,25 +6,23 @@
 #include "Vocab.hpp"
 #include <astl/mem_ext.hpp>
 #include <string>
+#include <functional>
 
 struct llama_model;
 //struct llama_model_params;
 
 namespace ac::llama {
 class Job;
-
-typedef bool (*LlamaProgressCallback)(float progress, void * user_data);
+using ModelLoadProgressCb = std::function<void(float)>;
 
 class AC_LLAMA_EXPORT Model {
 public:
     struct Params {
         bool gpu = true; // try to load data on gpu
         bool vocabOnly = false; // do not load model, only vocab
-        LlamaProgressCallback progressCallback = nullptr; // callback for progress
-        void* progressCallbackUserData = nullptr;
     };
 
-    explicit Model(const char* pathToGguf, Params params);
+    explicit Model(const char* pathToGguf, ModelLoadProgressCb loadProgressCb, Params params);
     ~Model();
 
     const Params& params() const noexcept { return m_params; }
