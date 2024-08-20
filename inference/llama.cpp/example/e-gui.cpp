@@ -82,8 +82,8 @@ public:
                     , m_text(std::move(prompt))
                     , m_session(instance.newSession(m_text, m_params))
                 {
-                    for (const auto& promp : antiprompts) {
-                        m_antiprompt.addAntiprompt(prompt);
+                    for (const auto& ap : antiprompts) {
+                        m_antiprompt.addAntiprompt(ap);
                     }
                 }
 

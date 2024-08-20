@@ -44,8 +44,8 @@ public:
 
         auto& model = m_instance.model();
         ac::llama::AntipromptManager antiprompt;
-        for (const auto& prompt : antiprompts) {
-            antiprompt.addAntiprompt(prompt);
+        for (const auto& ap : antiprompts) {
+            antiprompt.addAntiprompt(ap);
         }
 
         std::string result;
