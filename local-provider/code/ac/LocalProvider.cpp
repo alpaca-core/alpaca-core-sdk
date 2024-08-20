@@ -18,7 +18,7 @@ namespace ac {
 namespace {
 
 // TODO move to astl if used somewhere else
-struct transparent_sting_hash : public std::hash<std::string_view> {
+struct transparent_string_hash : public std::hash<std::string_view> {
     using hash_type = std::hash<std::string_view>;
     using hash_type::operator();
     using is_transparent = void;
@@ -105,7 +105,7 @@ public:
 } // anonymous namespace
 
 class LocalProvider::Impl {
-    std::unordered_map<std::string, LocalInferenceModelLoader*, transparent_sting_hash, std::equal_to<>> m_loaders;
+    std::unordered_map<std::string, LocalInferenceModelLoader*, transparent_string_hash, std::equal_to<>> m_loaders;
 
     // these must the last members (first to be destroyed)
     // if there are pending tasks, they will be finalized here and they may access other members
