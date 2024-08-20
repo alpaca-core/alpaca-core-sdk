@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
+#include "export.h"
+
 #include <string>
 #include <string_view>
 
 namespace ac::llama {
-class IncrementalStringFinder {
+class AC_LLAMA_EXPORT IncrementalStringFinder {
 public:
     IncrementalStringFinder(std::string searchStr = "");
 
