@@ -82,11 +82,9 @@ public:
                     , m_text(std::move(prompt))
                     , m_session(instance.newSession(m_text, m_params))
                 {
-                    for (uint32_t i = 0; i < antiprompts.size(); i++)
-                    {
-                        m_antiprompt.addAntiprompt(antiprompts[i]);
+                    for (const auto& promp : antiprompts) {
+                        m_antiprompt.addAntiprompt(prompt);
                     }
-
                 }
 
                 const std::string& text() const { return m_text; }
