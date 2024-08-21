@@ -114,6 +114,12 @@ int main() try {
 
     ac::whisper::initLibrary();
 
+    auto models = std::to_array({
+        AC_TEST_DATA_WHISPER_DIR "/whisper-base.en-f16.bin",
+        AC_TEST_DATA_WHISPER_DIR "/whisper-tiny.en-f16.bin",
+        AC_TEST_DATA_WHISPER_DIR "/whisper-base-q5_1.bin"
+    });
+
         // main loop
     bool done = false;
     while (!done)
@@ -136,6 +142,42 @@ int main() try {
             ImGui_ImplSDLRenderer2_NewFrame();
             ImGui_ImplSDL2_NewFrame();
             ImGui::NewFrame();
+
+            {
+                // app logic
+                auto* viewport = ImGui::GetMainViewport();
+                ImGui::SetNextWindowPos(viewport->Pos);
+                ImGui::SetNextWindowSize(viewport->Size);
+                ImGui::Begin("#main", nullptr,
+                    ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize);
+
+                ImGui::Text("FPS: %.2f (%.2gms)", io.Framerate, io.Framerate ? 1000.0f / io.Framerate : 0.0f);
+                ImGui::Separator();
+
+                ImGui::BeginTable("##main", 2, ImGuiTableFlags_Resizable);
+                ImGui::TableNextColumn();
+
+                ImGui::Text("Models");
+                ImGui::BeginListBox("##models", {-1, 0});
+                for (auto& m : models) {
+                    ImGui::PushID(&m);
+
+                    std::string name = m.name();
+                    if (m.state()) {
+                        name += " (0 sessions)";
+                    }
+                    else {
+                        name += " (unloaded)";
+                    }
+
+                    if (ImGui::Selectable(name.c_str(), selectedModel == &m)) {
+                        selectedModel = &m;
+                    }
+                    ImGui::PopID();
+                }
+                ImGui::EndListBox();
+                UModel::State* modelState = nullptr;
+            }
 
             // render frame
             ImGui::Render();
