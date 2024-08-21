@@ -103,17 +103,17 @@ std::string_view get_filename(std::string_view path) {
     return path.substr(path.find_last_of('/') + 1);
 }
 
-void my_audio_callback(void *userdata, Uint8 *stream, int len) {
-    if (audio_len ==0)
-        return;
+// void my_audio_callback(void *userdata, Uint8 *stream, int len) {
+//     if (audio_len ==0)
+//         return;
 
-    len = ( len > audio_len ? audio_len : len );
-    //SDL_memcpy (stream, audio_pos, len); 					// simply copy from one buffer into the other
-    SDL_MixAudio(stream, audio_pos, len, SDL_MIX_MAXVOLUME);// mix from one buffer into another
+//     len = ( len > audio_len ? audio_len : len );
+//     //SDL_memcpy (stream, audio_pos, len); 					// simply copy from one buffer into the other
+//     SDL_MixAudio(stream, audio_pos, len, SDL_MIX_MAXVOLUME);// mix from one buffer into another
 
-    audio_pos += len;
-    audio_len -= len;
-}
+//     audio_pos += len;
+//     audio_len -= len;
+// }
 
 class UAudio {
 public:
@@ -136,6 +136,18 @@ public:
 
     bool isLoaded() const {
         return m_pcmf32.size();
+    }
+
+    void play() {
+        // set the callback function
+        // wav_spec.callback = my_audio_callback;
+        // wav_spec.userdata = NULL;
+        // // set our global static variables
+        // audio_pos = wav_buffer; // copy sound buffer
+        // audio_len = wav_length; // copy file length
+        // SDL_OpenAudio()
+        // SDL_MixAudio()
+        // SDL_Pause
     }
 
     const std::vector<float>& pcmf32() { return m_pcmf32; }
