@@ -100,12 +100,13 @@ public:
                     }
 
                     auto tokenStr = m_vocab.tokenToString(token);
+                    m_text += tokenStr;
+
                     if (m_antiprompt.feedGeneratedText(tokenStr)) {
                         m_numTokens = 0;
                         return;
                     }
 
-                    m_text += tokenStr;
                     --m_numTokens;
                 }
 
