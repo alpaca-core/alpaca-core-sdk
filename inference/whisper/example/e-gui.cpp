@@ -34,7 +34,7 @@
 struct WindowState {
     SDL_Window* m_window;
     SDL_Renderer* m_renderer;
-    ImGuiIO m_io;
+    ImGuiIO* m_io;
 };
 
 int sdlError(const char* msg) {
@@ -83,8 +83,8 @@ void deinitSDL(WindowState& state) {
 void initImGui(WindowState& state) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    state.m_io = ImGui::GetIO();
-    state.m_io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    state.m_io = &ImGui::GetIO();
+    state.m_io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
     ImGui::StyleColorsDark();
 
@@ -98,6 +98,136 @@ void deinitImGui() {
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
 }
+
+std::string_view get_filename(std::string_view path) {
+    return path.substr(path.find_last_of('/') + 1);
+}
+
+void my_audio_callback(void *userdata, Uint8 *stream, int len) {
+    if (audio_len ==0)
+        return;
+
+    len = ( len > audio_len ? audio_len : len );
+    //SDL_memcpy (stream, audio_pos, len); 					// simply copy from one buffer into the other
+    SDL_MixAudio(stream, audio_pos, len, SDL_MIX_MAXVOLUME);// mix from one buffer into another
+
+    audio_pos += len;
+    audio_len -= len;
+}
+
+class UAudio {
+public:
+    UAudio(std::string path)
+        : m_path(std::move(path))
+        , m_name(get_filename(m_path))
+    {}
+
+    bool load() {
+        if (isLoaded()) {
+            return true;
+        }
+        return ac::audio::readWav(m_path, m_pcmf32, m_pcmf32s, false);
+    }
+
+    void unload() {
+        m_pcmf32.clear();
+        m_pcmf32s.clear();
+    }
+
+    bool isLoaded() const {
+        return m_pcmf32.size();
+    }
+
+    const std::vector<float>& pcmf32() { return m_pcmf32; }
+
+    const std::vector<std::vector<float>>& pcmf32s() { return m_pcmf32s; }
+
+    std::string_view name() const { return m_name; }
+
+private:
+    std::string m_path;
+    std::string m_name;
+    std::vector<float> m_pcmf32;               // mono-channel F32 PCM
+    std::vector<std::vector<float>> m_pcmf32s; // stereo-channel F32 PCM
+};
+
+// unloadable model
+class UModel {
+public:
+    UModel(std::string binPath) // intentionally implicit
+        : m_binPath(std::move(binPath))
+        , m_name(get_filename(m_binPath))
+    {}
+
+    const std::string& name() const { return m_name; }
+
+    class State {
+    public:
+        State(const std::string& binPath, const ac::whisper::Model::Params& modelParams)
+            : m_model(binPath.c_str(), modelParams)
+        {}
+
+        class Instance {
+        public:
+            Instance(std::string name, ac::whisper::Model& model, const ac::whisper::Instance::InitParams& params)
+                : m_name(std::move(name))
+                , m_instance(model, params)
+            {}
+
+            const std::string& name() const { return m_name; }
+
+            std::string transcribe(UAudio* audio) {
+                assert(audio->isLoaded());
+                std::string res;
+                m_instance.runOp("transcribe", audio->pcmf32(), audio->pcmf32s(), [&res](std::string result){
+                    res = result;
+                });
+
+                return res;
+            }
+
+        private:
+            std::string m_name;
+            ac::whisper::Instance m_instance;
+        };
+
+        Instance* createInstance(const ac::whisper::Instance::InitParams& params) {
+            auto name = std::to_string(m_nextInstanceId++);
+            m_instance.reset(new Instance(name, m_model, params));
+            return m_instance.get();
+        }
+
+        void dropInstance() {
+            m_instance.reset();
+        }
+
+        Instance* instance() const { return m_instance.get(); }
+    private:
+        ac::whisper::Model m_model;
+
+        int m_nextInstanceId = 0;
+        std::unique_ptr<Instance> m_instance;
+    };
+
+    State* state() { return m_state.get(); }
+
+    void unload() {
+        m_state->dropInstance();
+        m_state.reset();
+        JALOG(Info, "unloaded ", m_name);
+    }
+    void load() {
+        ac::whisper::Model::Params modelParams;
+        m_state.reset(new State(m_binPath, modelParams));
+        m_state->createInstance({});
+        JALOG(Info, "loaded ", m_name);
+    }
+private:
+    std::string m_binPath;
+    std::string m_name;
+
+    std::unique_ptr<State> m_state;
+};
 
 int main() try {
     jalog::Instance jl;
@@ -115,12 +245,20 @@ int main() try {
     ac::whisper::initLibrary();
 
     auto models = std::to_array({
-        AC_TEST_DATA_WHISPER_DIR "/whisper-base.en-f16.bin",
-        AC_TEST_DATA_WHISPER_DIR "/whisper-tiny.en-f16.bin",
-        AC_TEST_DATA_WHISPER_DIR "/whisper-base-q5_1.bin"
+        UModel(AC_TEST_DATA_WHISPER_DIR "/whisper-base.en-f16.bin"),
+        UModel(AC_TEST_DATA_WHISPER_DIR "/whisper-tiny.en-f16.bin"),
+        UModel(AC_TEST_DATA_WHISPER_DIR "/whisper-base-q5_1.bin")
     });
+    UModel* selectedModel = models.data();
 
-        // main loop
+    auto audioSamples = std::to_array({
+        UAudio(AC_TEST_DATA_WHISPER_DIR "/as-she-sat.wav"),
+        UAudio(AC_TEST_DATA_WHISPER_DIR "/prentice-hall.wav"),
+        UAudio(AC_TEST_DATA_WHISPER_DIR "/yes.wav")
+    });
+    auto selectedWav = audioSamples.data();
+    std::string lastOutput;
+
     bool done = false;
     while (!done)
     {
@@ -138,54 +276,120 @@ int main() try {
                 event.window.windowID == SDL_GetWindowID(wState.m_window)) {
                 done = true;
             }
+        }
 
-            ImGui_ImplSDLRenderer2_NewFrame();
-            ImGui_ImplSDL2_NewFrame();
-            ImGui::NewFrame();
+        // prepare frame
+        ImGui_ImplSDLRenderer2_NewFrame();
+        ImGui_ImplSDL2_NewFrame();
+        ImGui::NewFrame();
 
-            {
-                // app logic
-                auto* viewport = ImGui::GetMainViewport();
-                ImGui::SetNextWindowPos(viewport->Pos);
-                ImGui::SetNextWindowSize(viewport->Size);
-                ImGui::Begin("#main", nullptr,
-                    ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize);
+        {
+            // app logic
+            auto* viewport = ImGui::GetMainViewport();
+            ImGui::SetNextWindowPos(viewport->Pos);
+            ImGui::SetNextWindowSize(viewport->Size);
+            ImGui::Begin("#main", nullptr,
+                ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoResize);
 
-                ImGui::Text("FPS: %.2f (%.2gms)", io.Framerate, io.Framerate ? 1000.0f / io.Framerate : 0.0f);
+            ImGui::Text("FPS: %.2f (%.2gms)", wState.m_io->Framerate, wState.m_io->Framerate ? 1000.0f / wState.m_io->Framerate : 0.0f);
+            ImGui::Separator();
+
+            ImGui::BeginTable("##main", 2, ImGuiTableFlags_Resizable);
+            ImGui::TableNextColumn();
+
+            ImGui::Text("Models");
+            ImGui::BeginListBox("##models", {-1, 0});
+            for (auto& m : models) {
+                ImGui::PushID(&m);
+
+                std::string name = m.name();
+                name += m.state() ? " (loaded)" : " (unloaded)";
+
+                if (ImGui::Selectable(name.c_str(), selectedModel == &m)) {
+                    selectedModel = &m;
+                }
+                ImGui::PopID();
+            }
+            ImGui::EndListBox();
+
+            UModel::State* modelState = nullptr;
+
+            if (selectedModel) {
+                if (selectedModel->state()) {
+                    if (ImGui::Button("Unload")) {
+                        selectedModel->unload();
+                    }
+                }
+                else {
+                    if (ImGui::Button("Load")) {
+                        selectedModel->load();
+                    }
+                }
+
+                modelState = selectedModel->state();
+            }
+
+            if (modelState) {
                 ImGui::Separator();
+                ImGui::Text("Audio samples");
+                ImGui::BeginListBox("##samples", { -1, 0 });
 
-                ImGui::BeginTable("##main", 2, ImGuiTableFlags_Resizable);
-                ImGui::TableNextColumn();
+                for (auto& s : audioSamples) {
+                    std::string name(s.name());
+                    name += s.isLoaded() ? " (loaded)" : " (unloaded)";
+                    ImGui::PushID(&s);
 
-                ImGui::Text("Models");
-                ImGui::BeginListBox("##models", {-1, 0});
-                for (auto& m : models) {
-                    ImGui::PushID(&m);
-
-                    std::string name = m.name();
-                    if (m.state()) {
-                        name += " (0 sessions)";
-                    }
-                    else {
-                        name += " (unloaded)";
-                    }
-
-                    if (ImGui::Selectable(name.c_str(), selectedModel == &m)) {
-                        selectedModel = &m;
+                    if (ImGui::Selectable(name.c_str(), selectedWav == &s)) {
+                        selectedWav = &s;
                     }
                     ImGui::PopID();
                 }
                 ImGui::EndListBox();
-                UModel::State* modelState = nullptr;
             }
 
-            // render frame
-            ImGui::Render();
-            SDL_RenderSetScale(wState.m_renderer, wState.m_io.DisplayFramebufferScale.x, wState.m_io.DisplayFramebufferScale.y);
-            SDL_RenderClear(wState.m_renderer);
-            ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), wState.m_renderer);
-            SDL_RenderPresent(wState.m_renderer);
+            if (modelState && selectedWav) {
+                if (selectedWav->isLoaded()) {
+                    if (ImGui::Button("Unload Audio")) {
+                        selectedWav->unload();
+                    }
+                }
+                else {
+                    if (ImGui::Button("Load Audio")) {
+                        selectedWav->load();
+                    }
+                }
+            }
+
+
+            ImGui::SameLine();
+
+            if (modelState) {
+                auto instance = modelState->instance();
+                if (selectedWav && instance) {
+                    if (ImGui::Button("Transcribe")) {
+                        if (!selectedWav->isLoaded()) {
+                            selectedWav->load();
+                        }
+                        lastOutput = std::string(selectedWav->name()) + " transcription:\n\n";
+                        lastOutput += instance->transcribe(selectedWav);
+                    }
+                }
+            }
+
+            ImGui::Separator();
+            ImGui::TextWrapped("%s", lastOutput.c_str());
+            ImGui::Separator();
+
+            ImGui::EndTable();
+            ImGui::End();
         }
+
+        // render frame
+        ImGui::Render();
+        SDL_RenderSetScale(wState.m_renderer, wState.m_io->DisplayFramebufferScale.x, wState.m_io->DisplayFramebufferScale.y);
+        SDL_RenderClear(wState.m_renderer);
+        ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), wState.m_renderer);
+        SDL_RenderPresent(wState.m_renderer);
     }
 
     deinitImGui();
