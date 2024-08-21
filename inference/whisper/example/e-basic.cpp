@@ -9,8 +9,7 @@
 #include <ac/whisper/Model.hpp>
 #include <ac/whisper/Instance.hpp>
 
-// common functions
-#include <../whisper.cpp/examples/common.h>
+#include <ac-audio.hpp>
 
 // logging
 #include <jalog/Instance.hpp>
@@ -43,7 +42,7 @@ int main() try {
     std::vector<float> pcmf32;               // mono-channel F32 PCM
     std::vector<std::vector<float>> pcmf32s; // stereo-channel F32 PCM
 
-    if (!::read_wav(audioFile, pcmf32, pcmf32s,/* params.diarize*/ false)) {
+    if (!ac::audio::readWav(audioFile, pcmf32, pcmf32s,/* params.diarize*/ false)) {
         fprintf(stderr, "error: failed to read WAV file '%s'\n", audioFile.c_str());
         return 1;
     }
