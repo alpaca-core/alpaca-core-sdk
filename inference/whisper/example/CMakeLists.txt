@@ -12,3 +12,16 @@ target_link_libraries(${TARGET} PRIVATE
     ac-dev::audio
 )
 set_target_properties(${TARGET} PROPERTIES FOLDER example)
+
+# ====== setup gui example ========
+set(TARGET example-ac-whisper-gui)
+add_executable(${TARGET} e-gui.cpp)
+target_link_libraries(${TARGET} PRIVATE
+    ac::whisper
+    jalog::jalog
+    jalog::sinklib
+    ac-test-data::whisper
+    ac-dev::audio
+    ac-dev::imgui
+)
+set_target_properties(${TARGET} PROPERTIES FOLDER example)
