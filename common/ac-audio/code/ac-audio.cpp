@@ -29,7 +29,7 @@ bool is_wav_buffer(const std::string buf) {
 
 namespace ac::audio {
 bool readWav(
-    const std::string& fname,
+    const std::string& fileName,
     std::vector<float>& pcmf32,
     std::vector<std::vector<float>>& pcmf32s,
     bool stereo) {
@@ -37,7 +37,7 @@ bool readWav(
     drwav wav;
     std::vector<uint8_t> wav_data; // used for pipe input from stdin or ffmpeg decoding output
 
-    if (fname == "-") {
+    if (fileName == "-") {
         {
             #ifdef _WIN32
             _setmode(_fileno(stdin), _O_BINARY);
@@ -61,16 +61,16 @@ bool readWav(
 
         fprintf(stderr, "%s: read %zu bytes from stdin\n", __func__, wav_data.size());
     }
-    else if (is_wav_buffer(fname)) {
-        if (drwav_init_memory(&wav, fname.c_str(), fname.size(), nullptr) == false) {
-            fprintf(stderr, "error: failed to open WAV file from fname buffer\n");
+    else if (is_wav_buffer(fileName)) {
+        if (drwav_init_memory(&wav, fileName.c_str(), fileName.size(), nullptr) == false) {
+            fprintf(stderr, "error: failed to open WAV file from fileName buffer\n");
             return false;
         }
     }
-    else if (drwav_init_file(&wav, fname.c_str(), nullptr) == false) {
+    else if (drwav_init_file(&wav, fileName.c_str(), nullptr) == false) {
 #if defined(WHISPER_FFMPEG)
-        if (ffmpeg_decode_audio(fname, wav_data) != 0) {
-            fprintf(stderr, "error: failed to ffmpeg decode '%s' \n", fname.c_str());
+        if (ffmpeg_decode_audio(fileName, wav_data) != 0) {
+            fprintf(stderr, "error: failed to ffmpeg decode '%s' \n", fileName.c_str());
             return false;
         }
         if (drwav_init_memory(&wav, wav_data.data(), wav_data.size(), nullptr) == false) {
@@ -78,31 +78,31 @@ bool readWav(
             return false;
         }
 #else
-        fprintf(stderr, "error: failed to open '%s' as WAV file\n", fname.c_str());
+        fprintf(stderr, "error: failed to open '%s' as WAV file\n", fileName.c_str());
         return false;
 #endif
     }
 
     if (wav.channels != 1 && wav.channels != 2) {
-        fprintf(stderr, "%s: WAV file '%s' must be mono or stereo\n", __func__, fname.c_str());
+        fprintf(stderr, "%s: WAV file '%s' must be mono or stereo\n", __func__, fileName.c_str());
         drwav_uninit(&wav);
         return false;
     }
 
     if (stereo && wav.channels != 2) {
-        fprintf(stderr, "%s: WAV file '%s' must be stereo for diarization\n", __func__, fname.c_str());
+        fprintf(stderr, "%s: WAV file '%s' must be stereo for diarization\n", __func__, fileName.c_str());
         drwav_uninit(&wav);
         return false;
     }
 
     if (wav.sampleRate != COMMON_SAMPLE_RATE) {
-        fprintf(stderr, "%s: WAV file '%s' must be %i kHz\n", __func__, fname.c_str(), COMMON_SAMPLE_RATE/1000);
+        fprintf(stderr, "%s: WAV file '%s' must be %i kHz\n", __func__, fileName.c_str(), COMMON_SAMPLE_RATE/1000);
         drwav_uninit(&wav);
         return false;
     }
 
     if (wav.bitsPerSample != 16) {
-        fprintf(stderr, "%s: WAV file '%s' must be 16-bit\n", __func__, fname.c_str());
+        fprintf(stderr, "%s: WAV file '%s' must be 16-bit\n", __func__, fileName.c_str());
         drwav_uninit(&wav);
         return false;
     }
@@ -142,12 +142,12 @@ bool readWav(
 }
 
 bool WavWriter::open(
-    const std::string & filename,
+    const std::string& filename,
     const uint32_t sample_rate,
     const uint16_t bits_per_sample,
     const uint16_t channels) {
-    if (open_wav(filename)) {
-        write_header(sample_rate, bits_per_sample, channels);
+    if (openWav(filename)) {
+        writeHeader(sample_rate, bits_per_sample, channels);
     } else {
         return false;
     }
@@ -162,15 +162,15 @@ bool WavWriter::close() {
     return true;
 }
 
-bool WavWriter::write(const float * data, size_t length) {
-    return write_audio(data, length);
+bool WavWriter::write(const float* data, size_t length) {
+    return writeAudio(data, length);
 }
 
 WavWriter::~WavWriter() {
     close();
 }
 
-bool WavWriter::open_wav(const std::string & filename) {
+bool WavWriter::openWav(const std::string& filename) {
     if (filename != m_wavFilename) {
         if (m_file.is_open()) {
             m_file.close();
@@ -184,7 +184,7 @@ bool WavWriter::open_wav(const std::string & filename) {
     return m_file.is_open();
 }
 
-bool WavWriter::write_header(
+bool WavWriter::writeHeader(
     const uint32_t sample_rate,
     const uint16_t bits_per_sample,
     const uint16_t channels) {
@@ -212,7 +212,7 @@ bool WavWriter::write_header(
     return true;
 }
 
-bool WavWriter::write_audio(const float * data, size_t length) {
+bool WavWriter::writeAudio(const float* data, size_t length) {
     for (size_t i = 0; i < length; ++i) {
         const int16_t intSample = int16_t(data[i] * 32767);
         m_file.write(reinterpret_cast<const char *>(&intSample), sizeof(int16_t));
