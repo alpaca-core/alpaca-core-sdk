@@ -141,7 +141,7 @@ bool readWav(
     return true;
 }
 
-bool wavWriter::open(
+bool WavWriter::open(
     const std::string & filename,
     const uint32_t sample_rate,
     const uint16_t bits_per_sample,
@@ -155,76 +155,76 @@ bool wavWriter::open(
     return true;
 }
 
-bool wavWriter::close() {
-    if (file.is_open()) {
-        file.close();
+bool WavWriter::close() {
+    if (m_file.is_open()) {
+        m_file.close();
     }
     return true;
 }
 
-bool wavWriter::write(const float * data, size_t length) {
+bool WavWriter::write(const float * data, size_t length) {
     return write_audio(data, length);
 }
 
-wavWriter::~wavWriter() {
+WavWriter::~WavWriter() {
     close();
 }
 
-bool wavWriter::open_wav(const std::string & filename) {
-    if (filename != wav_filename) {
-        if (file.is_open()) {
-            file.close();
+bool WavWriter::open_wav(const std::string & filename) {
+    if (filename != m_wavFilename) {
+        if (m_file.is_open()) {
+            m_file.close();
         }
     }
-    if (!file.is_open()) {
-        file.open(filename, std::ios::binary);
-        wav_filename = filename;
-        dataSize = 0;
+    if (!m_file.is_open()) {
+        m_file.open(filename, std::ios::binary);
+        m_wavFilename = filename;
+        m_dataSize = 0;
     }
-    return file.is_open();
+    return m_file.is_open();
 }
 
-bool wavWriter::write_header(
+bool WavWriter::write_header(
     const uint32_t sample_rate,
     const uint16_t bits_per_sample,
     const uint16_t channels) {
 
-    file.write("RIFF", 4);
-    file.write("\0\0\0\0", 4);    // Placeholder for file size
-    file.write("WAVE", 4);
-    file.write("fmt ", 4);
+    m_file.write("RIFF", 4);
+    m_file.write("\0\0\0\0", 4);    // Placeholder for file size
+    m_file.write("WAVE", 4);
+    m_file.write("fmt ", 4);
 
     const uint32_t sub_chunk_size = 16;
     const uint16_t audio_format = 1;      // PCM format
     const uint32_t byte_rate = sample_rate * channels * bits_per_sample / 8;
     const uint16_t block_align = channels * bits_per_sample / 8;
 
-    file.write(reinterpret_cast<const char *>(&sub_chunk_size), 4);
-    file.write(reinterpret_cast<const char *>(&audio_format), 2);
-    file.write(reinterpret_cast<const char *>(&channels), 2);
-    file.write(reinterpret_cast<const char *>(&sample_rate), 4);
-    file.write(reinterpret_cast<const char *>(&byte_rate), 4);
-    file.write(reinterpret_cast<const char *>(&block_align), 2);
-    file.write(reinterpret_cast<const char *>(&bits_per_sample), 2);
-    file.write("data", 4);
-    file.write("\0\0\0\0", 4);    // Placeholder for data size
+    m_file.write(reinterpret_cast<const char *>(&sub_chunk_size), 4);
+    m_file.write(reinterpret_cast<const char *>(&audio_format), 2);
+    m_file.write(reinterpret_cast<const char *>(&channels), 2);
+    m_file.write(reinterpret_cast<const char *>(&sample_rate), 4);
+    m_file.write(reinterpret_cast<const char *>(&byte_rate), 4);
+    m_file.write(reinterpret_cast<const char *>(&block_align), 2);
+    m_file.write(reinterpret_cast<const char *>(&bits_per_sample), 2);
+    m_file.write("data", 4);
+    m_file.write("\0\0\0\0", 4);    // Placeholder for data size
 
     return true;
 }
 
-bool wavWriter::write_audio(const float * data, size_t length) {
+bool WavWriter::write_audio(const float * data, size_t length) {
     for (size_t i = 0; i < length; ++i) {
         const int16_t intSample = int16_t(data[i] * 32767);
-        file.write(reinterpret_cast<const char *>(&intSample), sizeof(int16_t));
-        dataSize += sizeof(int16_t);
+        m_file.write(reinterpret_cast<const char *>(&intSample), sizeof(int16_t));
+        m_dataSize += sizeof(int16_t);
     }
-    if (file.is_open()) {
-        file.seekp(4, std::ios::beg);
-        uint32_t fileSize = 36 + dataSize;
-        file.write(reinterpret_cast<char *>(&fileSize), 4);
-        file.seekp(40, std::ios::beg);
-        file.write(reinterpret_cast<char *>(&dataSize), 4);
-        file.seekp(0, std::ios::end);
+    if (m_file.is_open()) {
+        m_file.seekp(4, std::ios::beg);
+        uint32_t fileSize = 36 + m_dataSize;
+        m_file.write(reinterpret_cast<char *>(&fileSize), 4);
+        m_file.seekp(40, std::ios::beg);
+        m_file.write(reinterpret_cast<char *>(&m_dataSize), 4);
+        m_file.seekp(0, std::ios::end);
     }
     return true;
 }

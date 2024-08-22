@@ -12,7 +12,7 @@ namespace ac::audio {
 AC_AUDIO_EXPORT bool readWav(const std::string& fname, std::vector<float>& pcmf32, std::vector<std::vector<float>>& pcmf32s, bool stereo);
 
 // Write PCM data into WAV audio file
-class AC_AUDIO_EXPORT wavWriter {
+class AC_AUDIO_EXPORT WavWriter {
 public:
     bool open(const std::string & filename,
               const uint32_t sample_rate,
@@ -23,7 +23,7 @@ public:
 
     bool write(const float * data, size_t length);
 
-    ~wavWriter();
+    ~WavWriter();
 private:
     bool open_wav(const std::string & filename);
 
@@ -34,9 +34,9 @@ private:
     // It is assumed that PCM data is normalized to a range from -1 to 1
     bool write_audio(const float * data, size_t length);
 
-    std::ofstream file;
-    uint32_t dataSize = 0;
-    std::string wav_filename;
+    std::ofstream m_file;
+    uint32_t m_dataSize = 0;
+    std::string m_wavFilename;
 
 };
 
