@@ -359,22 +359,6 @@ int main() try {
                 ImGui::EndListBox();
             }
 
-            if (modelState && selectedWav) {
-                if (selectedWav->isLoaded()) {
-                    if (ImGui::Button("Unload Audio")) {
-                        selectedWav->unload();
-                    }
-                }
-                else {
-                    if (ImGui::Button("Load Audio")) {
-                        selectedWav->load();
-                    }
-                }
-            }
-
-
-            ImGui::SameLine();
-
             if (modelState) {
                 auto instance = modelState->instance();
                 if (selectedWav && instance) {
