@@ -5,11 +5,12 @@
 #include "export.h"
 #include "api_provider.h"
 #include "dict_ref.h"
+#include "dict_root.h"
 
 // functions implemented in c-api.cpp
 
 // general rules:
-// json_end can be null if the json is null-terminated
+// the ownership of dict_root is transferred to the underlying C++ code
 // the result_cb will be called with an error message if there is an error (and the payload will be null)
 // progress_cb can be null
 
@@ -25,8 +26,7 @@ AC_API_EXPORT void ac_free_model(ac_model* m);
 AC_API_EXPORT void ac_create_model_json_params(
     ac_api_provider* p,
     const char* model_id,
-    const char* json,
-    const char* json_end,
+    ac_dict_root* dict_root,
     void (*result_cb)(ac_model* m, const char* error, void* user_data),
     void (*progress_cb)(float progress, void* user_data),
     void* cb_user_data
@@ -37,8 +37,7 @@ AC_API_EXPORT void ac_free_instance(ac_instance* i);
 AC_API_EXPORT void ac_create_instance_json_params(
     ac_model* m,
     const char* instance_type,
-    const char* json,
-    const char* json_end,
+    ac_dict_root* dict_root,
     void (*result_cb)(ac_instance* i, const char* error, void* user_data),
     void (*progress_cb)(float progress, void* user_data),
     void* cb_user_data
@@ -47,8 +46,7 @@ AC_API_EXPORT void ac_create_instance_json_params(
 AC_API_EXPORT void ac_run_op_json_params(
     ac_instance* i,
     const char* op,
-    const char* json,
-    const char* json_end,
+    ac_dict_root* dict_root,
     void (*result_cb)(const char* error, void* user_data),
     void (*stream_cb)(ac_dict_ref dict, void* user_data),
     void* cb_user_data

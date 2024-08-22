@@ -46,14 +46,13 @@ void ac_free_model(ac_model* m) {
 void ac_create_model_json_params(
     ac_api_provider* p,
     const char* model_id,
-    const char* json,
-    const char* json_end,
+    ac_dict_root* dict_root,
     void (*result_cb)(ac_model* m, const char* error, void* user_data),
     void (*progress_cb)(float progress, void* user_data),
     void* cb_user_data
 ) {
     auto provider = Provider_from_provider(p);
-    provider->createModel(model_id, Dict_parse(json, json_end), {
+    provider->createModel(model_id, Dict_from_dict_root_consume(dict_root), {
         [=](ac::CallbackResult<ac::ModelPtr> result) {
             if (result.has_value()) {
                 result_cb(new ac_model{astl::move(result.value())}, nullptr, cb_user_data);
@@ -77,13 +76,12 @@ void ac_free_instance(ac_instance* i) {
 void ac_create_instance_json_params(
     ac_model* m,
     const char* instance_type,
-    const char* json,
-    const char* json_end,
+    ac_dict_root* dict_root,
     void (*result_cb)(ac_instance* i, const char* error, void* user_data),
     void (*progress_cb)(float progress, void* user_data),
     void* cb_user_data
 ) {
-    m->model->createInstance(instance_type, Dict_parse(json, json_end), {
+    m->model->createInstance(instance_type, Dict_from_dict_root_consume(dict_root), {
         [=](ac::CallbackResult<ac::InstancePtr> result) {
             if (result.has_value()) {
                 result_cb(new ac_instance{astl::move(result.value())}, nullptr, cb_user_data);
@@ -103,13 +101,12 @@ void ac_create_instance_json_params(
 void ac_run_op_json_params(
     ac_instance* i,
     const char* op,
-    const char* json,
-    const char* json_end,
+    ac_dict_root* dict_root,
     void (*result_cb)(const char* error, void* user_data),
     void (*stream_cb)(ac_dict_ref dict, void* user_data),
     void* cb_user_data
 ) {
-    i->instance->runOp(op, Dict_parse(json, json_end), {
+    i->instance->runOp(op, Dict_from_dict_root_consume(dict_root), {
         [=](ac::CallbackResult<void> result) {
             if (result.has_value()) {
                 result_cb(nullptr, cb_user_data);

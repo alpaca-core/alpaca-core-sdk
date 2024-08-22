@@ -112,7 +112,7 @@ int main(void) {
     ac_create_model_json_params(
         local_provider,
         "gpt2",
-        "{}", NULL,
+        ac_dict_new_root_from_json("{}", NULL), 
         on_model_result,
         on_progress,
         &state
@@ -127,7 +127,7 @@ int main(void) {
     ac_create_instance_json_params(
         state.model,
         "general",
-        "{}", NULL,
+        ac_dict_new_root_from_json("{}", NULL),
         on_instance_result,
         on_progress,
         &state
@@ -144,7 +144,7 @@ int main(void) {
     ac_run_op_json_params(
         state.instance,
         "run",
-        "{\"prompt\": \"" PROMPT "\", \"max_tokens\": 20}", NULL,
+        ac_dict_new_root_from_json("{\"prompt\": \"" PROMPT "\", \"max_tokens\": 20}", NULL),
         on_run_op_result,
         on_op_stream,
         &state

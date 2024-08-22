@@ -98,7 +98,29 @@ void dummy_provider(void) {
     atomic_init(&s.cur_step_done, false);
 
     {
-        ac_create_model_json_params(provider, "error", "{}", NULL, on_model_result, on_progress, &s);
+        ac_create_model_json_params(
+            provider, "error",
+            ac_dict_new_root_from_json("{}", NULL),
+            on_model_result, on_progress, &s
+        );
+        wait_for_cur_step(&s);
+
+        CHECK_EQ_STR("Model couldn't be loaded!", s.last_error);
+        CHECK_EQ_FLT(0.5f, s.last_progress);
+        CHECK_NULL(s.model);
+        s.last_progress = 0;
+    }
+
+    // expect the same behavior with param
+    // dict_root = ac_dict_new_root_from_json("{}", NULL) 
+    // AND 
+    // dict_root = NULL
+    {
+        ac_create_model_json_params(
+            provider, "error",
+            NULL,
+            on_model_result, on_progress, &s
+        );
         wait_for_cur_step(&s);
 
         CHECK_EQ_STR("Model couldn't be loaded!", s.last_error);
@@ -108,7 +130,11 @@ void dummy_provider(void) {
     }
 
     {
-        ac_create_model_json_params(provider, "empty", "{\"type\": \"dummy\", \"error\": true}", NULL, on_model_result, on_progress, &s);
+        ac_create_model_json_params(
+            provider, "empty",
+            ac_dict_new_root_from_json("{\"type\": \"dummy\", \"error\": true}", NULL),
+            on_model_result, on_progress, &s
+        );
         wait_for_cur_step(&s);
 
         CHECK_EQ_STR("Model couldn't be loaded!", s.last_error);
@@ -118,7 +144,11 @@ void dummy_provider(void) {
     }
 
     {
-        ac_create_model_json_params(provider, "model", "{\"error\": true}", NULL, on_model_result, on_progress, &s);
+        ac_create_model_json_params(
+            provider, "model",
+            ac_dict_new_root_from_json("{\"error\": true}", NULL),
+            on_model_result, on_progress, &s
+        );
         wait_for_cur_step(&s);
 
         CHECK_EQ_STR("Model couldn't be loaded!", s.last_error);
@@ -128,7 +158,11 @@ void dummy_provider(void) {
     }
 
     {
-        ac_create_model_json_params(provider, "empty", "{}", NULL, on_model_result, on_progress, &s);
+        ac_create_model_json_params(
+            provider, "empty",
+            ac_dict_new_root_from_json("{}", NULL),
+            on_model_result, on_progress, &s
+        );
         wait_for_cur_step(&s);
 
         CHECK_EQ_STR("[json.exception.out_of_range.403] key 'type' not found", s.last_error);
@@ -136,7 +170,25 @@ void dummy_provider(void) {
     }
 
     {
-        ac_create_model_json_params(provider, "model", "{}", NULL, on_model_result, on_progress, &s);
+        ac_create_model_json_params(
+            provider, "empty",
+            NULL,
+            on_model_result, on_progress, &s
+        );
+        wait_for_cur_step(&s);
+
+        CHECK_EQ_STR("[json.exception.out_of_range.403] key 'type' not found", s.last_error);
+        CHECK_NULL(s.model);
+    }
+
+
+    // note: create model with id "model" - successfully
+    {
+        ac_create_model_json_params(
+            provider, "model",
+            ac_dict_new_root_from_json("{}", NULL),
+            on_model_result, on_progress, &s
+        );
         wait_for_cur_step(&s);
 
         CHECK_EQ_STR("", s.last_error);
@@ -144,7 +196,11 @@ void dummy_provider(void) {
     }
 
     {
-        ac_create_instance_json_params(s.model, "error", "{\"error\": \"bad inst\"}", NULL, on_instance_result, on_progress, &s);
+        ac_create_instance_json_params(
+            s.model, "error",
+            ac_dict_new_root_from_json("{\"error\": \"bad inst\"}", NULL),
+            on_instance_result, on_progress, &s
+        );
         wait_for_cur_step(&s);
 
         CHECK_EQ_STR("[json.exception.type_error.302] type must be boolean, but is string", s.last_error);
@@ -152,15 +208,24 @@ void dummy_provider(void) {
     }
 
     {
-        ac_create_instance_json_params(s.model, "error", "{\"error\": true}", NULL, on_instance_result, on_progress, &s);
+        ac_create_instance_json_params(
+            s.model, "error",
+            ac_dict_new_root_from_json("{\"error\": true}", NULL),
+            on_instance_result, on_progress, &s
+        );
         wait_for_cur_step(&s);
 
         CHECK_EQ_STR("Instance couldn't be created!", s.last_error);
         CHECK_NULL(s.instance);
     }
 
+    // note: create model with id "insta" - successfully
     {
-        ac_create_instance_json_params(s.model, "insta", "{}", NULL, on_instance_result, on_progress, &s);
+        ac_create_instance_json_params(
+            s.model, "insta", 
+            ac_dict_new_root_from_json("{}", NULL), 
+            on_instance_result, on_progress, &s
+        );
         wait_for_cur_step(&s);
 
         CHECK_EQ_STR("", s.last_error);
@@ -168,7 +233,11 @@ void dummy_provider(void) {
     }
 
     {
-        ac_run_op_json_params(s.instance, "op", "{}", NULL, on_op_result, on_op_stream, &s);
+        ac_run_op_json_params(
+            s.instance, "op", 
+            ac_dict_new_root_from_json("{}", NULL), 
+            on_op_result, on_op_stream, &s
+        );
         ac_synchronize_instance(s.instance);
 
         ac_dict_ref some = ac_dict_at_key(s.dict, "some");
@@ -178,7 +247,25 @@ void dummy_provider(void) {
     }
 
     {
-        ac_run_op_json_params(s.instance, "error", "{\"error\": \"bad op\"}", NULL, on_op_result, on_op_stream, &s);
+        ac_run_op_json_params(
+            s.instance, "op", 
+            NULL, 
+            on_op_result, on_op_stream, &s
+        );
+        ac_synchronize_instance(s.instance);
+
+        ac_dict_ref some = ac_dict_at_key(s.dict, "some");
+        CHECK_NOT_NULL(some);
+        CHECK_EQ(ac_dict_value_type_number_int, ac_dict_get_type(some));
+        CHECK_EQ(42, ac_dict_get_int_value(some));
+    }
+
+    {
+        ac_run_op_json_params(
+            s.instance, "error", 
+            ac_dict_new_root_from_json("{\"error\": \"bad op\"}", NULL), 
+            on_op_result, on_op_stream, &s
+        );
         ac_synchronize_instance(s.instance);
 
         ac_dict_ref error = ac_dict_at_key(s.dict, "error");
@@ -188,7 +275,11 @@ void dummy_provider(void) {
     }
 
     {
-        ac_run_op_json_params(s.instance, "more", "{}", NULL, on_op_result, on_op_stream, &s);
+        ac_run_op_json_params(
+            s.instance, "more",
+            ac_dict_new_root_from_json("{}", NULL), 
+            on_op_result, on_op_stream, &s
+        );
         ac_synchronize_instance(s.instance);
 
         ac_dict_ref more = ac_dict_at_key(s.dict, "more");
@@ -198,7 +289,39 @@ void dummy_provider(void) {
     }
 
     {
-        ac_run_op_json_params(s.instance, "insta", "{}", NULL, on_op_result, on_op_stream, &s);
+        ac_run_op_json_params(
+            s.instance, "more",
+            NULL, 
+            on_op_result, on_op_stream, &s
+        );
+        ac_synchronize_instance(s.instance);
+
+        ac_dict_ref more = ac_dict_at_key(s.dict, "more");
+        CHECK_NOT_NULL(more);
+        CHECK_EQ(ac_dict_value_type_number_int, ac_dict_get_type(more));
+        CHECK_EQ(1024, ac_dict_get_int_value(more));
+    }
+
+    {
+        ac_run_op_json_params(
+            s.instance, "insta", 
+            ac_dict_new_root_from_json("{}", NULL), 
+            on_op_result, on_op_stream, &s
+        );
+        ac_synchronize_instance(s.instance);
+
+        ac_dict_ref insta = ac_dict_at_key(s.dict, "insta");
+        CHECK_NOT_NULL(insta);
+        CHECK_EQ(ac_dict_value_type_string, ac_dict_get_type(insta));
+        CHECK_EQ_STR("success", ac_dict_get_string_value(insta));
+    }
+
+    {
+        ac_run_op_json_params(
+            s.instance, "insta", 
+            NULL, 
+            on_op_result, on_op_stream, &s
+        );
         ac_synchronize_instance(s.instance);
 
         ac_dict_ref insta = ac_dict_at_key(s.dict, "insta");
