@@ -35,41 +35,178 @@ struct WindowState {
     SDL_Window* m_window;
     SDL_Renderer* m_renderer;
     ImGuiIO* m_io;
+
 };
+
+struct AudioState {
+    SDL_AudioDeviceID m_recordingDeviceId = 0;
+    SDL_AudioDeviceID m_playbackDeviceId = 0;
+    SDL_AudioSpec m_defaultSpec;
+    SDL_AudioSpec m_returnedRecordingSpec;
+    SDL_AudioSpec m_returnedPlaySpec;
+    uint32_t m_bytesPerSecond;
+};
+
+const uint16_t RECORDING_BUFFER_SECONDS = 60;
+const uint16_t MAX_RECORDING_SECONDS = 30;
+
+//Recording data buffer
+std::vector<float>* gRecordingBuffer;
+
+//Size of data buffer
+Uint32 gBufferByteSize = 0;
+
+//Position in data buffer
+Uint32 gBufferBytePosition = 0;
+
+//Maximum position in data buffer for recording
+Uint32 gBufferByteMaxPosition = 0;
+
+// Last recorded position in data buffer
+Uint32 gBufferRecordedPos = 0;
 
 int sdlError(const char* msg) {
     std::cerr << msg << ": " << SDL_GetError() << "\n";
     return -1;
 }
 
-int initSDL(WindowState& state) {
+void audioRecordingCallback(void* userData, Uint8* stream, int len)
+{
+    (void)userData;
+    if (gBufferBytePosition > (gRecordingBuffer->size() *sizeof(float))) {
+        return;
+    }
+    //Copy audio from stream
+    std::memcpy(gRecordingBuffer->data() + (gBufferBytePosition / sizeof(float)), stream, len);
+
+    //Move along buffer
+    gBufferBytePosition += len;
+}
+
+void audioPlaybackCallback(void* userData, Uint8* stream, int len)
+{
+    (void)userData;
+
+    if (gBufferBytePosition > gBufferRecordedPos) {
+        return;
+    }
+
+    //Copy audio to stream
+    std::memcpy(stream, gRecordingBuffer->data() + (gBufferBytePosition / sizeof(float)), len);
+
+    //Move along buffer
+    gBufferBytePosition += len;
+}
+
+int initSDL(WindowState& wState, AudioState& aState) {
     auto sdlError = [](const char* msg){
         std::cerr << msg << ": " << SDL_GetError() << "\n";
         return -1;
     };
 
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER | SDL_INIT_AUDIO) != 0) {
         sdlError("Error: SDL_Init");
     }
 
     SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
 
-    state.m_window = SDL_CreateWindow(
+    wState.m_window = SDL_CreateWindow(
         "Alpaca Core whisper.cpp example",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         1280, 720,
         SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    if (!state.m_window) {
+    if (!wState.m_window) {
         return sdlError("Error: SDL_CreateWindow");
     }
-    state.m_renderer = SDL_CreateRenderer(state.m_window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
-    if (state.m_renderer == nullptr) {
+    wState.m_renderer = SDL_CreateRenderer(wState.m_window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
+    if (wState.m_renderer == nullptr) {
         return sdlError("Error: SDL_CreateRenderer");
     }
 
     SDL_RendererInfo info;
-    SDL_GetRendererInfo(state.m_renderer, &info);
+    SDL_GetRendererInfo(wState.m_renderer, &info);
     JALOG(Info, "SDL_Renderer: ", info.name);
+
+    char* buff;
+    SDL_GetDefaultAudioInfo(&buff, &aState.m_defaultSpec, SDL_TRUE);
+    std::string defaultDeviceName(buff);
+    SDL_free(buff);
+
+    SDL_zero(aState.m_defaultSpec);
+    aState.m_defaultSpec.freq = 16000;
+    aState.m_defaultSpec.format = AUDIO_F32;
+    aState.m_defaultSpec.channels = 1;
+    aState.m_defaultSpec.samples = 16;
+
+    // aState.m_defaultSpec.freq = 44100;
+    // aState.m_defaultSpec.format = AUDIO_S16;
+    // aState.m_defaultSpec.channels = 2;
+    // aState.m_defaultSpec.samples = 4096;
+
+    SDL_AudioSpec desiredRecordingSpec;
+    desiredRecordingSpec = aState.m_defaultSpec;
+    desiredRecordingSpec.callback = audioRecordingCallback;
+
+#if _DEBUG
+    int recordingDeviceCount = SDL_GetNumAudioDevices(SDL_TRUE);
+    for(int i = 0; i < recordingDeviceCount; ++i)
+    {
+        //Get capture device name
+        std::string deviceName(SDL_GetAudioDeviceName(i, SDL_TRUE));
+        if (deviceName == defaultDeviceName) {
+            JALOG(Info, "[Default]: %d - %s\n", i, deviceName);
+        } else {
+            JALOG(Info, "%d - %s\n", i, deviceName);
+        }
+    }
+#endif
+
+    //Open recording device
+    aState.m_recordingDeviceId = SDL_OpenAudioDevice(defaultDeviceName.c_str(),
+        SDL_TRUE,
+        &desiredRecordingSpec,
+        &aState.m_returnedRecordingSpec,
+        SDL_AUDIO_ALLOW_FORMAT_CHANGE);
+
+    // Device failed to open
+    if(aState.m_recordingDeviceId == 0)
+    {
+        //Report error
+        JALOG(Error, "Failed to open recording device! SDL Error: %s", SDL_GetError());
+        return 1;
+    }
+
+    //Default audio spec
+    SDL_AudioSpec desiredPlaybackSpec;
+    desiredPlaybackSpec = aState.m_defaultSpec;
+    desiredPlaybackSpec.callback = audioPlaybackCallback;
+
+    //Open playback device
+    aState.m_playbackDeviceId = SDL_OpenAudioDevice(NULL,
+        SDL_FALSE,
+        &desiredPlaybackSpec,
+        &aState.m_returnedPlaySpec,
+        SDL_AUDIO_ALLOW_FORMAT_CHANGE );
+
+    //Device failed to open
+    if(aState.m_playbackDeviceId == 0)
+    {
+        //Report error
+        JALOG(Error, "Failed to open playback device! SDL Error: %s", SDL_GetError());
+        return 1;
+    }
+
+    //Calculate per sample bytes
+    int bytesPerSample = aState.m_returnedRecordingSpec.channels * (SDL_AUDIO_BITSIZE(aState.m_returnedRecordingSpec.format) / 8);
+
+    //Calculate bytes per second
+    aState.m_bytesPerSecond = aState.m_returnedRecordingSpec.freq * bytesPerSample;
+
+    //Calculate buffer size
+    gBufferByteSize = RECORDING_BUFFER_SECONDS * aState.m_bytesPerSecond;
+
+    //Calculate max buffer use
+    gBufferByteMaxPosition = MAX_RECORDING_SECONDS * aState.m_bytesPerSecond;
 
     return 0;
 }
@@ -103,18 +240,6 @@ std::string_view get_filename(std::string_view path) {
     return path.substr(path.find_last_of('/') + 1);
 }
 
-// void my_audio_callback(void *userdata, Uint8 *stream, int len) {
-//     if (audio_len ==0)
-//         return;
-
-//     len = ( len > audio_len ? audio_len : len );
-//     //SDL_memcpy (stream, audio_pos, len); 					// simply copy from one buffer into the other
-//     SDL_MixAudio(stream, audio_pos, len, SDL_MIX_MAXVOLUME);// mix from one buffer into another
-
-//     audio_pos += len;
-//     audio_len -= len;
-// }
-
 class UAudio {
 public:
     UAudio(std::string path)
@@ -126,6 +251,7 @@ public:
         if (isLoaded()) {
             return true;
         }
+        m_isSaved = true;
         return ac::audio::readWav(m_path, m_pcmf32, m_pcmf32s, false);
     }
 
@@ -135,30 +261,27 @@ public:
     }
 
     bool isLoaded() const {
-        return m_pcmf32.size();
+        return m_pcmf32.size() || m_pcmf32s.size();
     }
 
-    void play() {
-        // set the callback function
-        // wav_spec.callback = my_audio_callback;
-        // wav_spec.userdata = NULL;
-        // // set our global static variables
-        // audio_pos = wav_buffer; // copy sound buffer
-        // audio_len = wav_length; // copy file length
-        // SDL_OpenAudio()
-        // SDL_MixAudio()
-        // SDL_Pause
+    bool isSaved() {
+        return m_isSaved;
     }
 
-    const std::vector<float>& pcmf32() { return m_pcmf32; }
+    bool save() {
+        return m_isSaved;
+    }
 
-    const std::vector<std::vector<float>>& pcmf32s() { return m_pcmf32s; }
+    std::vector<float>& pcmf32() { return m_pcmf32; }
+
+    std::vector<std::vector<float>>& pcmf32s() { return m_pcmf32s; }
 
     std::string_view name() const { return m_name; }
 
 private:
     std::string m_path;
     std::string m_name;
+    bool m_isSaved;
     std::vector<float> m_pcmf32;               // mono-channel F32 PCM
     std::vector<std::vector<float>> m_pcmf32s; // stereo-channel F32 PCM
 };
@@ -246,7 +369,8 @@ int main() try {
     jl.setup().add<jalog::sinks::ColorSink>();
 
     WindowState wState;
-    int res = initSDL(wState);
+    AudioState aState;
+    int res = initSDL(wState, aState);
     if (res != 0) {
         std::cerr << "Error during SDL initialization!\n";
         return res;
@@ -263,7 +387,7 @@ int main() try {
     });
     UModel* selectedModel = models.data();
 
-    auto audioSamples = std::to_array({
+    auto audioSamples = std::vector<UAudio>({
         UAudio(AC_TEST_DATA_WHISPER_DIR "/as-she-sat.wav"),
         UAudio(AC_TEST_DATA_WHISPER_DIR "/prentice-hall.wav"),
         UAudio(AC_TEST_DATA_WHISPER_DIR "/yes.wav")
@@ -272,6 +396,8 @@ int main() try {
     std::string lastOutput;
 
     bool done = false;
+    bool recording = false;
+    bool playing = false;
     while (!done)
     {
         SDL_Event event;
@@ -288,6 +414,44 @@ int main() try {
                 event.window.windowID == SDL_GetWindowID(wState.m_window)) {
                 done = true;
             }
+        }
+
+        if (recording) {
+            SDL_PauseAudioDevice(aState.m_recordingDeviceId, SDL_FALSE );
+
+            //Lock callback
+            SDL_LockAudioDevice(aState.m_recordingDeviceId);
+
+            //Finished recording
+            if(gBufferBytePosition > gBufferByteMaxPosition)
+            {
+                //Stop recording audio
+                SDL_PauseAudioDevice(aState.m_recordingDeviceId, SDL_TRUE );
+                recording = false;
+            }
+
+            //Unlock callback
+            SDL_UnlockAudioDevice(aState.m_recordingDeviceId);
+        }
+
+        if (playing) {
+            SDL_PauseAudioDevice(aState.m_playbackDeviceId, SDL_FALSE);
+
+            //Lock callback
+            SDL_LockAudioDevice(aState.m_playbackDeviceId);
+
+            //Finished playback
+            if(gBufferBytePosition > gBufferRecordedPos)
+            {
+                //Stop playing audio
+                SDL_PauseAudioDevice(aState.m_playbackDeviceId, SDL_TRUE);
+                playing = false;
+            }
+
+            //Unlock callback
+            SDL_UnlockAudioDevice(aState.m_playbackDeviceId);
+        } else {
+
         }
 
         // prepare frame
@@ -370,7 +534,55 @@ int main() try {
                         lastOutput += instance->transcribe(selectedWav);
                     }
                 }
+
+                if (!recording && ImGui::Button("Record")) {
+                    static int32_t cnt = 0;
+                    audioSamples.push_back(UAudio("unnamed" + std::to_string(++cnt)));
+                    //Allocate and initialize byte buffer
+                    audioSamples.back().pcmf32().resize(gBufferByteSize);
+                    std::memset(audioSamples.back().pcmf32().data(), 0, gBufferByteSize);
+
+                    gRecordingBuffer = &audioSamples.back().pcmf32();
+                    gBufferBytePosition = 0;
+                    recording = true;
+                }
+
+                if (recording && ImGui::Button("Stop recording")) {
+                    SDL_PauseAudioDevice(aState.m_recordingDeviceId, SDL_TRUE );
+                    gBufferRecordedPos = gBufferBytePosition;
+                    gRecordingBuffer->resize(gBufferBytePosition / sizeof(float));
+                    recording = false;
+                }
+
+                if (!recording && !playing && ImGui::Button("Play Audio")) {
+                    gBufferBytePosition = 0;
+                    if (selectedWav) {
+                        if (!selectedWav->isLoaded()) {
+                            selectedWav->load();
+                        }
+                        gRecordingBuffer = &selectedWav->pcmf32();
+                        gBufferRecordedPos = selectedWav->pcmf32().size() * sizeof(float);
+                    }
+                    playing = true;
+                }
+
+                if (playing && ImGui::Button("Stop Audio")) {
+                    SDL_PauseAudioDevice(aState.m_playbackDeviceId, SDL_TRUE);
+                    playing = false;
+                }
+
+                if (playing) {
+                    const float max = gBufferRecordedPos / float(aState.m_bytesPerSecond);
+                    float currPos = gBufferBytePosition / float(aState.m_bytesPerSecond);
+                    const float beforeMut = currPos;
+                    ImGui::SliderFloat("Audio: ", &currPos, 0, max);
+
+                    if (beforeMut != currPos) {
+                        gBufferBytePosition = int32_t(currPos) * aState.m_bytesPerSecond;
+                    }
+                }
             }
+
 
             ImGui::Separator();
             ImGui::TextWrapped("%s", lastOutput.c_str());
