@@ -23,11 +23,11 @@ target_include_directories(imgui
         ${imgui_SOURCE_DIR}/misc/cpp
 )
 target_link_libraries(imgui
+    INTERFACE
+        SDL2::SDL2main
     PUBLIC
         splat::splat # for SYMBOL_EXPORT
         SDL2::SDL2
-    INTERFACE
-        SDL2::SDL2main
 )
 target_compile_definitions(imgui PUBLIC IMGUI_USER_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/imgui_userconfig.h")
 add_library(ac-dev::imgui ALIAS imgui)
