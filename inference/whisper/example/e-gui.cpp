@@ -240,7 +240,7 @@ public:
     UAudio(std::string path, bool recorded = false)
         : m_path(std::move(path))
         , m_name(get_filename(m_path))
-        , m_isSaved(false)
+        , m_isSaved(!recorded)
     {}
 
     bool load() {
@@ -266,7 +266,7 @@ public:
 
     bool save(const AudioState& aState) {
         if (m_isSaved) {
-            return;
+            return true;
         }
 
         auto fileName = std::string(AC_TEST_DATA_WHISPER_DIR) + "/" + m_name + ".wav";
