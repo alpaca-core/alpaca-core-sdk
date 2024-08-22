@@ -35,7 +35,7 @@ bool readWav(
     bool stereo) {
 
     drwav wav;
-    std::vector<uint8_t> wav_data; // used for pipe input from stdin or ffmpeg decoding output
+    std::vector<uint8_t> wavData; // used for pipe input from stdin or ffmpeg decoding output
 
     if (fileName == "-") {
         {
@@ -50,16 +50,16 @@ bool readWav(
                 if (n == 0) {
                     break;
                 }
-                wav_data.insert(wav_data.end(), buf, buf + n);
+                wavData.insert(wavData.end(), buf, buf + n);
             }
         }
 
-        if (drwav_init_memory(&wav, wav_data.data(), wav_data.size(), nullptr) == false) {
+        if (drwav_init_memory(&wav, wavData.data(), wavData.size(), nullptr) == false) {
             fprintf(stderr, "error: failed to open WAV file from stdin\n");
             return false;
         }
 
-        fprintf(stderr, "%s: read %zu bytes from stdin\n", __func__, wav_data.size());
+        fprintf(stderr, "%s: read %zu bytes from stdin\n", __func__, wavData.size());
     }
     else if (is_wav_buffer(fileName)) {
         if (drwav_init_memory(&wav, fileName.c_str(), fileName.size(), nullptr) == false) {
@@ -69,11 +69,11 @@ bool readWav(
     }
     else if (drwav_init_file(&wav, fileName.c_str(), nullptr) == false) {
 #if defined(WHISPER_FFMPEG)
-        if (ffmpeg_decode_audio(fileName, wav_data) != 0) {
+        if (ffmpeg_decode_audio(fileName, wavData) != 0) {
             fprintf(stderr, "error: failed to ffmpeg decode '%s' \n", fileName.c_str());
             return false;
         }
-        if (drwav_init_memory(&wav, wav_data.data(), wav_data.size(), nullptr) == false) {
+        if (drwav_init_memory(&wav, wavData.data(), wavData.size(), nullptr) == false) {
             fprintf(stderr, "error: failed to read wav data as wav \n");
             return false;
         }
@@ -107,7 +107,7 @@ bool readWav(
         return false;
     }
 
-    const uint64_t n = wav_data.empty() ? wav.totalPCMFrameCount : wav_data.size()/(wav.channels*wav.bitsPerSample/8);
+    const uint64_t n = wavData.empty() ? wav.totalPCMFrameCount : wavData.size()/(wav.channels*wav.bitsPerSample/8);
 
     std::vector<int16_t> pcm16;
     pcm16.resize(n*wav.channels);
@@ -143,11 +143,11 @@ bool readWav(
 
 bool WavWriter::open(
     const std::string& filename,
-    const uint32_t sample_rate,
-    const uint16_t bits_per_sample,
+    const uint32_t sampleRate,
+    const uint16_t bitsPerSample,
     const uint16_t channels) {
     if (openWav(filename)) {
-        writeHeader(sample_rate, bits_per_sample, channels);
+        writeHeader(sampleRate, bitsPerSample, channels);
     } else {
         return false;
     }
@@ -185,8 +185,8 @@ bool WavWriter::openWav(const std::string& filename) {
 }
 
 bool WavWriter::writeHeader(
-    const uint32_t sample_rate,
-    const uint16_t bits_per_sample,
+    const uint32_t sampleRate,
+    const uint16_t bitsPerSample,
     const uint16_t channels) {
 
     m_file.write("RIFF", 4);
@@ -196,16 +196,16 @@ bool WavWriter::writeHeader(
 
     const uint32_t sub_chunk_size = 16;
     const uint16_t audio_format = 1;      // PCM format
-    const uint32_t byte_rate = sample_rate * channels * bits_per_sample / 8;
-    const uint16_t block_align = channels * bits_per_sample / 8;
+    const uint32_t byte_rate = sampleRate * channels * bitsPerSample / 8;
+    const uint16_t block_align = channels * bitsPerSample / 8;
 
     m_file.write(reinterpret_cast<const char *>(&sub_chunk_size), 4);
     m_file.write(reinterpret_cast<const char *>(&audio_format), 2);
     m_file.write(reinterpret_cast<const char *>(&channels), 2);
-    m_file.write(reinterpret_cast<const char *>(&sample_rate), 4);
+    m_file.write(reinterpret_cast<const char *>(&sampleRate), 4);
     m_file.write(reinterpret_cast<const char *>(&byte_rate), 4);
     m_file.write(reinterpret_cast<const char *>(&block_align), 2);
-    m_file.write(reinterpret_cast<const char *>(&bits_per_sample), 2);
+    m_file.write(reinterpret_cast<const char *>(&bitsPerSample), 2);
     m_file.write("data", 4);
     m_file.write("\0\0\0\0", 4);    // Placeholder for data size
 

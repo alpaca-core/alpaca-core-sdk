@@ -138,11 +138,6 @@ int initSDL(WindowState& wState, AudioState& aState) {
     aState.m_defaultSpec.channels = 1;
     aState.m_defaultSpec.samples = 16;
 
-    // aState.m_defaultSpec.freq = 44100;
-    // aState.m_defaultSpec.format = AUDIO_S16;
-    // aState.m_defaultSpec.channels = 2;
-    // aState.m_defaultSpec.samples = 4096;
-
     SDL_AudioSpec desiredRecordingSpec;
     desiredRecordingSpec = aState.m_defaultSpec;
     desiredRecordingSpec.callback = audioRecordingCallback;
@@ -242,9 +237,10 @@ std::string_view get_filename(std::string_view path) {
 
 class UAudio {
 public:
-    UAudio(std::string path)
+    UAudio(std::string path, bool recorded = false)
         : m_path(std::move(path))
         , m_name(get_filename(m_path))
+        , m_isSaved(false)
     {}
 
     bool load() {
@@ -268,7 +264,22 @@ public:
         return m_isSaved;
     }
 
-    bool save() {
+    bool save(const AudioState& aState) {
+        if (m_isSaved) {
+            return;
+        }
+
+        auto fileName = std::string(AC_TEST_DATA_WHISPER_DIR) + "/" + m_name + ".wav";
+        ac::audio::WavWriter writer;
+         // /2 is because when it was saved, it sounded high pitched without it
+        auto bitPerSample = SDL_AUDIO_BITSIZE(aState.m_returnedRecordingSpec.format) * aState.m_returnedRecordingSpec.channels / 2;
+        writer.open(fileName,
+            aState.m_returnedRecordingSpec.freq,
+            bitPerSample,
+            aState.m_returnedRecordingSpec.channels);
+        writer.write(m_pcmf32.data(), m_pcmf32.size());
+        writer.close();
+        m_isSaved = true;
         return m_isSaved;
     }
 
@@ -511,9 +522,10 @@ int main() try {
                 ImGui::BeginListBox("##samples", { -1, 0 });
 
                 for (auto& s : audioSamples) {
+                    ImGui::PushID(&s);
                     std::string name(s.name());
                     name += s.isLoaded() ? " (loaded)" : " (unloaded)";
-                    ImGui::PushID(&s);
+                    name += s.isSaved() ? "" : " (unsaved)";
 
                     if (ImGui::Selectable(name.c_str(), selectedWav == &s)) {
                         selectedWav = &s;
@@ -537,7 +549,7 @@ int main() try {
 
                 if (!recording && ImGui::Button("Record")) {
                     static int32_t cnt = 0;
-                    audioSamples.push_back(UAudio("unnamed" + std::to_string(++cnt)));
+                    audioSamples.push_back(UAudio("unnamed" + std::to_string(++cnt), true));
                     //Allocate and initialize byte buffer
                     audioSamples.back().pcmf32().resize(gBufferByteSize);
                     std::memset(audioSamples.back().pcmf32().data(), 0, gBufferByteSize);
@@ -580,6 +592,10 @@ int main() try {
                     if (beforeMut != currPos) {
                         gBufferBytePosition = int32_t(currPos) * aState.m_bytesPerSecond;
                     }
+                }
+
+                if (!selectedWav->isSaved() && ImGui::Button("Save Audio")) {
+                    selectedWav->save(aState);
                 }
             }
 
