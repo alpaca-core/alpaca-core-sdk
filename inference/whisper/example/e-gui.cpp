@@ -30,6 +30,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <array>
 
 struct WindowState {
     SDL_Window* m_window;
@@ -375,7 +376,7 @@ private:
     std::unique_ptr<State> m_state;
 };
 
-int main() try {
+int main(int, char**) {
     jalog::Instance jl;
     jl.setup().add<jalog::sinks::ColorSink>();
 
@@ -619,8 +620,4 @@ int main() try {
     deinitImGui();
     deinitSDL(wState);
     return 0;
-}
-catch (const std::exception& e) {
-    std::cerr << "Error: " << e.what() << std::endl;
-    return 1;
 }
