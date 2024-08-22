@@ -574,8 +574,8 @@ int main() try {
                         }
                         gRecordingBuffer = &selectedWav->pcmf32();
                         gBufferRecordedPos = selectedWav->pcmf32().size() * sizeof(float);
+                        playing = true;
                     }
-                    playing = true;
                 }
 
                 if (playing && ImGui::Button("Stop Audio")) {
