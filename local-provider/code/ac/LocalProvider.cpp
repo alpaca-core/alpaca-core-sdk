@@ -8,6 +8,7 @@
 #include <xec/TaskExecutor.hpp>
 #include <xec/ThreadExecution.hpp>
 #include <astl/move_capture.hpp>
+#include <astl/tsumap.hpp>
 #include <itlib/shared_from.hpp>
 #include <unordered_map>
 #include <latch>
@@ -16,13 +17,6 @@
 namespace ac {
 
 namespace {
-
-// TODO move to astl if used somewhere else
-struct transparent_string_hash : public std::hash<std::string_view> {
-    using hash_type = std::hash<std::string_view>;
-    using hash_type::operator();
-    using is_transparent = void;
-};
 
 #define selfcap self = shared_from(this)
 
@@ -104,8 +98,8 @@ public:
 } // anonymous namespace
 
 class LocalProvider::Impl {
-    std::unordered_map<std::string, LocalInferenceModelLoader*, transparent_string_hash, std::equal_to<>> m_loaders;
-    std::unordered_map<std::string, Dict, transparent_string_hash, std::equal_to<>> m_localModels;
+    astl::tsumap<LocalInferenceModelLoader*> m_loaders;
+    astl::tsumap<Dict> m_localModels;
 
     // these must the last members (first to be destroyed)
     // if there are pending tasks, they will be finalized here and they may access other members

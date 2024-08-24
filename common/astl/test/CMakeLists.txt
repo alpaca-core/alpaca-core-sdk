@@ -11,6 +11,7 @@ astl_test(move)
 astl_test(move_capture)
 astl_test(throw_ex)
 astl_test(u8c)
+astl_test(transparent)
 
 icm_add_multiple_build_failure_tests(
     SOURCES
