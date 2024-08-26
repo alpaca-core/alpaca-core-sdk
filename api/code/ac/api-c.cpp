@@ -43,7 +43,7 @@ void ac_free_model(ac_model* m) {
     delete m;
 }
 
-void ac_create_model_json_params(
+void ac_create_model(
     ac_api_provider* p,
     const char* model_id,
     ac_dict_root* dict_root,
@@ -73,7 +73,7 @@ void ac_free_instance(ac_instance* i) {
     delete i;
 }
 
-void ac_create_instance_json_params(
+void ac_create_instance(
     ac_model* m,
     const char* instance_type,
     ac_dict_root* dict_root,
@@ -98,7 +98,7 @@ void ac_create_instance_json_params(
     });
 }
 
-void ac_run_op_json_params(
+void ac_run_op(
     ac_instance* i,
     const char* op,
     ac_dict_root* dict_root,

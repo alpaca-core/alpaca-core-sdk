@@ -10,7 +10,7 @@
 // functions implemented in c-api.cpp
 
 // general rules:
-// the ownership of dict_root is transferred to the underlying C++ code
+// the ownership of dict_root is transferred to function
 // the result_cb will be called with an error message if there is an error (and the payload will be null)
 // progress_cb can be null
 
@@ -23,7 +23,7 @@ AC_API_EXPORT void ac_free_api_provider(ac_api_provider* p);
 
 typedef struct ac_model ac_model;
 AC_API_EXPORT void ac_free_model(ac_model* m);
-AC_API_EXPORT void ac_create_model_json_params(
+AC_API_EXPORT void ac_create_model(
     ac_api_provider* p,
     const char* model_id,
     ac_dict_root* dict_root,
@@ -34,7 +34,7 @@ AC_API_EXPORT void ac_create_model_json_params(
 
 typedef struct ac_instance ac_instance;
 AC_API_EXPORT void ac_free_instance(ac_instance* i);
-AC_API_EXPORT void ac_create_instance_json_params(
+AC_API_EXPORT void ac_create_instance(
     ac_model* m,
     const char* instance_type,
     ac_dict_root* dict_root,
@@ -43,7 +43,7 @@ AC_API_EXPORT void ac_create_instance_json_params(
     void* cb_user_data
 );
 
-AC_API_EXPORT void ac_run_op_json_params(
+AC_API_EXPORT void ac_run_op(
     ac_instance* i,
     const char* op,
     ac_dict_root* dict_root,

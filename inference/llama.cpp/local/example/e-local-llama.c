@@ -109,10 +109,10 @@ int main(void) {
     );
 
     printf("Loading model...\n");
-    ac_create_model_json_params(
+    ac_create_model(
         local_provider,
         "gpt2",
-        ac_dict_new_root_from_json("{}", NULL), 
+        NULL, 
         on_model_result,
         on_progress,
         &state
@@ -124,10 +124,10 @@ int main(void) {
     }
 
     printf("Creating instance...\n");
-    ac_create_instance_json_params(
+    ac_create_instance(
         state.model,
         "general",
-        ac_dict_new_root_from_json("{}", NULL),
+        NULL,
         on_instance_result,
         on_progress,
         &state
@@ -141,7 +141,7 @@ int main(void) {
 #define PROMPT "He was slow to"
     printf("Running op. Prompt: %s\n", PROMPT);
     printf("Generation: ");
-    ac_run_op_json_params(
+    ac_run_op(
         state.instance,
         "run",
         ac_dict_new_root_from_json("{\"prompt\": \"" PROMPT "\", \"max_tokens\": 20}", NULL),
