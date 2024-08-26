@@ -12,6 +12,8 @@ target_include_directories(ac-audio
 target_link_libraries(ac-audio
     PUBLIC
         splat::splat
+        itlib::itlib
+        ac::astl
 )
 target_sources(ac-audio
     PRIVATE

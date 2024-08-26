@@ -8,8 +8,12 @@
 #include <vector>
 #include <fstream>
 
+#include <itlib/span.hpp>
+
 namespace ac::audio {
-AC_AUDIO_EXPORT bool readWav(const std::string& fileName, std::vector<float>& pcmf32, std::vector<std::vector<float>>& pcmf32s, bool stereo);
+AC_AUDIO_EXPORT std::vector<int16_t> loadWavI16Mono(const std::string& path);
+AC_AUDIO_EXPORT std::vector<float> loadWavF32Mono(const std::string& path);
+AC_AUDIO_EXPORT std::vector<float> convertWavI16ToF32(itlib::span<const int16_t> i16);
 
 // Write PCM data into WAV audio file
 class AC_AUDIO_EXPORT WavWriter {
@@ -21,7 +25,7 @@ public:
 
     bool close();
 
-    bool write(const float* data, size_t length);
+    bool write(const int16_t* data, size_t length);
 
     ~WavWriter();
 private:
@@ -32,7 +36,7 @@ private:
                       const uint16_t channels);
 
     // It is assumed that PCM data is normalized to a range from -1 to 1
-    bool writeAudio(const float* data, size_t length);
+    bool writeAudio(const int16_t* data, size_t length);
 
     std::ofstream m_file;
     uint32_t m_dataSize = 0;
