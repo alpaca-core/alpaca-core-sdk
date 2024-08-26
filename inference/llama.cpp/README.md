@@ -21,3 +21,4 @@ As mentioned in the discussion the (maybe distant) future plan is to ditch llama
 * `llama_batch` being used for both input and output makes it hard to propagate the constness of the input buffer. This leads to code having to use non-const buffers, even if we know they're not going to be modified. We should bind the buffer constness to the batch struct itself.
 * The low-level llama context currently takes a rng seed (which is only used for mirostat sampling). A reimplemented context should be deterministic. If an operation requires random numbers, a generator should be provided from the outside.
     * For now we will hide the mirostat sampling altogether and ditch the seed
+* As per [this discussion](https://github.com/alpaca-core/alpaca-core/discussions/53) we should take into account how we want to deal with asset storage and whether we want to abstract the i/o away.
