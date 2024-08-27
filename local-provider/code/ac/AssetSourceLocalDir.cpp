@@ -20,7 +20,7 @@ class AssetSourceLocalDir final : public AssetSource {
 public:
     AssetSourceLocalDir(std::string path)
         : m_path(astl::move(path))
-        , m_id("ld: " + m_path)
+        , m_id("local-dir: " + m_path)
     {}
 
     virtual std::string_view id() const {

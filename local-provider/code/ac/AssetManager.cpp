@@ -20,7 +20,7 @@ class AssetManager::Impl {
     xec::TaskExecutor m_executor;
     xec::ThreadExecution m_execution;
 
-    itlib::flat_map<int, std::unique_ptr<AssetSource>> m_sources;
+    itlib::flat_map<int, std::vector<std::unique_ptr<AssetSource>>> m_sources;
 
     astl::tsumap<AssetInfo> m_assets;
 
@@ -29,15 +29,17 @@ class AssetManager::Impl {
         if (f != m_assets.end()) {
             return f;
         }
-        for (auto& [_, source] : m_sources) {
-            auto basicInfo = source->checkAssetSync(id);
-            if (!basicInfo) continue;
-            auto ret = m_assets.try_emplace(m_assets.end(), id, AssetInfo{
-                .source = source.get(),
-                .size = basicInfo->size,
-                .path = astl::move(basicInfo->path),
-            });
-            return ret;
+        for (auto& [_, sources] : m_sources) {
+            for (auto& source : sources) {
+                auto basicInfo = source->checkAssetSync(id);
+                if (!basicInfo) continue;
+                auto ret = m_assets.try_emplace(m_assets.end(), id, AssetInfo{
+                    .source = source.get(),
+                    .size = basicInfo->size,
+                    .path = astl::move(basicInfo->path),
+                    });
+                return ret;
+            }
         }
         return m_assets.end();
     }
@@ -59,6 +61,9 @@ public:
     void getAsset(std::string id, GetAssetCb cb) {
         m_executor.pushTask([this, movecap(cb, id)]() mutable {
             auto f = getAssetInfo(id);
+            if (f == m_assets.end()) {
+                return cb(id, { .error = "Asset not found" });
+            }
             if (f->second.path) {
                 return cb(f->first, f->second);
             }
@@ -76,7 +81,7 @@ public:
 
     void addSource(std::unique_ptr<AssetSource> source, int priority) {
         m_executor.pushTask([this, movecap(source), priority]() mutable {
-            m_sources[priority] = astl::move(source);
+            m_sources[priority].push_back(astl::move(source));
         });
     }
 };

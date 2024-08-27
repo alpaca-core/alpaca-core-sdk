@@ -18,14 +18,13 @@ public:
     AssetManager();
     ~AssetManager();
 
+    void addSource(std::unique_ptr<AssetSource> source, int priority = 0);
+
     using QueryAssetCb = std::function<void(std::string_view id, const AssetInfo& data)>;
     void queryAsset(std::string id, QueryAssetCb cb);
 
     using GetAssetCb = std::function<void(std::string_view id, const AssetInfo& data)>;
     void getAsset(std::string id, GetAssetCb cb);
-
-    void addSource(std::unique_ptr<AssetSource> source, int priority = 0);
-
 public:
     class Impl;
     std::unique_ptr<Impl> m_impl;

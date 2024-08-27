@@ -11,6 +11,8 @@ TEST_CASE("AssetSourceLocalDir") {
 
     const std::string root = AC_REPO_ROOT;
 
+    CHECK(src->id() == "local-dir: " AC_REPO_ROOT);
+
     {
         auto info = src->checkAssetSync("no-such-file");
         CHECK_FALSE(info);

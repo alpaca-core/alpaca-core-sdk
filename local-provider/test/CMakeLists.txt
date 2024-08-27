@@ -39,3 +39,4 @@ macro(local_test test)
 endmacro()
 
 local_test(AssetSourceLocalDir LIBRARIES ac-dev::repo-root)
+local_test(AssetManager LIBRARIES ac-dev::repo-root)
