@@ -20,3 +20,5 @@ target_sources(ac-audio
     PRIVATE
         code/ac-audio.cpp
 )
+
+ac_add_test_subdir()
