@@ -112,8 +112,8 @@ void dummy_provider(void) {
     }
 
     // expect the same behavior with param
-    // dict_root = ac_dict_new_root_from_json("{}", NULL) 
-    // AND 
+    // dict_root = ac_dict_new_root_from_json("{}", NULL)
+    // AND
     // dict_root = NULL
     {
         ac_create_model(
@@ -210,8 +210,8 @@ void dummy_provider(void) {
     // note: create model with id "insta" - successfully
     {
         ac_create_instance(
-            s.model, "insta", 
-            NULL, 
+            s.model, "insta",
+            NULL,
             on_instance_result, on_progress, &s
         );
         wait_for_cur_step(&s);
@@ -222,8 +222,8 @@ void dummy_provider(void) {
 
     {
         ac_run_op(
-            s.instance, "op", 
-            ac_dict_new_root_from_json("{}", NULL), 
+            s.instance, "op",
+            ac_dict_new_root_from_json("{}", NULL),
             on_op_result, on_op_stream, &s
         );
         ac_synchronize_instance(s.instance);
@@ -235,13 +235,13 @@ void dummy_provider(void) {
     }
 
     // expect the same behavior with param
-    // dict_root = ac_dict_new_root_from_json("{}", NULL) 
-    // AND 
+    // dict_root = ac_dict_new_root_from_json("{}", NULL)
+    // AND
     // dict_root = NULL
     {
         ac_run_op(
-            s.instance, "op", 
-            NULL, 
+            s.instance, "op",
+            NULL,
             on_op_result, on_op_stream, &s
         );
         ac_synchronize_instance(s.instance);
@@ -254,8 +254,8 @@ void dummy_provider(void) {
 
     {
         ac_run_op(
-            s.instance, "error", 
-            ac_dict_new_root_from_json("{\"error\": \"bad op\"}", NULL), 
+            s.instance, "error",
+            ac_dict_new_root_from_json("{\"error\": \"bad op\"}", NULL),
             on_op_result, on_op_stream, &s
         );
         ac_synchronize_instance(s.instance);
@@ -269,7 +269,7 @@ void dummy_provider(void) {
     {
         ac_run_op(
             s.instance, "more",
-            NULL, 
+            NULL,
             on_op_result, on_op_stream, &s
         );
         ac_synchronize_instance(s.instance);
@@ -282,8 +282,8 @@ void dummy_provider(void) {
 
     {
         ac_run_op(
-            s.instance, "insta", 
-            NULL, 
+            s.instance, "insta",
+            NULL,
             on_op_result, on_op_stream, &s
         );
         ac_synchronize_instance(s.instance);
