@@ -12,23 +12,6 @@
 #include <itlib/span.hpp>
 #include <astl/throw_ex.hpp>
 
-namespace {
-bool is_wav_buffer(const std::string buf) {
-    // RIFF ref: https://en.wikipedia.org/wiki/Resource_Interchange_File_Format
-    // WAV ref: https://www.mmsp.ece.mcgill.ca/Documents/AudioFormats/WAVE/WAVE.html
-    if (buf.size() < 12 || buf.substr(0, 4) != "RIFF" || buf.substr(8, 4) != "WAVE") {
-        return false;
-    }
-
-    uint32_t chunk_size = *reinterpret_cast<const uint32_t*>(buf.data() + 4);
-    if (chunk_size + 8 != buf.size()) {
-        return false;
-    }
-
-    return true;
-}
-}
-
 namespace ac::audio {
 bool WavWriter::open(
     const std::string& filename,
@@ -51,7 +34,7 @@ bool WavWriter::close() {
     return true;
 }
 
-bool WavWriter::write(const int16_t* data, size_t length) {
+bool WavWriter::write(const float* data, size_t length) {
     return writeAudio(data, length);
 }
 
@@ -101,7 +84,7 @@ bool WavWriter::writeHeader(
     return true;
 }
 
-bool WavWriter::writeAudio(const int16_t* data, size_t length) {
+bool WavWriter::writeAudio(const float* data, size_t length) {
     for (size_t i = 0; i < length; ++i) {
         const int16_t intSample = int16_t(data[i] * 32767);
         m_file.write(reinterpret_cast<const char *>(&intSample), sizeof(int16_t));
@@ -120,7 +103,6 @@ bool WavWriter::writeAudio(const int16_t* data, size_t length) {
 
 std::pair<std::vector<int16_t>, int> loadWavI16(const std::string& path) {
     drwav wav;
-    throw_ex{} << "Failed to load wav file: " << path;
     if (!drwav_init_file(&wav, path.c_str(), nullptr)) {
         throw_ex{} << "Failed to load wav file: " << path;
     }

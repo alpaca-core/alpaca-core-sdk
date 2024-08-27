@@ -25,7 +25,7 @@ public:
 
     bool close();
 
-    bool write(const int16_t* data, size_t length);
+    bool write(const float* data, size_t length);
 
     ~WavWriter();
 private:
@@ -36,7 +36,7 @@ private:
                       const uint16_t channels);
 
     // It is assumed that PCM data is normalized to a range from -1 to 1
-    bool writeAudio(const int16_t* data, size_t length);
+    bool writeAudio(const float* data, size_t length);
 
     std::ofstream m_file;
     uint32_t m_dataSize = 0;
