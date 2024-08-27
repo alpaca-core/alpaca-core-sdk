@@ -4,7 +4,9 @@
 #include "Instance.hpp"
 #include "Model.hpp"
 #include "Logging.hpp"
+
 #include <whisper.h>
+
 #include <astl/throw_ex.hpp>
 #include <astl/iile.h>
 #include <astl/move.hpp>
@@ -13,6 +15,19 @@
 #include <span>
 
 namespace ac::whisper {
+namespace {
+whisper_sampling_strategy ACToWhisperStrategy(Instance::InitParams::SamplingStrategy strategy) {
+    switch (strategy)
+    {
+    case Instance::InitParams::SamplingStrategy::GREEDY:
+        return whisper_sampling_strategy::WHISPER_SAMPLING_GREEDY;
+    case Instance::InitParams::SamplingStrategy::BEAM_SEARCH:
+        return whisper_sampling_strategy::WHISPER_SAMPLING_BEAM_SEARCH;
+    default:
+        throw_ex{} << "Unknown sampling strategy!";;
+    }
+}
+}
 
 Instance::Instance(Model& model, InitParams)
     : m_model(model)
@@ -49,57 +64,26 @@ std::string Instance::runInference(const float* pcmf32, uint32_t dataSize) {
     float logprob_thold   = -1.00f;
     float grammar_penalty = 100.0f;
     float temperature     = 0.0f;
-    float temperature_inc = 0.2f;
 
-    bool debug_mode      = false;
-    bool translate       = false;
+    // default value means that temperature fallback will not be used
+    float temperature_inc = 0.0f;
+
     bool detect_language = false;
+    std::string language  = "en";
+    bool split_on_word   = false;
     bool diarize         = false;
     bool tinydiarize     = false;
-    bool split_on_word   = false;
-    bool no_fallback     = false;
-    bool output_txt      = false;
-    bool output_vtt      = false;
-    bool output_srt      = false;
-    bool output_wts      = false;
-    bool output_csv      = false;
-    bool output_jsn      = false;
-    bool output_jsn_full = false;
-    bool output_lrc      = false;
-    bool no_prints       = false;
+    bool translate       = false;
     bool print_special   = false;
-    bool print_colors    = false;
     bool print_progress  = false;
     bool no_timestamps   = false;
-    bool log_score       = false;
-    bool use_gpu         = true;
-    bool flash_attn      = false;
-
-    std::string language  = "en";
     std::string prompt;
-    std::string font_path = "/System/Library/Fonts/Supplemental/Courier New Bold.ttf";
-    std::string model     = "models/ggml-base.en.bin";
-    std::string grammar;
-    std::string grammar_rule;
-
-    // [TDRZ] speaker turn string
-    std::string tdrz_speaker_turn = " [SPEAKER_TURN]"; // TODO: set from command line
-
-    // A regular expression that matches tokens to suppress
-    std::string suppress_regex;
-
-    std::string openvino_encode_device = "CPU";
-
-    std::string dtw = "";
-
-    std::vector<std::string> fname_inp = {};
-    std::vector<std::string> fname_out = {};
 
     //grammar_parser::parse_state grammar_parsed;
     } params;
     // run the inference
         {
-            whisper_full_params wparams = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
+            whisper_full_params wparams = whisper_full_default_params(ACToWhisperStrategy(m_params.samplingStrategy));
 
             //const bool use_grammar = (!params.grammar_parsed.rules.empty() && !params.grammar_rule.empty());
             wparams.strategy = WHISPER_SAMPLING_GREEDY;//(params.beam_size > 1 || use_grammar) ? WHISPER_SAMPLING_BEAM_SEARCH : WHISPER_SAMPLING_GREEDY;
@@ -116,24 +100,22 @@ std::string Instance::runInference(const float* pcmf32, uint32_t dataSize) {
             wparams.offset_ms        = params.offset_t_ms;
             wparams.duration_ms      = params.duration_ms;
 
-            wparams.token_timestamps = params.output_wts || params.output_jsn_full || params.max_len > 0;
+            wparams.token_timestamps = params.max_len > 0;
             wparams.thold_pt         = params.word_thold;
-            wparams.max_len          = params.output_wts && params.max_len == 0 ? 60 : params.max_len;
+            wparams.max_len          = params.max_len == 0 ? 60 : params.max_len;
             wparams.split_on_word    = params.split_on_word;
             wparams.audio_ctx        = params.audio_ctx;
 
-            wparams.debug_mode       = params.debug_mode;
+            //wparams.debug_mode       = params.debug_mode;
 
             wparams.tdrz_enable      = params.tinydiarize; // [TDRZ]
-
-            wparams.suppress_regex   = params.suppress_regex.empty() ? nullptr : params.suppress_regex.c_str();
 
             wparams.initial_prompt   = params.prompt.c_str();
 
             wparams.greedy.best_of        = params.best_of;
             wparams.beam_search.beam_size = params.beam_size;
 
-            wparams.temperature_inc  = params.no_fallback ? 0.0f : params.temperature_inc;
+            wparams.temperature_inc  = params.temperature_inc;
             wparams.temperature      = params.temperature;
 
             wparams.entropy_thold    = params.entropy_thold;
