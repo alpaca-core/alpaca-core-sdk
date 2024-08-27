@@ -22,10 +22,10 @@ public:
     explicit Instance(Model& model, InitParams params);
     ~Instance();
 
-    void runOp(std::string_view op, const std::vector<float>& pcmf32, const std::vector<std::vector<float>>& pcmf32s, std::function<void(std::string)> resultCb);
+    void runOp(std::string_view op, const float* pcmf32, uint32_t dataSize, std::function<void(std::string)> resultCb);
 
 private:
-    std::string runInference(const std::vector<float>& pcmf32, const std::vector<std::vector<float>>& pcmf32s);
+    std::string runInference(const float* pcmf32, uint32_t dataSize);
 
     Model& m_model;
 };

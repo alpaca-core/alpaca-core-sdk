@@ -40,17 +40,11 @@ int main() try {
 
     std::string audioFile = AC_TEST_DATA_WHISPER_DIR "/as-she-sat.wav";
     std::vector<float> pcmf32;               // mono-channel F32 PCM
-    std::vector<std::vector<float>> pcmf32s; // stereo-channel F32 PCM
-
-    if (!ac::audio::readWav(audioFile, pcmf32, pcmf32s,/* params.diarize*/ false)) {
-        fprintf(stderr, "error: failed to read WAV file '%s'\n", audioFile.c_str());
-        return 1;
-    }
 
     std::cout << "Transcribing the audio [" << audioFile << "]: \n\n";
 
     // transcript the audio
-    instance.runOp("transcribe", pcmf32, pcmf32s, [](std::string res){
+    instance.runOp("transcribe", pcmf32.data(), pcmf32.size(), [](std::string res){
         std::cout<< res <<'\n';
     });
 

@@ -11,7 +11,6 @@
 
 // imgui & sdl
 #include <imgui.h>
-// #include <imgui_stdlib.h>
 #include <imgui_impl_sdl2.h>
 #include <imgui_impl_sdlrenderer2.h>
 #include <SDL.h>
@@ -48,20 +47,20 @@ struct AudioState {
     uint32_t m_bytesPerSecond;
 };
 
-const uint16_t RECORDING_BUFFER_SECONDS = 60;
-const uint16_t MAX_RECORDING_SECONDS = 30;
+const uint16_t MAX_RECORDING_BUFFER_SECONDS = 30;
 
-//Recording data buffer
+// Recording data buffer
 std::vector<float>* gRecordingBuffer;
+constexpr uint32_t gBufferTypeSize = sizeof(float);
 
-//Size of data buffer
+// Size of data buffer
 Uint32 gBufferByteSize = 0;
 
-//Position in data buffer
+// Position in data buffer
 Uint32 gBufferBytePosition = 0;
 
-//Maximum position in data buffer for recording
-Uint32 gBufferByteMaxPosition = 0;
+// Maximum position in data buffer for recording
+//Uint32 gBufferByteMaxPosition = 0;
 
 // Last recorded position in data buffer
 Uint32 gBufferRecordedPos = 0;
@@ -74,11 +73,11 @@ int sdlError(const char* msg) {
 void audioRecordingCallback(void* userData, Uint8* stream, int len)
 {
     (void)userData;
-    if (gBufferBytePosition > (gRecordingBuffer->size() *sizeof(float))) {
+    if (gBufferBytePosition > (gRecordingBuffer->size() * gBufferTypeSize)) {
         return;
     }
     //Copy audio from stream
-    std::memcpy(gRecordingBuffer->data() + (gBufferBytePosition / sizeof(float)), stream, len);
+    std::memcpy(gRecordingBuffer->data() + (gBufferBytePosition / gBufferTypeSize), stream, len);
 
     //Move along buffer
     gBufferBytePosition += len;
@@ -93,7 +92,7 @@ void audioPlaybackCallback(void* userData, Uint8* stream, int len)
     }
 
     //Copy audio to stream
-    std::memcpy(stream, gRecordingBuffer->data() + (gBufferBytePosition / sizeof(float)), len);
+    std::memcpy(stream, gRecordingBuffer->data() + (gBufferBytePosition / gBufferTypeSize), len);
 
     //Move along buffer
     gBufferBytePosition += len;
@@ -199,10 +198,10 @@ int initSDL(WindowState& wState, AudioState& aState) {
     aState.m_bytesPerSecond = aState.m_returnedRecordingSpec.freq * bytesPerSample;
 
     //Calculate buffer size
-    gBufferByteSize = RECORDING_BUFFER_SECONDS * aState.m_bytesPerSecond;
+    gBufferByteSize = MAX_RECORDING_BUFFER_SECONDS * aState.m_bytesPerSecond;
 
     //Calculate max buffer use
-    gBufferByteMaxPosition = MAX_RECORDING_SECONDS * aState.m_bytesPerSecond;
+    //gBufferByteMaxPosition = MAX_RECORDING_BUFFER_SECONDS * aState.m_bytesPerSecond;
 
     return 0;
 }
@@ -244,21 +243,21 @@ public:
         , m_isSaved(!recorded)
     {}
 
-    bool load() {
+    void load() {
         if (isLoaded()) {
-            return true;
+            return;
         }
+
         m_isSaved = true;
-        return ac::audio::readWav(m_path, m_pcmf32, m_pcmf32s, false);
+        m_pcmf32 = ac::audio::loadWavF32Mono(m_path);
     }
 
     void unload() {
         m_pcmf32.clear();
-        m_pcmf32s.clear();
     }
 
     bool isLoaded() const {
-        return m_pcmf32.size() || m_pcmf32s.size();
+        return m_pcmf32.size();
     }
 
     bool isSaved() {
@@ -286,8 +285,6 @@ public:
 
     std::vector<float>& pcmf32() { return m_pcmf32; }
 
-    std::vector<std::vector<float>>& pcmf32s() { return m_pcmf32s; }
-
     std::string_view name() const { return m_name; }
 
 private:
@@ -295,7 +292,6 @@ private:
     std::string m_name;
     bool m_isSaved;
     std::vector<float> m_pcmf32;               // mono-channel F32 PCM
-    std::vector<std::vector<float>> m_pcmf32s; // stereo-channel F32 PCM
 };
 
 // unloadable model
@@ -326,7 +322,7 @@ public:
             std::string transcribe(UAudio* audio) {
                 assert(audio->isLoaded());
                 std::string res;
-                m_instance.runOp("transcribe", audio->pcmf32(), audio->pcmf32s(), [&res](std::string result){
+                m_instance.runOp("transcribe", audio->pcmf32().data(), audio->pcmf32().size(), [&res](std::string result){
                     res = result;
                 });
 
@@ -435,7 +431,7 @@ int main(int, char**) {
             SDL_LockAudioDevice(aState.m_recordingDeviceId);
 
             //Finished recording
-            if(gBufferBytePosition > gBufferByteMaxPosition)
+            if(gBufferBytePosition > gBufferByteSize)
             {
                 //Stop recording audio
                 SDL_PauseAudioDevice(aState.m_recordingDeviceId, SDL_TRUE );
@@ -551,6 +547,7 @@ int main(int, char**) {
                 if (!recording && ImGui::Button("Record")) {
                     static int32_t cnt = 0;
                     audioSamples.push_back(UAudio("unnamed" + std::to_string(++cnt), true));
+
                     //Allocate and initialize byte buffer
                     audioSamples.back().pcmf32().resize(gBufferByteSize);
                     std::memset(audioSamples.back().pcmf32().data(), 0, gBufferByteSize);
@@ -558,12 +555,13 @@ int main(int, char**) {
                     gRecordingBuffer = &audioSamples.back().pcmf32();
                     gBufferBytePosition = 0;
                     recording = true;
+                    selectedWav = &audioSamples.back();
                 }
 
                 if (recording && ImGui::Button("Stop recording")) {
                     SDL_PauseAudioDevice(aState.m_recordingDeviceId, SDL_TRUE );
                     gBufferRecordedPos = gBufferBytePosition;
-                    gRecordingBuffer->resize(gBufferBytePosition / sizeof(float));
+                    gRecordingBuffer->resize(gBufferBytePosition / gBufferTypeSize);
                     recording = false;
                 }
 
@@ -574,7 +572,7 @@ int main(int, char**) {
                             selectedWav->load();
                         }
                         gRecordingBuffer = &selectedWav->pcmf32();
-                        gBufferRecordedPos = selectedWav->pcmf32().size() * sizeof(float);
+                        gBufferRecordedPos = gRecordingBuffer->size() * gBufferTypeSize;
                         playing = true;
                     }
                 }

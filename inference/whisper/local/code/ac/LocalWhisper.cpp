@@ -26,12 +26,14 @@ public:
     {}
 
     void run(Dict params, std::function<void(Dict)> streamCb) {
-        auto pcmf32 = Dict_optValueAt(params, "audioBinaryMono", std::vector<float>{});
-        auto pcmf32s = Dict_optValueAt(params, "audioBinaryStereo", std::vector<std::vector<float>>{});
+        auto value = params.find("audioBinaryMono");
+        assert(value->is_binary());
 
-        assert(pcmf32.size() || pcmf32s.size()); // sanity
+        auto pcmu8 = value->get_binary();
+        auto pcmf32 = reinterpret_cast<const float*>(pcmu8.data());
+        auto pcmf32Size = pcmu8.size() / sizeof(float);
 
-        m_instance.runOp("transcribe", pcmf32, pcmf32s, [&](std::string res){
+        m_instance.runOp("transcribe", pcmf32, pcmf32Size, [&](std::string res){
             streamCb({{"result", astl::move(res)}});
         });
     }

@@ -21,16 +21,16 @@ Instance::Instance(Model& model, InitParams)
 Instance::~Instance() = default;
 
 void Instance::runOp(std::string_view op,
-    const std::vector<float>& pcmf32,
-    const std::vector<std::vector<float>>& pcmf32s,
+    const float* pcmf32,
+    uint32_t dataSize,
     std::function<void(std::string)> resultCb) {
     if (op == "transcribe") {
-        std::string res = runInference(pcmf32, pcmf32s);
+        std::string res = runInference(pcmf32, dataSize);
         resultCb(res);
     }
 }
 
-std::string Instance::runInference(const std::vector<float>& pcmf32, const std::vector<std::vector<float>>& pcmf32s) {
+std::string Instance::runInference(const float* pcmf32, uint32_t dataSize) {
     struct whisper_params {
     int32_t n_threads     = 16;//std::min(4, (int32_t) std::thread::hardware_concurrency());
     int32_t n_processors  = 1;
@@ -193,7 +193,7 @@ std::string Instance::runInference(const std::vector<float>& pcmf32, const std::
                 wparams.abort_callback_user_data = &is_aborted;
             }
 
-            if (whisper_full_parallel(m_model.context(), wparams, pcmf32.data(), pcmf32.size(), params.n_processors) != 0) {
+            if (whisper_full_parallel(m_model.context(), wparams, pcmf32, dataSize, params.n_processors) != 0) {
                 fprintf(stderr, "failed to process audio!\n");
                 return "";
             }
@@ -205,14 +205,7 @@ std::string Instance::runInference(const std::vector<float>& pcmf32, const std::
         const char * text = whisper_full_get_segment_text(m_model.context(), i);
         std::string speaker = "";
 
-        if (params.diarize && pcmf32s.size() == 2)
-        {
-            // const int64_t t0 = whisper_full_get_segment_t0(m_model.context(), i);
-            // const int64_t t1 = whisper_full_get_segment_t1(m_model.context(), i);
-            speaker = "0";//estimate_diarization_speaker(pcmf32s, t0, t1);
-        }
-
-         result += speaker + text + "\n";
+        result += speaker + text + "\n";
     }
 
     return result;

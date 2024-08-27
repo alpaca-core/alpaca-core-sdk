@@ -6,6 +6,7 @@
 
 #include <ac/Model.hpp>
 #include <ac/Instance.hpp>
+#include <ac/Dict.hpp>
 
 #include <jalog/Instance.hpp>
 #include <jalog/sinks/ColorSink.hpp>
@@ -17,6 +18,13 @@
 #include "ac-test-data-whisper-dir.h"
 
 #include "ac-audio.hpp"
+
+ac::Blob convertF32ToBlob(std::span<float> f32data) {
+    ac::Blob blob;
+    blob.resize(f32data.size() * sizeof(float));
+    memcpy(blob.data(), f32data.data(), blob.size());
+    return blob;
+}
 
 int main() {
     jalog::Instance jl;
@@ -78,18 +86,15 @@ int main() {
     auto instance = std::move(instanceResult.value());
 
     std::string modelBinFilePath = AC_TEST_DATA_WHISPER_DIR "/as-she-sat.wav";
-    std::vector<float> pcmf32;
-    std::vector<std::vector<float>> pcmf32s;
+    auto pcmf32 = ac::audio::loadWavF32Mono(modelBinFilePath);
+    auto audioBlob = convertF32ToBlob(pcmf32);
 
-    if (!ac::audio::readWav(modelBinFilePath, pcmf32, pcmf32s, false)) {
-        std::cout << "Error: Couldn't read wav provided file! \n";
-        return 1;
-    }
-    ;
+    std::cout << "Local-whisper: Transcribing the audio [" << modelBinFilePath << "]: \n\n";
 
     std::string opError;
     latch.emplace(1);
-    instance->runOp("run", {{"audioBinaryMono", pcmf32}, {"audioBinaryStereo", pcmf32s}}, {
+
+    instance->runOp("run", {{"audioBinaryMono", ac::Dict::binary(std::move(audioBlob))}}, {
         [&](ac::CallbackResult<void> result) {
             if (result.has_error()) {
                 opError = std::move(result.error().text);
