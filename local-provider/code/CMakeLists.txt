@@ -18,6 +18,9 @@ target_sources(ac-local PRIVATE
     ac/LocalInference.hpp
     ac/LocalInference.cpp
 
+    ac/AssetManager.hpp
+    ac/AssetManager.cpp
+
     ac/local_provider.h
     ac/local_provider.cpp
 )

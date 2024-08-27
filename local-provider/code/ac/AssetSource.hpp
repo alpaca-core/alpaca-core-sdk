@@ -5,7 +5,7 @@
 #include "export.h"
 #include <itlib/expected.hpp>
 #include <string_view>
-#include <funtional>
+#include <functional>
 
 namespace ac {
 
@@ -22,8 +22,8 @@ public:
         std::optional<std::string> path;
     };
 
-    BasicAssetInfo checkAssetSync(std::string_view id) = 0;
-    itlib::expected<BasicAssetInfo, std::string> fetchAssetSync(std::string_view id, std::function<float> progressCb) = 0;
+    virtual std::optional<BasicAssetInfo> checkAssetSync(std::string_view id) = 0;
+    virtual itlib::expected<BasicAssetInfo, std::string> fetchAssetSync(std::string_view id, std::function<void(float)> progressCb) = 0;
 };
 
 }

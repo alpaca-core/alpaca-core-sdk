@@ -4,25 +4,27 @@
 #pragma once
 #include "export.h"
 #include "AssetInfo.hpp"
+#include <string>
 #include <string_view>
 #include <memory>
-#include <funtional>
+#include <functional>
 
 namespace ac {
 
-class AssetManagerLayer;
+class AssetSource;
 
 class AC_LOCAL_EXPORT AssetManager {
 public:
     AssetManager();
     ~AssetManager();
 
-    void queryAsset(std::string_view id,
-        std::function<void(std::string_view id, const AssetInfo& data)> cb);
+    using QueryAssetCb = std::function<void(std::string_view id, const AssetInfo& data)>;
+    void queryAsset(std::string id, QueryAssetCb cb);
 
-    void getAsset(std::string_view id,
-        std::function<void(std::string_view id, const AssetInfo& data, float progress)> cb,
-        bool fetch = true);
+    using GetAssetCb = std::function<void(std::string_view id, const AssetInfo& data)>;
+    void getAsset(std::string id, GetAssetCb cb);
+
+    void addSource(std::unique_ptr<AssetSource> source, int priority = 0);
 
 public:
     class Impl;
