@@ -33,3 +33,9 @@ add_doctest_lib_test(provider ac-local
     LIBRARIES
         test-ac-dummy-local-provider
 )
+
+macro(local_test test)
+    add_doctest_lib_test(${test} ac-local t-${test}.cpp ${ARGN})
+endmacro()
+
+local_test(AssetSourceLocalDir LIBRARIES ac-dev::repo-root)

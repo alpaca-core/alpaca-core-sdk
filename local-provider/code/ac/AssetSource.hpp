@@ -6,6 +6,8 @@
 #include <itlib/expected.hpp>
 #include <string_view>
 #include <functional>
+#include <optional>
+#include <string>
 
 namespace ac {
 

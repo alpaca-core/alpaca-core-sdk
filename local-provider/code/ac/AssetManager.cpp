@@ -35,7 +35,7 @@ class AssetManager::Impl {
             auto ret = m_assets.try_emplace(m_assets.end(), id, AssetInfo{
                 .source = source.get(),
                 .size = basicInfo->size,
-                .path = basicInfo->path
+                .path = astl::move(basicInfo->path),
             });
             return ret;
         }
@@ -65,7 +65,7 @@ public:
             auto res = f->second.source->fetchAssetSync(id, {});
             if (res) {
                 f->second.size = res->size;
-                f->second.path = res->path;
+                f->second.path = astl::move(res->path);
             }
             else {
                 f->second.error = astl::move(res.error());
