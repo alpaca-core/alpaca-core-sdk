@@ -51,6 +51,15 @@ CPMAddPackage(gh:iboB/itlib@1.11.2)
 CPMAddPackage(gh:iboB/xec@1.5.2)
 CPMAddPackage(gh:iboB/jalog@0.4.2)
 
+CPMAddPackage(
+    NAME dr_libs
+    VERSION 1.0
+    GIT_REPOSITORY https://github.com/mackron/dr_libs.git
+    GIT_TAG da35f9d
+)
+add_library(dr_libs INTERFACE)
+target_include_directories(dr_libs INTERFACE ${dr_libs_SOURCE_DIR})
+
 if(AC_BUILD_TESTS)
     CPMAddPackage(gh:iboB/doctest-util@0.1.2)
     set_target_properties(doctest PROPERTIES FOLDER test)
