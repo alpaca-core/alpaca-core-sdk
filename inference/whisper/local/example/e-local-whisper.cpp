@@ -5,6 +5,7 @@
 #include <ac/LocalWhisper.hpp>
 
 #include <ac/Model.hpp>
+#include <ac/ModelInfo.hpp>
 #include <ac/Instance.hpp>
 #include <ac/Dict.hpp>
 
@@ -32,10 +33,12 @@ int main() {
 
     ac::LocalProvider provider;
     ac::addLocalWhisperInference(provider);
-    provider.addLocalModel(
+    provider.addModel(ac::ModelInfo{
         "whisper_en",
-        {{"type", "whisper.cpp"}, {"bin", AC_TEST_DATA_WHISPER_DIR "/whisper-base.en-f16.bin"}}
-    );
+        "whisper.cpp",
+        ac::Dict::object({{"bin", AC_TEST_DATA_WHISPER_DIR "/whisper-base.en-f16.bin"}}),
+        {}
+    });
 
     std::optional<std::latch> latch;
 
