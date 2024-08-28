@@ -28,4 +28,4 @@ public:
     virtual itlib::expected<BasicAssetInfo, std::string> fetchAssetSync(std::string_view id, std::function<void(float)> progressCb) = 0;
 };
 
-}
+} // namespace ac
