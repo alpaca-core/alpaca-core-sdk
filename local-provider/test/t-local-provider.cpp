@@ -5,6 +5,7 @@
 #include <doctest/doctest.h>
 #include <ac/LocalInference.hpp>
 #include <ac/LocalProvider.hpp>
+#include <ac/ModelInfo.hpp>
 
 #include <ac/Model.hpp>
 #include <ac/Instance.hpp>
@@ -24,9 +25,9 @@ struct AcTestHelper {
     ac::CallbackResult<ac::InstancePtr> instanceResult;
 
     AcTestHelper() {
-        provider.addLocalModel("empty", {});
-        provider.addLocalModel("error", {{"type", "dummy"}, {"error", true}});
-        provider.addLocalModel("model", ac::Dict::object({{"type", "dummy"}}));
+        provider.addModel(ac::ModelInfo{"empty"});
+        provider.addModel(ac::ModelInfo{"error", "dummy", ac::Dict::object({{"error", true}})});
+        provider.addModel(ac::ModelInfo{"model", "dummy"});
     }
 
     void createModelAndWait(std::string_view type, ac::Dict params) {
@@ -68,12 +69,12 @@ TEST_CASE("invalid args") {
     CHECK(h.modelResult.error().text == "Unknown model id");
 }
 
-TEST_CASE("no args") {
+TEST_CASE("no models") {
     AcTestHelper h;
     h.createModelAndWait("empty", {});
 
     REQUIRE(h.modelResult.has_error() == true);
-    CHECK(h.modelResult.error().text == "[json.exception.out_of_range.403] key 'type' not found");
+    CHECK(h.modelResult.error().text == "Unknown model type");
 }
 
 TEST_CASE("missing model provider") {

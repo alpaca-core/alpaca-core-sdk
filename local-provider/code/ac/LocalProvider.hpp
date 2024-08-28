@@ -12,6 +12,7 @@
 namespace ac {
 
 class LocalInferenceModelLoader;
+struct ModelInfo;
 
 class AC_LOCAL_EXPORT LocalProvider final : public Provider {
 public:
@@ -19,7 +20,7 @@ public:
     ~LocalProvider();
     virtual void createModel(std::string_view id, Dict params, Callback<ModelPtr> cb) override;
 
-    void addLocalModel(std::string_view id, Dict baseParams);
+    void addModel(ModelInfo info);
     void addLocalInferenceLoader(std::string_view type, LocalInferenceModelLoader& loader);
 private:
     class Impl;

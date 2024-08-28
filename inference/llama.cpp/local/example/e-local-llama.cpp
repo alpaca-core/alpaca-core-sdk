@@ -3,6 +3,7 @@
 //
 #include <ac/LocalProvider.hpp>
 #include <ac/LocalLlama.hpp>
+#include <ac/ModelInfo.hpp>
 
 #include <ac/Model.hpp>
 #include <ac/Instance.hpp>
@@ -22,10 +23,11 @@ int main() {
 
     ac::LocalProvider provider;
     ac::addLocalLlamaInference(provider);
-    provider.addLocalModel(
+    provider.addModel(ac::ModelInfo{
         "gpt2",
-        {{"type", "llama.cpp"}, {"gguf", AC_TEST_DATA_LLAMA_DIR "/gpt2-117m-q6_k.gguf"}}
-    );
+        "llama.cpp",
+        ac::Dict::object({{"gguf", AC_TEST_DATA_LLAMA_DIR "/gpt2-117m-q6_k.gguf"}})
+    });
 
     std::optional<std::latch> latch;
 

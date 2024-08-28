@@ -131,20 +131,6 @@ void dummy_provider(void) {
 
     {
         ac_create_model(
-            provider, "empty",
-            ac_dict_new_root_from_json("{\"type\": \"dummy\", \"error\": true}", NULL),
-            on_model_result, on_progress, &s
-        );
-        wait_for_cur_step(&s);
-
-        CHECK_EQ_STR("Model couldn't be loaded!", s.last_error);
-        CHECK_EQ_FLT(0.5f, s.last_progress);
-        CHECK_NULL(s.model);
-        s.last_progress = 0;
-    }
-
-    {
-        ac_create_model(
             provider, "model",
             ac_dict_new_root_from_json("{\"error\": true}", NULL),
             on_model_result, on_progress, &s
@@ -165,7 +151,7 @@ void dummy_provider(void) {
         );
         wait_for_cur_step(&s);
 
-        CHECK_EQ_STR("[json.exception.out_of_range.403] key 'type' not found", s.last_error);
+        CHECK_EQ_STR("Unknown model type", s.last_error);
         CHECK_NULL(s.model);
     }
 

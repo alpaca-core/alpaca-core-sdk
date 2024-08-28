@@ -3,6 +3,7 @@
 //
 #include "LocalProvider.hpp"
 #include "LocalInference.hpp"
+#include "ModelInfo.hpp"
 #include <ac/Model.hpp>
 #include <ac/Instance.hpp>
 #include <xec/TaskExecutor.hpp>
@@ -99,7 +100,7 @@ public:
 
 class LocalProvider::Impl {
     astl::tsumap<LocalInferenceModelLoader*> m_loaders;
-    astl::tsumap<Dict> m_localModels;
+    astl::tsumap<ModelInfo> m_modelManifest;
 
     // these must the last members (first to be destroyed)
     // if there are pending tasks, they will be finalized here and they may access other members
@@ -116,30 +117,31 @@ public:
         });
     }
 
-    void addLocalModel(std::string_view id, Dict baseParams) {
-        m_executor.pushTask([this, id = std::string(id), baseParams = astl::move(baseParams)]() mutable {
-            m_localModels[astl::move(id)] = astl::move(baseParams);
+    void addModel(ModelInfo info) {
+        m_executor.pushTask([this, movecap(info)]() mutable {
+            m_modelManifest[info.id] = astl::move(info);
         });
     }
 
     void createModel(std::string_view id, Dict params, Callback<ModelPtr> cb) {
         m_executor.pushTask([this, id = std::string(id), movecap(params, cb)]() mutable {
             try {
-                auto f = m_localModels.find(id);
-                if (f == m_localModels.end()) {
+                auto f = m_modelManifest.find(id);
+                if (f == m_modelManifest.end()) {
                     cb.resultCb(itlib::unexpected(ac::Error{"Unknown model id"}));
                     return;
                 }
-                auto& baseParams = f->second;
+                auto& info = f->second;
+                auto& type = info.inferenceType;
+
                 if (params.is_null()) {
                     params = Dict::object();
                 }
 
-                if (!baseParams.is_null()) {
-                    params.update(baseParams); // merge with base params (assume object)
+                if (!info.baseParams.is_null()) {
+                    params.update(info.baseParams); // merge with base params (assume object)
                 }
 
-                auto type = params.at("type").get<std::string_view>();
                 auto it = m_loaders.find(type);
                 if (it == m_loaders.end()) {
                     cb.resultCb(itlib::unexpected(ac::Error{"Unknown model type"}));
@@ -174,8 +176,8 @@ public:
 LocalProvider::LocalProvider() : m_impl(std::make_unique<Impl>()) {}
 LocalProvider::~LocalProvider() = default;
 
-void LocalProvider::addLocalModel(std::string_view id, Dict baseParams) {
-    m_impl->addLocalModel(id, astl::move(baseParams));
+void LocalProvider::addModel(ModelInfo info) {
+    m_impl->addModel(astl::move(info));
 }
 
 void LocalProvider::createModel(std::string_view id, Dict params, Callback<ModelPtr> cb) {

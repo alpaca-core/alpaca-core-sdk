@@ -10,6 +10,7 @@
 #include <ac/ApiCUtil.hpp>
 
 #include <ac/LocalProvider.hpp>
+#include <ac/ModelInfo.hpp>
 
 #include <thread>
 
@@ -75,7 +76,7 @@ extern "C" void add_dummy_inference(ac_api_provider* local_provider) {
     assert(localProvider);
     localProvider->addLocalInferenceLoader("dummy", loader);
 
-    localProvider->addLocalModel("empty", {});
-    localProvider->addLocalModel("error", {{"type", "dummy"}, {"error", true}});
-    localProvider->addLocalModel("model", {{"type", "dummy"}});
+    localProvider->addModel(ac::ModelInfo{"empty"});
+    localProvider->addModel(ac::ModelInfo{"error", "dummy", ac::Dict::object({{"error", true}})});
+    localProvider->addModel(ac::ModelInfo{"model", "dummy"});
 }

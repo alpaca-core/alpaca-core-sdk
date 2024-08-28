@@ -11,7 +11,10 @@ extern "C" {
 #endif
 
 AC_LOCAL_EXPORT ac_api_provider* ac_new_local_api_provider();
-AC_LOCAL_EXPORT void ac_add_local_model(ac_api_provider* local_provider, const char* model_id, ac_dict_root* dict);
+AC_LOCAL_EXPORT void ac_add_model(
+    ac_api_provider* local_provider,
+    const char* model_id, const char* inferenceType, ac_dict_root* dict
+);
 
 #if defined(__cplusplus)
 }
