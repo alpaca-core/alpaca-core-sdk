@@ -11,8 +11,12 @@ namespace ac {
 struct ModelInfo {
     std::string id;
     std::string inferenceType;
-    Dict baseParams;
-    std::vector<std::string> assets;
+
+    struct Asset {
+        std::string id;
+        std::string tag;
+    };
+    std::vector<Asset> assets;
 };
 
 }

@@ -9,6 +9,7 @@
 #include <ac/llama/AntipromptManager.hpp>
 
 #include <ac/LocalProvider.hpp>
+#include <ac/LocalModelInfo.hpp>
 #include <ac/LocalInference.hpp>
 
 #include <astl/move.hpp>
@@ -93,10 +94,13 @@ public:
 
 class LlamaModelLoader final : public LocalInferenceModelLoader {
 public:
-    virtual std::unique_ptr<LocalInferenceModel> loadModelSync(Dict params, std::function<void(float)> progressCb) override {
-        auto gguf = params.at("gguf").get<std::string>();
+    virtual std::unique_ptr<LocalInferenceModel> loadModelSync(LocalModelInfoPtr info, Dict params, std::function<void(float)> progressCb) override {
+        if (!info) throw_ex{} << "llama: no model info";
+        if (info->localAssets.size() != 1) throw_ex{} << "llama: expected exactly one local asset";
+        auto& gguf = info->localAssets.front().path;
+        if (!gguf) throw_ex{} << "llama: missing gguf path";
         llama::Model::Params modelParams;
-        return std::make_unique<LlamaModel>(gguf, std::move(progressCb), modelParams);
+        return std::make_unique<LlamaModel>(*gguf, std::move(progressCb), modelParams);
     }
 };
 }

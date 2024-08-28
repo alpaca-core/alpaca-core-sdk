@@ -102,12 +102,10 @@ int main(void) {
     init_app_state(&state);
 
     ac_add_local_llama_inference(local_provider);
-    ac_add_model(
-        local_provider,
-        "gpt2",
-        "llama.cpp",
-        ac_dict_new_root_from_json("{\"gguf\": \"" AC_TEST_DATA_LLAMA_DIR "/gpt2-117m-q6_k.gguf\"}", NULL)
-    );
+    {
+        ac_model_info_asset asset = {.id = AC_TEST_DATA_LLAMA_DIR "/gpt2-117m-q6_k.gguf"};
+        ac_add_model(local_provider, "gpt2", "llama.cpp", &asset, 1);
+    }
 
     printf("Loading model...\n");
     ac_create_model(

@@ -24,9 +24,9 @@ int main() {
     ac::LocalProvider provider;
     ac::addLocalLlamaInference(provider);
     provider.addModel(ac::ModelInfo{
-        "gpt2",
-        "llama.cpp",
-        ac::Dict::object({{"gguf", AC_TEST_DATA_LLAMA_DIR "/gpt2-117m-q6_k.gguf"}})
+        .id = "gpt2",
+        .inferenceType = "llama.cpp",
+        .assets = {{AC_TEST_DATA_LLAMA_DIR "/gpt2-117m-q6_k.gguf", {}}}
     });
 
     std::optional<std::latch> latch;

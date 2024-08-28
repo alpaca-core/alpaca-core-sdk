@@ -3,6 +3,7 @@
 //
 #include "LocalProvider.hpp"
 #include "LocalInference.hpp"
+#include "LocalModelInfo.hpp"
 #include "ModelInfo.hpp"
 #include <ac/Model.hpp>
 #include <ac/Instance.hpp>
@@ -11,6 +12,7 @@
 #include <astl/move_capture.hpp>
 #include <astl/tsumap.hpp>
 #include <itlib/shared_from.hpp>
+#include <itlib/make_ptr.hpp>
 #include <unordered_map>
 #include <latch>
 #include <atomic>
@@ -100,7 +102,7 @@ public:
 
 class LocalProvider::Impl {
     astl::tsumap<LocalInferenceModelLoader*> m_loaders;
-    astl::tsumap<ModelInfo> m_modelManifest;
+    astl::tsumap<std::shared_ptr<LocalModelInfo>> m_modelManifest; // could be made into an unordered_set
 
     // these must the last members (first to be destroyed)
     // if there are pending tasks, they will be finalized here and they may access other members
@@ -119,7 +121,13 @@ public:
 
     void addModel(ModelInfo info) {
         m_executor.pushTask([this, movecap(info)]() mutable {
-            m_modelManifest[info.id] = astl::move(info);
+            auto localInfo = itlib::make_shared(LocalModelInfo{astl::move(info)});
+            localInfo->localAssets.resize(localInfo->assets.size());
+            for (size_t i = 0; i < localInfo->assets.size(); ++i) {
+                // temporary, until we integrate asset manager properly
+                localInfo->localAssets[i].path = localInfo->assets[i].id;
+            }
+            m_modelManifest[localInfo->id] = localInfo;
         });
     }
 
@@ -131,16 +139,8 @@ public:
                     cb.resultCb(itlib::unexpected(ac::Error{"Unknown model id"}));
                     return;
                 }
-                auto& info = f->second;
-                auto& type = info.inferenceType;
-
-                if (params.is_null()) {
-                    params = Dict::object();
-                }
-
-                if (!info.baseParams.is_null()) {
-                    params.update(info.baseParams); // merge with base params (assume object)
-                }
+                auto info = LocalModelInfoPtr(f->second);
+                auto& type = info->inferenceType;
 
                 auto it = m_loaders.find(type);
                 if (it == m_loaders.end()) {
@@ -149,7 +149,7 @@ public:
                 }
                 auto& loader = *it->second;
 
-                auto model = loader.loadModelSync(astl::move(params), [&](float progress) {
+                auto model = loader.loadModelSync(astl::move(info), astl::move(params), [&](float progress) {
                     assert(std::this_thread::get_id() == m_execution.threadId());
                     if (cb.progressCb) {
                         cb.progressCb(progress);

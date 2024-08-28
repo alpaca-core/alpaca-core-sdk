@@ -26,7 +26,6 @@ struct AcTestHelper {
 
     AcTestHelper() {
         provider.addModel(ac::ModelInfo{"empty"});
-        provider.addModel(ac::ModelInfo{"error", "dummy", ac::Dict::object({{"error", true}})});
         provider.addModel(ac::ModelInfo{"model", "dummy"});
     }
 
@@ -88,7 +87,7 @@ TEST_CASE("missing model provider") {
 TEST_CASE("model loading error") {
     AcTestHelper h;
     h.provider.addLocalInferenceLoader("dummy", h.modelLoader);
-    h.createModelAndWait("error", {});
+    h.createModelAndWait("model", {{"error", true}});
 
     REQUIRE(h.modelResult.has_error() == true);
     CHECK(h.modelResult.error().text == "Model couldn't be loaded!");

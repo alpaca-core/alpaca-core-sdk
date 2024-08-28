@@ -50,7 +50,11 @@ public:
 
 } // anonymous namespace
 
-std::unique_ptr<ac::LocalInferenceModel> DummyLocalInferenceModelLoader::loadModelSync(ac::Dict params, std::function<void(float)> progress) {
+std::unique_ptr<ac::LocalInferenceModel> DummyLocalInferenceModelLoader::loadModelSync(
+    ac::LocalModelInfoPtr info,
+    ac::Dict params,
+    std::function<void(float)> progress
+) {
     progress(0.2f);
     progress(0.5f);
 
@@ -77,6 +81,5 @@ extern "C" void add_dummy_inference(ac_api_provider* local_provider) {
     localProvider->addLocalInferenceLoader("dummy", loader);
 
     localProvider->addModel(ac::ModelInfo{"empty"});
-    localProvider->addModel(ac::ModelInfo{"error", "dummy", ac::Dict::object({{"error", true}})});
     localProvider->addModel(ac::ModelInfo{"model", "dummy"});
 }

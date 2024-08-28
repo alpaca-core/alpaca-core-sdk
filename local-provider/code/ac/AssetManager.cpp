@@ -37,7 +37,7 @@ class AssetManager::Impl {
                     .source = source.get(),
                     .size = basicInfo->size,
                     .path = astl::move(basicInfo->path),
-                    });
+                });
                 return ret;
             }
         }
@@ -54,7 +54,7 @@ public:
             if (f != m_assets.end()) {
                 return cb(f->first, f->second);
             }
-            cb(id, { .error = "Asset not found" });
+            cb(id, {.error = "Asset not found"});
         });
     }
 
@@ -62,7 +62,7 @@ public:
         m_executor.pushTask([this, movecap(cb, id)]() mutable {
             auto f = getAssetInfo(id);
             if (f == m_assets.end()) {
-                return cb(id, { .error = "Asset not found" });
+                return cb(id, {.error = "Asset not found"});
             }
             if (f->second.path) {
                 return cb(f->first, f->second);

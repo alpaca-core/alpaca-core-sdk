@@ -5,5 +5,9 @@
 
 class DummyLocalInferenceModelLoader final : public ac::LocalInferenceModelLoader {
 public:
-    virtual std::unique_ptr<ac::LocalInferenceModel> loadModelSync(ac::Dict params, std::function<void(float)> progress) override;
+    virtual std::unique_ptr<ac::LocalInferenceModel> loadModelSync(
+        ac::LocalModelInfoPtr info,
+        ac::Dict params,
+        std::function<void(float)> progress
+    ) override;
 };

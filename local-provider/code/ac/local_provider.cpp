@@ -5,7 +5,6 @@
 #include "LocalProvider.hpp"
 #include "ModelInfo.hpp"
 #include <ac/ApiCUtil.hpp>
-#include <ac/DictCUtil.hpp>
 
 extern "C" {
 
@@ -14,14 +13,27 @@ ac_api_provider* ac_new_local_api_provider() {
 }
 
 void ac_add_model(ac_api_provider* local_provider,
-    const char* model_id, const char* inference_type, ac_dict_root* dict
+    const char* model_id, const char* inference_type,
+    ac_model_info_asset* assets, size_t assets_count
 ) {
     auto lp = dynamic_cast<ac::LocalProvider*>(ac::cutil::Provider_from_provider(local_provider));
     assert(lp);
+
+    std::vector<ac::ModelInfo::Asset> assets_vec;
+    assets_vec.reserve(assets_count);
+    for (size_t i = 0; i < assets_count; ++i) {
+        auto& info = assets_vec.emplace_back();
+        assert(assets[i].id);
+        info.id = assets[i].id;
+        if (assets[i].tag) {
+            info.tag = assets[i].tag;
+        }
+    }
+
     lp->addModel(ac::ModelInfo{
         .id = model_id,
         .inferenceType = inference_type,
-        .baseParams = ac::cutil::Dict_from_dict_root_consume(dict),
+        .assets = std::move(assets_vec)
     });
 }
 

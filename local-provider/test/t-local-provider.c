@@ -99,38 +99,6 @@ void dummy_provider(void) {
 
     {
         ac_create_model(
-            provider, "error",
-            ac_dict_new_root_from_json("{}", NULL),
-            on_model_result, on_progress, &s
-        );
-        wait_for_cur_step(&s);
-
-        CHECK_EQ_STR("Model couldn't be loaded!", s.last_error);
-        CHECK_EQ_FLT(0.5f, s.last_progress);
-        CHECK_NULL(s.model);
-        s.last_progress = 0;
-    }
-
-    // expect the same behavior with param
-    // dict_root = ac_dict_new_root_from_json("{}", NULL)
-    // AND
-    // dict_root = NULL
-    {
-        ac_create_model(
-            provider, "error",
-            NULL,
-            on_model_result, on_progress, &s
-        );
-        wait_for_cur_step(&s);
-
-        CHECK_EQ_STR("Model couldn't be loaded!", s.last_error);
-        CHECK_EQ_FLT(0.5f, s.last_progress);
-        CHECK_NULL(s.model);
-        s.last_progress = 0;
-    }
-
-    {
-        ac_create_model(
             provider, "model",
             ac_dict_new_root_from_json("{\"error\": true}", NULL),
             on_model_result, on_progress, &s
@@ -154,7 +122,6 @@ void dummy_provider(void) {
         CHECK_EQ_STR("Unknown model type", s.last_error);
         CHECK_NULL(s.model);
     }
-
 
     // note: create model with id "model" - successfully
     {
