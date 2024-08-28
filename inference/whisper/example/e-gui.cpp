@@ -49,6 +49,8 @@ struct AudioState {
 
 const uint16_t MAX_RECORDING_BUFFER_SECONDS = 30;
 
+// TODO: Move global variables to a struct and pass them to audio callbacks as user data
+
 // Recording data buffer
 std::vector<float>* gRecordingBuffer;
 constexpr uint32_t gBufferTypeSize = sizeof(float);
