@@ -322,7 +322,7 @@ public:
             std::string transcribe(UAudio* audio) {
                 assert(audio->isLoaded());
                 std::string res;
-                m_instance.runOp("transcribe", audio->pcmf32().data(), audio->pcmf32().size(), [&res](std::string result){
+                m_instance.runOp("transcribe", audio->pcmf32(), [&res](std::string result){
                     res = result;
                 });
 

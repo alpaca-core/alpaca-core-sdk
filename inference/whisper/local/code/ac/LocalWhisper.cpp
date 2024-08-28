@@ -30,10 +30,10 @@ public:
         assert(value->is_binary());
 
         auto pcmu8 = value->get_binary();
-        auto pcmf32 = reinterpret_cast<const float*>(pcmu8.data());
+        auto pcmf32 = reinterpret_cast<float*>(pcmu8.data());
         auto pcmf32Size = pcmu8.size() / sizeof(float);
 
-        m_instance.runOp("transcribe", pcmf32, pcmf32Size, [&](std::string res){
+        m_instance.runOp("transcribe", std::span{pcmf32, pcmf32Size}, [&](std::string res){
             streamCb({{"result", astl::move(res)}});
         });
     }

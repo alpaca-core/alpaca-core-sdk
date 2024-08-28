@@ -36,16 +36,15 @@ Instance::Instance(Model& model, InitParams)
 Instance::~Instance() = default;
 
 void Instance::runOp(std::string_view op,
-    const float* pcmf32,
-    uint32_t dataSize,
+    std::span<float> pcmf32,
     std::function<void(std::string)> resultCb) {
     if (op == "transcribe") {
-        std::string res = runInference(pcmf32, dataSize);
+        std::string res = runInference(pcmf32);
         resultCb(res);
     }
 }
 
-std::string Instance::runInference(const float* pcmf32, uint32_t dataSize) {
+std::string Instance::runInference(std::span<float> pcmf32) {
     struct whisper_params {
     int32_t n_threads     = 16;//std::min(4, (int32_t) std::thread::hardware_concurrency());
     int32_t n_processors  = 1;
@@ -175,7 +174,7 @@ std::string Instance::runInference(const float* pcmf32, uint32_t dataSize) {
                 wparams.abort_callback_user_data = &is_aborted;
             }
 
-            if (whisper_full_parallel(m_model.context(), wparams, pcmf32, dataSize, params.n_processors) != 0) {
+            if (whisper_full_parallel(m_model.context(), wparams, pcmf32.data(), pcmf32.size(), params.n_processors) != 0) {
                 fprintf(stderr, "failed to process audio!\n");
                 return "";
             }

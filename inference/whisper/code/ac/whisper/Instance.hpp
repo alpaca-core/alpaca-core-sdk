@@ -6,6 +6,7 @@
 
 #include <functional>
 #include <string>
+#include <span>
 
 using WhisperCb = std::function<void(struct whisper_context*, struct whisper_state*,int, void*)>;
 
@@ -15,11 +16,10 @@ class Model;
 class AC_WHISPER_EXPORT Instance {
 public:
     struct InitParams {
-
         // Text segment callback
         // Called on every newly generated text segment
-        // WhisperCb newSegmentCb;
-        // WhisperCb progressCb;
+        WhisperCb newSegmentCb;
+        WhisperCb progressCb;
 
         enum SamplingStrategy {
             GREEDY,      // similar to OpenAI's GreedyDecoder
@@ -31,10 +31,10 @@ public:
     explicit Instance(Model& model, InitParams params);
     ~Instance();
 
-    void runOp(std::string_view op, const float* pcmf32, uint32_t dataSize, std::function<void(std::string)> resultCb);
+    void runOp(std::string_view op, std::span<float> pcmf32, std::function<void(std::string)> resultCb);
 
 private:
-    std::string runInference(const float* pcmf32, uint32_t dataSize);
+    std::string runInference(std::span<float> pcmf32);
 
     Model& m_model;
     InitParams m_params;

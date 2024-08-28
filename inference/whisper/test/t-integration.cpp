@@ -32,7 +32,7 @@ TEST_CASE("inference") {
     // general inference
     {
         ac::whisper::Instance inst(model, {});
-        inst.runOp("inference", nullptr, 0, [](std::string result) {
+        inst.runOp("inference", std::span<float>(), [](std::string result) {
             CHECK(result == "OK");
         });
 
@@ -45,7 +45,7 @@ TEST_CASE("inference") {
 
         CHECK(pcmf32.size() > 0);
 
-        inst.runOp("inference", pcmf32.data(), pcmf32.size(), [&prenticeHallText](std::string result) {
+        inst.runOp("inference", pcmf32, [&prenticeHallText](std::string result) {
             CHECK(result == prenticeHallText);
         });
 
