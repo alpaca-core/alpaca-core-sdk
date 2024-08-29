@@ -33,13 +33,12 @@ public:
         auto pcmf32 = reinterpret_cast<float*>(pcmu8.data());
         auto pcmf32Size = pcmu8.size() / sizeof(float);
 
-        m_instance.runOp("transcribe", std::span{pcmf32, pcmf32Size}, [&](std::string res){
-            streamCb({{"result", astl::move(res)}});
-        });
+        auto result = m_instance.transcribe(std::span{pcmf32, pcmf32Size});
+        streamCb({{"result", astl::move(result)}});
     }
 
     virtual void runOpSync(std::string_view op, Dict params, std::function<void(Dict)> streamCb) override {
-        if (op == "run") {
+        if (op == "transcribe") {
             run(astl::move(params), astl::move(streamCb));
         }
         else {

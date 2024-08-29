@@ -128,13 +128,14 @@ Instance::Instance(Model& model, InitParams params)
 
 Instance::~Instance() = default;
 
-void Instance::runOp(std::string_view op,
-    std::span<float> pcmf32,
-    std::function<void(std::string)> resultCb) {
-    if (op == "transcribe") {
-        std::string res = runInference(pcmf32);
-        resultCb(res);
+std::string Instance::transcribe(std::span<float> pcmf32) {
+    if (pcmf32.empty())
+    {
+        // TODO: Investigate why whisper.cpp crashes if the input is empty
+        return std::string();
     }
+
+    return runInference(pcmf32);
 }
 
 std::string Instance::runInference(std::span<float> pcmf32) {

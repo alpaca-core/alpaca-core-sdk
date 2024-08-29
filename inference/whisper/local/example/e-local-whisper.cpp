@@ -97,7 +97,7 @@ int main() {
     std::string opError;
     latch.emplace(1);
 
-    instance->runOp("run", {{"audioBinaryMono", ac::Dict::binary(std::move(audioBlob))}}, {
+    instance->runOp("transcribe", {{"audioBinaryMono", ac::Dict::binary(std::move(audioBlob))}}, {
         [&](ac::CallbackResult<void> result) {
             if (result.has_error()) {
                 opError = std::move(result.error().text);

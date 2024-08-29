@@ -28,7 +28,7 @@ public:
     explicit Instance(Model& model, InitParams params);
     ~Instance();
 
-    void runOp(std::string_view op, std::span<float> pcmf32, std::function<void(std::string)> resultCb);
+    std::string transcribe(std::span<float> pcmf32);
 
     whisper_context* context() const noexcept { return m_ctx.get(); }
 

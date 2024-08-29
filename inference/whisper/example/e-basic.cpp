@@ -44,9 +44,8 @@ int main() try {
     std::cout << "Transcribing the audio [" << audioFile << "]: \n\n";
 
     // transcript the audio
-    instance.runOp("transcribe", pcmf32, [](std::string res){
-        std::cout<< res <<'\n';
-    });
+    auto res = instance.transcribe(pcmf32);
+    std::cout << res << std::endl;
 
     return 0;
 }
