@@ -22,7 +22,7 @@ public:
         bool vocabOnly = false; // do not load model, only vocab
     };
 
-    explicit Model(const char* pathToGguf, ModelLoadProgressCb loadProgressCb, Params params);
+    Model(const char* pathToGguf, ModelLoadProgressCb loadProgressCb, Params params);
     ~Model();
 
     const Params& params() const noexcept { return m_params; }
