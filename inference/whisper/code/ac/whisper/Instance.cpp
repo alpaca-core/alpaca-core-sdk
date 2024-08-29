@@ -16,14 +16,6 @@
 
 namespace ac::whisper {
 namespace {
-whisper_context_params whisperFromModelParams(const Model::Params& params)
-{
-    whisper_context_params whisperParams = whisper_context_default_params();
-    whisperParams.use_gpu = params.gpu;
-
-    return whisperParams;
-}
-
 whisper_sampling_strategy whisperFromACStrategy(Instance::InitParams::SamplingStrategy strategy) {
     switch (strategy)
     {
@@ -119,12 +111,7 @@ whisper_full_params whisperFromInstanceParams(Instance::InitParams& iparams) {
 Instance::Instance(Model& model, InitParams params)
     : m_model(model)
     , m_params(astl::move(params))
-    , m_ctx(whisper_init_from_file_with_params(m_model.pathToBin().c_str(), whisperFromModelParams(m_model.params())), whisper_free)
-{
-        if (!m_ctx) {
-        throw std::runtime_error("Failed to load model");
-    }
-}
+{}
 
 Instance::~Instance() = default;
 
@@ -140,15 +127,15 @@ std::string Instance::transcribe(std::span<float> pcmf32) {
 
 std::string Instance::runInference(std::span<float> pcmf32) {
     auto wparams = whisperFromInstanceParams(m_params);
-    if (whisper_full_parallel(m_ctx.get(), wparams, pcmf32.data(), pcmf32.size(), 1 /* n_processors */) != 0) {
+    if (whisper_full_parallel(m_model.context(), wparams, pcmf32.data(), pcmf32.size(), 1 /* n_processors */) != 0) {
         fprintf(stderr, "failed to process audio!\n");
         return "";
     }
 
     std::string result;
-    const int n_segments = whisper_full_n_segments(m_ctx.get());
+    const int n_segments = whisper_full_n_segments(m_model.context());
     for (int i = 0; i < n_segments; ++i) {
-        const char * text = whisper_full_get_segment_text(m_ctx.get(), i);
+        const char * text = whisper_full_get_segment_text(m_model.context(), i);
         std::string speaker = "";
 
         result += speaker + text + "\n";

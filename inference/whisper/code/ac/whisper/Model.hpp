@@ -3,6 +3,9 @@
 //
 #pragma once
 #include "export.h"
+
+#include <astl/mem_ext.hpp>
+
 #include <string>
 
 struct whisper_context;
@@ -19,11 +22,12 @@ public:
     explicit Model(const char* pathToBin, Params params);
     ~Model();
 
-    const std::string& pathToBin() const noexcept { return m_pathToBin; }
     const Params& params() const noexcept { return m_params; }
+
+    whisper_context* context() const noexcept { return m_ctx.get(); }
 
 private:
     const Params m_params;
-    std::string m_pathToBin;
+    astl::c_unique_ptr<whisper_context> m_ctx;
 };
 } // namespace ac::whisper
