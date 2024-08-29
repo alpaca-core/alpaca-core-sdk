@@ -5,6 +5,8 @@
 #include "LocalInference.hpp"
 #include "LocalModelInfo.hpp"
 #include "ModelInfo.hpp"
+#include "AssetManager.hpp"
+#include "AssetSource.hpp"
 #include <ac/Model.hpp>
 #include <ac/Instance.hpp>
 #include <xec/TaskExecutor.hpp>
@@ -104,6 +106,8 @@ class LocalProvider::Impl {
     astl::tsumap<LocalInferenceModelLoader*> m_loaders;
     astl::tsumap<std::shared_ptr<LocalModelInfo>> m_modelManifest; // could be made into an unordered_set
 
+    AssetManager m_assetMgr;
+
     // these must the last members (first to be destroyed)
     // if there are pending tasks, they will be finalized here and they may access other members
     xec::TaskExecutor m_executor;
@@ -111,6 +115,11 @@ class LocalProvider::Impl {
 public:
     Impl() : m_execution(m_executor) {
         m_execution.launchThread("ac-inference");
+    }
+
+    void addAssetSource(std::unique_ptr<AssetSource> source, int priority) {
+        // asset manager is thread safe, so no need to push this to the executor
+        m_assetMgr.addSource(astl::move(source), priority);
     }
 
     void addLocalInferenceLoader(std::string_view type, LocalInferenceModelLoader& loader) {
@@ -186,6 +195,10 @@ void LocalProvider::createModel(std::string_view id, Dict params, Callback<Model
 
 void LocalProvider::addLocalInferenceLoader(std::string_view type, LocalInferenceModelLoader& loader) {
     m_impl->addLocalInferenceLoader(type, loader);
+}
+
+void LocalProvider::addAssetSource(std::unique_ptr<AssetSource> source, int priority) {
+    m_impl->addAssetSource(astl::move(source), priority);
 }
 
 } // namespace ac
