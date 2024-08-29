@@ -8,7 +8,7 @@
 #include <string>
 #include <span>
 
-struct whisper_context;
+struct whisper_state;
 
 namespace ac::whisper {
 class Model;
@@ -33,6 +33,7 @@ private:
 
     Model& m_model;
     InitParams m_params;
+    whisper_state* m_state;
 };
 
 } // namespace ac::whisper

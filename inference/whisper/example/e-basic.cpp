@@ -39,7 +39,7 @@ int main() try {
     ac::whisper::Instance instance(model, {});
 
     std::string audioFile = AC_TEST_DATA_WHISPER_DIR "/as-she-sat.wav";
-    std::vector<float> pcmf32;               // mono-channel F32 PCM
+    std::vector<float> pcmf32 = ac::audio::loadWavF32Mono(audioFile);
 
     std::cout << "Transcribing the audio [" << audioFile << "]: \n\n";
 
