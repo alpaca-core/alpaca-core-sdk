@@ -34,10 +34,9 @@ int main() {
     ac::LocalProvider provider;
     ac::addLocalWhisperInference(provider);
     provider.addModel(ac::ModelInfo{
-        "whisper_en",
-        "whisper.cpp",
-        ac::Dict::object({{"bin", AC_TEST_DATA_WHISPER_DIR "/whisper-base.en-f16.bin"}}),
-        {}
+        .id = "whisper_en",
+        .inferenceType = "whisper.cpp",
+        .assets = {{AC_TEST_DATA_WHISPER_DIR "/whisper-base.en-f16.bin", {}}}
     });
 
     std::optional<std::latch> latch;
