@@ -18,6 +18,7 @@
 #include <unordered_map>
 #include <latch>
 #include <atomic>
+#include <coroutine>
 
 namespace ac {
 
@@ -100,6 +101,36 @@ public:
         });
     }
 };
+
+// coroutines
+
+class CoTask {
+public:
+    struct promise_type {
+        CoTask get_return_object() noexcept {
+            return CoTask{std::coroutine_handle<promise_type>::from_promise(*this)};
+        }
+        void unhandled_exception() noexcept { /* terminate? */ }
+        std::suspend_always initial_suspend() noexcept { return {}; }
+        std::suspend_never final_suspend() noexcept { return {}; }
+        void return_void() noexcept {}
+    };
+    using Handle = std::coroutine_handle<promise_type>;
+
+    CoTask(CoTask&& other) noexcept : m_handle(std::exchange(other.m_handle, nullptr)) {}
+    ~CoTask() {
+        if (m_handle) {
+            m_handle.destroy();
+        }
+    }
+    Handle take_handle() noexcept {
+        return std::exchange(m_handle, nullptr);
+    }
+private:
+    Handle m_handle;
+    explicit CoTask(Handle handle) noexcept : m_handle(handle) {}
+};
+
 } // anonymous namespace
 
 class LocalProvider::Impl {
@@ -140,45 +171,59 @@ public:
         });
     }
 
-    void createModel(std::string_view id, Dict params, Callback<ModelPtr> cb) {
-        m_executor.pushTask([this, id = std::string(id), movecap(params, cb)]() mutable {
-            try {
-                auto f = m_modelManifest.find(id);
-                if (f == m_modelManifest.end()) {
-                    cb.resultCb(itlib::unexpected(ac::Error{"Unknown model id"}));
-                    return;
-                }
-                auto info = LocalModelInfoPtr(f->second);
-                auto& type = info->inferenceType;
-
-                auto it = m_loaders.find(type);
-                if (it == m_loaders.end()) {
-                    cb.resultCb(itlib::unexpected(ac::Error{"Unknown model type"}));
-                    return;
-                }
-                auto& loader = *it->second;
-
-                auto model = loader.loadModelSync(astl::move(info), astl::move(params), [&](float progress) {
-                    assert(std::this_thread::get_id() == m_execution.threadId());
-                    if (cb.progressCb) {
-                        cb.progressCb(progress);
-                    }
-                });
-
-                if (!model)
-                {
-                    cb.resultCb(itlib::unexpected(ac::Error{"Model couldn't be loaded!"}));
-                    return;
-                }
-
-                ModelPtr ptr = std::make_shared<LocalModel>(astl::move(model), m_executor);
-                cb.resultCb(astl::move(ptr));
-            }
-            catch (std::exception& ex) {
-                cb.resultCb(itlib::unexpected(ac::Error{ex.what()}));
-                return;
-            }
+    void co_splice(std::coroutine_handle<> h) {
+        m_executor.pushTask([h]() {
+            h.resume();
         });
+    }
+
+    void co_splice(CoTask task) {
+        co_splice(task.take_handle());
+    }
+
+    CoTask coCreateModel(std::string id, Dict params, Callback<ModelPtr> cb) {
+        try {
+            auto f = m_modelManifest.find(id);
+            if (f == m_modelManifest.end()) {
+                cb.resultCb(itlib::unexpected(ac::Error{ "Unknown model id" }));
+                co_return;
+            }
+            auto info = LocalModelInfoPtr(f->second);
+            auto& type = info->inferenceType;
+
+            auto it = m_loaders.find(type);
+            if (it == m_loaders.end()) {
+                cb.resultCb(itlib::unexpected(ac::Error{ "Unknown model type" }));
+                co_return;
+            }
+            auto& loader = *it->second;
+
+            auto model = loader.loadModelSync(astl::move(info), astl::move(params), [&](float progress) {
+                assert(std::this_thread::get_id() == m_execution.threadId());
+                if (cb.progressCb) {
+                    cb.progressCb(progress);
+                }
+            });
+
+            if (!model)
+            {
+                cb.resultCb(itlib::unexpected(ac::Error{ "Model couldn't be loaded!" }));
+                co_return;
+            }
+
+            ModelPtr ptr = std::make_shared<LocalModel>(astl::move(model), m_executor);
+            cb.resultCb(astl::move(ptr));
+
+            co_return;
+        }
+        catch (std::exception& ex) {
+            cb.resultCb(itlib::unexpected(ac::Error{ex.what()}));
+            co_return;
+        }
+    }
+
+    void createModel(std::string_view id, Dict params, Callback<ModelPtr> cb) {
+        co_splice(coCreateModel(std::string(id), astl::move(params), astl::move(cb)));
     }
 };
 

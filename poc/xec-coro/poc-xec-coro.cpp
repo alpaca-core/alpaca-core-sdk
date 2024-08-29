@@ -56,9 +56,7 @@ struct CoTask {
     }
 
     Handle take_handle() noexcept {
-        auto h = m_handle;
-        m_handle = nullptr;
-        return h;
+        return std::exchange(m_handle, nullptr);
     }
 private:
     Handle m_handle;
