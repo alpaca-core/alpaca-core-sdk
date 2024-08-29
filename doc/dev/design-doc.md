@@ -37,9 +37,9 @@ A collection of somewhat loose notes on the design and architecture of the SDK. 
         * A provider might be: "This device", "A remote device/server"
         * A provider maintains a list of available models
         * A provider can be used to download or load models
-        * A provider downloads models from a remote.
-        * Multiple remotes can be assigned to a provider.
-    * Remote: a model repository
+        * A provider manages models and assets.
+        * Multiple model sources can be assigned to a provider.
+    * Model source: a model manifest source
         * It has a manifest of available models
         * It supports queries for the fields of the model description. Think SQL relational databases, though the query language will likely not be SQL.
     * Model: a collection of parameters.
@@ -75,7 +75,7 @@ A collection of somewhat loose notes on the design and architecture of the SDK. 
 ## Project Structure
 
 * The project is composed of multiple libraries and tools. Their build can be controlled by build flavors. For example, one wouldn't (usually) build the server for mobile targets.
-* Inference libraries can be used separately form the API above. One would be able to instantiate, say LLaMa, if they have weights and call functions directly, without worrying about Providers and Remotes.
+* Inference libraries can be used separately form the API above. One would be able to instantiate, say LLaMa, if they have weights and call functions directly, without worrying about Providers and model or asset soruces.
 * Third party libraries which are likely to be modified by us are forked and added as submodules.
 * Ones that are not likely to be modified are added as dependencies with [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake) (in the future other package managers may be used if there is a need)
 
