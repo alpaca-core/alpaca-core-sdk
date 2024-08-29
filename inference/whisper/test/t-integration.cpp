@@ -24,7 +24,6 @@ const char* Base_en_f16 = AC_TEST_DATA_WHISPER_DIR "/whisper-base.en-f16.bin";
 
 TEST_CASE("inference") {
     ac::whisper::Model model(Base_en_f16, {});
-    REQUIRE(!!model.context());
 
     auto& params = model.params();
     CHECK(params.gpu);
@@ -32,6 +31,8 @@ TEST_CASE("inference") {
     // general inference
     {
         ac::whisper::Instance inst(model, {});
+        REQUIRE(!!inst.context());
+
         inst.runOp("inference", std::span<float>(), [](std::string result) {
             CHECK(result == "OK");
         });
