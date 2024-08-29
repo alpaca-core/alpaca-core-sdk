@@ -1,7 +1,9 @@
 #include <xec/TaskExecutor.hpp>
 #include <xec/ThreadExecution.hpp>
 #include <astl/move_capture.hpp>
+#include <astl/move.hpp>
 #include <string>
+#include <cassert>
 #include <iostream>
 #include <coroutine>
 
@@ -81,6 +83,63 @@ public:
     }
 };
 
+template <typename T>
+struct WrapCallbackAwaitable {
+    std::mutex m_mutex;
+    CoTask::Handle m_handle = nullptr;
+    std::optional<T> m_value;
+
+    std::function<void(T)> getCallback() {
+        return [this](T value) {
+            std::lock_guard lock(m_mutex);
+            m_value = astl::move(value);
+            if (!m_handle) return;
+            m_handle.promise().m_executor->pushTask([h = m_handle]() {
+                h.resume();
+            });
+        };
+    }
+
+    bool await_ready() const noexcept { return false; }
+    bool await_suspend(CoTask::Handle handle) {
+        std::lock_guard lock(m_mutex);
+        if (m_value.has_value()) {
+            return false;
+        }
+        else {
+            m_handle = handle;
+            return true;
+        }
+    }
+    T await_resume() noexcept {
+        assert(m_value);
+        return astl::move(*m_value);
+    }
+};
+
+template <typename T>
+struct CallbackAwaitable {
+    using FF = std::function<void(std::function<void(T)>)>;
+    FF m_producer;
+    std::optional<T> m_value;
+
+    CallbackAwaitable(FF producer) : m_producer(astl::move(producer)) {}
+
+    bool await_ready() const noexcept { return false; }
+    void await_suspend(CoTask::Handle handle) {
+        m_producer([this, handle](T value) {
+            m_value = astl::move(value);
+            handle.promise().m_executor->pushTask([handle]() {
+                handle.resume();
+            });
+        });
+    }
+    T await_resume() noexcept {
+        assert(m_value);
+        return *m_value;
+    }
+};
+
 struct IntAwaitable {
     Producer& m_producer;
     int m_producedValue;
@@ -99,11 +158,22 @@ struct IntAwaitable {
 };
 
 CoTask test(Producer& p) {
-    std::cout << "test\n";
-    int a = co_await IntAwaitable(p);
+    std::cout << "test start\n";
+
+    auto a = co_await IntAwaitable(p);
     std::cout << "a: " << a << "\n";
-    int b = co_await IntAwaitable(p);
+
+    WrapCallbackAwaitable<std::string> ab;
+    p.produceString(ab.getCallback());
+    auto b = co_await ab;
     std::cout << "b: " << b << "\n";
+
+    auto c = co_await CallbackAwaitable<std::string>([&p](auto cb) {
+        p.produceString(cb);
+    });
+    std::cout << "c: " << c << "\n";
+
+    std::cout << "test end\n";
 }
 
 int main() {
