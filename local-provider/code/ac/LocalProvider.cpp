@@ -159,18 +159,6 @@ public:
         });
     }
 
-    void addModel(ModelInfo info) {
-        m_executor.pushTask([this, movecap(info)]() mutable {
-            auto localInfo = itlib::make_shared(LocalModelInfo{astl::move(info)});
-            localInfo->localAssets.resize(localInfo->assets.size());
-            for (size_t i = 0; i < localInfo->assets.size(); ++i) {
-                // temporary, until we integrate asset manager properly
-                localInfo->localAssets[i].path = localInfo->assets[i].id;
-            }
-            m_modelManifest[localInfo->id] = localInfo;
-        });
-    }
-
     void co_splice(std::coroutine_handle<> h) {
         m_executor.pushTask([h]() {
             h.resume();
@@ -179,6 +167,21 @@ public:
 
     void co_splice(CoTask task) {
         co_splice(task.take_handle());
+    }
+
+    CoTask coAddModel(ModelInfo info) {
+        auto localInfo = itlib::make_shared(LocalModelInfo{ astl::move(info) });
+        localInfo->localAssets.resize(localInfo->assets.size());
+        for (size_t i = 0; i < localInfo->assets.size(); ++i) {
+            // temporary, until we integrate asset manager properly
+            localInfo->localAssets[i].path = localInfo->assets[i].id;
+        }
+        m_modelManifest[localInfo->id] = localInfo;
+        co_return;
+    }
+
+    void addModel(ModelInfo info) {
+        co_splice(coAddModel(astl::move(info)));
     }
 
     CoTask coCreateModel(std::string id, Dict params, Callback<ModelPtr> cb) {
@@ -205,8 +208,7 @@ public:
                 }
             });
 
-            if (!model)
-            {
+            if (!model) {
                 cb.resultCb(itlib::unexpected(ac::Error{ "Model couldn't be loaded!" }));
                 co_return;
             }
