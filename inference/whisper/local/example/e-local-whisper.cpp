@@ -49,18 +49,7 @@ int main() {
             modelResult = std::move(result);
             latch->count_down();
         },
-        [](float progress) {
-            const int barWidth = 50;
-            static float currProgress = 0;
-            auto delta = int(progress * barWidth) - int(currProgress * barWidth);
-            for (int i = 0; i < delta; i++) {
-                std::cout.put('=');
-            }
-            currProgress = progress;
-            if (progress == 1.f) {
-                std::cout << '\n';
-            }
-        }
+        {} // empty progress callback
     });
 
     latch->wait();
