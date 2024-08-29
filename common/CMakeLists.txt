@@ -5,7 +5,6 @@
 # public
 add_subdirectory(astl)
 add_subdirectory(jalogc)
-add_subdirectory(xec-coro)
 
 # dev-only
 add_subdirectory(imgui)
