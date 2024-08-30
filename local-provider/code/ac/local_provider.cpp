@@ -4,12 +4,20 @@
 #include "local_provider.h"
 #include "LocalProvider.hpp"
 #include "ModelInfo.hpp"
+#include "AssetSource.hpp"
 #include <ac/ApiCUtil.hpp>
 
 extern "C" {
 
 ac_api_provider* ac_new_local_api_provider() {
     return ac::cutil::Provider_to_provider(new ac::LocalProvider());
+}
+
+void ac_add_asset_source(ac_api_provider* local_provider, ac_asset_source* asset_source, int priority) {
+    auto lp = dynamic_cast<ac::LocalProvider*>(ac::cutil::Provider_from_provider(local_provider));
+    assert(lp);
+    ac::AssetSource* as = reinterpret_cast<ac::AssetSource*>(asset_source);
+    lp->addAssetSource(std::unique_ptr<ac::AssetSource>(as), priority);
 }
 
 void ac_add_model(ac_api_provider* local_provider,

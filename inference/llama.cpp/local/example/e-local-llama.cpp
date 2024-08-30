@@ -4,6 +4,7 @@
 #include <ac/LocalProvider.hpp>
 #include <ac/LocalLlama.hpp>
 #include <ac/ModelInfo.hpp>
+#include <ac/AssetSourceLocalDir.hpp>
 
 #include <ac/Model.hpp>
 #include <ac/Instance.hpp>
@@ -23,10 +24,12 @@ int main() {
 
     ac::LocalProvider provider;
     ac::addLocalLlamaInference(provider);
+    provider.addAssetSource(ac::AssetSourceLocalDir_Create(AC_TEST_DATA_LLAMA_DIR), 0);
+
     provider.addModel(ac::ModelInfo{
         .id = "gpt2",
         .inferenceType = "llama.cpp",
-        .assets = {{AC_TEST_DATA_LLAMA_DIR "/gpt2-117m-q6_k.gguf", {}}}
+        .assets = {{"gpt2-117m-q6_k.gguf", {}}}
     });
 
     std::optional<std::latch> latch;

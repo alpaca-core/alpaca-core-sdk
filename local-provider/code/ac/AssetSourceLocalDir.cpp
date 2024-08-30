@@ -1,7 +1,6 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#pragma once
 #include "AssetSourceLocalDir.hpp"
 #include <astl/move.hpp>
 

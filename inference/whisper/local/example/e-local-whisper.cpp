@@ -3,6 +3,7 @@
 //
 #include <ac/LocalProvider.hpp>
 #include <ac/LocalWhisper.hpp>
+#include <ac/AssetSourceLocalDir.hpp>
 
 #include <ac/Model.hpp>
 #include <ac/ModelInfo.hpp>
@@ -33,10 +34,12 @@ int main() {
 
     ac::LocalProvider provider;
     ac::addLocalWhisperInference(provider);
+    provider.addAssetSource(ac::AssetSourceLocalDir_Create(AC_TEST_DATA_WHISPER_DIR), 0);
+
     provider.addModel(ac::ModelInfo{
         .id = "whisper_en",
         .inferenceType = "whisper.cpp",
-        .assets = {{AC_TEST_DATA_WHISPER_DIR "/whisper-base.en-f16.bin", {}}}
+        .assets = {{"whisper-base.en-f16.bin", {}}}
     });
 
     std::optional<std::latch> latch;

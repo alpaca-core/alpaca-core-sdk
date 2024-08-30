@@ -13,6 +13,7 @@
 #include <xec/ThreadExecution.hpp>
 #include <astl/move_capture.hpp>
 #include <astl/tsumap.hpp>
+#include <astl/coro_lock.hpp>
 #include <itlib/shared_from.hpp>
 #include <itlib/make_ptr.hpp>
 #include <unordered_map>
@@ -51,7 +52,7 @@ public:
                 cb.resultCb({});
             }
             catch (std::exception& ex) {
-                cb.resultCb(itlib::unexpected(ac::Error{ex.what()}));
+                cb.resultCb(itlib::unexpected(ac::Error{ ex.what() }));
                 return;
             }
         }, m_opTaskToken);
@@ -87,7 +88,7 @@ public:
 
                 if (!instance)
                 {
-                    cb.resultCb(itlib::unexpected(ac::Error{"Instance couldn't be created!"}));
+                    cb.resultCb(itlib::unexpected(ac::Error{ "Instance couldn't be created!" }));
                     return;
                 }
 
@@ -95,7 +96,7 @@ public:
                 cb.resultCb(astl::move(ptr));
             }
             catch (std::exception& ex) {
-                cb.resultCb(itlib::unexpected(ac::Error{ex.what()}));
+                cb.resultCb(itlib::unexpected(ac::Error{ ex.what() }));
                 return;
             }
         });
@@ -108,7 +109,7 @@ class CoTask {
 public:
     struct promise_type {
         CoTask get_return_object() noexcept {
-            return CoTask{std::coroutine_handle<promise_type>::from_promise(*this)};
+            return CoTask{ std::coroutine_handle<promise_type>::from_promise(*this) };
         }
         void unhandled_exception() noexcept { /* terminate? */ }
         std::suspend_always initial_suspend() noexcept { return {}; }
@@ -131,21 +132,99 @@ private:
     explicit CoTask(Handle handle) noexcept : m_handle(handle) {}
 };
 
+struct async_resume {
+    std::coroutine_handle<> handle;
+
+    explicit async_resume(std::coroutine_handle<> h) : handle(h) {}
+
+    async_resume(const async_resume&) = delete;
+    async_resume& operator=(const async_resume&) = delete;
+    async_resume(async_resume&& other) noexcept : handle(std::exchange(other.handle, nullptr)) {}
+    async_resume& operator=(async_resume&& other) noexcept = delete; // don't move around
+
+    ~async_resume() {
+        // not resumed, so destoy the handle
+        if (handle) {
+            handle.destroy();
+        }
+    }
+    void operator()() {
+        auto h = std::exchange(handle, nullptr);
+        h.resume();
+    }
+};
+
+class AssetQuery {
+    std::string_view m_id;
+    AssetManager& m_mgr;
+    xec::TaskExecutor& m_executor;
+    std::optional<AssetInfo> m_assetInfo;
+public:
+    AssetQuery(std::string_view id, AssetManager& mgr, xec::TaskExecutor& executor)
+        : m_id(id)
+        , m_mgr(mgr)
+        , m_executor(executor)
+    {}
+
+    bool await_ready() const noexcept { return false; }
+    void await_suspend(std::coroutine_handle<> handle) {
+        m_mgr.queryAsset(std::string(m_id), [this, handle](std::string_view, const AssetInfo& data) {
+            m_assetInfo = data;
+            m_executor.pushTask(async_resume(handle));
+        });
+    }
+    AssetInfo await_resume() {
+        return std::move(*m_assetInfo);
+    }
+};
+
 } // anonymous namespace
 
 class LocalProvider::Impl {
     astl::tsumap<LocalInferenceModelLoader*> m_loaders;
-    astl::tsumap<std::shared_ptr<LocalModelInfo>> m_modelManifest; // could be made into an unordered_set
 
-    AssetManager m_assetMgr;
+    struct ModelManifestEntry {
+        // this is a quite complex struct
+        // it contains the model info which is to be shared with the outside world upon model queries
+        // the info is also used across the provider (in a single strand) to manage model creation and assets
+        // some of the provider's methods are coroutines which get spliced into the strand
+        //
+        // 1. to facilitate sharing between threads we use the CoW object
+        // 2. to facilitate sharing between coroutines we use the coro_lock (thus coroutines wait before touching infos)
 
-    // these must the last members (first to be destroyed)
-    // if there are pending tasks, they will be finalized here and they may access other members
+        astl::coro_lock lock;
+        std::shared_ptr<LocalModelInfo> info;
+    };
+
+    // the complexity just grows
+    // the model manifest is a map of model ids to model infos (btw could be made into an unordered_set)
+    // since spliced coroutines lock entries, we should never remove them from the map, otherwise we could
+    // leave awaiters hanging with an invalid reference
+    // and thus we created the spec that model infos are permanent, yay :)
+    // note that they are not immutable, model sources could still change them, just never remove them
+    astl::tsumap<std::unique_ptr<ModelManifestEntry>> m_modelManifest;
+
+    // keep the position order of the next items:
+    // * they must be the last (first to be destroyed)
+    // * the asset manager must be destroyed first
     xec::TaskExecutor m_executor;
     xec::ThreadExecution m_execution;
+    AssetManager m_assetMgr;
 public:
     Impl() : m_execution(m_executor) {
         m_execution.launchThread("ac-inference");
+    }
+
+    ~Impl() {
+        // complex shutdown logic since we're running threads and communicating by raw refs :)
+
+        // first shut down the local execution and thus stop any tasks issued to m_assetMgr
+        m_execution.stopAndJoinThread();
+
+        // then m_assetMgr being the last member will be destroyed and shut down first so it, in turn,
+        // stops issuing tasks to our executor
+
+        // any hanging tasks are just discarded
     }
 
     void addAssetSource(std::unique_ptr<AssetSource> source, int priority) {
@@ -160,9 +239,7 @@ public:
     }
 
     void co_splice(std::coroutine_handle<> h) {
-        m_executor.pushTask([h]() {
-            h.resume();
-        });
+        m_executor.pushTask(async_resume(h));
     }
 
     void co_splice(CoTask task) {
@@ -170,14 +247,31 @@ public:
     }
 
     CoTask coAddModel(ModelInfo info) {
-        auto localInfo = itlib::make_shared(LocalModelInfo{ astl::move(info) });
-        localInfo->localAssets.resize(localInfo->assets.size());
-        for (size_t i = 0; i < localInfo->assets.size(); ++i) {
-            // temporary, until we integrate asset manager properly
-            localInfo->localAssets[i].path = localInfo->assets[i].id;
+        // spliced coroutine: prepare lock
+        astl::coro_lock::guard lockGuard;
+
+        auto iter = m_modelManifest.find(info.id);
+        if (iter == m_modelManifest.end()) {
+            // creating a new model info
+            // update the manifest so that everyone knows it's there and immediately lock it
+            auto entry = std::make_unique<ModelManifestEntry>();
+            lockGuard = entry->lock.try_lock_guard(); // no need to await since it's just created
+            assert(lockGuard); // must be able to lock immediately
+            iter = m_modelManifest.emplace(info.id, astl::move(entry)).first;
         }
-        m_modelManifest[localInfo->id] = localInfo;
-        co_return;
+        else {
+            // we're updating the model info so just lock it
+            lockGuard = co_await iter->second->lock;
+        }
+
+        auto localInfo = itlib::make_shared(LocalModelInfo{astl::move(info)});
+
+        localInfo->localAssets.reserve(localInfo->assets.size());
+        for (auto& i : localInfo->assets) {
+            localInfo->localAssets.push_back(co_await AssetQuery(i.id, m_assetMgr, m_executor));
+        }
+        localInfo->localAssets.resize(localInfo->assets.size());
+        iter->second->info = astl::move(localInfo);
     }
 
     void addModel(ModelInfo info) {
@@ -188,15 +282,16 @@ public:
         try {
             auto f = m_modelManifest.find(id);
             if (f == m_modelManifest.end()) {
-                cb.resultCb(itlib::unexpected(ac::Error{ "Unknown model id" }));
+                cb.resultCb(itlib::unexpected(ac::Error{"Unknown model id"}));
                 co_return;
             }
-            auto info = LocalModelInfoPtr(f->second);
+            auto infoLock = co_await f->second->lock;
+            auto info = LocalModelInfoPtr(f->second->info);
             auto& type = info->inferenceType;
 
             auto it = m_loaders.find(type);
             if (it == m_loaders.end()) {
-                cb.resultCb(itlib::unexpected(ac::Error{ "Unknown model type" }));
+                cb.resultCb(itlib::unexpected(ac::Error{"Unknown model type"}));
                 co_return;
             }
             auto& loader = *it->second;
@@ -209,18 +304,15 @@ public:
             });
 
             if (!model) {
-                cb.resultCb(itlib::unexpected(ac::Error{ "Model couldn't be loaded!" }));
+                cb.resultCb(itlib::unexpected(ac::Error{"Model couldn't be loaded!"}));
                 co_return;
             }
 
             ModelPtr ptr = std::make_shared<LocalModel>(astl::move(model), m_executor);
             cb.resultCb(astl::move(ptr));
-
-            co_return;
         }
         catch (std::exception& ex) {
             cb.resultCb(itlib::unexpected(ac::Error{ex.what()}));
-            co_return;
         }
     }
 

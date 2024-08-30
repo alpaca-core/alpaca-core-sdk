@@ -26,4 +26,6 @@ target_sources(ac-local PRIVATE
 
     ac/local_provider.h
     ac/local_provider.cpp
+    ac/asset_source_local_dir.h
+    ac/asset_source_local_dir.cpp
 )

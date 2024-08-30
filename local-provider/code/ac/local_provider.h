@@ -3,6 +3,7 @@
 //
 #pragma once
 #include "export.h"
+#include "asset_source.h"
 #include <ac/api_provider.h>
 #include <stddef.h>
 
@@ -11,6 +12,8 @@ extern "C" {
 #endif
 
 AC_LOCAL_EXPORT ac_api_provider* ac_new_local_api_provider();
+
+AC_LOCAL_EXPORT void ac_add_asset_source(ac_api_provider* local_provider, ac_asset_source* asset_source, int priority);
 
 typedef struct ac_model_info_asset {
     const char* id;

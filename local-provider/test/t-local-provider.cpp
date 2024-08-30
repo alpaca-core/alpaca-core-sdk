@@ -26,7 +26,14 @@ struct AcTestHelper {
 
     AcTestHelper() {
         provider.addModel(ac::ModelInfo{"empty"});
-        provider.addModel(ac::ModelInfo{"model", "dummy"});
+        provider.addModel(ac::ModelInfo{
+            .id = "model",
+            .inferenceType = "dummy",
+            .assets = {
+                {"asset1", "tag1"},
+                {"asset2", "tag2"}
+            }
+        });
     }
 
     void createModelAndWait(std::string_view type, ac::Dict params) {

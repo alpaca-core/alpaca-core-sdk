@@ -5,6 +5,7 @@
 #include <ac/dict.h>
 #include <ac/local_provider.h>
 #include <ac/local_llama.h>
+#include <ac/asset_source_local_dir.h>
 
 #include <jalogc.h>
 
@@ -102,8 +103,10 @@ int main(void) {
     init_app_state(&state);
 
     ac_add_local_llama_inference(local_provider);
+    ac_add_asset_source(local_provider, ac_new_asset_source_local_dir(AC_TEST_DATA_LLAMA_DIR), 0);
+
     {
-        ac_model_info_asset asset = {.id = AC_TEST_DATA_LLAMA_DIR "/gpt2-117m-q6_k.gguf"};
+        ac_model_info_asset asset = {.id = "gpt2-117m-q6_k.gguf"};
         ac_add_model(local_provider, "gpt2", "llama.cpp", &asset, 1);
     }
 
