@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #include <ac/LocalInference.hpp>
+#include <ac/AssetSource.hpp>
 
 class DummyLocalInferenceModelLoader final : public ac::LocalInferenceModelLoader {
 public:
@@ -11,3 +12,5 @@ public:
         std::function<void(float)> progress
     ) override;
 };
+
+std::unique_ptr<ac::AssetSource> createDummyAssetSource();

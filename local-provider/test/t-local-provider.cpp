@@ -27,6 +27,21 @@ struct AcTestHelper {
     AcTestHelper() {
         provider.addModel(ac::ModelInfo{"empty"});
         provider.addModel(ac::ModelInfo{
+            .id = "single-asset",
+            .inferenceType = "dummy",
+            .assets = {
+                {"bad", "bad-tag"},
+            }
+        });
+        provider.addModel(ac::ModelInfo{
+            .id = "bad-assets",
+            .inferenceType = "dummy",
+            .assets = {
+                {"asset1", "tag1"},
+                {"bad-asset", "bad-tag"},
+            }
+        });
+        provider.addModel(ac::ModelInfo{
             .id = "model",
             .inferenceType = "dummy",
             .assets = {
@@ -91,9 +106,30 @@ TEST_CASE("missing model provider") {
     CHECK(h.modelResult.error().text == "Unknown model type");
 }
 
+TEST_CASE("not enough assets") {
+    AcTestHelper h;
+    h.provider.addLocalInferenceLoader("dummy", h.modelLoader);
+    h.createModelAndWait("single-asset", {});
+
+    REQUIRE(h.modelResult.has_error() == true);
+    CHECK(h.modelResult.error().text == "expected 2 assets, got 1");
+}
+
+TEST_CASE("bad assets") {
+    AcTestHelper h;
+    h.provider.addLocalInferenceLoader("dummy", h.modelLoader);
+    h.provider.addAssetSource(createDummyAssetSource(), 0);
+    h.createModelAndWait("bad-assets", {});
+
+    REQUIRE(h.modelResult.has_error() == true);
+    CHECK(h.modelResult.error().text == "asset error: Asset not found");
+}
+
+
 TEST_CASE("model loading error") {
     AcTestHelper h;
     h.provider.addLocalInferenceLoader("dummy", h.modelLoader);
+    h.provider.addAssetSource(createDummyAssetSource(), 0);
     h.createModelAndWait("model", {{"error", true}});
 
     REQUIRE(h.modelResult.has_error() == true);
@@ -104,6 +140,7 @@ TEST_CASE("model loading error") {
 TEST_CASE("model loading success") {
     AcTestHelper h;
     h.provider.addLocalInferenceLoader("dummy", h.modelLoader);
+    h.provider.addAssetSource(createDummyAssetSource(), 0);
     h.createModelAndWait("model", {});
 
     REQUIRE(h.modelResult.has_value() == true);
@@ -114,6 +151,7 @@ TEST_CASE("model loading success") {
 TEST_CASE("instance loading error") {
     AcTestHelper h;
     h.provider.addLocalInferenceLoader("dummy", h.modelLoader);
+    h.provider.addAssetSource(createDummyAssetSource(), 0);
     h.createModelAndWait("model", {});
     h.createInstanceAndWait({{"error", true}});
 
@@ -124,6 +162,7 @@ TEST_CASE("instance loading error") {
 TEST_CASE("instance loading success") {
     AcTestHelper h;
     h.provider.addLocalInferenceLoader("dummy", h.modelLoader);
+    h.provider.addAssetSource(createDummyAssetSource(), 0);
     h.createModelAndWait("model", {});
     h.createInstanceAndWait({});
 
@@ -134,6 +173,7 @@ TEST_CASE("instance loading success") {
 TEST_CASE("run ops") {
     AcTestHelper h;
     h.provider.addLocalInferenceLoader("dummy", h.modelLoader);
+    h.provider.addAssetSource(createDummyAssetSource(), 0);
     h.createModelAndWait("model", {});
     h.createInstanceAndWait({});
 
