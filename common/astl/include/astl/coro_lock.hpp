@@ -3,6 +3,7 @@
 //
 #pragma once
 #include <coroutine>
+#include <utility>
 #include <deque>
 
 // a lock for spliced coroutines
@@ -53,13 +54,39 @@ public:
         return m_locked;
     }
 
-    auto operator co_await() {
-        struct guard {
-            coro_lock& m_lock;
-            ~guard() {
-                m_lock.unlock();
+    class guard {
+        coro_lock* m_lock = nullptr;
+    public:
+        guard() noexcept = default;
+        explicit guard(coro_lock& lock) noexcept : m_lock(&lock) {}
+        ~guard() {
+            unlock();
+        }
+
+        guard(const guard&) = delete;
+        guard& operator=(const guard&) = delete;
+        guard(guard&& other) noexcept : m_lock(std::exchange(other.m_lock, nullptr)) {}
+        guard& operator=(guard&& other) noexcept {
+            if (this != &other) {
+                unlock();
+                m_lock = std::exchange(other.m_lock, nullptr);
             }
-        };
+            return *this;
+        }
+
+        void unlock() {
+            if (m_lock) {
+                m_lock->unlock();
+                m_lock = nullptr;
+            }
+        }
+
+        explicit operator bool() const noexcept {
+            return m_lock;
+        }
+    };
+
+    auto operator co_await() {
         struct awaitable {
             coro_lock& m_lock;
             std::coroutine_handle<> m_handle;

@@ -50,27 +50,42 @@ private:
     explicit coro(handle handle) noexcept : m_handle(handle) {}
 };
 
-coro test_await(astl::coro_lock& lock, int i, bool suspend_after_lock) {
+coro test_await(astl::coro_lock& lock, int i) {
     auto l = co_await lock;
-    if (suspend_after_lock) {
+    CHECK(lock.locked()); // must have lock here
+    co_return i;
+}
+
+coro test_await_suspend(astl::coro_lock& lock, int i) {
+    auto l = co_await lock;
+    co_await std::suspend_always{};
+    CHECK(lock.locked()); // must have lock here
+    co_return i;
+}
+
+coro test_maybe_await(astl::coro_lock& lock, int i, bool b) {
+    astl::coro_lock::guard g;
+    if (b) {
+        g = co_await lock;
         co_await std::suspend_always{};
     }
-    CHECK(lock.locked()); // must have lock here
+    CHECK(b == lock.locked());
+    CHECK(b == static_cast<bool>(g));
     co_return i;
 }
 
 TEST_CASE("release from completed coroutine") {
     astl::coro_lock lock;
-    auto c = test_await(lock, 42, false);
+    auto c = test_await(lock, 42);
     CHECK(c.value() == 42); // completed
     CHECK_FALSE(lock.locked()); // released
 }
 
-TEST_CASE("held by incomplete coroutine, but released upon destruction") {
+TEST_CASE("held by suspended coroutine, but released upon destruction") {
     astl::coro_lock lock;
 
     {
-        auto c = test_await(lock, 42, true);
+        auto c = test_await_suspend(lock, 42);
         CHECK(lock.locked());
         CHECK(c.value() == -1); // suspended
     }
@@ -78,10 +93,24 @@ TEST_CASE("held by incomplete coroutine, but released upon destruction") {
     CHECK_FALSE(lock.locked()); // guard was destroyed when c was destroyed
 }
 
+TEST_CASE("maybe suspend") {
+    astl::coro_lock lock;
+
+    auto c = test_maybe_await(lock, 42, false);
+    CHECK_FALSE(lock.locked());
+    CHECK(c.value() == 42);
+
+    auto d = test_maybe_await(lock, 43, true);
+    CHECK(lock.locked());
+    CHECK(d.value() == -1);
+    d.resume();
+    CHECK(d.value() == 43);
+}
+
 TEST_CASE("released by resumed coroutine") {
     astl::coro_lock lock;
 
-    auto c = test_await(lock, 34, true);
+    auto c = test_await_suspend(lock, 34);
     CHECK(lock.locked());
     CHECK(c.value() == -1); // suspended
     c.resume();
@@ -93,14 +122,14 @@ TEST_CASE("safely dropping awaiters") {
     astl::coro_lock lock;
 
     {
-        auto c = test_await(lock, 34, true);
+        auto c = test_await_suspend(lock, 34);
         CHECK(lock.locked());
         // next coros should be suspended on lock
-        auto d0 = test_await(lock, 1, false);
+        auto d0 = test_await(lock, 1);
         CHECK(d0.value() == -1);
-        auto d1 = test_await(lock, 2, false);
+        auto d1 = test_await(lock, 2);
         CHECK(d1.value() == -1);
-        auto d2 = test_await(lock, 3, true);
+        auto d2 = test_await_suspend(lock, 3);
         CHECK(d2.value() == -1);
     }
 
@@ -110,15 +139,15 @@ TEST_CASE("safely dropping awaiters") {
 TEST_CASE("splicing") {
 
     astl::coro_lock lock;
-    auto c = test_await(lock, 34, true);
+    auto c = test_await_suspend(lock, 34);
     CHECK(lock.locked());
-    auto a0 = test_await(lock, 0, false);
+    auto a0 = test_await(lock, 0);
     CHECK(a0.value() == -1); // suspended on lock
-    auto a1 = test_await(lock, 1, false);
+    auto a1 = test_await(lock, 1);
     CHECK(a1.value() == -1);
-    auto s2 = test_await(lock, 2, true); // suspend
+    auto s2 = test_maybe_await(lock, 2, true);
     CHECK(s2.value() == -1);
-    auto b3 = test_await(lock, 3, false); // blocked by s2
+    auto b3 = test_await(lock, 3); // blocked by s2
     CHECK(b3.value() == -1);
 
     c.resume();
