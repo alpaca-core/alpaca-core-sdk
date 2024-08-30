@@ -42,7 +42,7 @@ whisper_full_params whisperFromInstanceParams(Instance::InitParams& iparams) {
 Instance::Instance(Model& model, InitParams params)
     : m_model(model)
     , m_params(astl::move(params))
-    , m_state(whisper_init_state(model.context()))
+    , m_state(whisper_init_state(model.context()), whisper_free_state)
 {}
 
 Instance::~Instance() = default;
@@ -59,18 +59,17 @@ std::string Instance::transcribe(std::span<float> pcmf32) {
 std::string Instance::runInference(std::span<float> pcmf32) {
     auto wparams = whisperFromInstanceParams(m_params);
 
-    if (whisper_full_with_state(m_model.context(), m_state, wparams, pcmf32.data(), int(pcmf32.size())) != 0) {
+    if (whisper_full_with_state(m_model.context(), m_state.get(), wparams, pcmf32.data(), int(pcmf32.size())) != 0) {
         throw_ex{} << "Failed to process audio!";
     }
 
     std::string result;
-    const int n_segments = whisper_full_n_segments_from_state(m_state);
+    const int n_segments = whisper_full_n_segments_from_state(m_state.get());
     for (int i = 0; i < n_segments; ++i) {
-        const char * text = whisper_full_get_segment_text_from_state(m_state, i);
+        const char * text = whisper_full_get_segment_text_from_state(m_state.get(), i);
         result += std::string(text) + "\n";
     }
 
     return result;
 }
-
 } // namespace ac::whisper
