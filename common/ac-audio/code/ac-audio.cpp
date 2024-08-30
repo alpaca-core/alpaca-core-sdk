@@ -12,6 +12,8 @@
 #include <itlib/span.hpp>
 #include <astl/throw_ex.hpp>
 
+#include <limits>
+
 namespace ac::audio {
 bool WavWriter::open(
     const std::string& filename,
