@@ -7,11 +7,15 @@ target_include_directories(ac-local INTERFACE .)
 target_link_libraries(ac-local
     PRIVATE
         xec::xec
+        jalog::jalog
     PUBLIC
         ac::api
 )
 target_sources(ac-local PRIVATE
     ac/export.h
+
+    ac/Logging.hpp
+    ac/Logging.cpp
 
     ac/LocalProvider.hpp
     ac/LocalProvider.cpp
@@ -20,7 +24,6 @@ target_sources(ac-local PRIVATE
 
     ac/AssetManager.hpp
     ac/AssetManager.cpp
-
     ac/AssetSourceLocalDir.hpp
     ac/AssetSourceLocalDir.cpp
 

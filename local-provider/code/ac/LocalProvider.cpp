@@ -7,6 +7,7 @@
 #include "ModelInfo.hpp"
 #include "AssetManager.hpp"
 #include "AssetSource.hpp"
+#include "Logging.hpp"
 #include <ac/Model.hpp>
 #include <ac/Instance.hpp>
 #include <xec/TaskExecutor.hpp>
@@ -20,6 +21,8 @@
 #include <latch>
 #include <atomic>
 #include <coroutine>
+
+#define LOG_INFO(...) AC_LOCAL_LOG(Info, __VA_ARGS__)
 
 namespace ac {
 
@@ -250,6 +253,8 @@ public:
         // spliced coroutine: prepare lock
         astl::coro_lock::guard lockGuard;
 
+        LOG_INFO("adding model: ", info.id);
+
         auto iter = m_modelManifest.find(info.id);
         if (iter == m_modelManifest.end()) {
             // creating a new model info
@@ -268,6 +273,7 @@ public:
 
         localInfo->localAssets.reserve(localInfo->assets.size());
         for (auto& i : localInfo->assets) {
+            LOG_INFO("querying asset: ", i.id);
             localInfo->localAssets.push_back(co_await AssetQuery(i.id, m_assetMgr, m_executor));
         }
         localInfo->localAssets.resize(localInfo->assets.size());
@@ -296,6 +302,7 @@ public:
             }
             auto& loader = *it->second;
 
+            LOG_INFO("loading model: ", id);
             auto model = loader.loadModelSync(astl::move(info), astl::move(params), [&](float progress) {
                 assert(std::this_thread::get_id() == m_execution.threadId());
                 if (cb.progressCb) {
