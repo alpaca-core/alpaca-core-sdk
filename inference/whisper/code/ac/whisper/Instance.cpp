@@ -59,7 +59,7 @@ std::string Instance::transcribe(std::span<float> pcmf32) {
 std::string Instance::runInference(std::span<float> pcmf32) {
     auto wparams = whisperFromInstanceParams(m_params);
 
-    if (whisper_full_with_state(m_model.context(), m_state, wparams, pcmf32.data(), pcmf32.size()) != 0) {
+    if (whisper_full_with_state(m_model.context(), m_state, wparams, pcmf32.data(), int(pcmf32.size())) != 0) {
         throw_ex{} << "Failed to process audio!";
     }
 

@@ -269,7 +269,7 @@ public:
         auto bitPerSample = SDL_AUDIO_BITSIZE(aState.m_returnedRecordingSpec.format) * aState.m_returnedRecordingSpec.channels / 2;
         writer.open(fileName,
             aState.m_returnedRecordingSpec.freq,
-            bitPerSample,
+            uint16_t(bitPerSample),
             aState.m_returnedRecordingSpec.channels);
         writer.write(m_pcmf32.data(), m_pcmf32.size());
         writer.close();
@@ -558,7 +558,7 @@ int main(int, char**) {
                             selectedWav->load();
                         }
                         aState.m_currentRecordingBuffer = &selectedWav->pcmf32();
-                        aState.m_actualBufferByteSize = aState.m_currentRecordingBuffer->size() * RECORDING_BUFFER_TYPE_SIZE;
+                        aState.m_actualBufferByteSize = uint32_t(aState.m_currentRecordingBuffer->size()) * RECORDING_BUFFER_TYPE_SIZE;
                         playing = true;
                     }
                 }
