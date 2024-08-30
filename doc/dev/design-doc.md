@@ -21,10 +21,10 @@ A collection of somewhat loose notes on the design and architecture of the SDK. 
 ### API Design
 
 * The API is a first-class C++ API: It uses classes, throws exceptions, and doesn't shy away from C++ library types like `std::function` or `std::shared_ptr`.
-    * **Rationale**: 
-      * While C *is* the Lingua Franka of software engineering, C++ is simply easier to use. 
-      * It's much easier to design and maintain a C++ API without paying the price for the abstraction. Templates, and destructors provide a way to expose complex behavior without burdening the users with a huge number of specific functions and gotchas. Exceptions provide a natural way to handle errors. 
-      * Moreover many languages (like Java, Python, Lua, and others) provide ways to bind a C++ API in a much more natural way than a C one (including higher-order C++ constructs). It would be a shame to miss-out on this. 
+    * **Rationale**:
+      * While C *is* the Lingua Franka of software engineering, C++ is simply easier to use.
+      * It's much easier to design and maintain a C++ API without paying the price for the abstraction. Templates, and destructors provide a way to expose complex behavior without burdening the users with a huge number of specific functions and gotchas. Exceptions provide a natural way to handle errors.
+      * Moreover many languages (like Java, Python, Lua, and others) provide ways to bind a C++ API in a much more natural way than a C one (including higher-order C++ constructs). It would be a shame to miss-out on this.
       * This is not to ban a C interface. A C interface will necessarily exist. Many languages would have an easier time with C. Still the "natural" programming language of the API and the only way to access low-level features would be C++.
       * There are multiple arguments in favor of going C first if we're shipping a closed-source library. Things to consider in this case would be binaries for special instruction sets, using the library as a plugin with `dlopen`/`dlsym` and more. However this is not the case here. Moreover even if were, we could still cover all the needs by using [DynaMix](https://github.com/iboB/dynamix)
     * We will provide API wrappers for popular languages
@@ -65,7 +65,7 @@ A collection of somewhat loose notes on the design and architecture of the SDK. 
 * Somewhat stringly typed arguments
     * Given the vast and impossible to foresee number of combinations for API calls, we're providing most params to most ops as key-value maps/dictionaries.
     * The carrier for these is [nlohmann::json](https://github.com/nlohmann/json)
-        * The type is essentially a key-value BSON compatible map 
+        * The type is essentially a key-value BSON compatible map
         * Values are number (optionally integer), string, array, object, null, and crucially *blob*.
         * It supports [JSON Schema](https://json-schema.org/) via [pboettch/json-schema-validator](https://github.com/pboettch/json-schema-validator)
     * In the initial implementation the C API will use `const char*` JSON strings, with blobs as base64 strings. Later we will provide a C wrapper to set values
@@ -83,15 +83,15 @@ A collection of somewhat loose notes on the design and architecture of the SDK. 
 
 * Coding style:
     * 4-space indentation
-    * [Karisik](https://github.com/iboB/karisik-coding-style) for C++: 
+    * [Karisik](https://github.com/iboB/karisik-coding-style) for C++:
         * `.cpp`, `.hpp` file extensions
         * `PascalCase` for types
         * `camelCase` for functions and variables
         * `ALL_CAPS` for macros
-        * `Mixed_Case` for constants. 
-        * No `get` prefix on getters. 
-        * `m_` prefix on members. 
-        * `PascalCase` for filenames. 
+        * `Mixed_Case` for constants.
+        * No `get` prefix on getters.
+        * `m_` prefix on members.
+        * `PascalCase` for filenames.
         * `PascalCase.camelCase` for functional extensions
     * Simple for C
         * `.c`, `.h` file extensions
@@ -104,3 +104,6 @@ A collection of somewhat loose notes on the design and architecture of the SDK. 
     * Use `, ref #<issue number>` if the commit references an issue
     * Use `, closes #<issue number>` if the commit closes an issue
     * Use `, fixes #<issue number>` if the commit fixes a bug
+* _TODO_ sections:
+    * create an issue, when adding _TODO_ in the code
+    * use similar syntax to `TODO: <description>, ref #<issue number>`
