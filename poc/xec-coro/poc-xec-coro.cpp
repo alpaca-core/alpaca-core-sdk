@@ -180,8 +180,12 @@ int main() {
     Consumer consumer(producer);
 
     consumer.co_splice(test(producer));
+    consumer.scheduleTask(std::chrono::seconds(1), [&]() {
+        std::cout << "stopping after 1s\n";
+        consumer.stop();
+    });
 
-    std::cout << "start\n";
+    std::cout << "start (stop in 1s)\n";
     consumer.run();
     return 0;
 }
