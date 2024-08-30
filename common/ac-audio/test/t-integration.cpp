@@ -35,8 +35,7 @@ TEST_CASE("convert i16 to f32") {
     auto loadedF32 = ac::audio::loadWavF32Mono(AudioFileSmall);
     REQUIRE(loadedF32.size() == f32.size());
 
-    for (size_t i = 0; i < f32.size(); i++)
-    {
+    for (size_t i = 0; i < f32.size(); i++) {
         CHECK(f32[i] == doctest::Approx(loadedF32[i]).epsilon(0.1));
     }
 }

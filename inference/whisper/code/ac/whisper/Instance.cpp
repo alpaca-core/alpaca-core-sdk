@@ -17,8 +17,7 @@
 namespace ac::whisper {
 namespace {
 whisper_sampling_strategy whisperFromACStrategy(Instance::InitParams::SamplingStrategy strategy) {
-    switch (strategy)
-    {
+    switch (strategy) {
     case Instance::InitParams::SamplingStrategy::GREEDY:
         return whisper_sampling_strategy::WHISPER_SAMPLING_GREEDY;
     case Instance::InitParams::SamplingStrategy::BEAM_SEARCH:
@@ -117,8 +116,7 @@ Instance::Instance(Model& model, InitParams params)
 Instance::~Instance() = default;
 
 std::string Instance::transcribe(std::span<float> pcmf32) {
-    if (pcmf32.empty())
-    {
+    if (pcmf32.empty()) {
         // TODO: Investigate why whisper.cpp crashes if the input is empty
         return std::string();
     }
@@ -131,7 +129,7 @@ std::string Instance::runInference(std::span<float> pcmf32) {
 
     if (whisper_full_with_state(m_model.context(), m_state, wparams, pcmf32.data(), pcmf32.size()) != 0) {
         fprintf(stderr, "failed to process audio!\n");
-        return "";
+        return {};
     }
 
     std::string result;

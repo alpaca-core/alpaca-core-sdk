@@ -425,39 +425,35 @@ int main(int, char**) {
         if (recording) {
             SDL_PauseAudioDevice(aState.m_recordingDeviceId, SDL_FALSE );
 
-            //Lock callback
+            // Lock callback
             SDL_LockAudioDevice(aState.m_recordingDeviceId);
 
-            //Finished recording
-            if(gBufferBytePosition > gBufferByteSize)
-            {
-                //Stop recording audio
+            // Finished recording
+            if(gBufferBytePosition > gBufferByteSize) {
+                // Stop recording audio
                 SDL_PauseAudioDevice(aState.m_recordingDeviceId, SDL_TRUE );
                 recording = false;
             }
 
-            //Unlock callback
+            // Unlock callback
             SDL_UnlockAudioDevice(aState.m_recordingDeviceId);
         }
 
         if (playing) {
             SDL_PauseAudioDevice(aState.m_playbackDeviceId, SDL_FALSE);
 
-            //Lock callback
+            // Lock callback
             SDL_LockAudioDevice(aState.m_playbackDeviceId);
 
-            //Finished playback
-            if(gBufferBytePosition > gBufferRecordedPos)
-            {
-                //Stop playing audio
+            // Finished playback
+            if(gBufferBytePosition > gBufferRecordedPos) {
+                // Stop playing audio
                 SDL_PauseAudioDevice(aState.m_playbackDeviceId, SDL_TRUE);
                 playing = false;
             }
 
-            //Unlock callback
+            // Unlock callback
             SDL_UnlockAudioDevice(aState.m_playbackDeviceId);
-        } else {
-
         }
 
         // prepare frame
