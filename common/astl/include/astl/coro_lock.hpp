@@ -55,10 +55,11 @@ public:
     }
 
     class guard {
+        friend coro_lock;
         coro_lock* m_lock = nullptr;
+        explicit guard(coro_lock& lock) noexcept : m_lock(&lock) {} // only coro_lock can create this
     public:
         guard() noexcept = default;
-        explicit guard(coro_lock& lock) noexcept : m_lock(&lock) {}
         ~guard() {
             unlock();
         }
@@ -86,6 +87,13 @@ public:
         }
     };
 
+    [[nodiscard]] guard try_lock_guard() noexcept {
+        if (try_lock()) {
+            return guard{*this};
+        }
+        return guard{};
+    }
+
     auto operator co_await() {
         struct awaitable {
             coro_lock& m_lock;
@@ -97,7 +105,7 @@ public:
                 m_handle = h;
                 m_lock.m_awaiters.push_back(h);
             }
-            guard await_resume() noexcept {
+            [[nodiscard]] guard await_resume() noexcept {
                 m_handle = nullptr;
                 return guard{m_lock};
             }

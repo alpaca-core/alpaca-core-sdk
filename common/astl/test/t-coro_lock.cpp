@@ -4,16 +4,26 @@
 #include <astl/coro_lock.hpp>
 #include <doctest/doctest.h>
 
-TEST_CASE("trivial") {
+TEST_CASE("no coro") {
     astl::coro_lock lock;
     CHECK_FALSE(lock.locked());
     CHECK(lock.try_lock());
     CHECK(lock.locked());
     CHECK_FALSE(lock.try_lock());
+    CHECK_FALSE(lock.try_lock_guard());
     lock.unlock();
     CHECK_FALSE(lock.locked());
     CHECK(lock.try_lock());
     CHECK(lock.locked());
+
+    lock.unlock();
+    {
+        auto g = lock.try_lock_guard();
+        CHECK(!!g);
+        CHECK(lock.locked());
+        CHECK_FALSE(lock.try_lock_guard());
+    }
+    CHECK_FALSE(lock.locked());
 }
 
 class coro {
