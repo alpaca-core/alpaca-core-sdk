@@ -4,6 +4,7 @@
 #pragma once
 #include "export.h"
 #include <ac/api_provider.h>
+#include <stddef.h>
 
 #if defined(__cplusplus)
 extern "C" {

@@ -9,8 +9,7 @@
 #include <ac/whisper/Model.hpp>
 #include <ac/whisper/Instance.hpp>
 
-// common functions
-#include <../whisper.cpp/examples/common.h>
+#include <ac-audio.hpp>
 
 // logging
 #include <jalog/Instance.hpp>
@@ -40,20 +39,13 @@ int main() try {
     ac::whisper::Instance instance(model, {});
 
     std::string audioFile = AC_TEST_DATA_WHISPER_DIR "/as-she-sat.wav";
-    std::vector<float> pcmf32;               // mono-channel F32 PCM
-    std::vector<std::vector<float>> pcmf32s; // stereo-channel F32 PCM
-
-    if (!::read_wav(audioFile, pcmf32, pcmf32s,/* params.diarize*/ false)) {
-        fprintf(stderr, "error: failed to read WAV file '%s'\n", audioFile.c_str());
-        return 1;
-    }
+    std::vector<float> pcmf32 = ac::audio::loadWavF32Mono(audioFile);
 
     std::cout << "Transcribing the audio [" << audioFile << "]: \n\n";
 
     // transcript the audio
-    instance.runOp("transcribe", pcmf32, pcmf32s, [](std::string res){
-        std::cout<< res <<'\n';
-    });
+    auto res = instance.transcribe(pcmf32);
+    std::cout << res << std::endl;
 
     return 0;
 }

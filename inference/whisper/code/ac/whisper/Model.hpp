@@ -3,7 +3,9 @@
 //
 #pragma once
 #include "export.h"
+
 #include <astl/mem_ext.hpp>
+
 #include <string>
 
 struct whisper_context;
@@ -17,7 +19,7 @@ public:
         bool gpu = true; // try to load data on gpu
     };
 
-    explicit Model(const char* pathToGguf, Params params);
+    explicit Model(const char* pathToBin, Params params);
     ~Model();
 
     const Params& params() const noexcept { return m_params; }
