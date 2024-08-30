@@ -19,7 +19,7 @@ public:
         bool gpu = true; // try to load data on gpu
     };
 
-    explicit Model(const char* pathToBin, Params params);
+    Model(const char* pathToBin, Params params);
     ~Model();
 
     const Params& params() const noexcept { return m_params; }

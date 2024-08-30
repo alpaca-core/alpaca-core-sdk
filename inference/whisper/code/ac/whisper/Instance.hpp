@@ -4,6 +4,8 @@
 #pragma once
 #include "export.h"
 
+#include <astl/mem_ext.hpp>
+
 #include <functional>
 #include <string>
 #include <span>
@@ -23,7 +25,7 @@ public:
         SamplingStrategy samplingStrategy = GREEDY;
     };
 
-    explicit Instance(Model& model, InitParams params);
+    Instance(Model& model, InitParams params);
     ~Instance();
 
     std::string transcribe(std::span<float> pcmf32);
@@ -33,7 +35,7 @@ private:
 
     Model& m_model;
     InitParams m_params;
-    whisper_state* m_state;
+    astl::c_unique_ptr<whisper_state> m_state;
 };
 
 } // namespace ac::whisper
