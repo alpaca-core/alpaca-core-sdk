@@ -32,6 +32,8 @@ add_doctest_lib_test(provider ac-local
         t-local-provider.cpp
     LIBRARIES
         test-ac-dummy-local-provider
+        jalog::jalog
+        jalog::sinklib
 )
 
 macro(local_test test)

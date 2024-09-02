@@ -12,9 +12,21 @@
 
 #include <astl/move.hpp>
 
+#include <jalog/Instance.hpp>
+#include <jalog/sinks/ColorSink.hpp>
+
 #include <string>
 #include <optional>
 #include <latch>
+
+struct GlobalFixture {
+    jalog::Instance jl;
+    GlobalFixture() {
+        jl.setup().add<jalog::sinks::ColorSink>();
+    }
+};
+
+GlobalFixture globalFixture;
 
 struct AcTestHelper {
     ac::LocalProvider provider;
