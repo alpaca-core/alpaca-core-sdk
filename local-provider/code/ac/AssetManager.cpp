@@ -64,18 +64,19 @@ public:
             if (f == m_assets.end()) {
                 return cb(id, {.error = "Asset not found"});
             }
-            if (f->second.path) {
-                return cb(f->first, f->second);
+            auto& info = f->second;
+            if (info.path) {
+                return cb(f->first, info);
             }
-            auto res = f->second.source->fetchAssetSync(id, {});
+            auto res = info.source->fetchAssetSync(id, {});
             if (res) {
-                f->second.size = res->size;
-                f->second.path = astl::move(res->path);
+                info.size = res->size;
+                info.path = astl::move(res->path);
             }
             else {
-                f->second.error = astl::move(res.error());
+                info.error = astl::move(res.error());
             }
-            return cb(f->first, f->second);
+            return cb(f->first, info);
         });
     }
 

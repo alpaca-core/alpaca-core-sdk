@@ -61,12 +61,15 @@ public:
         if (id == "asset2") {
             return BasicAssetInfo{{}, {}};
         }
+        if (id == "bad-remote-asset") {
+            return BasicAssetInfo{ {}, {} };
+        }
         return std::nullopt;
     }
 
     virtual itlib::expected<BasicAssetInfo, std::string> fetchAssetSync(
         std::string_view id,
-        std::function<void(float)> progressCb
+        ProgressCb progressCb
     ) override {
         if (id == "asset2") {
             progressCb(0.2f);
@@ -74,8 +77,12 @@ public:
             progressCb(1.f);
             return BasicAssetInfo{512, "/home/asset2"};
         }
+        else if (id == "bad-remote-asset") {
+            progressCb(0.2f);
+            return itlib::unexpected("Bad remote asset");
+        }
         // shouldn't get called for asset1
-        return itlib::unexpected();
+        return itlib::unexpected("Can't get asset");
     }
 };
 

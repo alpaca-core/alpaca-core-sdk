@@ -25,7 +25,7 @@ public:
         }
         return BasicAssetInfo{1'000 + id.size()};
     }
-    virtual itlib::expected<BasicAssetInfo, std::string> fetchAssetSync(std::string_view id, std::function<void(float)> progressCb) override {
+    virtual itlib::expected<BasicAssetInfo, std::string> fetchAssetSync(std::string_view id, ProgressCb) override {
         auto basicInfo = checkAssetSync(id);
         if (!basicInfo) {
             return itlib::unexpected("dummy not found");

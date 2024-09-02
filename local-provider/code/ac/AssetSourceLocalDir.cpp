@@ -34,7 +34,7 @@ public:
         }
         return std::nullopt;
     }
-    virtual itlib::expected<BasicAssetInfo, std::string> fetchAssetSync(std::string_view id, std::function<void(float)> progressCb) override {
+    virtual itlib::expected<BasicAssetInfo, std::string> fetchAssetSync(std::string_view id, ProgressCb) override {
         auto ret = checkAssetSync(id);
         if (ret) {
             return astl::move(*ret);

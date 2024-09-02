@@ -3,6 +3,7 @@
 //
 #pragma once
 #include "export.h"
+#include <astl/safe_func.hpp>
 #include <itlib/expected.hpp>
 #include <string_view>
 #include <functional>
@@ -25,7 +26,9 @@ public:
     };
 
     virtual std::optional<BasicAssetInfo> checkAssetSync(std::string_view id) = 0;
-    virtual itlib::expected<BasicAssetInfo, std::string> fetchAssetSync(std::string_view id, std::function<void(float)> progressCb) = 0;
+
+    using ProgressCb = astl::safe_func<std::function<void(float)>>;
+    virtual itlib::expected<BasicAssetInfo, std::string> fetchAssetSync(std::string_view id, ProgressCb progressCb) = 0;
 };
 
 } // namespace ac

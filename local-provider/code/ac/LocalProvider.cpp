@@ -15,6 +15,8 @@
 #include <astl/move_capture.hpp>
 #include <astl/tsumap.hpp>
 #include <astl/coro_lock.hpp>
+#include <astl/iile.h>
+#include <astl/cow.hpp>
 #include <itlib/shared_from.hpp>
 #include <itlib/make_ptr.hpp>
 #include <unordered_map>
@@ -157,27 +159,46 @@ struct async_resume {
     }
 };
 
-class AssetQuery {
+class AssetAwaitable {
+protected:
     std::string_view m_id;
     AssetManager& m_mgr;
     xec::TaskExecutor& m_executor;
     std::optional<AssetInfo> m_assetInfo;
 public:
-    AssetQuery(std::string_view id, AssetManager& mgr, xec::TaskExecutor& executor)
+    AssetAwaitable(std::string_view id, AssetManager& mgr, xec::TaskExecutor& executor)
         : m_id(id)
         , m_mgr(mgr)
         , m_executor(executor)
     {}
 
     bool await_ready() const noexcept { return false; }
+    AssetInfo await_resume() {
+        return std::move(*m_assetInfo);
+    }
+};
+
+class AssetQuery : public AssetAwaitable {
+public:
+    using AssetAwaitable::AssetAwaitable;
+
     void await_suspend(std::coroutine_handle<> handle) {
         m_mgr.queryAsset(std::string(m_id), [this, handle](std::string_view, const AssetInfo& data) {
             m_assetInfo = data;
             m_executor.pushTask(async_resume(handle));
         });
     }
-    AssetInfo await_resume() {
-        return std::move(*m_assetInfo);
+};
+
+class AssetGet : public AssetAwaitable {
+public:
+    using AssetAwaitable::AssetAwaitable;
+
+    void await_suspend(std::coroutine_handle<> handle) {
+        m_mgr.getAsset(std::string(m_id), [this, handle](std::string_view, const AssetInfo& data) {
+            m_assetInfo = data;
+            m_executor.pushTask(async_resume(handle));
+        });
     }
 };
 
@@ -196,7 +217,7 @@ class LocalProvider::Impl {
         // 2. to facilitate sharing between coroutines we use the coro_lock (thus coroutines wait before touching infos)
 
         astl::coro_lock lock;
-        std::shared_ptr<LocalModelInfo> info;
+        astl::sp_cow<LocalModelInfo> info;
     };
 
     // the complexity just grows
@@ -269,15 +290,16 @@ public:
             lockGuard = co_await iter->second->lock;
         }
 
-        auto localInfo = itlib::make_shared(LocalModelInfo{astl::move(info)});
+        auto& localInfo = iter->second->info;
+        static_cast<ModelInfo&>(localInfo.w()) = std::move(info); // slice relevant part
+        localInfo.w().localAssets.reserve(localInfo->assets.size());
 
-        localInfo->localAssets.reserve(localInfo->assets.size());
-        for (auto& i : localInfo->assets) {
-            LOG_INFO("querying asset: ", i.id);
-            localInfo->localAssets.push_back(co_await AssetQuery(i.id, m_assetMgr, m_executor));
+        // since we can detach in a spliced coroutine, we can't use a range-based for loop here
+        for (size_t i = 0; i < localInfo->assets.size(); ++i) {
+            auto& asset = localInfo->assets[i];
+            LOG_INFO("querying asset: ", asset.id);
+            localInfo.w().localAssets.push_back(co_await AssetQuery(asset.id, m_assetMgr, m_executor));
         }
-        localInfo->localAssets.resize(localInfo->assets.size());
-        iter->second->info = astl::move(localInfo);
     }
 
     void addModel(ModelInfo info) {
@@ -292,7 +314,7 @@ public:
                 co_return;
             }
             auto infoLock = co_await f->second->lock;
-            auto info = LocalModelInfoPtr(f->second->info);
+            auto& info = f->second->info;
             auto& type = info->inferenceType;
 
             auto it = m_loaders.find(type);
@@ -302,8 +324,35 @@ public:
             }
             auto& loader = *it->second;
 
+            // find assets which are not loaded and don't have an error
+            // (we won't try to load assets with errors)
+            auto gettable = [&](const AssetInfo& a) {
+                return !a.path && !a.error;
+            };
+            auto hasAssetsToLoad = iile([&] {
+                for (auto& a : info->localAssets) {
+                    if (!a.path && !a.error) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+            if (hasAssetsToLoad) {
+                auto localAssets = info->localAssets;
+                assert(localAssets.size() == info->assets.size());
+                for (size_t i = 0; i < localAssets.size(); ++i) {
+                    auto& asset = localAssets[i];
+                    if (!gettable(asset)) continue;
+
+                    auto& aid = info->assets[i].id;
+                    LOG_INFO("getting asset: ", aid);
+                    asset = co_await AssetGet(aid, m_assetMgr, m_executor);
+                }
+                info.w().localAssets = astl::move(localAssets);
+            }
+
             LOG_INFO("loading model: ", id);
-            auto model = loader.loadModelSync(astl::move(info), astl::move(params), [&](float progress) {
+            auto model = loader.loadModelSync(info.detach(), astl::move(params), [&](float progress) {
                 assert(std::this_thread::get_id() == m_execution.threadId());
                 if (cb.progressCb) {
                     cb.progressCb(progress);

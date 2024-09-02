@@ -42,6 +42,14 @@ struct AcTestHelper {
             }
         });
         provider.addModel(ac::ModelInfo{
+            .id = "bad-remote-assets",
+            .inferenceType = "dummy",
+            .assets = {
+                {"asset1", "tag1"},
+                {"bad-remote-asset", "bad-tag"},
+            }
+        });
+        provider.addModel(ac::ModelInfo{
             .id = "model",
             .inferenceType = "dummy",
             .assets = {
@@ -123,6 +131,16 @@ TEST_CASE("bad assets") {
 
     REQUIRE(h.modelResult.has_error() == true);
     CHECK(h.modelResult.error().text == "asset error: Asset not found");
+}
+
+TEST_CASE("bad remote assets") {
+    AcTestHelper h;
+    h.provider.addLocalInferenceLoader("dummy", h.modelLoader);
+    h.provider.addAssetSource(createDummyAssetSource(), 0);
+    h.createModelAndWait("bad-remote-assets", {});
+
+    REQUIRE(h.modelResult.has_error() == true);
+    CHECK(h.modelResult.error().text == "asset error: Bad remote asset");
 }
 
 
