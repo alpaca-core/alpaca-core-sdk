@@ -7,6 +7,11 @@
 #include <doctest/doctest.h>
 #include <latch>
 
+const std::string Source_Path_Suffix = "/local-provider/test";
+const std::string Source_Path = AC_REPO_ROOT + Source_Path_Suffix;
+const std::string Test_File_Name = "test-binary-file.bin";
+const int Test_File_Size = 69420;
+
 class DummyAssetSource : public ac::AssetSource {
 public:
     virtual std::string_view id() const {
@@ -14,7 +19,7 @@ public:
     }
 
     virtual std::optional<BasicAssetInfo> checkAssetSync(std::string_view id) override {
-        if (id.starts_with("VS") || id.starts_with("no")) {
+        if (id.starts_with("test") || id.starts_with("no")) {
             return std::nullopt;
         }
         if (id.starts_with("local")) {
@@ -45,7 +50,8 @@ public:
 
 TEST_CASE("dummy-dir") {
     ac::AssetManager mgr;
-    mgr.addSource(ac::AssetSourceLocalDir_Create(AC_REPO_ROOT), 10);
+
+    mgr.addSource(ac::AssetSourceLocalDir_Create(Source_Path), 10);
     mgr.addSource(std::make_unique<DummyAssetSource>());
 
     ac::AssetInfo info;
@@ -65,17 +71,17 @@ TEST_CASE("dummy-dir") {
     CHECK_FALSE(info.path);
     CHECK(info.error == "Asset not found");
 
-    q("VSOpenFileFromDirFilters.json");
+    q(Test_File_Name);
     REQUIRE(info.source);
-    CHECK(info.source->id() == "local-dir: " AC_REPO_ROOT);
-    CHECK(info.size == 86);
-    CHECK(info.path == AC_REPO_ROOT "/VSOpenFileFromDirFilters.json");
+    CHECK(info.source->id() == "local-dir: " + Source_Path);
+    CHECK(info.size == Test_File_Size);
+    CHECK(info.path == Source_Path + "/" + Test_File_Name);
     CHECK_FALSE(info.error);
 
-    q("CMakeLists.txt");
+    q("dummy-file");
     REQUIRE(info.source);
     CHECK(info.source->id() == "dummy"); // smaller prio
-    CHECK(info.size == 1'000 + 14);
+    CHECK(info.size == 1'000 + 10);
     CHECK_FALSE(info.path);
     CHECK_FALSE(info.error);
 
@@ -107,13 +113,13 @@ TEST_CASE("dummy-dir") {
     CHECK_FALSE(info.source);
     CHECK_FALSE(info.size);
     CHECK_FALSE(info.path);
-    CHECK(info.error == "Asset not found");
+    CHECK(info.error == "Can't get asset. No source");
 
-    g("VSOpenFileFromDirFilters.json");
+    g(Test_File_Name);
     REQUIRE(info.source);
-    CHECK(info.source->id() == "local-dir: " AC_REPO_ROOT);
-    CHECK(info.size == 86);
-    CHECK(info.path == AC_REPO_ROOT "/VSOpenFileFromDirFilters.json");
+    CHECK(info.source->id() == "local-dir: " + Source_Path);
+    CHECK(info.size == Test_File_Size);
+    CHECK(info.path == Source_Path + "/" + Test_File_Name);
     CHECK_FALSE(info.error);
 
     g("CMakeLists.txt");
@@ -147,21 +153,22 @@ TEST_CASE("dummy-dir") {
 
 TEST_CASE("dir-dummy") {
     ac::AssetManager mgr;
-    mgr.addSource(ac::AssetSourceLocalDir_Create(AC_REPO_ROOT), -10);
+
+    mgr.addSource(ac::AssetSourceLocalDir_Create(Source_Path), -10);
     mgr.addSource(std::make_unique<DummyAssetSource>());
 
     ac::AssetInfo info;
     std::latch latch(1);
-    mgr.queryAsset(std::string("CMakeLists.txt"), [&](std::string_view id, const ac::AssetInfo& data) {
-        CHECK(id == "CMakeLists.txt");
+    mgr.queryAsset(std::string(Test_File_Name), [&](std::string_view id, const ac::AssetInfo& data) {
+        CHECK(id == Test_File_Name);
         info = data;
         latch.count_down();
     });
     latch.wait();
 
     REQUIRE(info.source);
-    CHECK(info.source->id() == "local-dir: " AC_REPO_ROOT);
+    CHECK(info.source->id() == "local-dir: " + Source_Path);
     CHECK(info.size);
-    CHECK(info.path == AC_REPO_ROOT "/CMakeLists.txt");
+    CHECK(info.path == Source_Path + "/" + Test_File_Name);
     CHECK_FALSE(info.error);
 }
