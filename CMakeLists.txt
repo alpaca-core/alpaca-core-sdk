@@ -40,6 +40,12 @@ if(alpacaCoreIsRoot)
     include(./root-setup.cmake)
 endif()
 
+# normally we wouldn't just prevent a warning globaly like the following lines,
+# but it is our opinion that this warning is just stupid
+if(NOT MSVC)
+	add_compile_options(-Wno-missing-field-initializers)
+endif()
+
 option(AC_BUILD_TESTS "${CMAKE_PROJECT_NAME}: build tests" ${alpacaCoreIsRoot})
 option(AC_BUILD_EXAMPLES "${CMAKE_PROJECT_NAME}: build examples" ${alpacaCoreIsRoot})
 
