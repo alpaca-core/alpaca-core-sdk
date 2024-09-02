@@ -62,7 +62,7 @@ public:
             return BasicAssetInfo{{}, {}};
         }
         if (id == "bad-remote-asset") {
-            return BasicAssetInfo{ {}, {} };
+            return BasicAssetInfo{{}, {}};
         }
         return std::nullopt;
     }
