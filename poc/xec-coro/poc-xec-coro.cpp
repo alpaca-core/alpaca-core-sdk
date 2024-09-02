@@ -175,11 +175,17 @@ CoTask test(Producer& p) {
     std::cout << "test end\n";
 }
 
-int main() {
-    Producer producer;
-    Consumer consumer(producer);
+CoTask simple(Producer& p) {
+    auto a = co_await IntAwaitable(p);
+    std::cout << "a: " << a << "\n";
+}
 
-    consumer.co_splice(test(producer));
+int main() {
+    std::optional<Producer> producer;
+    producer.emplace();
+    Consumer consumer(*producer);
+
+    consumer.co_splice(test(*producer));
     consumer.scheduleTask(std::chrono::seconds(1), [&]() {
         std::cout << "stopping after 1s\n";
         consumer.stop();
@@ -187,5 +193,7 @@ int main() {
 
     std::cout << "start (stop in 1s)\n";
     consumer.run();
+
+    producer.reset();
     return 0;
 }
