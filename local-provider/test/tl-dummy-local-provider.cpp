@@ -133,6 +133,8 @@ extern "C" void add_dummy_inference(ac_api_provider* local_provider) {
     assert(localProvider);
     localProvider->addLocalInferenceLoader("dummy", loader);
 
+    localProvider->addAssetSource(createDummyAssetSource(), 0);
+
     localProvider->addModel(ac::ModelInfo{"empty"});
     localProvider->addModel(ac::ModelInfo{
         .id = "model",
@@ -142,6 +144,4 @@ extern "C" void add_dummy_inference(ac_api_provider* local_provider) {
             {"asset2", "tag2"}
         }
     });
-
-    localProvider->addAssetSource(createDummyAssetSource(), 0);
 }
