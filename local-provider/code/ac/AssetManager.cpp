@@ -62,7 +62,7 @@ public:
         m_executor.pushTask([this, movecap(cb, id)]() mutable {
             auto f = getAssetInfo(id);
             if (f == m_assets.end()) {
-                return cb(id, {.error = "Asset not found"});
+                return cb(id, {.error = "Can't get asset. No source"});
             }
             auto& info = f->second;
             if (info.path) {
