@@ -14,6 +14,7 @@ astl_test(u8c)
 astl_test(transparent)
 astl_test(coro_lock)
 astl_test(cow)
+astl_test(safe_func)
 
 icm_add_multiple_build_failure_tests(
     SOURCES
