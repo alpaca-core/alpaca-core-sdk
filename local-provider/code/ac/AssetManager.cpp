@@ -15,14 +15,14 @@
 namespace ac {
 
 class AssetManager::Impl {
+    itlib::flat_map<int, std::vector<std::unique_ptr<AssetSource>>> m_sources;
+
+    astl::tsumap<AssetInfo> m_assets;
+
     // these must the last members (first to be destroyed)
     // if there are pending tasks, they will be finalized here and they may access other members
     xec::TaskExecutor m_executor;
     xec::ThreadExecution m_execution;
-
-    itlib::flat_map<int, std::vector<std::unique_ptr<AssetSource>>> m_sources;
-
-    astl::tsumap<AssetInfo> m_assets;
 
     auto getAssetInfo(std::string& id) {
         auto f = m_assets.find(id);

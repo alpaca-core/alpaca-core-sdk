@@ -221,5 +221,3 @@ TEST_CASE("run ops") {
     CHECK(opResult[0]["some"] == 42);
     CHECK(opResult[1]["more"] == 1024);
 }
-
-
