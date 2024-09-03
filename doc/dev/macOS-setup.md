@@ -12,6 +12,7 @@
 * Install __CMake__ - using `brew install cmake`
 * Install __Ninja__ - using `brew install ninja`
 * Install __SDL2__ - command `brew install sdl2`
+* Install __Doxygen__ - command `brew install doxygen`
 * Clone needed repositories e.g. alpca-core
 
 ## Prepare VS code for development
