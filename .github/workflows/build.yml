@@ -35,7 +35,7 @@ jobs:
         if: matrix.cfg.os == 'windows-latest'
         uses: ilammy/msvc-dev-cmd@v1
       - name: Configure
-        run: cmake --preset ${{ matrix.cfg.preset }} -B build
+        run: cmake --preset ${{ matrix.cfg.preset }} -DAC_BUILD_POC=0 -B build
       - name: Build
         run: cmake --build build
       - name: Test
