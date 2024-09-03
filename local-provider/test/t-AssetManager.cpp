@@ -3,14 +3,12 @@
 //
 #include <ac/AssetSourceLocalDir.hpp>
 #include <ac/AssetManager.hpp>
-#include "ac-repo-root.h"
+#include "t-Consts.hpp"
 #include <doctest/doctest.h>
 #include <latch>
 
-const std::string Source_Path_Suffix = "/local-provider/test";
-const std::string Source_Path = AC_REPO_ROOT + Source_Path_Suffix;
-const std::string Test_File_Name = "test-binary-file.bin";
-const int Test_File_Size = 69420;
+
+const int Dummy_Another_Test_File_Size = Another_Test_File_Name.length() + 1000; //Size reported by the Dummy asset source
 
 class DummyAssetSource : public ac::AssetSource {
 public:
@@ -78,10 +76,10 @@ TEST_CASE("dummy-dir") {
     CHECK(info.path == Source_Path + "/" + Test_File_Name);
     CHECK_FALSE(info.error);
 
-    q("dummy-file");
+    q(Another_Test_File_Name);
     REQUIRE(info.source);
     CHECK(info.source->id() == "dummy"); // smaller prio
-    CHECK(info.size == 1'000 + 10);
+    CHECK(info.size == Dummy_Another_Test_File_Size);
     CHECK_FALSE(info.path);
     CHECK_FALSE(info.error);
 
@@ -122,11 +120,11 @@ TEST_CASE("dummy-dir") {
     CHECK(info.path == Source_Path + "/" + Test_File_Name);
     CHECK_FALSE(info.error);
 
-    g("CMakeLists.txt");
+    g(Another_Test_File_Name);
     REQUIRE(info.source);
     CHECK(info.source->id() == "dummy"); // smaller prio
-    CHECK(info.size == 1'000 + 14);
-    CHECK(info.path == "dl/CMakeLists.txt");
+    CHECK(info.size == Dummy_Another_Test_File_Size);
+    CHECK(info.path == "dl/" + Another_Test_File_Name);
     CHECK_FALSE(info.error);
 
     g("local-asset");

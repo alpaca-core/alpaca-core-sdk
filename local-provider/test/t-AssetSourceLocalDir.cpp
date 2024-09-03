@@ -2,13 +2,8 @@
 // SPDX-License-Identifier: MIT
 //
 #include <ac/AssetSourceLocalDir.hpp>
-#include "ac-repo-root.h"
+#include "t-Consts.hpp"
 #include <doctest/doctest.h>
-
-const std::string Source_Path_Suffix = "/local-provider/test";
-const std::string Source_Path = AC_REPO_ROOT + Source_Path_Suffix;
-const std::string Test_File_Name = "test-binary-file.bin";
-const int Test_File_Size = 69420;
 
 TEST_CASE("AssetSourceLocalDir") {
 
