@@ -33,6 +33,7 @@
 extern "C" {
 #endif
 
+// to obtain a provider use a library which can create it
 /**
  * @brief Free an API provider
  * 
