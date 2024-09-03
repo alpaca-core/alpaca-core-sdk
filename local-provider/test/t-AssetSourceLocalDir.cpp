@@ -2,16 +2,17 @@
 // SPDX-License-Identifier: MIT
 //
 #include <ac/AssetSourceLocalDir.hpp>
-#include "ac-repo-root.h"
+#include "TestBinaryAssets.hpp"
 #include <doctest/doctest.h>
 
 TEST_CASE("AssetSourceLocalDir") {
-    auto src = ac::AssetSourceLocalDir_Create(AC_REPO_ROOT);
+
+    auto src = ac::AssetSourceLocalDir_Create(Test_Local_Asset_Source_Path);
     REQUIRE(src);
 
-    const std::string root = AC_REPO_ROOT;
+    const std::string root = Test_Local_Asset_Source_Path;
 
-    CHECK(src->id() == "local-dir: " AC_REPO_ROOT);
+    CHECK(src->id() == "local-dir: " + Test_Local_Asset_Source_Path);
 
     {
         auto info = src->checkAssetSync("no-such-file");
@@ -24,12 +25,12 @@ TEST_CASE("AssetSourceLocalDir") {
         CHECK(info.error() == "Asset not found");
     }
 
-    const std::string asset = "VSOpenFileFromDirFilters.json";
+    const std::string asset = Test_Local_Asset_Id;
 
     auto checkSuccess = [&](auto& info) {
         REQUIRE(info);
         CHECK(info->path.value_or(std::string{}) == root + "/" + asset);
-        CHECK(info->size.value_or(0) == 86);
+        CHECK(info->size.value_or(0) == Test_Local_Asset_Size); // The size of our new binary file
     };
 
     {

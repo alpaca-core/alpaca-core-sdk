@@ -3,9 +3,12 @@
 //
 #include <ac/AssetSourceLocalDir.hpp>
 #include <ac/AssetManager.hpp>
-#include "ac-repo-root.h"
+#include "TestBinaryAssets.hpp"
 #include <doctest/doctest.h>
 #include <latch>
+
+
+const int Dummy_Another_Test_File_Size = Another_Test_Asset_Id.length() + 1000; //Size reported by the Dummy asset source
 
 class DummyAssetSource : public ac::AssetSource {
 public:
@@ -14,7 +17,7 @@ public:
     }
 
     virtual std::optional<BasicAssetInfo> checkAssetSync(std::string_view id) override {
-        if (id.starts_with("VS") || id.starts_with("no")) {
+        if (id.starts_with("test") || id.starts_with("no")) {
             return std::nullopt;
         }
         if (id.starts_with("local")) {
@@ -45,7 +48,8 @@ public:
 
 TEST_CASE("dummy-dir") {
     ac::AssetManager mgr;
-    mgr.addSource(ac::AssetSourceLocalDir_Create(AC_REPO_ROOT), 10);
+
+    mgr.addSource(ac::AssetSourceLocalDir_Create(Test_Local_Asset_Source_Path), 10);
     mgr.addSource(std::make_unique<DummyAssetSource>());
 
     ac::AssetInfo info;
@@ -65,17 +69,17 @@ TEST_CASE("dummy-dir") {
     CHECK_FALSE(info.path);
     CHECK(info.error == "Asset not found");
 
-    q("VSOpenFileFromDirFilters.json");
+    q(Test_Local_Asset_Id);
     REQUIRE(info.source);
-    CHECK(info.source->id() == "local-dir: " AC_REPO_ROOT);
-    CHECK(info.size == 86);
-    CHECK(info.path == AC_REPO_ROOT "/VSOpenFileFromDirFilters.json");
+    CHECK(info.source->id() == "local-dir: " + Test_Local_Asset_Source_Path);
+    CHECK(info.size == Test_Local_Asset_Size);
+    CHECK(info.path == Test_Local_Asset_Source_Path + "/" + Test_Local_Asset_Id);
     CHECK_FALSE(info.error);
 
-    q("CMakeLists.txt");
+    q(Another_Test_Asset_Id);
     REQUIRE(info.source);
     CHECK(info.source->id() == "dummy"); // smaller prio
-    CHECK(info.size == 1'000 + 14);
+    CHECK(info.size == Dummy_Another_Test_File_Size);
     CHECK_FALSE(info.path);
     CHECK_FALSE(info.error);
 
@@ -107,20 +111,20 @@ TEST_CASE("dummy-dir") {
     CHECK_FALSE(info.source);
     CHECK_FALSE(info.size);
     CHECK_FALSE(info.path);
-    CHECK(info.error == "Asset not found");
+    CHECK(info.error == "Can't get asset. No source");
 
-    g("VSOpenFileFromDirFilters.json");
+    g(Test_Local_Asset_Id);
     REQUIRE(info.source);
-    CHECK(info.source->id() == "local-dir: " AC_REPO_ROOT);
-    CHECK(info.size == 86);
-    CHECK(info.path == AC_REPO_ROOT "/VSOpenFileFromDirFilters.json");
+    CHECK(info.source->id() == "local-dir: " + Test_Local_Asset_Source_Path);
+    CHECK(info.size == Test_Local_Asset_Size);
+    CHECK(info.path == Test_Local_Asset_Source_Path + "/" + Test_Local_Asset_Id);
     CHECK_FALSE(info.error);
 
-    g("CMakeLists.txt");
+    g(Another_Test_Asset_Id);
     REQUIRE(info.source);
     CHECK(info.source->id() == "dummy"); // smaller prio
-    CHECK(info.size == 1'000 + 14);
-    CHECK(info.path == "dl/CMakeLists.txt");
+    CHECK(info.size == Dummy_Another_Test_File_Size);
+    CHECK(info.path == "dl/" + Another_Test_Asset_Id);
     CHECK_FALSE(info.error);
 
     g("local-asset");
@@ -147,21 +151,22 @@ TEST_CASE("dummy-dir") {
 
 TEST_CASE("dir-dummy") {
     ac::AssetManager mgr;
-    mgr.addSource(ac::AssetSourceLocalDir_Create(AC_REPO_ROOT), -10);
+
+    mgr.addSource(ac::AssetSourceLocalDir_Create(Test_Local_Asset_Source_Path), -10);
     mgr.addSource(std::make_unique<DummyAssetSource>());
 
     ac::AssetInfo info;
     std::latch latch(1);
-    mgr.queryAsset(std::string("CMakeLists.txt"), [&](std::string_view id, const ac::AssetInfo& data) {
-        CHECK(id == "CMakeLists.txt");
+    mgr.queryAsset(std::string(Test_Local_Asset_Id), [&](std::string_view id, const ac::AssetInfo& data) {
+        CHECK(id == Test_Local_Asset_Id);
         info = data;
         latch.count_down();
     });
     latch.wait();
 
     REQUIRE(info.source);
-    CHECK(info.source->id() == "local-dir: " AC_REPO_ROOT);
+    CHECK(info.source->id() == "local-dir: " + Test_Local_Asset_Source_Path);
     CHECK(info.size);
-    CHECK(info.path == AC_REPO_ROOT "/CMakeLists.txt");
+    CHECK(info.path == Test_Local_Asset_Source_Path + "/" + Test_Local_Asset_Id);
     CHECK_FALSE(info.error);
 }
