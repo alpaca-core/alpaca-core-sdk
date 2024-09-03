@@ -52,6 +52,8 @@ option(AC_BUILD_API "${CMAKE_PROJECT_NAME}: build API" ON)
 cmake_dependent_option(AC_BUILD_LOCAL_PROVIDER "${CMAKE_PROJECT_NAME}: build local inference provider" ON
     AC_BUILD_API OFF)
 
+set(AC_INFERENCE_LIBS "all" CACHE STRING "${CMAKE_PROJECT_NAME}: inference libraries to build")
+
 option(AC_BUILD_TESTS "${CMAKE_PROJECT_NAME}: build tests" ${alpacaCoreIsRoot})
 option(AC_BUILD_EXAMPLES "${CMAKE_PROJECT_NAME}: build examples" ${alpacaCoreIsRoot})
 option(AC_BUILD_POC "${CMAKE_PROJECT_NAME}: build proof of concept targets" ${alpacaCoreIsRoot})
@@ -87,7 +89,7 @@ CPMAddPackage(
     GIT_TAG f33d981742198f2b55494265fc9d43156b39a30d
 )
 
-if (EXISTS tmp/ac-test-data-whisper)
+if(EXISTS tmp/ac-test-data-whisper)
     add_subdirectory(tmp/ac-test-data-whisper)
 endif()
 
@@ -95,7 +97,18 @@ endif()
 # subdirs/targets
 
 add_subdirectory(common)
-add_subdirectory(api)
-add_subdirectory(local-provider)
-add_subdirectory(inference)
-add_subdirectory(poc)
+
+if(AC_BUILD_API)
+    add_subdirectory(api)
+    if(AC_BUILD_LOCAL_PROVIDER)
+        add_subdirectory(local-provider)
+    endif()
+endif()
+
+if(NOT AC_INFERENCE_LIBS STREQUAL "none")
+    add_subdirectory(inference)
+endif()
+
+if(AC_BUILD_POC)
+    add_subdirectory(poc)
+endif()

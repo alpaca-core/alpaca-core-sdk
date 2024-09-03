@@ -27,5 +27,16 @@ endif()
 
 set(GGML_CCACHE OFF)
 add_subdirectory(ggml)
-add_subdirectory(llama.cpp)
-add_subdirectory(whisper)
+
+if(AC_INFERENCE_LIBS STREQUAL "all")
+    set(libs
+        llama.cpp
+        whisper
+    )
+else()
+    set(libs "${AC_INFERENCE_LIBS}")
+endif()
+
+foreach(lib IN LISTS libs)
+    add_subdirectory(${lib})
+endforeach()
