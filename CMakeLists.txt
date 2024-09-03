@@ -27,6 +27,7 @@ include(icm_add_lib)
 include(ac_lib_subdirs)
 include(icm_testing)
 include(icm_build_failure_testing)
+include(CMakeDependentOption)
 
 #################
 # cfg
@@ -48,6 +49,10 @@ endif()
 
 option(AC_BUILD_TESTS "${CMAKE_PROJECT_NAME}: build tests" ${alpacaCoreIsRoot})
 option(AC_BUILD_EXAMPLES "${CMAKE_PROJECT_NAME}: build examples" ${alpacaCoreIsRoot})
+
+option(AC_BUILD_API "${CMAKE_PROJECT_NAME}: build API" ON)
+cmake_dependent_option(AC_BUILD_LOCAL_PROVIDER "${CMAKE_PROJECT_NAME}: build local inference provider" ON
+    AC_BUILD_API OFF)
 
 #################
 # global packages
