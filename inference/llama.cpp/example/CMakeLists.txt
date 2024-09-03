@@ -1,6 +1,7 @@
 # Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
+ac_dep(test-data-llama)
 
 add_executable(example-ac-llama-basic e-basic.cpp)
 target_link_libraries(example-ac-llama-basic PRIVATE

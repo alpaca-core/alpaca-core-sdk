@@ -1,6 +1,8 @@
 # Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
+ac_dep(test-data-whisper)
+
 set(TARGET example-ac-whisper-basic)
 
 add_executable(${TARGET} e-basic.cpp)

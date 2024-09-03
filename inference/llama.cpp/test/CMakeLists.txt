@@ -1,6 +1,8 @@
 # Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
+ac_dep(test-data-llama)
+
 macro(llama_test test)
     add_doctest_lib_test(${test} ac-llama t-${test}.cpp)
 endmacro()

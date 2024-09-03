@@ -74,25 +74,6 @@ if(AC_BUILD_TESTS)
     enable_testing()
 endif()
 
-# test data packages
-CPMAddPackage(
-    NAME ac-test-data-llama
-    VERSION 1.0.0
-    GIT_REPOSITORY https://huggingface.co/alpaca-core/ac-test-data-llama
-    GIT_TAG e6860e89d869ea815a4107bce3bb41af9ad1c1f0
-)
-
-CPMAddPackage(
-    NAME ac-test-data-whisper
-    VERSION 1.0.0
-    GIT_REPOSITORY https://huggingface.co/alpaca-core/ac-test-data-whisper
-    GIT_TAG f33d981742198f2b55494265fc9d43156b39a30d
-)
-
-if(EXISTS tmp/ac-test-data-whisper)
-    add_subdirectory(tmp/ac-test-data-whisper)
-endif()
-
 #################
 # subdirs/targets
 

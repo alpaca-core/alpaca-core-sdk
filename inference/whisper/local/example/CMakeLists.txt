@@ -1,6 +1,8 @@
 # Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
+ac_dep(test-data-whisper)
+
 add_executable(example-ac-local-whisper e-local-whisper.cpp)
 target_link_libraries(example-ac-local-whisper
     PRIVATE

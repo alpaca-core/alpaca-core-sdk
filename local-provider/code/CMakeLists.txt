@@ -1,7 +1,7 @@
 # Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
-dep(xec)
+ac_dep(xec)
 
 icm_add_lib(ac-local AC_LOCAL)
 add_library(ac::local ALIAS ac-local)

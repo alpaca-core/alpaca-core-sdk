@@ -1,7 +1,7 @@
 # Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
-dep(nl-json)
+ac_dep(nl-json)
 
 icm_add_lib(ac-api AC_API)
 add_library(ac::api ALIAS ac-api)
