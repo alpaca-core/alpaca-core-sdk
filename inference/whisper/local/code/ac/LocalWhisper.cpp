@@ -65,7 +65,7 @@ public:
 
 class WhisperModelLoader final : public LocalInferenceModelLoader {
 public:
-    virtual std::unique_ptr<LocalInferenceModel> loadModelSync(LocalModelInfoPtr info, Dict params, std::function<void(float)> progressCb) override {
+    virtual std::unique_ptr<LocalInferenceModel> loadModelSync(LocalModelInfoPtr info, Dict /*params*/, std::function<void(float)> /*progressCb*/) override {
         if (!info) throw_ex{} << "whisper: no model info";
         if (info->localAssets.size() != 1) throw_ex{} << "whisper: expected exactly one local asset";
         auto& bin = info->localAssets.front().path;
