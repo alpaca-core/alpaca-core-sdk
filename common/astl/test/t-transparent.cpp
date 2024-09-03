@@ -3,6 +3,7 @@
 //
 #include <astl/tsumap.hpp>
 #include <doctest/doctest.h>
+#include <memory_resource>
 
 TEST_CASE("basic") {
     // test that it compiles
