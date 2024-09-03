@@ -7,13 +7,12 @@
 #include <string>
 #include <vector>
 #include <fstream>
-
-#include <itlib/span.hpp>
+#include <span>
 
 namespace ac::audio {
 AC_AUDIO_EXPORT std::vector<int16_t> loadWavI16Mono(const std::string& path);
 AC_AUDIO_EXPORT std::vector<float> loadWavF32Mono(const std::string& path);
-AC_AUDIO_EXPORT std::vector<float> convertWavI16ToF32(itlib::span<const int16_t> i16);
+AC_AUDIO_EXPORT std::vector<float> convertWavI16ToF32(std::span<const int16_t> i16);
 
 // Write PCM data into WAV audio file
 class AC_AUDIO_EXPORT WavWriter {

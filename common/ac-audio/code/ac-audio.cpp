@@ -9,7 +9,6 @@
 #include <dr_wav.h>
 
 #include <itlib/sentry.hpp>
-#include <itlib/span.hpp>
 #include <astl/throw_ex.hpp>
 
 #include <limits>
@@ -182,10 +181,10 @@ std::vector<float> loadWavF32Mono(const std::string& path) {
     return pcmf32;
 }
 
-std::vector<float> convertWavI16ToF32(itlib::span<const int16_t> i16) {
+std::vector<float> convertWavI16ToF32(std::span<const int16_t> i16) {
     std::vector<float> f32(i16.size());
-    auto pi16 = i16.data();
-    auto pf32 = f32.data();
+    auto pi16 = i16.begin();
+    auto pf32 = f32.begin();
     while (pi16 != i16.end()) {
         constexpr float SCALE = 1 /* here */ + float(std::numeric_limits<int16_t>::max());
         *pf32++ = *pi16++ / SCALE;
