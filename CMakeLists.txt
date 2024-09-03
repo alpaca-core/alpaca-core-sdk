@@ -28,6 +28,7 @@ include(ac_lib_subdirs)
 include(icm_testing)
 include(icm_build_failure_testing)
 include(CMakeDependentOption)
+include(ac_dep)
 
 #################
 # cfg
@@ -59,19 +60,8 @@ mark_as_advanced(AC_BUILD_TESTS AC_BUILD_EXAMPLES AC_BUILD_POC)
 #################
 # global packages
 CPMAddPackage(gh:iboB/splat@1.3.3)
-CPMAddPackage(gh:nlohmann/json@3.11.3)
-CPMAddPackage(gh:iboB/itlib@1.11.2)
-CPMAddPackage(gh:iboB/xec@1.5.2)
-CPMAddPackage(gh:iboB/jalog@0.4.2)
-
-CPMAddPackage(
-    NAME dr_libs
-    VERSION 1.0
-    GIT_REPOSITORY https://github.com/mackron/dr_libs.git
-    GIT_TAG da35f9d
-)
-add_library(dr_libs INTERFACE)
-target_include_directories(dr_libs INTERFACE ${dr_libs_SOURCE_DIR})
+CPMAddPackage(gh:iboB/itlib@1.11.3)
+CPMAddPackage(gh:iboB/jalog@0.4.3)
 
 if(AC_BUILD_TESTS)
     CPMAddPackage(gh:iboB/doctest-util@0.1.2)
