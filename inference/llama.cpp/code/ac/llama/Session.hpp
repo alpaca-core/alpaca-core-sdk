@@ -5,6 +5,7 @@
 #include "Token.hpp"
 #include <string>
 #include <utility>
+#include <exception>
 #include <coroutine>
 
 namespace ac::llama {
@@ -17,6 +18,8 @@ public:
         Token m_value = Token_Invalid;
 
         std::string m_currentPrompt, m_pendingPrompt;
+
+        std::exception_ptr m_exception;
     public:
         Session get_return_object() noexcept {
             return Session{std::coroutine_handle<promise_type>::from_promise(*this)};
@@ -34,7 +37,13 @@ public:
         void return_void() noexcept {
             m_value = Token_Invalid;
         }
-        void unhandled_exception() { throw; }
+        void unhandled_exception() noexcept {
+            // why store the exception here instead of simply rethrowing?
+            // because clang is stupid, that's why
+            // clang's ridiculous handling of corouitnes causes local coroutine variables to be destroyed twice if we
+            // just rethrow here
+            m_exception = std::current_exception();
+        }
 
         struct Awaiter {
             promise_type& self;
@@ -52,6 +61,12 @@ public:
         }
 
         Awaiter await_transform(Prompt) noexcept { return Awaiter{*this}; }
+
+        void rethrowIfException() {
+            if (m_exception) {
+                std::rethrow_exception(m_exception);
+            }
+        }
     };
 
     using Handle = std::coroutine_handle<promise_type>;
@@ -91,6 +106,7 @@ public:
     Token getToken() {
         if (m_handle.done()) return Token_Invalid;
         m_handle.resume();
+        m_handle.promise().rethrowIfException();
         return std::move(m_handle.promise().value());
     }
 
@@ -99,4 +115,3 @@ private:
 };
 
 } // namespace ac::llama
-
