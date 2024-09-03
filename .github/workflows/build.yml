@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Clone
         uses: actions/checkout@v4
+        with:
+          submodules: true
       - name: Install Ninja
         uses: seanmiddleditch/gha-setup-ninja@v5
       - name: Install SDL
