@@ -3,12 +3,12 @@
 //
 #include <ac/AssetSourceLocalDir.hpp>
 #include <ac/AssetManager.hpp>
-#include "t-Consts.hpp"
+#include "TestBinaryAssets.hpp"
 #include <doctest/doctest.h>
 #include <latch>
 
 
-const int Dummy_Another_Test_File_Size = Another_Test_File_Name.length() + 1000; //Size reported by the Dummy asset source
+const int Dummy_Another_Test_File_Size = Another_Test_Asset_Id.length() + 1000; //Size reported by the Dummy asset source
 
 class DummyAssetSource : public ac::AssetSource {
 public:
@@ -49,7 +49,7 @@ public:
 TEST_CASE("dummy-dir") {
     ac::AssetManager mgr;
 
-    mgr.addSource(ac::AssetSourceLocalDir_Create(Source_Path), 10);
+    mgr.addSource(ac::AssetSourceLocalDir_Create(Test_Local_Asset_Source_Path), 10);
     mgr.addSource(std::make_unique<DummyAssetSource>());
 
     ac::AssetInfo info;
@@ -69,14 +69,14 @@ TEST_CASE("dummy-dir") {
     CHECK_FALSE(info.path);
     CHECK(info.error == "Asset not found");
 
-    q(Test_File_Name);
+    q(Test_Local_Asset_Id);
     REQUIRE(info.source);
-    CHECK(info.source->id() == "local-dir: " + Source_Path);
-    CHECK(info.size == Test_File_Size);
-    CHECK(info.path == Source_Path + "/" + Test_File_Name);
+    CHECK(info.source->id() == "local-dir: " + Test_Local_Asset_Source_Path);
+    CHECK(info.size == Test_Local_Asset_Size);
+    CHECK(info.path == Test_Local_Asset_Source_Path + "/" + Test_Local_Asset_Id);
     CHECK_FALSE(info.error);
 
-    q(Another_Test_File_Name);
+    q(Another_Test_Asset_Id);
     REQUIRE(info.source);
     CHECK(info.source->id() == "dummy"); // smaller prio
     CHECK(info.size == Dummy_Another_Test_File_Size);
@@ -113,18 +113,18 @@ TEST_CASE("dummy-dir") {
     CHECK_FALSE(info.path);
     CHECK(info.error == "Can't get asset. No source");
 
-    g(Test_File_Name);
+    g(Test_Local_Asset_Id);
     REQUIRE(info.source);
-    CHECK(info.source->id() == "local-dir: " + Source_Path);
-    CHECK(info.size == Test_File_Size);
-    CHECK(info.path == Source_Path + "/" + Test_File_Name);
+    CHECK(info.source->id() == "local-dir: " + Test_Local_Asset_Source_Path);
+    CHECK(info.size == Test_Local_Asset_Size);
+    CHECK(info.path == Test_Local_Asset_Source_Path + "/" + Test_Local_Asset_Id);
     CHECK_FALSE(info.error);
 
-    g(Another_Test_File_Name);
+    g(Another_Test_Asset_Id);
     REQUIRE(info.source);
     CHECK(info.source->id() == "dummy"); // smaller prio
     CHECK(info.size == Dummy_Another_Test_File_Size);
-    CHECK(info.path == "dl/" + Another_Test_File_Name);
+    CHECK(info.path == "dl/" + Another_Test_Asset_Id);
     CHECK_FALSE(info.error);
 
     g("local-asset");
@@ -152,21 +152,21 @@ TEST_CASE("dummy-dir") {
 TEST_CASE("dir-dummy") {
     ac::AssetManager mgr;
 
-    mgr.addSource(ac::AssetSourceLocalDir_Create(Source_Path), -10);
+    mgr.addSource(ac::AssetSourceLocalDir_Create(Test_Local_Asset_Source_Path), -10);
     mgr.addSource(std::make_unique<DummyAssetSource>());
 
     ac::AssetInfo info;
     std::latch latch(1);
-    mgr.queryAsset(std::string(Test_File_Name), [&](std::string_view id, const ac::AssetInfo& data) {
-        CHECK(id == Test_File_Name);
+    mgr.queryAsset(std::string(Test_Local_Asset_Id), [&](std::string_view id, const ac::AssetInfo& data) {
+        CHECK(id == Test_Local_Asset_Id);
         info = data;
         latch.count_down();
     });
     latch.wait();
 
     REQUIRE(info.source);
-    CHECK(info.source->id() == "local-dir: " + Source_Path);
+    CHECK(info.source->id() == "local-dir: " + Test_Local_Asset_Source_Path);
     CHECK(info.size);
-    CHECK(info.path == Source_Path + "/" + Test_File_Name);
+    CHECK(info.path == Test_Local_Asset_Source_Path + "/" + Test_Local_Asset_Id);
     CHECK_FALSE(info.error);
 }

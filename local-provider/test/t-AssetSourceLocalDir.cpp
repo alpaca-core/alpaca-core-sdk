@@ -2,17 +2,17 @@
 // SPDX-License-Identifier: MIT
 //
 #include <ac/AssetSourceLocalDir.hpp>
-#include "t-Consts.hpp"
+#include "TestBinaryAssets.hpp"
 #include <doctest/doctest.h>
 
 TEST_CASE("AssetSourceLocalDir") {
 
-    auto src = ac::AssetSourceLocalDir_Create(Source_Path);
+    auto src = ac::AssetSourceLocalDir_Create(Test_Local_Asset_Source_Path);
     REQUIRE(src);
 
-    const std::string root = Source_Path;
+    const std::string root = Test_Local_Asset_Source_Path;
 
-    CHECK(src->id() == "local-dir: " + Source_Path);
+    CHECK(src->id() == "local-dir: " + Test_Local_Asset_Source_Path);
 
     {
         auto info = src->checkAssetSync("no-such-file");
@@ -25,12 +25,12 @@ TEST_CASE("AssetSourceLocalDir") {
         CHECK(info.error() == "Asset not found");
     }
 
-    const std::string asset = Test_File_Name;
+    const std::string asset = Test_Local_Asset_Id;
 
     auto checkSuccess = [&](auto& info) {
         REQUIRE(info);
         CHECK(info->path.value_or(std::string{}) == root + "/" + asset);
-        CHECK(info->size.value_or(0) == Test_File_Size); // The size of our new binary file
+        CHECK(info->size.value_or(0) == Test_Local_Asset_Size); // The size of our new binary file
     };
 
     {
