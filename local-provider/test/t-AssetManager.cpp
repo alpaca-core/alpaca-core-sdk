@@ -8,7 +8,7 @@
 #include <latch>
 
 
-const int Dummy_Another_Test_File_Size = Another_Test_Asset_Id.length() + 1000; //Size reported by the Dummy asset source
+const auto Dummy_Another_Test_File_Size = Another_Test_Asset_Id.length() + 1000; //Size reported by the Dummy asset source
 
 class DummyAssetSource : public ac::AssetSource {
 public:
