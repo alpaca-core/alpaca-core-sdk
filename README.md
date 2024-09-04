@@ -4,6 +4,13 @@
 
 AI Inference SDK
 
+## API Wrappers
+
+* Java
+* Swift
+
+## Demo Projects
+
 ## Build
 
 Use CMake. Some useful presets are provided in the repo.
@@ -24,4 +31,4 @@ Use CMake. Some useful presets are provided in the repo.
 
 This software is distributed under the MIT Software License. See accompanying file LICENSE or copy [here](https://opensource.org/licenses/MIT).
 
-Copyright &copy; 2024 Alpaca Core
+Copyright &copy; 2024 [Alpaca Core, Inc](https://github.com/alpaca-core)
