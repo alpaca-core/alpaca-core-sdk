@@ -15,4 +15,11 @@ T Dict_optValueAt(Dict& dict, std::string_view key, T defaultValue) {
     return f->get<T>();
 }
 
+template <typename T>
+void Dict_optApplyValueAt(const Dict& dict, std::string_view key, T& value) {
+    auto f = dict.find(key);
+    if (f == dict.end()) return;
+    value = f->get<T>();
 }
+
+} // namespace ac

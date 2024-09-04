@@ -21,10 +21,7 @@ namespace ac {
 namespace {
 llama::Instance::SessionParams SessionParams_fromDict(const Dict& d) {
     llama::Instance::SessionParams ret;
-    auto f = d.find("conversation");
-    if (f != d.end()) {
-        ret.conversation = f->get<bool>();
-    }
+    Dict_optApplyValueAt(d, "conversation", ret.conversation);
 
     return ret;
 }
