@@ -17,6 +17,8 @@ Model::Model(const char* path, Params params)
         throw_ex{} << "Failed to open file: " << path;
     }
 
+    DUMMY_LOG(Info, "Loading model from ", path);
+
     while (!file.eof()) {
         std::string word;
         file >> word;
