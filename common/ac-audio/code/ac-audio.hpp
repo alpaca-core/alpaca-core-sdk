@@ -8,6 +8,7 @@
 #include <vector>
 #include <fstream>
 #include <span>
+#include <cstdint>
 
 namespace ac::audio {
 AC_AUDIO_EXPORT std::vector<int16_t> loadWavI16Mono(const std::string& path);
