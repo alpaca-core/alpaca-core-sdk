@@ -39,7 +39,8 @@ itlib::generator<const std::string&> Instance::newSession(std::vector<std::strin
             maybeThrow();
             co_yield w;
             maybeThrow();
-            co_yield m_data[di++];
+            co_yield m_data[di];
+            ++di;
             if (di == m_data.size()) {
                 di = 0;
             }
