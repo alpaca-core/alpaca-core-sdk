@@ -1,0 +1,2 @@
+#pragma once
+#define AC_TEST_DATA_DUMMY_DIR "@CMAKE_CURRENT_SOURCE_DIR@"
