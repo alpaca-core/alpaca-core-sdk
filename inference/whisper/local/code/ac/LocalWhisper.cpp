@@ -28,7 +28,7 @@ public:
 
     void run(Dict params, std::function<void(Dict)> streamCb) {
         auto value = params.find("audioBinaryMono");
-        assert(value->is_binary());
+        throw_ex{} << "missing input 'audioBinaryMono' in params";
 
         auto pcmu8 = value->get_binary();
         auto pcmf32 = reinterpret_cast<float*>(pcmu8.data());
