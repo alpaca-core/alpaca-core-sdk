@@ -30,6 +30,7 @@ add_subdirectory(ggml)
 
 if(AC_INFERENCE_LIBS STREQUAL "all")
     set(libs
+        dummy
         llama.cpp
         whisper
     )
