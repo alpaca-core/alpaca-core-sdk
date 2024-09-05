@@ -16,6 +16,11 @@ astl_test(coro_lock)
 astl_test(cow)
 astl_test(safe_func)
 
+add_doctest_unity_lib_test(sv astl
+    t-sv.cpp
+    t-sv.c
+)
+
 icm_add_multiple_build_failure_tests(
     SOURCES
         t-move-bf.cpp
