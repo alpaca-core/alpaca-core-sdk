@@ -37,6 +37,9 @@ void on_progress(ac_sv tag, float progress, void* user_data) {
     state* s = (state*)user_data;
     CHECK_GT_FLT(s->last_progress, progress);
     s->last_progress = progress;
+    if (s->last_progress == 1) {
+        s->last_progress = 0;
+    }
 }
 
 void on_model_result(ac_model* m, const char* error, void* user_data) {

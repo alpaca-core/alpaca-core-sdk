@@ -353,8 +353,8 @@ public:
 
                     auto& aid = info->assets[i].id;
                     LOG_INFO("getting asset: ", aid);
-                    asset = co_await AssetGet(aid, m_assetMgr, m_executor, [](std::string_view, float) {
-                        // nothing for now
+                    asset = co_await AssetGet(aid, m_assetMgr, m_executor, [&](std::string_view, float p) {
+                        cb.progressCb(aid, p);
                     });
                 }
                 info.w().localAssets = astl::move(localAssets);
