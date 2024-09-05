@@ -9,6 +9,7 @@
 
 namespace dl {
 
+FILE_DOWNLOAD_EXPORT bool supportsHttps() noexcept;
 FILE_DOWNLOAD_EXPORT bool supportsUri(std::string_view uri) noexcept;
 
 struct Chunk {
