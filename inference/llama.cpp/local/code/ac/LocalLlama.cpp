@@ -91,7 +91,7 @@ public:
 
 class LlamaModelLoader final : public LocalInferenceModelLoader {
 public:
-    virtual std::unique_ptr<LocalInferenceModel> loadModelSync(LocalModelInfoPtr info, Dict params, std::function<void(float)> progressCb) override {
+    virtual std::unique_ptr<LocalInferenceModel> loadModelSync(LocalModelInfoPtr info, Dict, std::function<void(float)> progressCb) override {
         if (!info) throw_ex{} << "llama: no model info";
         if (info->localAssets.size() != 1) throw_ex{} << "llama: expected exactly one local asset";
         auto& gguf = info->localAssets.front().path;
