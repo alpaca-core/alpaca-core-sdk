@@ -71,7 +71,7 @@ if(AC_BUILD_DOCS)
         # Set input and output files
         set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
         set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
-        set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/doc_doxygen)
+        set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/out/doc_doxygen)
 
         # Define input directories
         set(DOC_INPUT_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/api")
