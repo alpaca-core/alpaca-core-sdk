@@ -32,6 +32,7 @@ int main() {
         .assets = {{"gpt2-117m-q6_k.gguf", {}}}
     });
 
+    //! [Provider_createModel Usage Example]
     std::optional<std::latch> latch;
 
     ac::CallbackResult<ac::ModelPtr> modelResult;
@@ -59,7 +60,9 @@ int main() {
         return 1;
     }
     auto model = std::move(modelResult.value());
-
+    //! [Provider_createModel Usage Example]
+    
+    //! [Model_createInstance Usage Example]
     ac::CallbackResult<ac::InstancePtr> instanceResult;
     latch.emplace(1);
     model->createInstance("general", {}, {
@@ -76,7 +79,8 @@ int main() {
         return 1;
     }
     auto instance = std::move(instanceResult.value());
-
+    //! [Model_createInstance Usage Example]
+    
     const std::string prompt = "The first person to";
     std::vector<std::string> antiprompts;
     antiprompts.push_back("user:");// change it to "name" to break the token generation with the default input
@@ -88,6 +92,7 @@ int main() {
     }
     std::cout << "Generation: " << "<prompt>" << prompt << "</prompt> ";
 
+    //! [Instance_runOp Usage Example]
     std::string opError;
     latch.emplace(1);
     instance->runOp("run", {{"prompt", prompt}, {"max_tokens", 20}, {"antiprompts", antiprompts}}, {
@@ -104,6 +109,7 @@ int main() {
     });
 
     latch->wait();
+    //! [Instance_runOp Usage Example]
 
     std::cout << "\n";
 
