@@ -14,6 +14,7 @@
  * Model, and Instance classes.
  */
 
+// export vtables for classes which only have that
 namespace ac {
 
 /**
