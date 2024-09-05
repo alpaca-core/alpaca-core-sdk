@@ -80,11 +80,14 @@ if(AC_BUILD_DOCS)
         # Request to configure the file
         configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
 
+        # Pass PROJECT_SOURCE_DIR to Doxygen
+        set(PROJECT_SOURCE_DIR ${PROJECT_SOURCE_DIR})
+
         # Create custom command
         add_custom_command(
             OUTPUT ${DOXYGEN_OUTPUT_DIR}
             COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
-            WORKING_DIRECTORY ${doxygenOutDir}
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
             COMMENT "Generating API documentation with Doxygen"
             VERBATIM
             DEPENDS ${DOC_INPUT_DIRS}

@@ -93,6 +93,8 @@ EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = 
 EXCLUDE_SYMBOLS        = 
 
+EXAMPLE_PATH           = @PROJECT_SOURCE_DIR@
+
 #---------------------------------------------------------------------------
 # Configuration options related to source browsing
 #---------------------------------------------------------------------------
