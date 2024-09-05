@@ -38,19 +38,16 @@ int main() {
     latch.emplace(1);
     provider.createModel("gpt2", {}, {
         [&](ac::CallbackResult<ac::ModelPtr> result) {
+            std::cout << '\n';
             modelResult = std::move(result);
             latch->count_down();
         },
-        [](float progress) {
-            const int barWidth = 50;
-            static float currProgress = 0;
-            auto delta = int(progress * barWidth) - int(currProgress * barWidth);
-            for (int i = 0; i < delta; i++) {
-                std::cout.put('=');
+        [](std::string_view tag, float) {
+            if (tag.empty()) {
+                std::cout.put('*');
             }
-            currProgress = progress;
-            if (progress == 1.f) {
-                std::cout << '\n';
+            else {
+                std::cout.put(tag[0]);
             }
         }
     });
@@ -101,7 +98,7 @@ int main() {
             }
             latch->count_down();
         },
-        [](ac::Dict result) {
+        [](std::string_view, ac::Dict result) {
             std::cout << result.at("result").get<std::string_view>();
         }
     });

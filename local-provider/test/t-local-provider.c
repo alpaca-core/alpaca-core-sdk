@@ -32,7 +32,8 @@ void set_error(state* s, const char* error) {
     }
 }
 
-void on_progress(float progress, void* user_data) {
+void on_progress(ac_sv tag, float progress, void* user_data) {
+    CHECK_FALSE(ac_sv_is_empty(tag));
     state* s = (state*)user_data;
     CHECK_GT_FLT(s->last_progress, progress);
     s->last_progress = progress;
@@ -67,7 +68,8 @@ void on_op_result(const char* error, void* user_data) {
     atomic_store(&s->cur_step_done, true);
 }
 
-void on_op_stream(ac_dict_ref dict, void* user_data) {
+void on_op_stream(ac_sv tag, ac_dict_ref dict, void* user_data) {
+    CHECK(ac_sv_is_empty(tag));
     state* s = (state*)user_data;
     if (s->dict_root) {
         ac_dict_free_root(s->dict_root);

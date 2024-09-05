@@ -48,7 +48,7 @@ void ac_create_model(
     const char* model_id,
     ac_dict_root* dict_root,
     void (*result_cb)(ac_model* m, const char* error, void* user_data),
-    void (*progress_cb)(float progress, void* user_data),
+    void (*progress_cb)(ac_sv tag, float progress, void* user_data),
     void* cb_user_data
 ) {
     auto provider = Provider_from_provider(p);
@@ -61,9 +61,9 @@ void ac_create_model(
                 result_cb(nullptr, result.error().text.c_str(), cb_user_data);
             }
         },
-        [=](float progress) {
+        [=](std::string_view tag, float progress) {
             if (progress_cb) {
-                progress_cb(progress, cb_user_data);
+                progress_cb(ac_sv::from_std(tag), progress, cb_user_data);
             }
         }
     });
@@ -78,7 +78,7 @@ void ac_create_instance(
     const char* instance_type,
     ac_dict_root* dict_root,
     void (*result_cb)(ac_instance* i, const char* error, void* user_data),
-    void (*progress_cb)(float progress, void* user_data),
+    void (*progress_cb)(ac_sv tag, float progress, void* user_data),
     void* cb_user_data
 ) {
     m->model->createInstance(instance_type, Dict_from_dict_root_consume(dict_root), {
@@ -90,9 +90,9 @@ void ac_create_instance(
                 result_cb(nullptr, result.error().text.c_str(), cb_user_data);
             }
         },
-        [=](float progress) {
+        [=](std::string_view tag, float progress) {
             if (progress_cb) {
-                progress_cb(progress, cb_user_data);
+                progress_cb(ac_sv::from_std(tag), progress, cb_user_data);
             }
         }
     });
@@ -103,7 +103,7 @@ void ac_run_op(
     const char* op,
     ac_dict_root* dict_root,
     void (*result_cb)(const char* error, void* user_data),
-    void (*stream_cb)(ac_dict_ref dict, void* user_data),
+    void (*stream_cb)(ac_sv tag, ac_dict_ref dict, void* user_data),
     void* cb_user_data
 ) {
     i->instance->runOp(op, Dict_from_dict_root_consume(dict_root), {
@@ -115,9 +115,9 @@ void ac_run_op(
                 result_cb(result.error().text.c_str(), cb_user_data);
             }
         },
-        [=](ac::Dict dict) {
+        [=](std::string_view tag, ac::Dict dict) {
             if (stream_cb) {
-                stream_cb(Dict_to_dict_ref(dict), cb_user_data);
+                stream_cb(ac_sv::from_std(tag), Dict_to_dict_ref(dict), cb_user_data);
             }
         }
     });

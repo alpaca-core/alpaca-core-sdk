@@ -91,7 +91,7 @@ struct AcTestHelper {
                 modelResult = astl::move(result);
                 latch->count_down();
             },
-            [&](float f) {
+            [&](std::string_view, float f) {
                 progress = f;
             }
         });
@@ -219,7 +219,8 @@ TEST_CASE("run ops") {
                 return;
             }
         },
-        [&](ac::Dict result) {
+        [&](std::string_view tag, ac::Dict result) {
+            CHECK(tag.empty());
             opResult[resultsCount++] = result;
         }
     });
@@ -238,7 +239,7 @@ TEST_CASE("run ops") {
                 return;
             }
         },
-        [&](ac::Dict result) {
+        [&](std::string_view, ac::Dict result) {
             opResult[resultsCount++] = result;
         }
     });

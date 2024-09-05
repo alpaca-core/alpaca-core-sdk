@@ -16,7 +16,7 @@ template <typename R, typename S = float>
 struct Callback {
     using ResultCb = std::function<void(CallbackResult<R>)>;
     ResultCb resultCb;
-    using StreamCb = std::function<void(S)>;
+    using StreamCb = std::function<void(std::string_view tag, S)>;
     StreamCb progressCb;
 };
 

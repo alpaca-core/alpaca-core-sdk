@@ -96,7 +96,7 @@ int main() {
             }
             latch->count_down();
         },
-        [](ac::Dict result) {
+        [](std::string_view, ac::Dict result) {
             std::cout << result.at("result").get<std::string_view>();
         }
     });

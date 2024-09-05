@@ -73,7 +73,8 @@ struct TestHelper {
                 }
                 latch->count_down();
             },
-            [&](ac::Dict res) {
+            [&](std::string_view tag, ac::Dict res) {
+                CHECK(tag.empty());
                 REQUIRE(ret.has_value());
                 ret->push_back(astl::move(res));
             }

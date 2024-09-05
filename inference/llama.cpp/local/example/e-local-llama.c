@@ -14,11 +14,9 @@
 #include <stdbool.h>
 #include <stdatomic.h>
 
-#include "ac-test-data-llama-dir.h"
+#include <astl/unused.h>
 
-#if !defined(UNUSED)
-#define UNUSED(x) (void)(x)
-#endif
+#include "ac-test-data-llama-dir.h"
 
 typedef struct app_state {
     ac_model* model;
@@ -46,9 +44,9 @@ void wait_for_step(app_state* state) {
     atomic_store(&state->cur_step_done, false); // prepare next step
 }
 
-void on_progress(float progress, void* user_data) {
+void on_progress(ac_sv tag, float progress, void* user_data) {
     UNUSED(user_data);
-    printf("Progress: %f\n", progress);
+    printf(PRacsv " progress: %f\n", AC_PRINTF_SV(tag), progress);
 }
 
 void on_model_result(ac_model* m, const char* error, void* user_data) {
@@ -79,7 +77,8 @@ void on_run_op_result(const char* error, void* user_data) {
     atomic_store(&state->cur_step_done, true);
 }
 
-void on_op_stream(ac_dict_ref dict, void* user_data) {
+void on_op_stream(ac_sv tag, ac_dict_ref dict, void* user_data) {
+    UNUSED(tag);
     app_state* state = (app_state*)user_data;
     ac_dict_ref result = ac_dict_at_key(dict, "result");
     if (result) {

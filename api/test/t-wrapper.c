@@ -35,7 +35,8 @@ void set_error(state* s, const char* error) {
     }
 }
 
-void on_progress(float progress, void* user_data) {
+void on_progress(ac_sv tag, float progress, void* user_data) {
+    CHECK_FALSE(ac_sv_is_empty(tag));
     state* s = (state*)user_data;
     CHECK_GT_FLT(s->last_progress, progress);
     if (progress == 1) {
@@ -66,7 +67,8 @@ void on_op_result(const char* error, void* user_data) {
     set_error(s, error);
 }
 
-void on_op_stream(ac_dict_ref dict, void* user_data) {
+void on_op_stream(ac_sv tag, ac_dict_ref dict, void* user_data) {
+    EXPECT_SV("stream", tag);
     state* s = (state*)user_data;
     if (s->dict_root) {
         ac_dict_free_root(s->dict_root);
@@ -82,8 +84,8 @@ void dummy_provider(void) {
 
     state s = {0};
     ac_create_model(
-        provider, "error", 
-        ac_dict_new_root_from_json("{\"error\": true}", NULL), 
+        provider, "error",
+        ac_dict_new_root_from_json("{\"error\": true}", NULL),
         on_model_result, on_progress, &s
     );
     CHECK_EQ_STR("dummy id error", s.last_error);
@@ -118,7 +120,7 @@ void dummy_provider(void) {
     s.last_progress = 0;
 
     ac_create_instance(
-        s.model, "insta", 
+        s.model, "insta",
         NULL,
         on_instance_result, on_progress, &s
     );
@@ -150,8 +152,8 @@ void dummy_provider(void) {
     CHECK_EQ(1024, ac_dict_get_int_value(more));
 
     // expect the same behavior with param
-    // dict_root = ac_dict_new_root_from_json("{}", NULL) 
-    // AND 
+    // dict_root = ac_dict_new_root_from_json("{}", NULL)
+    // AND
     // dict_root = NULL
     ac_run_op(
         s.instance, "op",

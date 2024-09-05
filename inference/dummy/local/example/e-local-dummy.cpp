@@ -81,7 +81,7 @@ int main() {
             }
             latch->count_down();
         },
-        [&](ac::Dict result) {
+        [&](std::string_view, ac::Dict result) {
             inferenceResult += result["result"].get<std::string>();
         }
     });

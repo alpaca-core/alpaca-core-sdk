@@ -52,7 +52,7 @@ public:
         m_executor.pushTask([selfcap, op = std::string(op), movecap(params, cb)]() mutable {
             try {
                 self->m_iinstance->runOpSync(op, astl::move(params), [&](Dict result) {
-                    cb.progressCb(astl::move(result));
+                    cb.progressCb({}, astl::move(result));
                 });
                 cb.resultCb({});
             }
@@ -364,7 +364,7 @@ public:
             auto model = loader.loadModelSync(info.detach(), astl::move(params), [&](float progress) {
                 assert(std::this_thread::get_id() == m_execution.threadId());
                 if (cb.progressCb) {
-                    cb.progressCb(progress);
+                    cb.progressCb(id, progress);
                 }
             });
 

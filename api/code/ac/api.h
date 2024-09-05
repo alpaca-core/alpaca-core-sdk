@@ -6,6 +6,7 @@
 #include "api_provider.h"
 #include "dict_ref.h"
 #include "dict_root.h"
+#include <astl/sv.h>
 
 // functions implemented in c-api.cpp
 
@@ -28,7 +29,7 @@ AC_API_EXPORT void ac_create_model(
     const char* model_id,
     ac_dict_root* dict_root,
     void (*result_cb)(ac_model* m, const char* error, void* user_data),
-    void (*progress_cb)(float progress, void* user_data),
+    void (*progress_cb)(ac_sv tag, float progress, void* user_data),
     void* cb_user_data
 );
 
@@ -39,7 +40,7 @@ AC_API_EXPORT void ac_create_instance(
     const char* instance_type,
     ac_dict_root* dict_root,
     void (*result_cb)(ac_instance* i, const char* error, void* user_data),
-    void (*progress_cb)(float progress, void* user_data),
+    void (*progress_cb)(ac_sv tag, float progress, void* user_data),
     void* cb_user_data
 );
 
@@ -48,7 +49,7 @@ AC_API_EXPORT void ac_run_op(
     const char* op,
     ac_dict_root* dict_root,
     void (*result_cb)(const char* error, void* user_data),
-    void (*stream_cb)(ac_dict_ref dict, void* user_data),
+    void (*stream_cb)(ac_sv tag, ac_dict_ref dict, void* user_data),
     void* cb_user_data
 );
 
