@@ -31,7 +31,7 @@ class DummyInstance final : public ac::Instance {
 
     void synchronize() override {} // not really testable
 
-    void initiateAbort(ac::Callback<void> cb) {
+    void initiateAbort(ac::Callback<void> cb) override {
         cb.resultCb({});
     }
 };

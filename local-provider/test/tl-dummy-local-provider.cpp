@@ -52,7 +52,7 @@ public:
 
 class DummyAssetSource final : public ac::AssetSource {
 public:
-    virtual std::string_view id() const { return "dummy-asset-source"; }
+    virtual std::string_view id() const override { return "dummy-asset-source"; }
 
     virtual std::optional<BasicAssetInfo> checkAssetSync(std::string_view id) override {
         if (id == "asset1") {

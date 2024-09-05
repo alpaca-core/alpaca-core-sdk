@@ -12,7 +12,7 @@ const auto Dummy_Another_Test_File_Size = Another_Test_Asset_Id.length() + 1000;
 
 class DummyAssetSource : public ac::AssetSource {
 public:
-    virtual std::string_view id() const {
+    virtual std::string_view id() const override {
         return "dummy";
     }
 

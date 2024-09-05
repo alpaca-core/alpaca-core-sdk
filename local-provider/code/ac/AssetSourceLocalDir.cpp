@@ -22,7 +22,7 @@ public:
         , m_id("local-dir: " + m_path)
     {}
 
-    virtual std::string_view id() const {
+    virtual std::string_view id() const override {
         return m_id;
     }
 
