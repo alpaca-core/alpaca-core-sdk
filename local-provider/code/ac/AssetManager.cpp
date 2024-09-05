@@ -58,8 +58,8 @@ public:
         });
     }
 
-    void getAsset(std::string id, GetAssetCb cb) {
-        m_executor.pushTask([this, movecap(cb, id)]() mutable {
+    void getAsset(std::string id, GetAssetCb cb, GetAssetProgressCb progressCb) {
+        m_executor.pushTask([this, movecap(cb, id, progressCb)]() mutable {
             auto f = getAssetInfo(id);
             if (f == m_assets.end()) {
                 return cb(id, {.error = "Can't get asset. No source"});
@@ -68,7 +68,9 @@ public:
             if (info.path) {
                 return cb(f->first, info);
             }
-            auto res = info.source->fetchAssetSync(id, {});
+            auto res = info.source->fetchAssetSync(id, [&](float p) {
+                progressCb(id, p);
+            });
             if (res) {
                 info.size = res->size;
                 info.path = astl::move(res->path);
@@ -94,8 +96,8 @@ void AssetManager::queryAsset(std::string id, QueryAssetCb cb) {
     m_impl->queryAsset(astl::move(id), astl::move(cb));
 }
 
-void AssetManager::getAsset(std::string id, GetAssetCb cb) {
-    m_impl->getAsset(astl::move(id), astl::move(cb));
+void AssetManager::getAsset(std::string id, GetAssetCb cb, GetAssetProgressCb progressCb) {
+    m_impl->getAsset(astl::move(id), astl::move(cb), astl::move(progressCb));
 }
 
 void AssetManager::addSource(std::unique_ptr<AssetSource> source, int priority) {

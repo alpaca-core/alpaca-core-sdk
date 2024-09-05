@@ -24,7 +24,8 @@ public:
     void queryAsset(std::string id, QueryAssetCb cb);
 
     using GetAssetCb = std::function<void(std::string_view id, const AssetInfo& data)>;
-    void getAsset(std::string id, GetAssetCb cb);
+    using GetAssetProgressCb = std::function<void(std::string_view id, float progress)>;
+    void getAsset(std::string id, GetAssetCb cb, GetAssetProgressCb progressCb);
 public:
     class Impl;
     std::unique_ptr<Impl> m_impl;

@@ -28,8 +28,9 @@ public:
         }
         return BasicAssetInfo{1'000 + id.size()};
     }
-    virtual itlib::expected<BasicAssetInfo, std::string> fetchAssetSync(std::string_view id, ProgressCb) override {
+    virtual itlib::expected<BasicAssetInfo, std::string> fetchAssetSync(std::string_view id, ProgressCb progress) override {
         auto basicInfo = checkAssetSync(id);
+        progress(7); // dummy progress so we can check it
         if (!basicInfo) {
             return itlib::unexpected("dummy not found");
         }
@@ -99,11 +100,17 @@ TEST_CASE("dummy-dir") {
 
     auto g = [&](std::string_view qid) {
         std::latch latch(1);
-        mgr.getAsset(std::string(qid), [&](std::string_view id, const ac::AssetInfo& data) {
-            CHECK(id == qid);
-            info = data;
-            latch.count_down();
-        });
+        mgr.getAsset(std::string(qid),
+            [&](std::string_view id, const ac::AssetInfo& data) {
+                CHECK(id == qid);
+                info = data;
+                latch.count_down();
+            },
+            [&](std::string_view id, float f) {
+                CHECK(id == qid);
+                CHECK(f == 7);
+            }
+        );
         latch.wait();
     };
 

@@ -191,14 +191,21 @@ public:
 };
 
 class AssetGet : public AssetAwaitable {
+    AssetManager::GetAssetProgressCb m_progressCb;
 public:
-    using AssetAwaitable::AssetAwaitable;
+    AssetGet(std::string_view id, AssetManager& mgr, xec::TaskExecutor& executor, AssetManager::GetAssetProgressCb progressCb)
+        : AssetAwaitable(id, mgr, executor)
+        , m_progressCb(astl::move(progressCb))
+    {}
 
     void await_suspend(std::coroutine_handle<> handle) {
-        m_mgr.getAsset(std::string(m_id), [this, handle](std::string_view, const AssetInfo& data) {
-            m_assetInfo = data;
-            m_executor.pushTask(async_resume(handle));
-        });
+        m_mgr.getAsset(std::string(m_id),
+            [this, handle](std::string_view, const AssetInfo& data) {
+                m_assetInfo = data;
+                m_executor.pushTask(async_resume(handle));
+            },
+            astl::move(m_progressCb)
+        );
     }
 };
 
@@ -346,7 +353,9 @@ public:
 
                     auto& aid = info->assets[i].id;
                     LOG_INFO("getting asset: ", aid);
-                    asset = co_await AssetGet(aid, m_assetMgr, m_executor);
+                    asset = co_await AssetGet(aid, m_assetMgr, m_executor, [](std::string_view, float) {
+                        // nothing for now
+                    });
                 }
                 info.w().localAssets = astl::move(localAssets);
             }
