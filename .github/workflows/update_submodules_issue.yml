@@ -2,7 +2,7 @@ name: Create Submodule Update Issue
 
 on:
   schedule:
-    - cron: '0 0 */15 * *'  # Run every 15 days
+    - cron: '0 0 15 * *'  # Run on the 15th of each month
   workflow_dispatch:  # Allow manual triggering
 
 
