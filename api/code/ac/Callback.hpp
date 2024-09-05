@@ -26,6 +26,8 @@ using CallbackResult = itlib::expected<R, Error>;
  * @tparam R The type of the result.
  * @tparam S The type of the progress value (default is float)
  *
+ * Example usage:
+ * @snippet inference/llama.cpp/local/example/e-local-llama.cpp Instance_runOp Usage Example
  */
 template <typename R, typename S = float>
 struct Callback {

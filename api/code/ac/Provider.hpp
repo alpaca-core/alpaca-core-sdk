@@ -35,8 +35,12 @@ public:
      * @param id The unique identifier for the model to be created.
      * @param params A dictionary of parameters for model creation.
      * @param cb A callback function to be called with the created ModelPtr and optional progress updates.
+     *
+     * Example usage:
+     * @snippet inference/llama.cpp/local/example/e-local-llama.cpp Provider_createModel Usage Example
      */
     virtual void createModel(std::string_view id, Dict params, Callback<ModelPtr> cb) = 0;
 };
 
 }
+
