@@ -17,18 +17,6 @@ namespace ac {
  * It is designed to be subclassed by specific model providers, such as LocalProvider, allowing for
  * different implementations of model creation and management.
  *
- * Example usage:
- * @code
- * ac::LocalProvider provider;
- * ac::addLocalLlamaInference(provider);
- * provider.addAssetSource(ac::AssetSourceLocalDir_Create(AC_TEST_DATA_LLAMA_DIR), 0);
- *
- * provider.addModel(ac::ModelInfo{
- *     .id = "gpt2",
- *     .inferenceType = "llama.cpp",
- *     .assets = {{"gpt2-117m-q6_k.gguf", {}}}
- * });
- * @endcode
  */
 class AC_API_EXPORT Provider {
 public:
@@ -61,26 +49,6 @@ public:
      * @endcode
      */
     virtual void createModel(std::string_view id, Dict params, Callback<ModelPtr> cb) = 0;
-
-    /**
-     * @brief Adds a model to the provider.
-     *
-     * This method should be implemented by derived classes to add a model to the provider's
-     * available models.
-     *
-     * @param modelInfo The information about the model to be added.
-     */
-    virtual void addModel(const ModelInfo& modelInfo) = 0;
-
-    /**
-     * @brief Adds an asset source to the provider.
-     *
-     * This method should be implemented by derived classes to add an asset source to the provider.
-     *
-     * @param source The asset source to be added.
-     * @param priority The priority of the asset source.
-     */
-    virtual void addAssetSource(AssetSourcePtr source, int priority) = 0;
 };
 
 }

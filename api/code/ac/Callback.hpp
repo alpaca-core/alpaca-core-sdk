@@ -24,7 +24,7 @@ using CallbackResult = itlib::expected<R, Error>;
  * It provides callbacks for both the final result and intermediate progress updates.
  * 
  * @tparam R The type of the result.
- * @tparam S The type of the progress value (default is Dict for stream data).
+ * @tparam S The type of the progress value (default is float)
  *
  * Example usage:
  * @code
@@ -43,7 +43,7 @@ using CallbackResult = itlib::expected<R, Error>;
  * };
  * @endcode
  */
-template <typename R, typename S = Dict>
+template <typename R, typename S = float>
 struct Callback {
     /**
      * @brief Type alias for the result callback function.
