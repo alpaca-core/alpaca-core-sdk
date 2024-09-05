@@ -63,15 +63,16 @@ mark_as_advanced(AC_BUILD_TESTS AC_BUILD_EXAMPLES AC_BUILD_POC AC_BUILD_DOCS)
 #################
 # global packages
 
-# Find Doxygen
 if(AC_BUILD_DOCS)
     # Find Doxygen
     find_package(Doxygen)
     if(DOXYGEN_FOUND)
+        set(doxygenOutDir ${CMAKE_CURRENT_SOURCE_DIR}/out)
+
         # Set input and output files
         set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
-        set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
-        set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/out/doc_doxygen)
+        set(DOXYGEN_OUT ${doxygenOutDir}/Doxyfile)
+        set(DOXYGEN_OUTPUT_DIR ${doxygenOutDir}/doc-doxygen)
 
         # Define input directories
         set(DOC_INPUT_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/api")
@@ -83,7 +84,7 @@ if(AC_BUILD_DOCS)
         add_custom_command(
             OUTPUT ${DOXYGEN_OUTPUT_DIR}
             COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            WORKING_DIRECTORY ${doxygenOutDir}
             COMMENT "Generating API documentation with Doxygen"
             VERBATIM
             DEPENDS ${DOC_INPUT_DIRS}
