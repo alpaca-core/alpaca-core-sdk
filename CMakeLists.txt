@@ -67,15 +67,15 @@ if(AC_BUILD_DOCS)
     # Find Doxygen
     find_package(Doxygen)
     if(DOXYGEN_FOUND)
-        set(doxygenOutDir ${CMAKE_CURRENT_SOURCE_DIR}/out)
+        set(doxygenOutDir ${PROJECT_SOURCE_DIR}/out)
 
         # Set input and output files
-        set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
+        set(DOXYGEN_IN ${PROJECT_SOURCE_DIR}/Doxyfile.in)
         set(DOXYGEN_OUT ${doxygenOutDir}/Doxyfile)
         set(DOXYGEN_OUTPUT_DIR ${doxygenOutDir}/doc-doxygen)
 
         # Define input directories
-        set(DOC_INPUT_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/api")
+        set(DOC_INPUT_DIRS "${PROJECT_SOURCE_DIR}/api")
 
         # Request to configure the file
         configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
@@ -91,7 +91,7 @@ if(AC_BUILD_DOCS)
         )
 
         # Create target that depends on the custom command
-        add_custom_target(generate-docs
+        add_custom_target(ac-generate-docs
             DEPENDS ${DOXYGEN_OUTPUT_DIR}
         )
     else()

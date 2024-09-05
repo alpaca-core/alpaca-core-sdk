@@ -36,4 +36,8 @@ TEST_CASE("std::function") {
     f = {};
     f(c, 20, 2);
     CHECK(c == 1);
+
+    f = [](int& c, int a, int b) { c = a * b; };
+    f(c, 3, 2);
+    CHECK(c == 6);
 }
