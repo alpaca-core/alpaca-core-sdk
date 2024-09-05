@@ -13,6 +13,9 @@ namespace ac {
  *
  * The Instance class provides an interface for running operations, synchronizing,
  * and aborting the instance's execution. It is typically created using a Model object.
+ *
+ * Example usage:
+ * @snippet inference/llama.cpp/local/example/e-local-llama.cpp Instance_runOp Usage Example
  */
 class AC_API_EXPORT Instance {
 public:
@@ -30,6 +33,9 @@ public:
      * @param op The operation to run, specified as a string_view (e.g., "run").
      * @param params Parameters for the operation, provided as a Dict (e.g., prompt, max_tokens, antiprompts).
      * @param cb Callback function to be called with the operation's result and intermediate updates.
+     *
+     * Example usage:
+     * @snippet inference/llama.cpp/local/example/e-local-llama.cpp Instance_runOp Usage Example
      */
     virtual void runOp(std::string_view op, Dict params, Callback<void, Dict> cb) = 0;
 
