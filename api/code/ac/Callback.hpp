@@ -57,7 +57,25 @@ struct Callback {
      * @brief The result callback function.
      */
     ResultCb resultCb;
+    /**
+     * @brief Type alias for the progress callback function.
+     *
+     * This function is called to report progress during the asynchronous operation.
+     * @param tag A string view representing a tag or category for the progress update.
+     *            Since async tasks can be internally composed of multiple independent
+     *            async tasks, tags allow for more granular progress reporting.
+     * @param progress The progress value, typically a float between 0 and 1, but can
+     *                 vary based on the specific task and tag.
+     */
     using StreamCb = std::function<void(std::string_view tag, S)>;
+
+    /**
+     * @brief The progress callback function.
+     *
+     * This function is called periodically to report progress during the asynchronous operation.
+     * The use of tags in the callback allows for more flexible progress reporting,
+     * especially in complex operations composed of multiple subtasks.
+     */
     StreamCb progressCb;
 };
 
