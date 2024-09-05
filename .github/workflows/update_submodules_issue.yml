@@ -42,7 +42,8 @@ jobs:
               title: 'Update Submodules',
               body: `It's time to update the submodules. Please check for updates and merge them if necessary.
 
-Submodules to update:
-${checkboxList}`,
-              labels: ['maintenance']
+            Subbmodules to update:
+
+            ${checkboxList}`,
+              labels: ['refactor']
             });
