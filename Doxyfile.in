@@ -82,12 +82,7 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 INPUT                  = @DOC_INPUT_DIRS@
 INPUT_ENCODING         = UTF-8
-FILE_PATTERNS          = *.c \
-                         *.cc \
-                         *.cxx \
-                         *.cpp \
-                         *.c++ \
-                         *.h \
+FILE_PATTERNS          = *.h \
                          *.hh \
                          *.hxx \
                          *.hpp \
