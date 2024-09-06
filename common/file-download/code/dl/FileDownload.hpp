@@ -11,7 +11,7 @@
 namespace dl {
 
 FILE_DOWNLOAD_EXPORT bool supportsHttps() noexcept;
-FILE_DOWNLOAD_EXPORT bool supportsUri(std::string_view uri) noexcept;
+FILE_DOWNLOAD_EXPORT bool supportsUrl(std::string_view url) noexcept;
 
 struct Chunk {
     size_t size = 0; // total size of the file
@@ -28,6 +28,6 @@ struct Chunk {
 // optionally provide chunkSize to control the size of the chunks (all but the last one will be of this size)
 // chunkSize -1 means to try to download the whole file in one chunk
 // note that if the server does provide size in the respose, the chunkSize will default to 1mb
-FILE_DOWNLOAD_EXPORT itlib::generator<Chunk> downloadFileSync(std::string_view uri, size_t chunkSize = size_t(-1));
+FILE_DOWNLOAD_EXPORT itlib::generator<Chunk> downloadFileSync(std::string_view url, size_t chunkSize = size_t(-1));
 
 } // namespace dl

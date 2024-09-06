@@ -10,8 +10,8 @@ bool supportsHttps() noexcept {
     return false;
 }
 
-bool supportsUri(std::string_view uri) noexcept {
-    auto scheme = furi::uri_split::get_scheme_from_uri(uri);
+bool supportsUrl(std::string_view url) noexcept {
+    auto scheme = furi::uri_split::get_scheme_from_uri(url);
     if (scheme == "http") return true;
     return false;
 }
