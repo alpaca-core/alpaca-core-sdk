@@ -5,6 +5,7 @@
 #include "export.h"
 #include <itlib/generator.hpp>
 #include <string_view>
+#include <cstdint>
 #include <vector>
 
 namespace dl {
