@@ -11,7 +11,7 @@ endif()
 # public
 add_subdirectory(astl)
 add_subdirectory(jalogc)
-add_subdirectory(file-download)
+add_subdirectory(ahttp)
 
 # dev-only
 # ...thus only used in certain build flavors

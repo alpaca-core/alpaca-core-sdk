@@ -1,8 +1,7 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-
-#include "FileDownload.hpp"
+#include "ahttp.hpp"
 
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
@@ -22,46 +21,46 @@ namespace ssl = net::ssl;
 namespace beast = boost::beast;
 namespace http = boost::beast::http;
 
-namespace dl {
+namespace ahttp {
 
-bool supportsHttps() noexcept {
+bool supports_https() noexcept {
     return false;
 }
 
-bool supportsUrl(std::string_view url) noexcept {
+bool supports_url(std::string_view url) noexcept {
     auto scheme = furi::uri_split::get_scheme_from_uri(url);
     if (scheme == "http") return true;
     return false;
 }
 
 namespace {
-itlib::generator<Chunk> downloadSyncCoro(beast::tcp_stream& stream, beast::flat_buffer& buf, http::response_parser<http::buffer_body>& parser, size_t chunkSize) {
-    const auto totalSize = iile([&]() -> std::optional<size_t> {
+itlib::generator<chunk> get_sync_coro(beast::tcp_stream& stream, beast::flat_buffer& buf, http::response_parser<http::buffer_body>& parser, size_t chunk_size) {
+    const auto total_size = iile([&]() -> std::optional<size_t> {
         auto ret = parser.content_length();
         if (ret) return *ret;
         return {};
     });
 
-    if (totalSize) {
-        if (chunkSize > *totalSize) {
-            chunkSize = *totalSize;
+    if (total_size) {
+        if (chunk_size > *total_size) {
+            chunk_size = *total_size;
         }
     }
     else {
-        if (chunkSize == std::numeric_limits<size_t>::max()) {
-            chunkSize = 1024 * 1024; // 1mb
+        if (chunk_size == std::numeric_limits<size_t>::max()) {
+            chunk_size = 1024 * 1024; // 1mb
         }
     }
 
-    std::vector<uint8_t> chunk;
+    std::vector<uint8_t> chunk_buf;
     size_t offset = 0;
-    co_yield Chunk{totalSize, offset, chunk};
+    co_yield chunk{total_size, offset, chunk_buf};
 
     auto& body = parser.get().body();
     while (!parser.is_done()) {
-        chunk.resize(chunkSize);
-        body.data = chunk.data();
-        body.size = chunk.size();
+        chunk_buf.resize(chunk_size);
+        body.data = chunk_buf.data();
+        body.size = chunk_buf.size();
         beast::error_code ec;
         http::read(stream, buf, parser, ec);
 
@@ -69,16 +68,16 @@ itlib::generator<Chunk> downloadSyncCoro(beast::tcp_stream& stream, beast::flat_
             throw boost::system::system_error{ ec };
         }
 
-        chunk.resize(chunkSize - body.size);
-        co_yield Chunk{totalSize, offset, chunk};
-        offset += chunk.size();
+        chunk_buf.resize(chunk_size - body.size);
+        co_yield chunk{total_size, offset, chunk_buf};
+        offset += chunk_buf.size();
     }
 }
 
-itlib::generator<Chunk> downloadFileSync(net::io_context& ctx, std::string_view url, size_t chunkSize);
+itlib::generator<chunk> get_sync(net::io_context& ctx, std::string_view url, size_t chunk_size);
 
 template <typename Stream>
-itlib::generator<Chunk> downloadSync(net::io_context& ctx, Stream& stream, const http::request<http::empty_body>& req, size_t chunkSize) {
+itlib::generator<chunk> get_sync_t(net::io_context& ctx, Stream& stream, const http::request<http::empty_body>& req, size_t chunk_size) {
     http::write(stream, req);
 
     beast::flat_buffer buf;
@@ -93,13 +92,13 @@ itlib::generator<Chunk> downloadSync(net::io_context& ctx, Stream& stream, const
         // redirect... so recurse
         auto location = f->value();
         std::cout << "redirecting to: " << location << std::endl;
-        return downloadFileSync(ctx, location, chunkSize);
+        return get_sync(ctx, location, chunk_size);
     }
 
-    return downloadSyncCoro(stream, buf, parser, chunkSize);
+    return get_sync_coro(stream, buf, parser, chunk_size);
 }
 
-itlib::generator<Chunk> downloadFileSync(net::io_context& ctx, std::string_view url, size_t chunkSize) {
+itlib::generator<chunk> get_sync(net::io_context& ctx, std::string_view url, size_t chunk_size) {
     auto splitUrl = furi::uri_split::from_uri(url);
 
     http::request<http::empty_body> req;
@@ -122,7 +121,7 @@ itlib::generator<Chunk> downloadFileSync(net::io_context& ctx, std::string_view 
     stream.connect(resolved);
 
     if (splitUrl.scheme == "http") {
-        return downloadSync(ctx, stream, req, chunkSize);
+        return get_sync_t(ctx, stream, req, chunk_size);
     }
 
     ac::throw_ex{} << "unsupported scheme: " << splitUrl.scheme;
@@ -133,9 +132,9 @@ itlib::generator<Chunk> downloadFileSync(net::io_context& ctx, std::string_view 
 }
 }
 
-itlib::generator<Chunk> downloadFileSync(std::string_view uri, size_t chunkSize) {
+itlib::generator<chunk> get_sync(std::string_view uri, size_t chunk_size) {
     net::io_context ctx;
-    return downloadFileSync(ctx, uri, chunkSize);
+    return get_sync(ctx, uri, chunk_size);
 }
 
 } // namespace dl
