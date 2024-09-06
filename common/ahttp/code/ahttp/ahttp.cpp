@@ -36,10 +36,13 @@ bool supports_url(std::string_view url) noexcept {
 
 itlib::generator<chunk> get_sync(std::string_view url, size_t chunk_size) {
     net::io_context ctx;
+    beast::flat_buffer buf;
     std::string redirect_url;
 
     // loop while redirecting
     while (true) {
+        buf.clear();
+
         auto splitUrl = furi::uri_split::from_uri(url);
 
         auto stream = iile([&]() -> std::unique_ptr<beast::tcp_stream> {
@@ -73,7 +76,6 @@ itlib::generator<chunk> get_sync(std::string_view url, size_t chunk_size) {
         http::response_parser<http::buffer_body> parser;
         parser.body_limit(std::numeric_limits<std::uint64_t>::max());
 
-        beast::flat_buffer buf;
         http::read_header(*stream, buf, parser);
         auto& header = parser.get().base();
         std::cout << header << std::endl;
@@ -82,7 +84,20 @@ itlib::generator<chunk> get_sync(std::string_view url, size_t chunk_size) {
         if (f != header.end()) {
             // redirect
             // update url and loop again
-            redirect_url = std::string(f->value());
+            auto loc = f->value();
+            if (loc.starts_with('/')) {
+                // relative path
+                std::string host{splitUrl.scheme};
+                host += "://";
+                host += splitUrl.authority;
+                redirect_url = host;
+                redirect_url += loc;
+            }
+            else {
+                // absolute path
+                redirect_url = std::string(loc);
+            }
+
             url = redirect_url;
             std::cout << "redirecting to: " << url << std::endl;
             continue;
