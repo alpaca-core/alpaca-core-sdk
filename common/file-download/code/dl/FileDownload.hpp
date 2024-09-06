@@ -5,6 +5,7 @@
 #include "export.h"
 #include <itlib/generator.hpp>
 #include <string_view>
+#include <optional>
 #include <cstdint>
 #include <vector>
 
@@ -14,7 +15,7 @@ FILE_DOWNLOAD_EXPORT bool supportsHttps() noexcept;
 FILE_DOWNLOAD_EXPORT bool supportsUrl(std::string_view url) noexcept;
 
 struct Chunk {
-    size_t size = 0; // total size of the file
+    std::optional<size_t> size = 0; // total size of the file (may not be provided by the server)
 
     size_t offset = 0; // offset of the chunk
 

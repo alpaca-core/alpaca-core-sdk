@@ -14,6 +14,7 @@ target_link_libraries(file-download
     PUBLIC
         splat::splat
         itlib::itlib
+        ac::astl
     PRIVATE
         furi::furi
         Boost::beast
