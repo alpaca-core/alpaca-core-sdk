@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MIT
 #
 ac_dep(furi)
+ac_dep(boost)
 
 icm_add_lib(file-download FILE_DOWNLOAD
     code/dl/export.h
@@ -15,6 +16,7 @@ target_link_libraries(file-download
         itlib::itlib
     PRIVATE
         furi::furi
+        Boost::beast
 )
 add_library(ac::file-download ALIAS file-download)
 
