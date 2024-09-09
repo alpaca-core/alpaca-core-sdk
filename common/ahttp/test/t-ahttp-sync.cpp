@@ -13,27 +13,18 @@ TEST_CASE("supports_url") {
 
 TEST_CASE("just get") {
     auto gen = ahttp::get_sync("http://httpbin.org/bytes/128?seed=42");
-    auto init = gen.next();
-    REQUIRE(init);
-    CHECK(init->size.value_or(0) == 128);
-    CHECK(init->offset == 0);
-    CHECK(init->data.size() == 0);
+    auto size = gen.size();
+    CHECK(size.value_or(0) == 128);
 }
 
 TEST_CASE("chunked get") {
-    auto gen = ahttp::get_sync("http://httpbin.org/bytes/512?seed=42", 75);
-    auto init = gen.next();
-    REQUIRE(init);
-    CHECK(init->size.value_or(0) == 512);
-    CHECK(init->offset == 0);
-    CHECK(init->data.size() == 0);
+    auto gen = ahttp::get_sync("http://httpbin.org/bytes/512?seed=42");
+    auto size = gen.size();
+    CHECK(size.value_or(0) == 512);
 }
 
 TEST_CASE("redirect once") {
     auto gen = ahttp::get_sync("http://httpbin.org/redirect-to?url=http%3A%2F%2Fhttpbin.org%2Fbytes%2F64");
-    auto init = gen.next();
-    REQUIRE(init);
-    CHECK(init->size.value_or(0) == 64);
-    CHECK(init->offset == 0);
-    CHECK(init->data.size() == 0);
+    auto size = gen.size();
+    CHECK(size.value_or(0) == 64);
 }

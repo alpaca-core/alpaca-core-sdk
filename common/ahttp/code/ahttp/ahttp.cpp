@@ -34,7 +34,7 @@ bool supports_url(std::string_view url) noexcept {
     return false;
 }
 
-itlib::generator<chunk> get_sync(std::string_view url, size_t chunk_size) {
+sync_generator get_sync(std::string_view url) {
     net::io_context ctx;
     beast::flat_buffer buf;
     std::string redirect_url;
@@ -106,31 +106,15 @@ itlib::generator<chunk> get_sync(std::string_view url, size_t chunk_size) {
         // no redirect
         // get the resource and return
 
-        const auto total_size = iile([&]() -> std::optional<size_t> {
-            // silly convert boost::optional to std::optional
+        {
             auto ret = parser.content_length();
-            if (ret) return *ret;
-            return {};
-        });
-
-        if (total_size) {
-            if (chunk_size > *total_size) {
-                chunk_size = *total_size;
-            }
-        }
-        else {
-            if (chunk_size == std::numeric_limits<size_t>::max()) {
-                chunk_size = 1024 * 1024; // 1mb
-            }
-        }
-
-        std::vector<uint8_t> chunk_buf;
-        size_t offset = 0;
-        co_yield chunk{total_size, offset, chunk_buf}; // initial yield with empty buffer and total size
+            if (ret) co_yield *ret;
+            else co_yield std::nullopt;
+        };
 
         auto& body = parser.get().body();
         while (!parser.is_done()) {
-            chunk_buf.resize(chunk_size);
+            auto& chunk_buf = co_await sync_generator::chunk_buf_t{};
             body.data = chunk_buf.data();
             body.size = chunk_buf.size();
             beast::error_code ec;
@@ -139,13 +123,8 @@ itlib::generator<chunk> get_sync(std::string_view url, size_t chunk_size) {
             if (ec && ec != http::error::need_buffer) {
                 throw boost::system::system_error{ec};
             }
-
-            chunk_buf.resize(chunk_size - body.size);
-            co_yield chunk{total_size, offset, chunk_buf};
-            offset += chunk_buf.size();
+            chunk_buf = chunk_buf.subspan(0, chunk_buf.size() - body.size);
         }
-
-        co_return;
     }
 }
 
