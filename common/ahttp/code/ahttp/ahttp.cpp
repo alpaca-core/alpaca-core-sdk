@@ -78,7 +78,7 @@ sync_generator get_sync(std::string_view url) {
 
         http::read_header(*stream, buf, parser);
         auto& header = parser.get().base();
-        std::cout << header << std::endl;
+        //std::cout << header << std::endl;
 
         auto f = header.find(http::field::location);
         if (f != header.end()) {
@@ -99,7 +99,7 @@ sync_generator get_sync(std::string_view url) {
             }
 
             url = redirect_url;
-            std::cout << "redirecting to: " << url << std::endl;
+            //std::cout << "redirecting to: " << url << std::endl;
             continue;
         }
 
@@ -125,6 +125,8 @@ sync_generator get_sync(std::string_view url) {
             }
             chunk_buf = chunk_buf.subspan(0, chunk_buf.size() - body.size);
         }
+
+        co_return;
     }
 }
 
