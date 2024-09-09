@@ -5,14 +5,15 @@
 
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
-//#include <boost/beast/ssl.hpp>
+#if AHTTP_SSL
+#   include <boost/beast/ssl.hpp>
+#endif
 
 #include <string> // must be here (workardound for furi bug)
 #include <furi/furi.hpp>
 
 #include <astl/throw_ex.hpp>
 #include <astl/move.hpp>
-#include <astl/iile.h>
 
 #include <limits>
 #include <iostream>
@@ -25,17 +26,84 @@ namespace http = boost::beast::http;
 namespace ahttp {
 
 bool supports_https() noexcept {
+#if AHTTP_SSL
+    return true;
+#else
     return false;
+#endif
 }
 
 bool supports_url(std::string_view url) noexcept {
     auto scheme = furi::uri_split::get_scheme_from_uri(url);
     if (scheme == "http") return true;
+    if (scheme == "https") return supports_https();
     return false;
 }
 
+namespace {
+
+class http_stream {
+public:
+    virtual ~http_stream() = default;
+
+    virtual void write(const http::request<http::empty_body>& req) = 0;
+    virtual void read_header(beast::flat_buffer& buf, http::response_parser<http::buffer_body>& parser) = 0;
+    virtual void read(beast::flat_buffer& buf, http::response_parser<http::buffer_body>& parser) = 0;
+};
+
+template <typename Stream>
+class http_stream_t : public http_stream {
+protected:
+    Stream m_stream;
+public:
+    template <typename... Args>
+    explicit http_stream_t(Args&&... args) : m_stream(std::forward<Args>(args)...) {}
+
+    virtual void write(const http::request<http::empty_body>& req) final override {
+        http::write(m_stream, req);
+    }
+    virtual void read_header(beast::flat_buffer& buf, http::response_parser<http::buffer_body>& parser) final override {
+        http::read_header(m_stream, buf, parser);
+    }
+    virtual void read(beast::flat_buffer& buf, http::response_parser<http::buffer_body>& parser) final override {
+        beast::error_code ec;
+        http::read(m_stream, buf, parser, ec);
+        if (ec && ec != http::error::need_buffer) {
+            throw boost::system::system_error{ ec };
+        }
+    }
+};
+
+class http_stream_tcp final : public http_stream_t<beast::tcp_stream> {
+public:
+    using http_stream_t<beast::tcp_stream>::http_stream_t;
+};
+
+#if AHTTP_SSL
+using ssl_stream = beast::ssl_stream<beast::tcp_stream>;
+class http_stream_ssl final : public http_stream_t<ssl_stream> {
+public:
+    http_stream_ssl(beast::tcp_stream&& stream, ssl::context& ctx)
+        : http_stream_t<ssl_stream>(astl::move(stream), ctx)
+    {
+        m_stream.handshake(ssl::stream_base::client);
+    }
+
+    ~http_stream_ssl() {
+        // too many tings can go wrong here, so instead of trying to handle them all, just ignore them
+        [[maybe_unused]] beast::error_code ec;
+        m_stream.shutdown(ec);
+    }
+};
+#endif
+
+} // namespace
+
 sync_generator get_sync(std::string_view url) {
     net::io_context ctx;
+#if AHTTP_SSL
+    ssl::context ssl_ctx{ssl::context::tls_client};
+#endif
     beast::flat_buffer buf;
     std::string redirect_url;
 
@@ -45,7 +113,7 @@ sync_generator get_sync(std::string_view url) {
 
         auto splitUrl = furi::uri_split::from_uri(url);
 
-        auto stream = iile([&]() -> std::unique_ptr<beast::tcp_stream> {
+        auto stream = /*iile*/[&]() -> std::unique_ptr<http_stream> {
             beast::tcp_stream init_stream(ctx);
 
             net::ip::tcp::resolver resolver(ctx);
@@ -53,12 +121,17 @@ sync_generator get_sync(std::string_view url) {
             init_stream.connect(resolved);
 
             if (splitUrl.scheme == "http") {
-                return std::make_unique<beast::tcp_stream>(astl::move(init_stream));
+                return std::make_unique<http_stream_tcp>(astl::move(init_stream));
             }
+#if AHTTP_SSL
+            else if (splitUrl.scheme == "https") {
+                return std::make_unique<http_stream_ssl>(astl::move(init_stream), ssl_ctx);
+            }
+#endif
             else {
                 ac::throw_ex{} << "unsupported scheme: " << splitUrl.scheme;
             }
-        });
+        }();
 
         http::request<http::empty_body> req;
         req.method(http::verb::get);
@@ -71,12 +144,12 @@ sync_generator get_sync(std::string_view url) {
         //req.set(http::field::range, "1-5");
         //std::cout << req << std::endl;
 
-        http::write(*stream, req);
+        stream->write(req);
 
         http::response_parser<http::buffer_body> parser;
         parser.body_limit(std::numeric_limits<std::uint64_t>::max());
 
-        http::read_header(*stream, buf, parser);
+        stream->read_header(buf, parser);
 
         auto& header = parser.get().base();
         //std::cout << header << std::endl;
@@ -123,12 +196,7 @@ sync_generator get_sync(std::string_view url) {
             auto& chunk_buf = co_await sync_generator::chunk_buf_t{};
             body.data = chunk_buf.data();
             body.size = chunk_buf.size();
-            beast::error_code ec;
-            http::read(*stream, buf, parser, ec);
-
-            if (ec && ec != http::error::need_buffer) {
-                throw boost::system::system_error{ec};
-            }
+            stream->read(buf, parser);
             chunk_buf = chunk_buf.subspan(0, chunk_buf.size() - body.size);
         }
 
@@ -136,4 +204,4 @@ sync_generator get_sync(std::string_view url) {
     }
 }
 
-} // namespace dl
+} // namespace ahttp

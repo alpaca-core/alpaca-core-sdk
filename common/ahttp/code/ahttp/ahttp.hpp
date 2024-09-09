@@ -15,4 +15,4 @@ AHTTP_EXPORT bool supports_url(std::string_view url) noexcept;
 // returns a generator that yields chunks of the file
 AHTTP_EXPORT sync_generator get_sync(std::string_view url);
 
-} // namespace dl
+} // namespace ahttp

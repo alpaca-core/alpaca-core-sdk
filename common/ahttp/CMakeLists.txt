@@ -3,6 +3,7 @@
 #
 ac_dep(furi)
 ac_dep(boost)
+ac_dep(openssl)
 
 icm_add_lib(ahttp AHTTP
     code/ahttp/export.h
@@ -20,5 +21,10 @@ target_link_libraries(ahttp
         Boost::beast
 )
 add_library(ac::http ALIAS ahttp)
+
+if(TARGET OpenSSL::SSL)
+    target_compile_definitions(ahttp PUBLIC AHTTP_SSL=1)
+    target_link_libraries(ahttp PRIVATE OpenSSL::SSL)
+endif()
 
 ac_add_test_subdir()
