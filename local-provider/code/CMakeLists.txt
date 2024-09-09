@@ -28,6 +28,8 @@ target_sources(ac-local PRIVATE
     ac/AssetManager.cpp
     ac/AssetSourceLocalDir.hpp
     ac/AssetSourceLocalDir.cpp
+    ac/AssetSourceHttp.hpp
+    ac/AssetSourceHttp.cpp
 
     ac/local_provider.h
     ac/local_provider.cpp
