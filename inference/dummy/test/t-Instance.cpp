@@ -35,6 +35,21 @@ TEST_CASE("no-splice") {
     }
 }
 
+TEST_CASE("model splice") {
+    ac::dummy::Model small(AC_DUMMY_MODEL_SMALL, {.splice = "x"});
+    ac::dummy::Instance inst(small, {});
+    {
+        auto s = inst.newSession({ "a", "b", "c" }, {});
+        CHECK(*s.next() == "a");
+        CHECK(*s.next() == "x");
+        CHECK(*s.next() == "b");
+        CHECK(*s.next() == "soco");
+        CHECK(*s.next() == "c");
+        CHECK(*s.next() == "x");
+        CHECK_FALSE(s.next());
+    }
+}
+
 TEST_CASE("exceptions") {
     ac::dummy::Model small(AC_DUMMY_MODEL_SMALL, {});
 

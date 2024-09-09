@@ -94,8 +94,8 @@ public:
         if (info->localAssets.size() != 1) throw_ex{} << "dummy: expected exactly one local asset";
         auto& fname = info->localAssets.front().path;
         if (!fname) throw_ex{} << "dummy: missing fname path";
-        dummy::Model::Params modelParams;
-        return std::make_unique<DummyModel>(*fname, modelParams);
+        auto modelParams = ModelParams_fromDict(params);
+        return std::make_unique<DummyModel>(*fname, std::move(modelParams));
     }
 };
 }
