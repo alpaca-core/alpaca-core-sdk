@@ -40,6 +40,7 @@ AC_API_EXPORT const char* ac_dict_get_last_error(void);
  * an instance of the C++ ac::Dict type (an alias for nlohmann::json).
  *
  * @return ac_dict_root* Pointer to the new dictionary root, or NULL on error.
+ * @note This function uses exception handling internally. Check ac_dict_get_last_error() for error details.
  */
 AC_API_EXPORT ac_dict_root* ac_dict_new_root(void);
 
@@ -72,6 +73,7 @@ AC_API_EXPORT ac_dict_ref ac_dict_make_ref(ac_dict_root* d);
  * @param json JSON string to parse.
  * @param json_end End of JSON string (NULL for zero-terminated).
  * @return bool True if parsing succeeded, false otherwise.
+ * @note This function uses exception handling internally. Check ac_dict_get_last_error() for error details.
  */
 AC_API_EXPORT bool ac_dict_parse_json(ac_dict_ref target, const char* json, const char* json_end);
 
@@ -97,6 +99,7 @@ AC_API_EXPORT void ac_dict_take(ac_dict_ref target, ac_dict_ref source);
  * @param json JSON string to parse.
  * @param json_end End of JSON string (null for zero-terminated).
  * @return ac_dict_root* New dictionary root, or null on error.
+ * @note This function uses exception handling internally. Check ac_dict_get_last_error() for error details.
  */
 AC_INLINE ac_dict_root* ac_dict_new_root_from_json(const char* json, const char* json_end) {
     ac_dict_root* root = ac_dict_new_root();
@@ -114,6 +117,7 @@ AC_INLINE ac_dict_root* ac_dict_new_root_from_json(const char* json, const char*
  *
  * @param source Source dictionary reference to copy.
  * @return ac_dict_root* New dictionary root containing a copy of source.
+ * @note This function uses exception handling internally. Check ac_dict_get_last_error() for error details.
  */
 AC_INLINE ac_dict_root* ac_dict_new_root_by_copy(ac_dict_ref source) {
     ac_dict_root* root = ac_dict_new_root();
@@ -128,6 +132,7 @@ AC_INLINE ac_dict_root* ac_dict_new_root_by_copy(ac_dict_ref source) {
  *
  * @param source Source dictionary reference to take from (becomes null).
  * @return ac_dict_root* New dictionary root containing data from source.
+ * @note This function uses exception handling internally. Check ac_dict_get_last_error() for error details.
  */
 AC_INLINE ac_dict_root* ac_dict_new_root_by_take(ac_dict_ref source) {
     ac_dict_root* root = ac_dict_new_root();
@@ -143,6 +148,7 @@ AC_INLINE ac_dict_root* ac_dict_new_root_by_take(ac_dict_ref source) {
  * @param d Dictionary reference.
  * @param key Key to look up.
  * @return ac_dict_ref Reference to element, or null on error.
+ * @note This function uses exception handling internally. Check ac_dict_get_last_error() for error details.
  */
 AC_API_EXPORT ac_dict_ref ac_dict_at_key(ac_dict_ref d, const char* key);
 
@@ -152,6 +158,7 @@ AC_API_EXPORT ac_dict_ref ac_dict_at_key(ac_dict_ref d, const char* key);
  * @param d Dictionary reference.
  * @param index Index to look up.
  * @return ac_dict_ref Reference to element, or null on error.
+ * @note This function uses exception handling internally. Check ac_dict_get_last_error() for error details.
  */
 AC_API_EXPORT ac_dict_ref ac_dict_at_index(ac_dict_ref d, int index);
 
@@ -178,6 +185,7 @@ typedef enum ac_dict_value_type {
  *
  * @param d Dictionary reference.
  * @return ac_dict_value_type Type of the dictionary value.
+ * @note This function uses exception handling internally. Check ac_dict_get_last_error() for error details.
  */
 AC_API_EXPORT ac_dict_value_type ac_dict_get_type(ac_dict_ref d);
 
@@ -194,6 +202,7 @@ AC_API_EXPORT int ac_dict_get_size(ac_dict_ref d);
  *
  * @param d Dictionary reference.
  * @return bool Boolean value (false on error).
+ * @note This function uses exception handling internally. Check ac_dict_get_last_error() for error details.
  */
 AC_API_EXPORT bool ac_dict_get_bool_value(ac_dict_ref d);
 
@@ -202,6 +211,7 @@ AC_API_EXPORT bool ac_dict_get_bool_value(ac_dict_ref d);
  *
  * @param d Dictionary reference.
  * @return int Integer value (0 on error).
+ * @note This function uses exception handling internally. Check ac_dict_get_last_error() for error details.
  */
 AC_API_EXPORT int ac_dict_get_int_value(ac_dict_ref d);
 
@@ -210,6 +220,7 @@ AC_API_EXPORT int ac_dict_get_int_value(ac_dict_ref d);
  *
  * @param d Dictionary reference.
  * @return unsigned Unsigned integer value (0 on error).
+ * @note This function uses exception handling internally. Check ac_dict_get_last_error() for error details.
  */
 AC_API_EXPORT unsigned ac_dict_get_unsigned_value(ac_dict_ref d);
 
@@ -218,6 +229,7 @@ AC_API_EXPORT unsigned ac_dict_get_unsigned_value(ac_dict_ref d);
  *
  * @param d Dictionary reference.
  * @return double Double value (0.0 on error).
+ * @note This function uses exception handling internally. Check ac_dict_get_last_error() for error details.
  */
 AC_API_EXPORT double ac_dict_get_double_value(ac_dict_ref d);
 
@@ -226,6 +238,7 @@ AC_API_EXPORT double ac_dict_get_double_value(ac_dict_ref d);
  *
  * @param d Dictionary reference.
  * @return const char* String value (null if not a string).
+ * @note This function uses exception handling internally. Check ac_dict_get_last_error() for error details.
  */
 AC_API_EXPORT const char* ac_dict_get_string_value(ac_dict_ref d);
 
@@ -246,6 +259,7 @@ typedef struct ac_dict_binary_buf {
  * @param d Dictionary reference.
  * @return ac_dict_binary_buf Binary buffer (data is null on error).
  * @note The returned buffer is owned by the dictionary.
+ * @note This function uses exception handling internally. Check ac_dict_get_last_error() for error details.
  */
 AC_API_EXPORT ac_dict_binary_buf ac_dict_get_binary_value(ac_dict_ref d);
 
@@ -282,6 +296,7 @@ AC_API_EXPORT void ac_dict_free_iter(ac_dict_iter* it);
  *
  * @param d Iterator.
  * @return const char* Key (null if not an object).
+ * @note This function uses exception handling internally. Check ac_dict_get_last_error() for error details.
  */
 AC_API_EXPORT const char* ac_dict_iter_get_key(ac_dict_iter* d);
 
@@ -370,6 +385,7 @@ AC_API_EXPORT void ac_dict_set_binary(ac_dict_ref parent, const uint8_t* data, u
  * @param parent Dictionary reference.
  * @param key Key for the child (null for array elements).
  * @return ac_dict_ref Reference to the new child (null on error).
+ * @note This function uses exception handling internally. Check ac_dict_get_last_error() for error details.
  */
 AC_API_EXPORT ac_dict_ref ac_dict_add_child(ac_dict_ref parent, const char* key);
 
@@ -379,6 +395,7 @@ AC_API_EXPORT ac_dict_ref ac_dict_add_child(ac_dict_ref parent, const char* key)
  * @param d Dictionary reference.
  * @param indent Indentation (-1 for compact, 0 for pretty, 1+ for pretty with indent).
  * @return char* Dumped string (null on error, caller must free).
+ * @note This function uses exception handling internally. Check ac_dict_get_last_error() for error details.
  */
 AC_API_EXPORT char* ac_dict_dump(ac_dict_ref d, int indent);
 
@@ -390,6 +407,7 @@ AC_API_EXPORT char* ac_dict_dump(ac_dict_ref d, int indent);
  * @param buf Buffer to write to.
  * @param buf_size Size of buffer.
  * @return int Number of characters that would have been written (ignoring buf_size), or -1 on error.
+ * @note This function uses exception handling internally. Check ac_dict_get_last_error() for error details.
  */
 AC_API_EXPORT int ac_dict_dump_to(ac_dict_ref d, int indent, char* buf, int buf_size);
 
