@@ -77,9 +77,11 @@ sync_generator get_sync(std::string_view url) {
         parser.body_limit(std::numeric_limits<std::uint64_t>::max());
 
         http::read_header(*stream, buf, parser);
+
         auto& header = parser.get().base();
         //std::cout << header << std::endl;
 
+        // instead of juggling redirects, just look for location header
         auto f = header.find(http::field::location);
         if (f != header.end()) {
             // redirect
@@ -103,7 +105,11 @@ sync_generator get_sync(std::string_view url) {
             continue;
         }
 
-        // no redirect
+        // no redirect, must be ok
+        if (parser.get().result() != http::status::ok) {
+            ac::throw_ex{} << "http response status: " << parser.get().result_int();
+        }
+
         // get the resource and return
 
         {

@@ -36,7 +36,7 @@ public:
         promise_type() noexcept = default;
         ~promise_type() = default;
         sync_generator get_return_object() noexcept {
-            return sync_generator{ std::coroutine_handle<promise_type>::from_promise(*this) };
+            return sync_generator{std::coroutine_handle<promise_type>::from_promise(*this)};
         }
 
         // never suspend at until we yield the size

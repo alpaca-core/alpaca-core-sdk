@@ -5,6 +5,19 @@
 #include <vector>
 #include <doctest/doctest.h>
 
+TEST_CASE("supports_url") {
+    CHECK(ahttp::supports_url("http://example.com"));
+    CHECK(ahttp::supports_https() == ahttp::supports_url("https://example.com"));
+    CHECK_FALSE(ahttp::supports_url("git://example.com"));
+    CHECK_FALSE(ahttp::supports_url("asdf"));
+}
+
+TEST_CASE("bad url") {
+    CHECK_THROWS(ahttp::get_sync("http://nope-doesnt-exist.co.uk"));
+    CHECK_THROWS(ahttp::get_sync("http://httpbin.org/no-such-request"));
+    CHECK_THROWS_WITH(ahttp::get_sync("http://httpbin.org/status/500"), "http response status: 500");
+}
+
 uint8_t g_expected_buffer[] = {
     0x39, 0x0c, 0x8c, 0x7d, 0x72, 0x47, 0x34, 0x2c, 0xd8, 0x10, 0x0f, 0x2f, 0x6f, 0x77, 0x0d, 0x65,
     0xd6, 0x70, 0xe5, 0x8e, 0x03, 0x51, 0xd8, 0xae, 0x8e, 0x4f, 0x6e, 0xac, 0x34, 0x2f, 0xc2, 0x31,
@@ -47,13 +60,6 @@ bool is_expectected(std::span<uint8_t> span, size_t offset = 0) {
         if (span[i] != expected_buffer[i + offset]) return false;
     }
     return true;
-}
-
-TEST_CASE("supports_url") {
-    CHECK(ahttp::supports_url("http://example.com"));
-    CHECK(ahttp::supports_https() == ahttp::supports_url("https://example.com"));
-    CHECK_FALSE(ahttp::supports_url("git://example.com"));
-    CHECK_FALSE(ahttp::supports_url("asdf"));
 }
 
 TEST_CASE("just get") {
