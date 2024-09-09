@@ -62,35 +62,22 @@ bool is_expectected(std::span<uint8_t> span, size_t offset = 0) {
     return true;
 }
 
-TEST_CASE("just get") {
-    auto gen = ahttp::get_sync("http://httpbin.org/bytes/128?seed=42");
-    auto size = gen.size();
-    CHECK(size.value_or(0) == 128);
-    std::vector<uint8_t> data(128);
-    auto chunk = gen.get_next_chunk(data);
-    CHECK(chunk.size() == 128);
-    CHECK(gen.done());
-    CHECK(is_expectected(chunk));
-    CHECK(is_expectected(data));
+#define SCHEME "http"
+#include "t-get-tests.inl"
+
+#if AHTTP_SSL
+#undef SCHEME
+#define SCHEME "https"
+
+TEST_CASE("supports https") {
+    CHECK(ahttp::supports_https());
+    CHECK(ahttp::supports_url("https://example.com"));
 }
 
-TEST_CASE("chunked get") {
-    auto gen = ahttp::get_sync("http://httpbin.org/bytes/512?seed=42");
-    auto size = gen.size();
-    CHECK(size.value_or(0) == 512);
+#include "t-get-tests.inl"
 
-    std::vector<uint8_t> data;
-    while (!gen.done()) {
-        std::vector<uint8_t> buf(150 + rand()%100);
-        auto chunk = gen.get_next_chunk(buf);
-        data.insert(data.end(), chunk.begin(), chunk.end());
-    }
-    CHECK(data.size() == 512);
-    CHECK(is_expectected(data));
-}
-
-TEST_CASE("redirect once") {
-    auto gen = ahttp::get_sync("http://httpbin.org/redirect-to?url=http%3A%2F%2Fhttpbin.org%2Fbytes%2F64%3Fseed%3D42");
+TEST_CASE("redirect http->https") {
+    auto gen = ahttp::get_sync("http://httpbin.org/redirect-to?url=https%3A%2F%2Fhttpbin.org%2Fbytes%2F64%3Fseed%3D42");
     auto size = gen.size();
     CHECK(size.value_or(0) == 64);
     std::vector<uint8_t> data(64);
@@ -100,46 +87,15 @@ TEST_CASE("redirect once") {
     CHECK(is_expectected(chunk));
 }
 
-TEST_CASE("redirect more") {
-    auto gen = ahttp::get_sync("http://httpbin.org/redirect/5");
+TEST_CASE("redirect https->http") {
+    auto gen = ahttp::get_sync("https://httpbin.org/redirect-to?url=http%3A%2F%2Fhttpbin.org%2Fbytes%2F64%3Fseed%3D42");
     auto size = gen.size();
-    CHECK(!!size);
-    std::string data;
-    data.resize(*gen.size());
-    auto chunk = gen.get_next_chunk(std::span(reinterpret_cast<uint8_t*>(data.data()), data.size()));
-    CHECK(chunk.size() == data.size());
+    CHECK(size.value_or(0) == 64);
+    std::vector<uint8_t> data(64);
+    auto chunk = gen.get_next_chunk(data);
+    CHECK(chunk.size() == 64);
     CHECK(gen.done());
-
-    // data should be a json with our request
-    // {
-    //   "args": {},
-    //   "headers": {
-    //      "Accept": "*/*",
-    //      "Host": "httpbin.org",
-    //      "User-Agent": "ac-file-download/1.0.0",
-    //      "X-Amzn-Trace-Id": "Root=<guid>"
-    //   },
-    //   "origin": "<ip address>",
-    //   "url": "http://httpbin.org/get"
-    // }
-    // so, check for some key fields
-    // C++23: use contains instead of find
-    CHECK(data.find(R"json("Host": "httpbin.org")json") != std::string::npos);
-    CHECK(data.find(R"json("User-Agent": "ac-file-download/)json") != std::string::npos);
-    CHECK(data.find(R"json("url": "http://httpbin.org/get")json") != std::string::npos);
+    CHECK(is_expectected(chunk));
 }
 
-TEST_CASE("stream chunked") {
-    auto gen = ahttp::get_sync("http://httpbin.org/stream-bytes/128?seed=42");
-    auto size = gen.size();
-    CHECK_FALSE(size); // size should not be available on stream
-
-    std::vector<uint8_t> data;
-    while (!gen.done()) {
-        std::vector<uint8_t> buf(33);
-        auto chunk = gen.get_next_chunk(buf);
-        data.insert(data.end(), chunk.begin(), chunk.end());
-    }
-    CHECK(data.size() == 128);
-    CHECK(is_expectected(data));
-}
+#endif
