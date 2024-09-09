@@ -35,18 +35,6 @@ public:
      * @param id The unique identifier for the model to be created.
      * @param params A dictionary of parameters for model creation.
      * @param cb A callback function to be called with the created ModelPtr and optional progress updates.
-     *
-     * Example usage:
-     * @code
-     * provider.createModel("gpt2", {}, {
-     *     [&](ac::CallbackResult<ac::ModelPtr> result) {
-     *         // Handle the result
-     *     },
-     *     [](float progress) {
-     *         // Handle progress updates
-     *     }
-     * });
-     * @endcode
      */
     virtual void createModel(std::string_view id, Dict params, Callback<ModelPtr> cb) = 0;
 };

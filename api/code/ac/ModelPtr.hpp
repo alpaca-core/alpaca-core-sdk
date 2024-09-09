@@ -15,12 +15,6 @@ class Model;
  * way to manage Model objects with shared ownership semantics. This allows
  * multiple parts of the code to share ownership of a Model instance, with
  * automatic memory management when the last reference is destroyed.
- *
- * Usage example:
- * @code
- * ac::ModelPtr model = std::make_shared<ConcreteModel>();
- * // Use model as needed
- * @endcode
  */
 using ModelPtr = std::shared_ptr<Model>;
 

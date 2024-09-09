@@ -26,22 +26,6 @@ using CallbackResult = itlib::expected<R, Error>;
  * @tparam R The type of the result.
  * @tparam S The type of the progress value (default is float)
  *
- * Example usage:
- * @code
- * Callback<ac::ModelPtr> cb{
- *     [&](ac::CallbackResult<ac::ModelPtr> result) {
- *         if (result.has_error()) {
- *             std::cout << "Error: " << result.error().text << "\n";
- *             return;
- *         }
- *         auto model = std::move(result.value());
- *         // Use the model
- *     },
- *     [](float progress) {
- *         std::cout << "Loading progress: " << progress * 100 << "%\n";
- *     }
- * };
- * @endcode
  */
 template <typename R, typename S = float>
 struct Callback {
