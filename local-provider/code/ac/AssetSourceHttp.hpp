@@ -11,8 +11,8 @@ class AC_LOCAL_EXPORT AssetSourceHttp final : public AssetSource {
 public:
     AssetSourceHttp();
 
-    virtual std::optional<BasicAssetInfo> checkAssetSync(std::string_view id) override;
-    virtual itlib::expected<BasicAssetInfo, std::string> fetchAssetSync(std::string_view id, ProgressCb) override;
+    virtual std::optional<BasicAssetInfo> checkAssetSync(std::string_view id) noexcept override;
+    virtual BasicAssetInfo fetchAssetSync(std::string_view id, ProgressCb) override;
 private:
     struct AssetManifestEntry {
         std::string url;

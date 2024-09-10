@@ -3,7 +3,6 @@
 //
 #pragma once
 #include "export.h"
-#include <itlib/expected.hpp>
 #include <string_view>
 #include <functional>
 #include <optional>
@@ -24,10 +23,11 @@ public:
         std::optional<std::string> path;
     };
 
-    virtual std::optional<BasicAssetInfo> checkAssetSync(std::string_view id) = 0;
+    // return nullopt if the source does not have the asset
+    virtual std::optional<BasicAssetInfo> checkAssetSync(std::string_view id) noexcept = 0;
 
     using ProgressCb = std::function<void(float)>;
-    virtual itlib::expected<BasicAssetInfo, std::string> fetchAssetSync(std::string_view id, ProgressCb progressCb) = 0;
+    virtual BasicAssetInfo fetchAssetSync(std::string_view id, ProgressCb progressCb) = 0;
 };
 
 } // namespace ac

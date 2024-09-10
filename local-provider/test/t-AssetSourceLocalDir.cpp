@@ -20,22 +20,20 @@ TEST_CASE("AssetSourceLocalDir") {
     }
 
     {
-        auto info = src->fetchAssetSync("no-such-file", {});
-        REQUIRE_FALSE(info);
-        CHECK(info.error() == "Asset not found");
+        CHECK_THROWS_WITH_AS(src->fetchAssetSync("no-such-file", {}), "Asset not found", std::runtime_error);
     }
 
     const std::string asset = Test_Local_Asset_Id;
 
-    auto checkSuccess = [&](auto& info) {
-        REQUIRE(info);
-        CHECK(info->path.value_or(std::string{}) == root + "/" + asset);
-        CHECK(info->size.value_or(0) == Test_Local_Asset_Size); // The size of our new binary file
+    auto checkSuccess = [&](ac::AssetSource::BasicAssetInfo& info) {
+        CHECK(info.path.value_or(std::string{}) == root + "/" + asset);
+        CHECK(info.size.value_or(0) == Test_Local_Asset_Size); // The size of our new binary file
     };
 
     {
         auto info = src->checkAssetSync(asset);
-        checkSuccess(info);
+        REQUIRE(info);
+        checkSuccess(*info);
     }
 
     {

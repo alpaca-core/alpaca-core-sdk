@@ -68,15 +68,16 @@ public:
             if (info.path) {
                 return cb(f->first, info);
             }
-            auto res = info.source->fetchAssetSync(id, [&](float p) {
-                progressCb(id, p);
-            });
-            if (res) {
-                info.size = res->size;
-                info.path = astl::move(res->path);
+            try {
+                auto res = info.source->fetchAssetSync(id, [&](float p) {
+                    progressCb(id, p);
+                });
+
+                info.size = res.size;
+                info.path = astl::move(res.path);
             }
-            else {
-                info.error = astl::move(res.error());
+            catch (std::exception& ex) {
+                info.error = ex.what();
             }
             return cb(f->first, info);
         });

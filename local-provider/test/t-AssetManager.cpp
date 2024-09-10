@@ -16,7 +16,7 @@ public:
         return "dummy";
     }
 
-    virtual std::optional<BasicAssetInfo> checkAssetSync(std::string_view id) override {
+    virtual std::optional<BasicAssetInfo> checkAssetSync(std::string_view id) noexcept override {
         if (id.starts_with("test") || id.starts_with("no")) {
             return std::nullopt;
         }
@@ -28,14 +28,14 @@ public:
         }
         return BasicAssetInfo{1'000 + id.size()};
     }
-    virtual itlib::expected<BasicAssetInfo, std::string> fetchAssetSync(std::string_view id, ProgressCb progress) override {
+    virtual BasicAssetInfo fetchAssetSync(std::string_view id, ProgressCb progress) override {
         auto basicInfo = checkAssetSync(id);
         progress(7); // dummy progress so we can check it
         if (!basicInfo) {
-            return itlib::unexpected("dummy not found");
+            throw std::runtime_error("dummy not found");
         }
         if (id.starts_with("error")) {
-            return itlib::unexpected("dummy error");
+            throw std::runtime_error("dummy error");
         }
         if (!basicInfo->path) {
             basicInfo->path = "dl/" + std::string(id);

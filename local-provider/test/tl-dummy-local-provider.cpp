@@ -54,7 +54,7 @@ class DummyAssetSource final : public ac::AssetSource {
 public:
     virtual std::string_view id() const override { return "dummy-asset-source"; }
 
-    virtual std::optional<BasicAssetInfo> checkAssetSync(std::string_view id) override {
+    virtual std::optional<BasicAssetInfo> checkAssetSync(std::string_view id) noexcept override {
         if (id == "asset1") {
             return BasicAssetInfo{1024, "/home/asset1"};
         }
@@ -67,10 +67,7 @@ public:
         return std::nullopt;
     }
 
-    virtual itlib::expected<BasicAssetInfo, std::string> fetchAssetSync(
-        std::string_view id,
-        ProgressCb progressCb
-    ) override {
+    virtual BasicAssetInfo fetchAssetSync(std::string_view id, ProgressCb progressCb) override {
         if (id == "asset2") {
             progressCb(0.2f);
             progressCb(0.5f);
@@ -79,10 +76,10 @@ public:
         }
         else if (id == "bad-remote-asset") {
             progressCb(0.2f);
-            return itlib::unexpected("Bad remote asset");
+            throw std::runtime_error("Bad remote asset");
         }
         // shouldn't get called for asset1
-        return itlib::unexpected("Can't get asset");
+        throw std::runtime_error("Can't get asset");
     }
 };
 

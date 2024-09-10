@@ -3,6 +3,7 @@
 //
 #include "AssetSourceLocalDir.hpp"
 #include <astl/move.hpp>
+#include <stdexcept>
 
 #include <sys/stat.h>
 #if defined(_WIN32)
@@ -26,7 +27,7 @@ public:
         return m_id;
     }
 
-    virtual std::optional<BasicAssetInfo> checkAssetSync(std::string_view id) override {
+    virtual std::optional<BasicAssetInfo> checkAssetSync(std::string_view id) noexcept override {
         auto path = m_path + "/" + std::string(id);
         struct stat st;
         if (stat(path.c_str(), &st) == 0) {
@@ -34,13 +35,13 @@ public:
         }
         return std::nullopt;
     }
-    virtual itlib::expected<BasicAssetInfo, std::string> fetchAssetSync(std::string_view id, ProgressCb) override {
+    virtual BasicAssetInfo fetchAssetSync(std::string_view id, ProgressCb) override {
         auto ret = checkAssetSync(id);
         if (ret) {
             return astl::move(*ret);
         }
         else {
-            return itlib::unexpected("Asset not found");
+            throw std::runtime_error("Asset not found");
         }
     }
 };
