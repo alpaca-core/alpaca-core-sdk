@@ -41,7 +41,7 @@ TEST_CASE("expandPath") {
         REQUIRE(e.length() > 5);
         CHECK(e[1] == ':'); // must be absolute
 #else
-        CHECK(e.length >= 4);
+        CHECK(e.length() >= 4);
         CHECK(e[0] == '/'); // must be absolute
 #endif
     }
