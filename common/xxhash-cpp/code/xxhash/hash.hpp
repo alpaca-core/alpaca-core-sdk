@@ -27,8 +27,8 @@ struct hasher_traits<type::xxh64> {
 
 struct xxh128_hash_type : public XXH128_hash_t {
     xxh128_hash_type() = default;
-    xxh128_hash_type(uint64_t low, uint64_t high) : XXH128_hash_t{ low, high } {}
-    xxh128_hash_type(const XXH128_hash_t& src) : XXH128_hash_t{ src } {}
+    xxh128_hash_type(uint64_t low, uint64_t high) : XXH128_hash_t{low, high} {}
+    xxh128_hash_type(const XXH128_hash_t& src) : XXH128_hash_t{src} {}
     bool operator==(const xxh128_hash_type& other) const {
         return low64 == other.low64 && high64 == other.high64;
     }
@@ -100,4 +100,4 @@ private:
 using h64 = hasher<type::xxh64>;
 using h128 = hasher<type::xxh128>;
 
-}
+} // namespace xxhash
