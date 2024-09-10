@@ -18,7 +18,7 @@ public:
         , m_id("local-dir: " + m_path)
     {}
 
-    virtual std::string_view id() const override {
+    virtual std::string_view id() const noexcept override {
         return m_id;
     }
 

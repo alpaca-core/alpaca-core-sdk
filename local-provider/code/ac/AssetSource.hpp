@@ -14,13 +14,15 @@ class AC_LOCAL_EXPORT AssetSource {
 public:
     virtual ~AssetSource();
 
-    virtual std::string_view id() const = 0;
+    virtual std::string_view id() const noexcept = 0;
 
     // synchronous interface for now (may be redesigned later)
 
     struct BasicAssetInfo {
         std::optional<size_t> size;
         std::optional<std::string> path;
+
+        friend bool operator==(const BasicAssetInfo&, const BasicAssetInfo&) = default;
     };
 
     // return nullopt if the source does not have the asset

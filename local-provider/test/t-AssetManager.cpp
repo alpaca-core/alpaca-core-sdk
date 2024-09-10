@@ -13,7 +13,7 @@ const std::string Bin_Path = TEST_ASSETS_BINARY_PATH;
 
 class DummyAssetSource : public ac::AssetSource {
 public:
-    virtual std::string_view id() const override {
+    virtual std::string_view id() const noexcept override {
         return "dummy";
     }
 

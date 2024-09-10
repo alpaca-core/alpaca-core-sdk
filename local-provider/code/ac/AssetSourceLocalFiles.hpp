@@ -9,13 +9,20 @@
 namespace ac {
 class AC_LOCAL_EXPORT AssetSourceLocalFiles final : public AssetSource {
 public:
-    explicit AssetSourceLocalFiles(astl::tsumap<std::string> manifest);
-    explicit AssetSourceLocalFiles(std::string jsonManifest);
+    explicit AssetSourceLocalFiles(std::string_view id, const astl::tsumap<std::string>& manifest);
+    explicit AssetSourceLocalFiles(std::string_view id, std::string_view jsonManifest);
+
+    virtual std::string_view id() const noexcept override { return m_id; }
 
     virtual std::optional<BasicAssetInfo> checkAssetSync(std::string_view id) noexcept override;
     virtual BasicAssetInfo fetchAssetSync(std::string_view id, ProgressCb) override;
 private:
-    astl::tsumap<std::string> m_assetManifest; // id -> path
-    astl::tsumap<BasicAssetInfo> m_availableAssets; // id -> existing file
+    std::string m_id;
+
+    struct AssetManifestEntry {
+        BasicAssetInfo info;
+        std::string path;
+    };
+    astl::tsumap<AssetManifestEntry> m_assetManifest; // id -> existing file
 };
 } // namespace ac
