@@ -2,17 +2,16 @@
 // SPDX-License-Identifier: MIT
 //
 #include <ac/AssetSourceLocalDir.hpp>
-#include "TestBinaryAssets.hpp"
+#include <test-assets/assets.h>
 #include <doctest/doctest.h>
 
 TEST_CASE("AssetSourceLocalDir") {
+    const std::string Bin_Path = TEST_ASSETS_BINARY_PATH;
 
-    auto src = ac::AssetSourceLocalDir_Create(Test_Local_Asset_Source_Path);
+    auto src = ac::AssetSourceLocalDir_Create(Bin_Path);
     REQUIRE(src);
 
-    const std::string root = Test_Local_Asset_Source_Path;
-
-    CHECK(src->id() == "local-dir: " + Test_Local_Asset_Source_Path);
+    CHECK(src->id() == "local-dir: " + Bin_Path);
 
     {
         auto info = src->checkAssetSync("no-such-file");
@@ -23,11 +22,11 @@ TEST_CASE("AssetSourceLocalDir") {
         CHECK_THROWS_WITH_AS(src->fetchAssetSync("no-such-file", {}), "Asset not found", std::runtime_error);
     }
 
-    const std::string asset = Test_Local_Asset_Id;
+    const std::string asset = TA_BINARY_FILE;
 
     auto checkSuccess = [&](ac::AssetSource::BasicAssetInfo& info) {
-        CHECK(info.path.value_or(std::string{}) == root + "/" + asset);
-        CHECK(info.size.value_or(0) == Test_Local_Asset_Size); // The size of our new binary file
+        CHECK(info.path.value_or(std::string{}) == Bin_Path + "/" + asset);
+        CHECK(info.size.value_or(0) == TA_BINARY_FILE_SIZE); // The size of our new binary file
     };
 
     {

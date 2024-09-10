@@ -19,6 +19,7 @@ add_subdirectory(ahttp)
 if(AC_BUILD_TESTS OR AC_BUILD_EXAMPLES OR AC_BUILD_POC)
     add_subdirectory(ac-repo-root)
     add_subdirectory(ac-audio)
+    add_subdirectory(ac-test-assets)
 endif()
 
 # example-only
