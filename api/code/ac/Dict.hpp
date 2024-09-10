@@ -29,10 +29,10 @@ using Blob = std::vector<uint8_t>;
  * @return The value associated with the key if found, otherwise the default value.
  */
 template <typename T>
-T Dict_optValueAt(Dict& dict, std::string_view key, T defaultValue) {
+T Dict_optValueAt(const Dict& dict, std::string_view key, T defaultValue) {
     auto f = dict.find(key);
     if (f == dict.end()) return defaultValue;
-    return f->get<T>();
+    return f->template get<T>();
 }
 
 /**
@@ -51,7 +51,7 @@ template <typename T>
 void Dict_optApplyValueAt(const Dict& dict, std::string_view key, T& value) {
     auto f = dict.find(key);
     if (f == dict.end()) return;
-    value = f->get<T>();
+    value = f->template get<T>();
 }
 
 } // namespace ac
