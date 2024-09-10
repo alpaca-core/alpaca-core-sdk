@@ -19,6 +19,9 @@ target_sources(ac-local PRIVATE
     ac/Logging.hpp
     ac/Logging.cpp
 
+    ac/FsUtil.hpp
+    ac/FsUtil.cpp
+
     ac/LocalProvider.hpp
     ac/LocalProvider.cpp
     ac/LocalInference.hpp

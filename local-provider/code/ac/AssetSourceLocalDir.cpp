@@ -2,14 +2,9 @@
 // SPDX-License-Identifier: MIT
 //
 #include "AssetSourceLocalDir.hpp"
+#include "FsUtil.hpp"
 #include <astl/move.hpp>
 #include <stdexcept>
-
-#include <sys/stat.h>
-#if defined(_WIN32)
-#   define stat _stat
-#endif
-
 
 namespace ac {
 
@@ -29,12 +24,13 @@ public:
 
     virtual std::optional<BasicAssetInfo> checkAssetSync(std::string_view id) noexcept override {
         auto path = m_path + "/" + std::string(id);
-        struct stat st;
-        if (stat(path.c_str(), &st) == 0) {
-            return BasicAssetInfo{st.st_size, astl::move(path)};
+        auto st = fs::basicStat(path);
+        if (st.file()) {
+            return BasicAssetInfo{st.size, astl::move(path)};
         }
         return std::nullopt;
     }
+
     virtual BasicAssetInfo fetchAssetSync(std::string_view id, ProgressCb) override {
         auto ret = checkAssetSync(id);
         if (ret) {

@@ -40,5 +40,6 @@ macro(local_test test)
     add_doctest_lib_test(${test} ac-local t-${test}.cpp ${ARGN})
 endmacro()
 
+local_test(FsUtil LIBRARIES ac-dev::test-assets)
 local_test(AssetSourceLocalDir LIBRARIES ac-dev::test-assets)
 local_test(AssetManager LIBRARIES ac-dev::test-assets)
