@@ -4,7 +4,7 @@
 #pragma once
 #include "export.h"
 #include "AssetSource.hpp"
-#include <unordered_map>
+#include <astl/tsumap.hpp>
 #include <cstdint>
 
 namespace ac {
@@ -24,6 +24,6 @@ private:
         BasicAssetInfo info;
     };
 
-    std::unordered_map<std::string, AssetManifestEntry> m_assetManifest;
+    astl::tsumap<AssetManifestEntry> m_assetManifest;
 };
 } // namespace ac
