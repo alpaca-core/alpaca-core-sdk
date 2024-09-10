@@ -5,6 +5,7 @@
 #include "export.h"
 #include "AssetSource.hpp"
 #include <unordered_map>
+#include <cstdint>
 
 namespace ac {
 class AC_LOCAL_EXPORT AssetSourceHttp final : public AssetSource {
@@ -16,6 +17,10 @@ public:
 private:
     struct AssetManifestEntry {
         std::string url;
+        uint64_t xxhash; // xxhash of the asset
+        std::string targetPath; // where the asset should be stored
+
+        // materialized info to return from interface methods
         BasicAssetInfo info;
     };
 
