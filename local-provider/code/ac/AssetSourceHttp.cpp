@@ -6,7 +6,7 @@
 
 namespace ac {
 
-AssetSourceHttp::AssetSourceHttp() {}
+//AssetSourceHttp::AssetSourceHttp() {}
 
 std::optional<AssetSource::BasicAssetInfo> AssetSourceHttp::checkAssetSync(std::string_view id) noexcept {
     return {};

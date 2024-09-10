@@ -6,18 +6,22 @@
 #include "AssetSource.hpp"
 #include <astl/tsumap.hpp>
 #include <cstdint>
+#include <concepts>
 
 namespace ac {
 class AC_LOCAL_EXPORT AssetSourceHttp final : public AssetSource {
 public:
-    AssetSourceHttp();
+    struct ManifestEntry {
+        std::string url;
+        std::optional<uint64_t> xxhash; // expected xxhash of the asset (if available in the manifest)
+    };
+
+    //AssetSourceHttp(std::string id, std::string elocalDir, );
 
     virtual std::optional<BasicAssetInfo> checkAssetSync(std::string_view id) noexcept override;
     virtual BasicAssetInfo fetchAssetSync(std::string_view id, ProgressCb) override;
 private:
-    struct AssetManifestEntry {
-        std::string url;
-        uint64_t xxhash; // xxhash of the asset
+    struct AssetManifestEntry : public ManifestEntry {
         std::string targetPath; // where the asset should be stored
 
         // materialized info to return from interface methods
