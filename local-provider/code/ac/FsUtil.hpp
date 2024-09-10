@@ -9,8 +9,8 @@
 
 namespace ac::fs {
 
-AC_LOCAL_EXPORT std::string expandPath(std::string_view path);
 AC_LOCAL_EXPORT void expandPathInPlace(std::string& path); // expands in place
+AC_LOCAL_EXPORT std::string expandPath(std::string_view path);
 
 struct BasicStat {
     enum Type {
