@@ -9,8 +9,8 @@
 namespace ac {
 class AC_LOCAL_EXPORT AssetSourceLocalFiles final : public AssetSource {
 public:
-    explicit AssetSourceLocalFiles(std::string_view id, const astl::tsumap<std::string>& manifest);
-    explicit AssetSourceLocalFiles(std::string_view id, std::string_view jsonManifest);
+    AssetSourceLocalFiles(std::string_view id, const astl::tsumap<std::string>& manifest);
+    AssetSourceLocalFiles(std::string_view id, std::string_view jsonManifest);
 
     virtual std::string_view id() const noexcept override { return m_id; }
 
