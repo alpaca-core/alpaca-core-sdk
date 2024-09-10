@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #include "LocalLlama.hpp"
+#include "LocalLlamaSchema.hpp"
 
 #include <ac/llama/Instance.hpp>
 #include <ac/llama/Init.hpp>
@@ -22,7 +23,6 @@ namespace {
 llama::Instance::SessionParams SessionParams_fromDict(const Dict& d) {
     llama::Instance::SessionParams ret;
     Dict_optApplyValueAt(d, "conversation", ret.conversation);
-
     return ret;
 }
 
@@ -34,9 +34,9 @@ public:
     {}
 
     void run(Dict params, std::function<void(Dict)> streamCb) {
-        auto prompt = Dict_optValueAt(params, "prompt", std::string{});
-        auto antiprompts = Dict_optValueAt(params, "antiprompts", std::vector<std::string>{});
-        const uint32_t maxTokens = Dict_optValueAt(params, "max_tokens", 2000u); // somewhat arbitrary, see #37
+        auto prompt = ac::LlamaSchema::RunParams::prompt(params);
+        auto antiprompts = ac::LlamaSchema::RunParams::antiprompts(params);
+        const uint32_t maxTokens = ac::LlamaSchema::RunParams::max_tokens(params);
 
         auto s = m_instance.newSession(astl::move(prompt), SessionParams_fromDict(params));
 
@@ -61,7 +61,9 @@ public:
             result += model.vocab().tokenToString(t);
         }
 
-        streamCb({{"result", astl::move(result)}});
+        Dict resultDict;
+        ac::LlamaSchema::RunResult::set_result(resultDict, astl::move(result));
+        streamCb(resultDict);
     }
 
     virtual void runOpSync(std::string_view op, Dict params, std::function<void(Dict)> streamCb) override {
