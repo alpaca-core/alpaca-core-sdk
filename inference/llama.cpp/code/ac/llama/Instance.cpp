@@ -28,7 +28,7 @@ llama_context_params llamaFromInstanceInitParams(Model& model, const Instance::I
 
 Instance::Instance(Model& model, InitParams params)
     : m_model(model)
-    , m_sampler({})
+    , m_sampler(model, {})
     , m_lctx(llama_new_context_with_model(model.lmodel(), llamaFromInstanceInitParams(model, params)), llama_free)
 {
     if (!m_lctx) {
@@ -74,7 +74,7 @@ void Instance::warmup() {
     llama_decode(lctx, llama_batch_get_one(tmp.data(), ntokens, 0, 0));
     llama_kv_cache_clear(lctx);
     llama_synchronize(lctx);
-    llama_reset_timings(lctx);
+    //llama_reset_timings(lctx);
 }
 
 void Instance::reset() {
@@ -93,7 +93,7 @@ Session Instance::newSession(std::string initialPrompt, const SessionParams para
 
     llama_kv_cache_clear(lctx);
     llama_synchronize(lctx);
-    llama_reset_timings(lctx);
+    //llama_reset_timings(lctx);
 
     ChatFormat chatFmt(m_model.getChatTemplateId());
     std::vector<ChatMsg> chatMsgs;
@@ -154,7 +154,13 @@ Session Instance::newSession(std::string initialPrompt, const SessionParams para
     uint32_t gaIndex = 0; // number of grouped KV tokens (only used if params.gaFactor > 1)
     uint32_t numPast = 0; // number of tokens in the context (that's prompts + generated)
 
-    auto doDecode = [&](std::span<Token> tokens) {
+    enum class Source {
+        InitialPrompt,
+        InteractivePrompt,
+        Generated
+    };
+
+    auto doDecode = [&](std::span<Token> tokens, Source src) {
         // first try to expand the context if needed
         const auto gaFactor = params.gaFactor;
 
@@ -218,7 +224,8 @@ Session Instance::newSession(std::string initialPrompt, const SessionParams para
 
         // add to sampler
         for (auto t : tokens) {
-            m_sampler.accept(t);
+            // only apply grammar for generated content
+            m_sampler.accept(t, src == Source::Generated);
         }
 
         // decode
@@ -237,7 +244,7 @@ Session Instance::newSession(std::string initialPrompt, const SessionParams para
         }
     };
 
-    doDecode(tokens);
+    doDecode(tokens, Source::InitialPrompt);
 
     while (true) {
         auto& prompt = co_await Session::Prompt{};
@@ -254,7 +261,7 @@ Session Instance::newSession(std::string initialPrompt, const SessionParams para
             // reset sampling and don't allow previous inputs to affect the generation
             m_sampler.reset();
 
-            doDecode(tokens);
+            doDecode(tokens, Source::InteractivePrompt);
         }
 
         auto token = m_sampler.sample(lctx);
@@ -263,7 +270,7 @@ Session Instance::newSession(std::string initialPrompt, const SessionParams para
         }
         else {
             co_yield token;
-            doDecode({&token, 1});
+            doDecode({&token, 1}, Source::Generated);
         }
     }
 }

@@ -5,14 +5,17 @@
 #include "export.h"
 #include "Token.hpp"
 #include <itlib/flat_map.hpp>
+#include <astl/mem_ext.hpp>
 #include <vector>
-#include <random>
 
 struct llama_token_data;
 struct llama_context;
 struct llama_token_data_array;
+struct llama_sampler;
 
 namespace ac::llama {
+
+class Model;
 
 class AC_LLAMA_EXPORT Sampler {
 public:
@@ -26,7 +29,6 @@ public:
     };
 
     struct Params {
-        uint32_t numPrev = 64; // number of previous tokens to remember
         uint32_t rngSeed = 0; // seed for the random number generator
 
         int32_t topK = 40;       // <= 0 to use vocab size
@@ -52,6 +54,7 @@ public:
         } mirostat;
 
         bool penalizeNewline = false; // consider newlines as a repeatable token
+        bool ignoreEos = false;
 
         std::vector<SamplingType> samplerSequence = {
             SamplingType::Top_K,
@@ -62,19 +65,12 @@ public:
             SamplingType::Temperature
         };
 
-        // Classifier-Free Guidance
-        // https://arxiv.org/abs/2306.17806
-        struct Cfg {
-            std::string negativePrompt; // string to help guidance
-            float       scale = 1.f; // how strong is guidance
-        } cfg;
+        std::string grammar; // optional BNF-like grammar to constrain sampling
 
         itlib::flat_map<Token, float> logitBias; // bias for specific tokens
-
-        std::vector<Token> penaltyPromptTokens;
     };
 
-    explicit Sampler(Params params);
+    explicit Sampler(Model& model, const Params& params);
     ~Sampler();
 
     Sampler(const Sampler&) = delete;
@@ -83,37 +79,32 @@ public:
     // reset the sampler state
     void reset();
 
-    void reseedRng(uint32_t seed) noexcept { m_rng.seed(seed); }
-
-    Token last() const noexcept { return m_prev.back(); }
-
-    // sample a token from the current distribution
-    // cfgCtx is optional in case classifier-free guidance is used
+    // extended sampling implementation:
+    //
+    // - set logits
+    // - apply the configured sampler chain
+    // - check if the token fits the grammar (if any)
+    // - if not: resample by first applying the grammar constraints and then sampling again (slower path)
+    //
+    // if grammarFirst is true, the grammar is applied before the samplers (slower)
+    // useful in cases where all the resulting candidates (not just the sampled one) must fit the grammar
+    //
     // idx is optional for sampling from the logits of the ith token
-    Token sample(llama_context* lctx, llama_context* cfgCtx = nullptr, int idx = -1);
+    Token sample(llama_context* lctx, int idx = -1, bool grammarFirst = false);
 
-    // accept token as sampled (add to prev)
-    void accept(Token id);
+    // accept token as sampled
+    // if acceptGrammar is true, the token is accepted both by the sampling chain and the grammar
+    void accept(Token id, bool acceptGrammar);
 
 private:
-    const Params m_params;
+    astl::c_unique_ptr<llama_sampler> m_grammarSampler;
+    astl::c_unique_ptr<llama_sampler> m_samplerChain;
 
-    llama_token_data_array prepareSampling(llama_context* lctx, llama_context* cfgCtx, int idx);
-    Token sampleImpl(llama_context* lctx, llama_context* cfgCtx, int idx, bool resample);
-
-    // previously sampled tokens (ring buffer but kept as vector because of llama_sample_repetition_penalties)
-    // used for repetition penalties and antiprompts
-    std::vector<Token> m_prev;
-
-    std::vector<llama_token_data> m_cur; // current tokens for sampling (one for each vocabulary entry)
+    // current tokens for sampling (one for each vocabulary entry)
+    // kept as member so as to avoid reallocation on every sample call
+    std::vector<llama_token_data> m_cur;
 
     size_t m_numValidTokens = 0; // number of correct top tokens with correct probs
-
-    float m_mirostatMu = 0; // optionally used for mirostat sampling
-
-    std::minstd_rand m_rng;
-
-    // TODO: grammar-based sampling (#14)
 };
 
 } // namespace ac::llama

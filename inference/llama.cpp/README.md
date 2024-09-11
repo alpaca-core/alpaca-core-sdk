@@ -15,7 +15,6 @@ As mentioned in the discussion the (maybe distant) future plan is to ditch llama
     * as a whole, chat management is not very efficient. `llama_chat_format_single` doing a full chat format for a single message is terrible
 * Chat templates can't be used to escape special tokens. If the user actually enters some, this just messes-up the resulting formatted text.
 * Give vocab more visibility
-* The sampling prev buffer is a `vector` but is essentially a ring buffer. That's because `llama_sample_repetition_penalties` accepts a span. Can we do something about that and use an actual ring buffer?
 * Token-to-text can be handled much more elegantly by using plain ol' `string_view` instead of copying strings. It's not like tokens are going to be modified once the model is loaded
     * If we don't reimplement, perhaps keeping a parallel array of all tokens to string would be a good idea
 * `llama_batch` being used for both input and output makes it hard to propagate the constness of the input buffer. This leads to code having to use non-const buffers, even if we know they're not going to be modified. We should bind the buffer constness to the batch struct itself.
