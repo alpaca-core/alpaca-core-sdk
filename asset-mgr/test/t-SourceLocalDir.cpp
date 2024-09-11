@@ -5,7 +5,7 @@
 #include <test-assets/assets.h>
 #include <doctest/doctest.h>
 
-TEST_CASE("AssetSourceLocalDir") {
+TEST_CASE("SourceLocalDir") {
     const std::string Bin_Path = TEST_ASSETS_BINARY_PATH;
 
     auto src = ac::asset::SourceLocalDir_Create(Bin_Path);

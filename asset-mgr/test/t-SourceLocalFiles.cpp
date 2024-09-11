@@ -6,7 +6,7 @@
 #include <ac-test-util/setenv.hpp>
 #include <doctest/doctest.h>
 
-TEST_CASE("AssetSourceLocalFiles") {
+TEST_CASE("SourceLocalFiles") {
     setenv("AC_BIN_DIR", TEST_ASSETS_BINARY_PATH, 1);
 
     ac::asset::SourceLocalFiles src("test", R"({
