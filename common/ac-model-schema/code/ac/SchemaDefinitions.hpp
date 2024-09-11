@@ -37,7 +37,7 @@ using ac::Dict_optValueAt;
 #ifdef GENERATE_SCHEMA
 
 #define DEFINE_PARAM(name, type, description, default_value) \
-    write_param(__params, #name, map_type(#type), description, #default_value);
+    write_param(__params, #name, map_type(#type), description, default_value);
 
 #define DEFINE_RESULT(name, type, description) \
     write_param(__result, #name, map_type(#type), description, "");
