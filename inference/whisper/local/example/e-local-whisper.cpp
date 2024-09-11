@@ -34,7 +34,7 @@ int main() {
 
     ac::LocalProvider provider;
     ac::addLocalWhisperInference(provider);
-    provider.addAssetSource(ac::asset::AssetSourceLocalDir_Create(AC_TEST_DATA_WHISPER_DIR), 0);
+    provider.addAssetSource(ac::asset::SourceLocalDir_Create(AC_TEST_DATA_WHISPER_DIR), 0);
 
     provider.addModel(ac::ModelInfo{
         .id = "whisper_en",

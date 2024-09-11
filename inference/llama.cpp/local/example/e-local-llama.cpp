@@ -24,7 +24,7 @@ int main() {
 
     ac::LocalProvider provider;
     ac::addLocalLlamaInference(provider);
-    provider.addAssetSource(ac::asset::AssetSourceLocalDir_Create(AC_TEST_DATA_LLAMA_DIR), 0);
+    provider.addAssetSource(ac::asset::SourceLocalDir_Create(AC_TEST_DATA_LLAMA_DIR), 0);
 
     provider.addModel(ac::ModelInfo{
         .id = "gpt2",

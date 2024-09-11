@@ -162,18 +162,18 @@ struct async_resume {
 class AssetAwaitable {
 protected:
     std::string_view m_id;
-    asset::AssetManager& m_mgr;
+    asset::Manager& m_mgr;
     xec::TaskExecutor& m_executor;
-    std::optional<asset::AssetInfo> m_assetInfo;
+    std::optional<asset::Info> m_assetInfo;
 public:
-    AssetAwaitable(std::string_view id, asset::AssetManager& mgr, xec::TaskExecutor& executor)
+    AssetAwaitable(std::string_view id, asset::Manager& mgr, xec::TaskExecutor& executor)
         : m_id(id)
         , m_mgr(mgr)
         , m_executor(executor)
     {}
 
     bool await_ready() const noexcept { return false; }
-    asset::AssetInfo await_resume() {
+    asset::Info await_resume() {
         return std::move(*m_assetInfo);
     }
 };
@@ -183,7 +183,7 @@ public:
     using AssetAwaitable::AssetAwaitable;
 
     void await_suspend(std::coroutine_handle<> handle) {
-        m_mgr.queryAsset(std::string(m_id), [this, handle](std::string_view, const asset::AssetInfo& data) {
+        m_mgr.queryAsset(std::string(m_id), [this, handle](std::string_view, const asset::Info& data) {
             m_assetInfo = data;
             m_executor.pushTask(async_resume(handle));
         });
@@ -191,16 +191,16 @@ public:
 };
 
 class AssetGet : public AssetAwaitable {
-    asset::AssetManager::GetAssetProgressCb m_progressCb;
+    asset::Manager::GetAssetProgressCb m_progressCb;
 public:
-    AssetGet(std::string_view id, asset::AssetManager& mgr, xec::TaskExecutor& executor, asset::AssetManager::GetAssetProgressCb progressCb)
+    AssetGet(std::string_view id, asset::Manager& mgr, xec::TaskExecutor& executor, asset::Manager::GetAssetProgressCb progressCb)
         : AssetAwaitable(id, mgr, executor)
         , m_progressCb(astl::move(progressCb))
     {}
 
     void await_suspend(std::coroutine_handle<> handle) {
         m_mgr.getAsset(std::string(m_id),
-            [this, handle](std::string_view, const asset::AssetInfo& data) {
+            [this, handle](std::string_view, const asset::Info& data) {
                 m_assetInfo = data;
                 m_executor.pushTask(async_resume(handle));
             },
@@ -240,7 +240,7 @@ class LocalProvider::Impl {
     // * the asset manager must be destroyed first
     xec::TaskExecutor m_executor;
     xec::ThreadExecution m_execution;
-    asset::AssetManager m_assetMgr;
+    asset::Manager m_assetMgr;
 public:
     Impl() : m_execution(m_executor) {
         m_execution.launchThread("ac-inference");
@@ -258,7 +258,7 @@ public:
         // any hanging tasks are just discarded
     }
 
-    void addAssetSource(std::unique_ptr<asset::AssetSource> source, int priority) {
+    void addAssetSource(std::unique_ptr<asset::Source> source, int priority) {
         // asset manager is thread safe, so no need to push this to the executor
         m_assetMgr.addSource(astl::move(source), priority);
     }
@@ -333,7 +333,7 @@ public:
 
             // find assets which are not loaded and don't have an error
             // (we won't try to load assets with errors)
-            auto gettable = [&](const asset::AssetInfo& a) {
+            auto gettable = [&](const asset::Info& a) {
                 return !a.path && !a.error;
             };
             auto hasAssetsToLoad = iile([&] {
@@ -401,7 +401,7 @@ void LocalProvider::addLocalInferenceLoader(std::string_view type, LocalInferenc
     m_impl->addLocalInferenceLoader(type, loader);
 }
 
-void LocalProvider::addAssetSource(std::unique_ptr<asset::AssetSource> source, int priority) {
+void LocalProvider::addAssetSource(std::unique_ptr<asset::Source> source, int priority) {
     m_impl->addAssetSource(astl::move(source), priority);
 }
 

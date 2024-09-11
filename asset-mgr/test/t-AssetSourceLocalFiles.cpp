@@ -9,7 +9,7 @@
 TEST_CASE("AssetSourceLocalFiles") {
     setenv("AC_BIN_DIR", TEST_ASSETS_BINARY_PATH, 1);
 
-    ac::asset::AssetSourceLocalFiles src("test", R"({
+    ac::asset::SourceLocalFiles src("test", R"({
         "foo": ")" TEST_ASSETS_BINARY_PATH "/" TA_BINARY_FILE R"(",
         "bar": "$AC_BIN_DIR/)" TA_ANOTHER_BINARY_FILE R"(",
         "baz": "$AC_BIN_DIR/no-such-file"

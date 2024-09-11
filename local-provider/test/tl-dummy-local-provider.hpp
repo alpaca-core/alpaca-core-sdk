@@ -13,4 +13,4 @@ public:
     ) override;
 };
 
-std::unique_ptr<ac::asset::AssetSource> createDummyAssetSource();
+std::unique_ptr<ac::asset::Source> createDummyAssetSource();

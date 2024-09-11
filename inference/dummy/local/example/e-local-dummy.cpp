@@ -24,7 +24,7 @@ int main() {
 
     ac::LocalProvider provider;
     ac::addLocalDummyInference(provider);
-    provider.addAssetSource(ac::asset::AssetSourceLocalDir_Create(AC_TEST_DATA_DUMMY_DIR), 0);
+    provider.addAssetSource(ac::asset::SourceLocalDir_Create(AC_TEST_DATA_DUMMY_DIR), 0);
     provider.addModel(ac::ModelInfo{
         .id = "dummy-large",
         .inferenceType = "dummy",

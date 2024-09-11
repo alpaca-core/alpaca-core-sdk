@@ -50,7 +50,7 @@ public:
     }
 };
 
-class DummyAssetSource final : public ac::asset::AssetSource {
+class DummyAssetSource final : public ac::asset::Source {
 public:
     virtual std::string_view id() const noexcept override { return "dummy-asset-source"; }
 
@@ -112,7 +112,7 @@ std::unique_ptr<ac::LocalInferenceModel> DummyLocalInferenceModelLoader::loadMod
     return std::unique_ptr<DummyLocalInferenceModel>(new DummyLocalInferenceModel());
 }
 
-std::unique_ptr<ac::asset::AssetSource> createDummyAssetSource() {
+std::unique_ptr<ac::asset::Source> createDummyAssetSource() {
     return std::make_unique<DummyAssetSource>();
 }
 

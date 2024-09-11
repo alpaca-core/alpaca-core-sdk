@@ -9,14 +9,14 @@
 #include <concepts>
 
 namespace ac::asset {
-class AC_ASSET_EXPORT AssetSourceHttp final : public AssetSource {
+class AC_ASSET_EXPORT SourceHttp final : public Source {
 public:
     struct ManifestEntry {
         std::string url;
         std::optional<uint64_t> xxhash; // expected xxhash of the asset (if available in the manifest)
     };
 
-    AssetSourceHttp(std::string id, std::string edownloadDir);
+    SourceHttp(std::string id, std::string edownloadDir);
 
     void addAsset(std::string id, ManifestEntry entry);
 

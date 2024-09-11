@@ -9,7 +9,7 @@
 
 namespace ac::asset {
 
-AssetSourceLocalFiles::AssetSourceLocalFiles(std::string_view id, const astl::tsumap<std::string>& manifest)
+SourceLocalFiles::SourceLocalFiles(std::string_view id, const astl::tsumap<std::string>& manifest)
     : m_id(id)
 {
     // fill available assets
@@ -37,18 +37,18 @@ astl::tsumap<std::string> parseManifest(std::string_view jsonManifest) {
 } // namespace
 
 
-AssetSourceLocalFiles::AssetSourceLocalFiles(std::string_view id, std::string_view jsonManifest)
-    : AssetSourceLocalFiles(id, parseManifest(jsonManifest))
+SourceLocalFiles::SourceLocalFiles(std::string_view id, std::string_view jsonManifest)
+    : SourceLocalFiles(id, parseManifest(jsonManifest))
 {}
 
-std::optional<AssetSource::BasicAssetInfo> AssetSourceLocalFiles::checkAssetSync(std::string_view id) noexcept {
+std::optional<Source::BasicAssetInfo> SourceLocalFiles::checkAssetSync(std::string_view id) noexcept {
     if (auto it = m_assetManifest.find(id); it != m_assetManifest.end()) {
         return it->second.info;
     }
     return std::nullopt;
 }
 
-AssetSource::BasicAssetInfo AssetSourceLocalFiles::fetchAssetSync(std::string_view id, ProgressCb) {
+Source::BasicAssetInfo SourceLocalFiles::fetchAssetSync(std::string_view id, ProgressCb) {
     if (auto it = m_assetManifest.find(id); it != m_assetManifest.end()) {
         if (it->second.info.path) {
             return it->second.info;

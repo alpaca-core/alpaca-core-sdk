@@ -14,10 +14,10 @@
 
 namespace ac::asset {
 
-class AssetManager::Impl {
-    itlib::flat_map<int, std::vector<std::unique_ptr<AssetSource>>> m_sources;
+class Manager::Impl {
+    itlib::flat_map<int, std::vector<std::unique_ptr<Source>>> m_sources;
 
-    astl::tsumap<AssetInfo> m_assets;
+    astl::tsumap<Info> m_assets;
 
     // these must the last members (first to be destroyed)
     // if there are pending tasks, they will be finalized here and they may access other members
@@ -33,7 +33,7 @@ class AssetManager::Impl {
             for (auto& source : sources) {
                 auto basicInfo = source->checkAssetSync(id);
                 if (!basicInfo) continue;
-                auto ret = m_assets.try_emplace(m_assets.end(), id, AssetInfo{
+                auto ret = m_assets.try_emplace(m_assets.end(), id, Info{
                     .source = source.get(),
                     .size = basicInfo->size,
                     .path = astl::move(basicInfo->path),
@@ -83,28 +83,28 @@ public:
         });
     }
 
-    void addSource(std::unique_ptr<AssetSource> source, int priority) {
+    void addSource(std::unique_ptr<Source> source, int priority) {
         m_executor.pushTask([this, movecap(source), priority]() mutable {
             m_sources[priority].push_back(astl::move(source));
         });
     }
 };
 
-AssetManager::AssetManager() : m_impl(std::make_unique<Impl>()) {}
-AssetManager::~AssetManager() = default;
+Manager::Manager() : m_impl(std::make_unique<Impl>()) {}
+Manager::~Manager() = default;
 
-void AssetManager::queryAsset(std::string id, QueryAssetCb cb) {
+void Manager::queryAsset(std::string id, QueryAssetCb cb) {
     m_impl->queryAsset(astl::move(id), astl::move(cb));
 }
 
-void AssetManager::getAsset(std::string id, GetAssetCb cb, GetAssetProgressCb progressCb) {
+void Manager::getAsset(std::string id, GetAssetCb cb, GetAssetProgressCb progressCb) {
     m_impl->getAsset(astl::move(id), astl::move(cb), astl::move(progressCb));
 }
 
-void AssetManager::addSource(std::unique_ptr<AssetSource> source, int priority) {
+void Manager::addSource(std::unique_ptr<Source> source, int priority) {
     m_impl->addSource(astl::move(source), priority);
 }
 
-AssetSource::~AssetSource() = default; // export vtable
+Source::~Source() = default; // export vtable
 
 } // namespace ac::asset

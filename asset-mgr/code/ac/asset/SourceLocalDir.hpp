@@ -8,5 +8,5 @@
 #include <memory>
 
 namespace ac::asset {
-AC_ASSET_EXPORT std::unique_ptr<AssetSource> AssetSourceLocalDir_Create(std::string path);
+AC_ASSET_EXPORT std::unique_ptr<Source> SourceLocalDir_Create(std::string path);
 }

@@ -7,6 +7,6 @@
 
 namespace ac {
 struct LocalModelInfo : public ModelInfo {
-    std::vector<asset::AssetInfo> localAssets;
+    std::vector<asset::Info> localAssets;
 };
 } // namespace ac

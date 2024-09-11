@@ -11,7 +11,7 @@
 const auto AnotherTestFile_DummySize = strlen(TA_ANOTHER_BINARY_FILE) + 1000; //Size reported by the Dummy asset source
 const std::string Bin_Path = TEST_ASSETS_BINARY_PATH;
 
-class DummyAssetSource : public ac::asset::AssetSource{
+class DummyAssetSource : public ac::asset::Source{
 public:
     virtual std::string_view id() const noexcept override {
         return "dummy";
@@ -49,15 +49,15 @@ public:
 };
 
 TEST_CASE("dummy-dir") {
-    ac::asset::AssetManager mgr;
+    ac::asset::Manager mgr;
 
-    mgr.addSource(ac::asset::AssetSourceLocalDir_Create(Bin_Path), 10);
+    mgr.addSource(ac::asset::SourceLocalDir_Create(Bin_Path), 10);
     mgr.addSource(std::make_unique<DummyAssetSource>());
 
-    ac::asset::AssetInfo info;
+    ac::asset::Info info;
     auto q = [&](std::string_view qid) {
         std::latch latch(1);
-        mgr.queryAsset(std::string(qid), [&](std::string_view id, const ac::asset::AssetInfo& data) {
+        mgr.queryAsset(std::string(qid), [&](std::string_view id, const ac::asset::Info& data) {
             CHECK(id == qid);
             info = data;
             latch.count_down();
@@ -102,7 +102,7 @@ TEST_CASE("dummy-dir") {
     auto g = [&](std::string_view qid) {
         std::latch latch(1);
         mgr.getAsset(std::string(qid),
-            [&](std::string_view id, const ac::asset::AssetInfo& data) {
+            [&](std::string_view id, const ac::asset::Info& data) {
                 CHECK(id == qid);
                 info = data;
                 latch.count_down();
@@ -158,14 +158,14 @@ TEST_CASE("dummy-dir") {
 }
 
 TEST_CASE("dir-dummy") {
-    ac::asset::AssetManager mgr;
+    ac::asset::Manager mgr;
 
-    mgr.addSource(ac::asset::AssetSourceLocalDir_Create(Bin_Path), -10);
+    mgr.addSource(ac::asset::SourceLocalDir_Create(Bin_Path), -10);
     mgr.addSource(std::make_unique<DummyAssetSource>());
 
-    ac::asset::AssetInfo info;
+    ac::asset::Info info;
     std::latch latch(1);
-    mgr.queryAsset(std::string(TA_ANOTHER_BINARY_FILE), [&](std::string_view id, const ac::asset::AssetInfo& data) {
+    mgr.queryAsset(std::string(TA_ANOTHER_BINARY_FILE), [&](std::string_view id, const ac::asset::Info& data) {
         CHECK(id == TA_ANOTHER_BINARY_FILE);
         info = data;
         latch.count_down();

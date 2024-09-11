@@ -11,14 +11,14 @@
 
 namespace ac::asset {
 
-AssetSourceHttp::AssetSourceHttp(std::string id, std::string edownloadDir)
+SourceHttp::SourceHttp(std::string id, std::string edownloadDir)
     : m_id(astl::move(id))
     , m_downloadDir(astl::move(edownloadDir))
 {
     fs::expandPathInPlace(m_downloadDir);
 }
 
-void AssetSourceHttp::addAsset(std::string id, ManifestEntry entry) {
+void SourceHttp::addAsset(std::string id, ManifestEntry entry) {
     AssetManifestEntry ame;
     (ManifestEntry&)ame = astl::move(entry);
     ame.targetPath = m_downloadDir + "/" + id;
@@ -35,7 +35,7 @@ void AssetSourceHttp::addAsset(std::string id, ManifestEntry entry) {
     m_assetManifest.emplace(std::move(id), std::move(ame));
 }
 
-std::optional<AssetSource::BasicAssetInfo> AssetSourceHttp::checkAssetSync(std::string_view id) noexcept {
+std::optional<Source::BasicAssetInfo> SourceHttp::checkAssetSync(std::string_view id) noexcept {
     auto it = m_assetManifest.find(std::string(id));
     if (it == m_assetManifest.end()) {
         return std::nullopt;
@@ -43,7 +43,7 @@ std::optional<AssetSource::BasicAssetInfo> AssetSourceHttp::checkAssetSync(std::
     return it->second.info;
 }
 
-AssetSource::BasicAssetInfo AssetSourceHttp::fetchAssetSync(std::string_view id, ProgressCb pcb) {
+Source::BasicAssetInfo SourceHttp::fetchAssetSync(std::string_view id, ProgressCb pcb) {
     auto it = m_assetManifest.find(std::string(id));
     if (it == m_assetManifest.end()) {
         throw_ex{} << "Asset not found: " << id;

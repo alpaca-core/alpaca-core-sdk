@@ -11,19 +11,19 @@
 
 namespace ac::asset {
 
-class AssetSource;
+class Source;
 
-class AC_ASSET_EXPORT AssetManager {
+class AC_ASSET_EXPORT Manager {
 public:
-    AssetManager();
-    ~AssetManager();
+    Manager();
+    ~Manager();
 
-    void addSource(std::unique_ptr<AssetSource> source, int priority = 0);
+    void addSource(std::unique_ptr<Source> source, int priority = 0);
 
-    using QueryAssetCb = std::function<void(std::string_view id, const AssetInfo& data)>;
+    using QueryAssetCb = std::function<void(std::string_view id, const Info& data)>;
     void queryAsset(std::string id, QueryAssetCb cb);
 
-    using GetAssetCb = std::function<void(std::string_view id, const AssetInfo& data)>;
+    using GetAssetCb = std::function<void(std::string_view id, const Info& data)>;
     using GetAssetProgressCb = std::function<void(std::string_view id, float progress)>;
     void getAsset(std::string id, GetAssetCb cb, GetAssetProgressCb progressCb);
 public:

@@ -12,7 +12,7 @@
 namespace ac {
 
 namespace asset {
-class AssetSource;
+class Source;
 }
 
 class LocalInferenceModelLoader;
@@ -24,7 +24,7 @@ public:
     ~LocalProvider();
     virtual void createModel(std::string_view id, Dict params, Callback<ModelPtr> cb) override;
 
-    void addAssetSource(std::unique_ptr<asset::AssetSource> source, int priority);
+    void addAssetSource(std::unique_ptr<asset::Source> source, int priority);
     void addModel(ModelInfo info);
     void addLocalInferenceLoader(std::string_view type, LocalInferenceModelLoader& loader);
 private:

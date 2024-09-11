@@ -9,11 +9,11 @@
 namespace ac::asset {
 
 namespace {
-class AssetSourceLocalDir final : public AssetSource {
+class SourceLocalDir final : public Source {
     std::string m_path;
     std::string m_id;
 public:
-    AssetSourceLocalDir(std::string path)
+    SourceLocalDir(std::string path)
         : m_path(astl::move(path))
         , m_id("local-dir: " + m_path)
     {}
@@ -43,7 +43,7 @@ public:
 };
 }
 
-std::unique_ptr<AssetSource> AssetSourceLocalDir_Create(std::string path) {
-    return std::make_unique<AssetSourceLocalDir>(astl::move(path));
+std::unique_ptr<Source> SourceLocalDir_Create(std::string path) {
+    return std::make_unique<SourceLocalDir>(astl::move(path));
 }
 }

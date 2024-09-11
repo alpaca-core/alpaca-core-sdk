@@ -10,9 +10,9 @@
 
 namespace ac::asset {
 
-class AC_ASSET_EXPORT AssetSource {
+class AC_ASSET_EXPORT Source {
 public:
-    virtual ~AssetSource();
+    virtual ~Source();
 
     virtual std::string_view id() const noexcept = 0;
 

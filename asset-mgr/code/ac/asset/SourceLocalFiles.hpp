@@ -7,10 +7,10 @@
 #include <astl/tsumap.hpp>
 
 namespace ac::asset {
-class AC_ASSET_EXPORT AssetSourceLocalFiles final : public AssetSource {
+class AC_ASSET_EXPORT SourceLocalFiles final : public Source {
 public:
-    AssetSourceLocalFiles(std::string_view id, const astl::tsumap<std::string>& manifest);
-    AssetSourceLocalFiles(std::string_view id, std::string_view jsonManifest);
+    SourceLocalFiles(std::string_view id, const astl::tsumap<std::string>& manifest);
+    SourceLocalFiles(std::string_view id, std::string_view jsonManifest);
 
     virtual std::string_view id() const noexcept override { return m_id; }
 
