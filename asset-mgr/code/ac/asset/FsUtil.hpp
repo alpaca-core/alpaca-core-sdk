@@ -29,4 +29,8 @@ struct BasicStat {
 
 AC_ASSET_EXPORT BasicStat basicStat(const std::string& path) noexcept;
 
+AC_ASSET_EXPORT bool mkdir_p(std::string_view path);
+AC_ASSET_EXPORT bool rm_r(std::string_view path, bool f = false);
+AC_ASSET_EXPORT void touch(const std::string& path, bool mkdir = true);
+
 } // namespace ac::asset::fs

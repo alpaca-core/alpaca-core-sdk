@@ -3,13 +3,17 @@
 //
 #include "FsUtil.hpp"
 #include <astl/throw_ex.hpp>
+#include <cstdio>
 #include <cstdlib>
+#include <filesystem>
 #include <sys/stat.h>
 #if defined(_WIN32)
 #   define stat _stat
 #endif
 
 namespace ac::asset::fs {
+
+namespace sfs = std::filesystem;
 
 constexpr const char* Home_Var =
 #if defined(_WIN32)
@@ -67,6 +71,33 @@ BasicStat basicStat(const std::string& path) noexcept {
         return {BasicStat::Directory, 0};
     }
     return {BasicStat::Other, 0};
+}
+
+bool mkdir_p(std::string_view path) {
+    sfs::path fspath(path);
+    return sfs::create_directories(fspath);
+}
+
+bool rm_r(std::string_view path, bool f) {
+    sfs::path fspath(path);
+    if (f) {
+        return !!sfs::remove_all(fspath);
+    }
+    return sfs::remove(fspath);
+}
+
+void touch(const std::string& path, bool mkdir) {
+    if (mkdir) {
+        auto fspath = sfs::path(path).parent_path();
+        if (!fspath.empty()) {
+            sfs::create_directories(fspath);
+        }
+    }
+    auto f = fopen(path.c_str(), "a+");
+    if (!f) {
+        throw_ex{} << "Failed to touch file: " << path;
+    }
+    fclose(f);
 }
 
 } // namespace ac::asset::fs
