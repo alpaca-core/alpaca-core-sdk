@@ -11,6 +11,7 @@ target_link_libraries(ac-local
         xec::xec
         jalog::jalog
         ac::xxhash-cpp
+        ac::http
     PUBLIC
         ac::api
 )
