@@ -50,10 +50,7 @@ uint32_t Model::trainCtxLength() const noexcept {
 }
 
 bool Model::shouldAddBosToken() const noexcept {
-    const int lbos = llama_add_bos_token(m_lmodel.get());
-    if (lbos != -1) return !!lbos;
-
-    return llama_vocab_type(m_lmodel.get()) == LLAMA_VOCAB_TYPE_SPM;
+    return llama_add_bos_token(m_lmodel.get());
 }
 
 bool Model::hasEncoder() const noexcept {

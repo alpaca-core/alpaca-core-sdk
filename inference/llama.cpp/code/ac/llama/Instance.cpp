@@ -55,10 +55,15 @@ void Instance::warmup() {
     llama_token bos = llama_token_bos(model);
     llama_token eos = llama_token_eos(model);
     // some models (e.g. T5) don't have a BOS token
-    if (bos != -1) {
+    if (bos != LLAMA_TOKEN_NULL) {
         tmp.push_back(bos);
     }
-    tmp.push_back(eos);
+    if (eos != LLAMA_TOKEN_NULL) {
+        tmp.push_back(eos);
+    }
+    if (tmp.empty()) {
+        tmp.push_back(0);
+    }
 
     const auto ntokens = int32_t(tmp.size());
 
