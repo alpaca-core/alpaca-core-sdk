@@ -4,7 +4,7 @@
 #include <ac/LocalProvider.hpp>
 #include <ac/LocalLlama.hpp>
 #include <ac/ModelInfo.hpp>
-#include <ac/asset/AssetSourceLocalDir.hpp>
+#include <ac/asset/SourceLocalDir.hpp>
 
 #include <ac/Model.hpp>
 #include <ac/Instance.hpp>

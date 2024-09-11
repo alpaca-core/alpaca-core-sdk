@@ -4,7 +4,7 @@
 #include "local_provider.h"
 #include "LocalProvider.hpp"
 #include "ModelInfo.hpp"
-#include <ac/asset/AssetSource.hpp>
+#include <ac/asset/Source.hpp>
 #include <ac/ApiCUtil.hpp>
 
 extern "C" {

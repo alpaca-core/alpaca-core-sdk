@@ -3,7 +3,7 @@
 //
 #include <ac/LocalProvider.hpp>
 #include <ac/LocalWhisper.hpp>
-#include <ac/asset/AssetSourceLocalDir.hpp>
+#include <ac/asset/SourceLocalDir.hpp>
 
 #include <ac/Model.hpp>
 #include <ac/ModelInfo.hpp>

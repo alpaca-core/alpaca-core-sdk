@@ -1,8 +1,8 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include "AssetManager.hpp"
-#include "AssetSource.hpp"
+#include "Manager.hpp"
+#include "Source.hpp"
 
 #include <xec/TaskExecutor.hpp>
 #include <xec/ThreadExecution.hpp>

@@ -27,17 +27,17 @@ target_sources(ac-asset-mgr PRIVATE
     ac/asset/FsUtil.hpp
     ac/asset/FsUtil.cpp
 
-    ac/asset/AssetManager.hpp
-    ac/asset/AssetManager.cpp
-    ac/asset/AssetSourceLocalDir.hpp
-    ac/asset/AssetSourceLocalDir.cpp
-    ac/asset/AssetSourceLocalFiles.hpp
-    ac/asset/AssetSourceLocalFiles.cpp
-    ac/asset/AssetSourceHttp.hpp
-    ac/asset/AssetSourceHttp.cpp
+    ac/asset/Manager.hpp
+    ac/asset/Manager.cpp
+    ac/asset/SourceLocalDir.hpp
+    ac/asset/SourceLocalDir.cpp
+    ac/asset/SourceLocalFiles.hpp
+    ac/asset/SourceLocalFiles.cpp
+    ac/asset/SourceHttp.hpp
+    ac/asset/SourceHttp.cpp
 
-    ac/asset/asset_source.h
+    ac/asset/source.h
 
-    ac/asset/asset_source_local_dir.h
-    ac/asset/asset_source_local_dir.cpp
+    ac/asset/source_local_dir.h
+    ac/asset/source_local_dir.cpp
 )

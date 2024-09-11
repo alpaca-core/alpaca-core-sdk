@@ -1,7 +1,7 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include "AssetSourceHttp.hpp"
+#include "SourceHttp.hpp"
 #include "FsUtil.hpp"
 #include <ahttp/ahttp.hpp>
 #include <xxhash/hash.hpp>

@@ -3,7 +3,7 @@
 //
 #pragma once
 #include "ModelInfo.hpp"
-#include <ac/asset/AssetInfo.hpp>
+#include <ac/asset/Info.hpp>
 
 namespace ac {
 struct LocalModelInfo : public ModelInfo {

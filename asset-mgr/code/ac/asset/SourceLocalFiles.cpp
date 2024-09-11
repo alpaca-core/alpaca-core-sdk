@@ -1,7 +1,7 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include "AssetSourceLocalFiles.hpp"
+#include "SourceLocalFiles.hpp"
 #include "FsUtil.hpp"
 #include <nlohmann/json.hpp>
 #include <astl/throw_ex.hpp>

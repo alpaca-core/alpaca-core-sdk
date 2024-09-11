@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #include <ac/LocalInference.hpp>
-#include <ac/asset/AssetSource.hpp>
+#include <ac/asset/Source.hpp>
 
 class DummyLocalInferenceModelLoader final : public ac::LocalInferenceModelLoader {
 public:

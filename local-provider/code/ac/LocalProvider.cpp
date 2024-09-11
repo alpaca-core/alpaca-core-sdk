@@ -6,8 +6,8 @@
 #include "LocalModelInfo.hpp"
 #include "ModelInfo.hpp"
 #include "Logging.hpp"
-#include <ac/asset/AssetManager.hpp>
-#include <ac/asset/AssetSource.hpp>
+#include <ac/asset/Manager.hpp>
+#include <ac/asset/Source.hpp>
 #include <ac/Model.hpp>
 #include <ac/Instance.hpp>
 #include <xec/TaskExecutor.hpp>

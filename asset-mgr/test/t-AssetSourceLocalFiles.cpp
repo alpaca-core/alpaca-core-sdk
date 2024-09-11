@@ -1,7 +1,7 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include <ac/asset/AssetSourceLocalFiles.hpp>
+#include <ac/asset/SourceLocalFiles.hpp>
 #include <test-assets/assets.h>
 #include <ac-test-util/setenv.hpp>
 #include <doctest/doctest.h>

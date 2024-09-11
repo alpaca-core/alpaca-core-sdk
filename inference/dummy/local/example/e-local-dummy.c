@@ -5,7 +5,7 @@
 #include <ac/dict.h>
 #include <ac/local_provider.h>
 #include <ac/local_dummy.h>
-#include <ac/asset/asset_source_local_dir.h>
+#include <ac/asset/source_local_dir.h>
 
 #include <jalogc.h>
 

@@ -3,7 +3,7 @@
 //
 #pragma once
 #include "export.h"
-#include "AssetInfo.hpp"
+#include "Info.hpp"
 #include <string>
 #include <string_view>
 #include <memory>
