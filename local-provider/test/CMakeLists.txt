@@ -35,16 +35,3 @@ add_doctest_lib_test(provider ac-local
         jalog::jalog
         jalog::sinklib
 )
-
-macro(local_test test)
-    add_doctest_lib_test(${test} ac-local t-${test}.cpp
-        LIBRARIES
-            ac-dev::test-assets
-            ac-dev::test-util
-    )
-endmacro()
-
-local_test(FsUtil)
-local_test(AssetSourceLocalDir)
-local_test(AssetSourceLocalFiles)
-local_test(AssetManager)

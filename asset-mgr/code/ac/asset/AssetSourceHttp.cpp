@@ -9,7 +9,7 @@
 #include <astl/throw_ex.hpp>
 #include <fstream>
 
-namespace ac {
+namespace ac::asset {
 
 AssetSourceHttp::AssetSourceHttp(std::string id, std::string edownloadDir)
     : m_id(astl::move(id))
@@ -91,4 +91,4 @@ AssetSource::BasicAssetInfo AssetSourceHttp::fetchAssetSync(std::string_view id,
     return ame.info;
 }
 
-} // namespace ac
+} // namespace ac::asset

@@ -6,8 +6,8 @@
 #include "AssetSource.hpp"
 #include <astl/tsumap.hpp>
 
-namespace ac {
-class AC_LOCAL_EXPORT AssetSourceLocalFiles final : public AssetSource {
+namespace ac::asset {
+class AC_ASSET_EXPORT AssetSourceLocalFiles final : public AssetSource {
 public:
     AssetSourceLocalFiles(std::string_view id, const astl::tsumap<std::string>& manifest);
     AssetSourceLocalFiles(std::string_view id, std::string_view jsonManifest);
@@ -25,4 +25,4 @@ private:
     };
     astl::tsumap<AssetManifestEntry> m_assetManifest; // id -> existing file
 };
-} // namespace ac
+} // namespace ac::asset

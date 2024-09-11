@@ -1,8 +1,8 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include <ac/AssetSourceLocalDir.hpp>
-#include <ac/AssetManager.hpp>
+#include <ac/asset/AssetSourceLocalDir.hpp>
+#include <ac/asset/AssetManager.hpp>
 #include <test-assets/assets.h>
 #include <doctest/doctest.h>
 #include <latch>
@@ -11,7 +11,7 @@
 const auto AnotherTestFile_DummySize = strlen(TA_ANOTHER_BINARY_FILE) + 1000; //Size reported by the Dummy asset source
 const std::string Bin_Path = TEST_ASSETS_BINARY_PATH;
 
-class DummyAssetSource : public ac::AssetSource {
+class DummyAssetSource : public ac::asset::AssetSource{
 public:
     virtual std::string_view id() const noexcept override {
         return "dummy";
@@ -49,15 +49,15 @@ public:
 };
 
 TEST_CASE("dummy-dir") {
-    ac::AssetManager mgr;
+    ac::asset::AssetManager mgr;
 
-    mgr.addSource(ac::AssetSourceLocalDir_Create(Bin_Path), 10);
+    mgr.addSource(ac::asset::AssetSourceLocalDir_Create(Bin_Path), 10);
     mgr.addSource(std::make_unique<DummyAssetSource>());
 
-    ac::AssetInfo info;
+    ac::asset::AssetInfo info;
     auto q = [&](std::string_view qid) {
         std::latch latch(1);
-        mgr.queryAsset(std::string(qid), [&](std::string_view id, const ac::AssetInfo& data) {
+        mgr.queryAsset(std::string(qid), [&](std::string_view id, const ac::asset::AssetInfo& data) {
             CHECK(id == qid);
             info = data;
             latch.count_down();
@@ -102,7 +102,7 @@ TEST_CASE("dummy-dir") {
     auto g = [&](std::string_view qid) {
         std::latch latch(1);
         mgr.getAsset(std::string(qid),
-            [&](std::string_view id, const ac::AssetInfo& data) {
+            [&](std::string_view id, const ac::asset::AssetInfo& data) {
                 CHECK(id == qid);
                 info = data;
                 latch.count_down();
@@ -158,14 +158,14 @@ TEST_CASE("dummy-dir") {
 }
 
 TEST_CASE("dir-dummy") {
-    ac::AssetManager mgr;
+    ac::asset::AssetManager mgr;
 
-    mgr.addSource(ac::AssetSourceLocalDir_Create(Bin_Path), -10);
+    mgr.addSource(ac::asset::AssetSourceLocalDir_Create(Bin_Path), -10);
     mgr.addSource(std::make_unique<DummyAssetSource>());
 
-    ac::AssetInfo info;
+    ac::asset::AssetInfo info;
     std::latch latch(1);
-    mgr.queryAsset(std::string(TA_ANOTHER_BINARY_FILE), [&](std::string_view id, const ac::AssetInfo& data) {
+    mgr.queryAsset(std::string(TA_ANOTHER_BINARY_FILE), [&](std::string_view id, const ac::asset::AssetInfo& data) {
         CHECK(id == TA_ANOTHER_BINARY_FILE);
         info = data;
         latch.count_down();

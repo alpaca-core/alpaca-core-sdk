@@ -6,7 +6,7 @@
 #include <astl/move.hpp>
 #include <stdexcept>
 
-namespace ac {
+namespace ac::asset {
 
 namespace {
 class AssetSourceLocalDir final : public AssetSource {

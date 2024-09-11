@@ -3,10 +3,10 @@
 //
 #pragma once
 #include "ModelInfo.hpp"
-#include "AssetInfo.hpp"
+#include <ac/asset/AssetInfo.hpp>
 
 namespace ac {
 struct LocalModelInfo : public ModelInfo {
-    std::vector<AssetInfo> localAssets;
+    std::vector<asset::AssetInfo> localAssets;
 };
 } // namespace ac

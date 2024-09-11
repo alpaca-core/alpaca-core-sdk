@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-AC_LOCAL_EXPORT ac_asset_source* ac_new_asset_source_local_dir(const char* path);
+AC_ASSET_EXPORT ac_asset_source* ac_new_asset_source_local_dir(const char* path);
 
 #if defined(__cplusplus)
 }

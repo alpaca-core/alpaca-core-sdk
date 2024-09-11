@@ -1,7 +1,7 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include <ac/FsUtil.hpp>
+#include <ac/asset/FsUtil.hpp>
 #include <test-assets/assets.h>
 #include <ac-test-util/setenv.hpp>
 #include <doctest/doctest.h>
@@ -9,7 +9,7 @@
 TEST_CASE("expandPath") {
     // can't test home without reinforcing bugs
     {
-        auto e = ac::fs::expandPath("~/foo");
+        auto e = ac::asset::fs::expandPath("~/foo");
 
         CHECK(e.ends_with("/foo"));
 
@@ -23,10 +23,10 @@ TEST_CASE("expandPath") {
     }
 
     auto test = [](const std::string& path, std::string_view expected) {
-        auto expanded = ac::fs::expandPath(path);
+        auto expanded = ac::asset::fs::expandPath(path);
         CHECK(expanded == expected);
         auto inplace = path;
-        ac::fs::expandPathInPlace(inplace);
+        ac::asset::fs::expandPathInPlace(inplace);
         CHECK(inplace == expected);
     };
 
@@ -34,7 +34,7 @@ TEST_CASE("expandPath") {
     test("$AC_TEST_VAR", "foo");
     test("$AC_TEST_VAR/bar", "foo/bar");
 
-    CHECK_THROWS_WITH_AS(ac::fs::expandPath("$nope42/xxx"), "Environment variable nope42 not set", std::runtime_error);
+    CHECK_THROWS_WITH_AS(ac::asset::fs::expandPath("$nope42/xxx"), "Environment variable nope42 not set", std::runtime_error);
 }
 
 const std::string binDir = TEST_ASSETS_BINARY_PATH;
@@ -43,25 +43,25 @@ const std::string bin2 = TEST_ASSETS_BINARY_PATH "/" TA_ANOTHER_BINARY_FILE;
 const std::string nope = TEST_ASSETS_BINARY_PATH "/no-such-file";
 
 TEST_CASE("stat") {
-    auto s = ac::fs::basicStat(binDir);
+    auto s = ac::asset::fs::basicStat(binDir);
     CHECK(s.exists());
     CHECK(s.dir());
     CHECK(!s.file());
     CHECK(s.size == 0);
 
-    s = ac::fs::basicStat(bin1);
+    s = ac::asset::fs::basicStat(bin1);
     CHECK(s.exists());
     CHECK(s.file());
     CHECK(!s.dir());
     CHECK(s.size == TA_BINARY_FILE_SIZE);
 
-    s = ac::fs::basicStat(bin2);
+    s = ac::asset::fs::basicStat(bin2);
     CHECK(s.exists());
     CHECK(s.file());
     CHECK(!s.dir());
     CHECK(s.size == TA_ANOTHER_BINARY_FILE_SIZE);
 
-    s = ac::fs::basicStat(nope);
+    s = ac::asset::fs::basicStat(nope);
     CHECK(!s.exists());
     CHECK(!s.file());
     CHECK(!s.dir());

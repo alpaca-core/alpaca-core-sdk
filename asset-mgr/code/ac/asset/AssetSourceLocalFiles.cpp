@@ -3,11 +3,11 @@
 //
 #include "AssetSourceLocalFiles.hpp"
 #include "FsUtil.hpp"
-#include <ac/Dict.hpp>
+#include <nlohmann/json.hpp>
 #include <astl/throw_ex.hpp>
 #include <stdexcept>
 
-namespace ac {
+namespace ac::asset {
 
 AssetSourceLocalFiles::AssetSourceLocalFiles(std::string_view id, const astl::tsumap<std::string>& manifest)
     : m_id(id)
@@ -28,7 +28,7 @@ AssetSourceLocalFiles::AssetSourceLocalFiles(std::string_view id, const astl::ts
 namespace {
 astl::tsumap<std::string> parseManifest(std::string_view jsonManifest) {
     astl::tsumap<std::string> result;
-    auto manifest = ac::Dict::parse(jsonManifest);
+    auto manifest = nlohmann::json::parse(jsonManifest);
     for (const auto& i : manifest.items()) {
         result[i.key()] = i.value().get<std::string>();
     }
@@ -62,4 +62,4 @@ AssetSource::BasicAssetInfo AssetSourceLocalFiles::fetchAssetSync(std::string_vi
     }
 }
 
-} // namespace ac
+} // namespace ac::asset

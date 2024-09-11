@@ -7,10 +7,10 @@
 #include <cstdint>
 #include <string_view>
 
-namespace ac::fs {
+namespace ac::asset::fs {
 
-AC_LOCAL_EXPORT void expandPathInPlace(std::string& path); // expands in place
-AC_LOCAL_EXPORT std::string expandPath(std::string_view path);
+AC_ASSET_EXPORT void expandPathInPlace(std::string& path); // expands in place
+AC_ASSET_EXPORT std::string expandPath(std::string_view path);
 
 struct BasicStat {
     enum Type {
@@ -27,6 +27,6 @@ struct BasicStat {
     bool other() const noexcept { return type == Other; }
 };
 
-AC_LOCAL_EXPORT BasicStat basicStat(const std::string& path) noexcept;
+AC_ASSET_EXPORT BasicStat basicStat(const std::string& path) noexcept;
 
-} // namespace ac::fs
+} // namespace ac::asset::fs

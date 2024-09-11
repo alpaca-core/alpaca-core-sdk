@@ -12,7 +12,7 @@
 #include <astl/tsumap.hpp>
 #include <itlib/flat_map.hpp>
 
-namespace ac {
+namespace ac::asset {
 
 class AssetManager::Impl {
     itlib::flat_map<int, std::vector<std::unique_ptr<AssetSource>>> m_sources;
@@ -107,4 +107,4 @@ void AssetManager::addSource(std::unique_ptr<AssetSource> source, int priority) 
 
 AssetSource::~AssetSource() = default; // export vtable
 
-}
+} // namespace ac::asset

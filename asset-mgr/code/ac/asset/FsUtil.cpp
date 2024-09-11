@@ -9,7 +9,7 @@
 #   define stat _stat
 #endif
 
-namespace ac::fs {
+namespace ac::asset::fs {
 
 constexpr const char* Home_Var =
 #if defined(_WIN32)
@@ -69,4 +69,4 @@ BasicStat basicStat(const std::string& path) noexcept {
     return {BasicStat::Other, 0};
 }
 
-} // namespace ac::fs
+} // namespace ac::asset::fs

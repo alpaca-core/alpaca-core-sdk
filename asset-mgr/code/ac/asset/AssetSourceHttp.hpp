@@ -8,8 +8,8 @@
 #include <cstdint>
 #include <concepts>
 
-namespace ac {
-class AC_LOCAL_EXPORT AssetSourceHttp final : public AssetSource {
+namespace ac::asset {
+class AC_ASSET_EXPORT AssetSourceHttp final : public AssetSource {
 public:
     struct ManifestEntry {
         std::string url;
@@ -38,4 +38,4 @@ private:
 
     astl::tsumap<AssetManifestEntry> m_assetManifest;
 };
-} // namespace ac
+} // namespace ac::asset

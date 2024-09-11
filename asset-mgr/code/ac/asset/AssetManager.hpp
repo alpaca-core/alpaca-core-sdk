@@ -9,11 +9,11 @@
 #include <memory>
 #include <functional>
 
-namespace ac {
+namespace ac::asset {
 
 class AssetSource;
 
-class AC_LOCAL_EXPORT AssetManager {
+class AC_ASSET_EXPORT AssetManager {
 public:
     AssetManager();
     ~AssetManager();
@@ -31,4 +31,4 @@ public:
     std::unique_ptr<Impl> m_impl;
 };
 
-}
+} // namespace ac::asset

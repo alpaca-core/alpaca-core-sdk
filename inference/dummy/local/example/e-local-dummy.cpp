@@ -4,7 +4,7 @@
 #include <ac/LocalProvider.hpp>
 #include <ac/LocalDummy.hpp>
 #include <ac/ModelInfo.hpp>
-#include <ac/AssetSourceLocalDir.hpp>
+#include <ac/asset/AssetSourceLocalDir.hpp>
 
 #include <ac/Model.hpp>
 #include <ac/Instance.hpp>
@@ -24,7 +24,7 @@ int main() {
 
     ac::LocalProvider provider;
     ac::addLocalDummyInference(provider);
-    provider.addAssetSource(ac::AssetSourceLocalDir_Create(AC_TEST_DATA_DUMMY_DIR), 0);
+    provider.addAssetSource(ac::asset::AssetSourceLocalDir_Create(AC_TEST_DATA_DUMMY_DIR), 0);
     provider.addModel(ac::ModelInfo{
         .id = "dummy-large",
         .inferenceType = "dummy",

@@ -7,6 +7,6 @@
 #include <string>
 #include <memory>
 
-namespace ac {
-AC_LOCAL_EXPORT std::unique_ptr<AssetSource> AssetSourceLocalDir_Create(std::string path);
+namespace ac::asset {
+AC_ASSET_EXPORT std::unique_ptr<AssetSource> AssetSourceLocalDir_Create(std::string path);
 }

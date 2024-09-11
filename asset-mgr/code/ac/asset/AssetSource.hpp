@@ -8,9 +8,9 @@
 #include <optional>
 #include <string>
 
-namespace ac {
+namespace ac::asset {
 
-class AC_LOCAL_EXPORT AssetSource {
+class AC_ASSET_EXPORT AssetSource {
 public:
     virtual ~AssetSource();
 
@@ -32,4 +32,4 @@ public:
     virtual BasicAssetInfo fetchAssetSync(std::string_view id, ProgressCb progressCb) = 0;
 };
 
-} // namespace ac
+} // namespace ac::asset

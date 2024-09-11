@@ -4,7 +4,7 @@
 #include <ac/LocalProvider.hpp>
 #include <ac/LocalLlama.hpp>
 #include <ac/ModelInfo.hpp>
-#include <ac/AssetSourceLocalDir.hpp>
+#include <ac/asset/AssetSourceLocalDir.hpp>
 
 #include <ac/Model.hpp>
 #include <ac/Instance.hpp>
@@ -24,7 +24,7 @@ int main() {
 
     ac::LocalProvider provider;
     ac::addLocalLlamaInference(provider);
-    provider.addAssetSource(ac::AssetSourceLocalDir_Create(AC_TEST_DATA_LLAMA_DIR), 0);
+    provider.addAssetSource(ac::asset::AssetSourceLocalDir_Create(AC_TEST_DATA_LLAMA_DIR), 0);
 
     provider.addModel(ac::ModelInfo{
         .id = "gpt2",
@@ -61,7 +61,7 @@ int main() {
     }
     auto model = std::move(modelResult.value());
     //! [Provider_createModel Usage Example]
-    
+
     //! [Model_createInstance Usage Example]
     ac::CallbackResult<ac::InstancePtr> instanceResult;
     latch.emplace(1);
@@ -80,7 +80,7 @@ int main() {
     }
     auto instance = std::move(instanceResult.value());
     //! [Model_createInstance Usage Example]
-    
+
     const std::string prompt = "The first person to";
     std::vector<std::string> antiprompts;
     antiprompts.push_back("user:");// change it to "name" to break the token generation with the default input

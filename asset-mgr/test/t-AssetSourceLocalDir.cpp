@@ -1,14 +1,14 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include <ac/AssetSourceLocalDir.hpp>
+#include <ac/asset/AssetSourceLocalDir.hpp>
 #include <test-assets/assets.h>
 #include <doctest/doctest.h>
 
 TEST_CASE("AssetSourceLocalDir") {
     const std::string Bin_Path = TEST_ASSETS_BINARY_PATH;
 
-    auto src = ac::AssetSourceLocalDir_Create(Bin_Path);
+    auto src = ac::asset::AssetSourceLocalDir_Create(Bin_Path);
     REQUIRE(src);
 
     CHECK(src->id() == "local-dir: " + Bin_Path);
@@ -24,7 +24,7 @@ TEST_CASE("AssetSourceLocalDir") {
 
     const std::string asset = TA_BINARY_FILE;
 
-    auto checkSuccess = [&](ac::AssetSource::BasicAssetInfo& info) {
+    auto checkSuccess = [&](ac::asset::AssetSource::BasicAssetInfo& info) {
         CHECK(info.path.value_or(std::string{}) == Bin_Path + "/" + asset);
         CHECK(info.size.value_or(0) == TA_BINARY_FILE_SIZE); // The size of our new binary file
     };

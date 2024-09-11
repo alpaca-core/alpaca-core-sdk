@@ -1,7 +1,7 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include <ac/AssetSourceLocalFiles.hpp>
+#include <ac/asset/AssetSourceLocalFiles.hpp>
 #include <test-assets/assets.h>
 #include <ac-test-util/setenv.hpp>
 #include <doctest/doctest.h>
@@ -9,7 +9,7 @@
 TEST_CASE("AssetSourceLocalFiles") {
     setenv("AC_BIN_DIR", TEST_ASSETS_BINARY_PATH, 1);
 
-    ac::AssetSourceLocalFiles src("test", R"({
+    ac::asset::AssetSourceLocalFiles src("test", R"({
         "foo": ")" TEST_ASSETS_BINARY_PATH "/" TA_BINARY_FILE R"(",
         "bar": "$AC_BIN_DIR/)" TA_ANOTHER_BINARY_FILE R"(",
         "baz": "$AC_BIN_DIR/no-such-file"

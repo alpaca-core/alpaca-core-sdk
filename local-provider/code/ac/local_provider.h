@@ -3,7 +3,7 @@
 //
 #pragma once
 #include "export.h"
-#include "asset_source.h"
+#include <ac/asset/asset_source.h>
 #include <ac/api_provider.h>
 #include <stddef.h>
 
