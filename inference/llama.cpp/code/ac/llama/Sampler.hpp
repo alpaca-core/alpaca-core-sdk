@@ -31,6 +31,8 @@ public:
     struct Params {
         uint32_t rngSeed = 0; // seed for the random number generator
 
+        int32_t minKeep = 0; // 0 = disabled, otherwise samplers should return at least min_keep tokens
+
         int32_t topK = 40;       // <= 0 to use vocab size
         float topP = 0.95f;      // 1.0 = disabled
         float minP = 0.05f;      // 0.0 = disabled

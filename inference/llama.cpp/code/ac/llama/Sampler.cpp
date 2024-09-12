@@ -82,7 +82,7 @@ Sampler::Sampler(Model& model, const Params& params)
     }
     else {
         // sequence sampling
-        const size_t minKeep = 0; // ref #15
+        const size_t minKeep = params.minKeep;
         for (auto type : params.samplerSequence) {
             auto sampler = iile([&]() -> llama_sampler* {
                 switch (type)
