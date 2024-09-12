@@ -12,12 +12,14 @@ target_sources(ac-local-llama PRIVATE
     code/ac/LocalLlama.cpp
     code/ac/local_llama.h
     code/ac/local_llama.cpp
+    code/ac/LocalLlamaSchema.hpp
 )
 
 target_link_libraries(ac-local-llama
     PRIVATE
         ac::llama
         ac::local
+        ac::model-schema
 )
 
 ac_add_example_subdir()
