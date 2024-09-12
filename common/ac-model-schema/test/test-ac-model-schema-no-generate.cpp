@@ -25,14 +25,14 @@ TEST_CASE("TestSchemaStruct without GENERATE_SCHEMA") {
     TestSchemaStruct::RunResult result;
 
     SUBCASE("Default values") {
-        Dict d;
+        ac::Dict d;
         CHECK(params.test_string(d) == "default");
         CHECK(params.test_int(d) == 42);
         CHECK(params.test_float(d) == doctest::Approx(3.14f));
     }
 
     SUBCASE("Set and get values") {
-        Dict d;
+        ac::Dict d;
         params.set_test_string(d, "new value");
         params.set_test_int(d, 100);
         params.set_test_float(d, 2.718f);

@@ -29,9 +29,6 @@ inline std::string map_type(const std::string& cpp_type) {
 }
 #else
 #include "ac/Dict.hpp"
-
-using ac::Dict;
-using ac::Dict_optValueAt;
 #endif
 
 #ifdef GENERATE_SCHEMA
@@ -44,12 +41,12 @@ using ac::Dict_optValueAt;
 
 #else
 #define DEFINE_PARAM(name, type, description, default_value) \
-  static type name(const Dict& d) { return Dict_optValueAt<type>(d, #name, default_value); } \
-  static void set_##name(Dict& d, type value) { d[#name] = value; }
+  static type name(const ::ac::Dict& d) { return ::ac::Dict_optValueAt<type>(d, #name, default_value); } \
+  static void set_##name(::ac::Dict& d, type value) { d[#name] = value; }
 
 #define DEFINE_RESULT(name, type, description) \
-    static type name(const Dict& d) { return d[#name].get<type>(); } \
-    static void set_##name(Dict& d, type value) { d[#name] = value; }
+    static type name(const ::ac::Dict& d) { return d[#name].get<type>(); } \
+    static void set_##name(::ac::Dict& d, type value) { d[#name] = value; }
 #endif
 
 #define BEGIN_SCHEMA(name) \
