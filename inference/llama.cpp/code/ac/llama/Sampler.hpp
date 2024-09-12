@@ -81,6 +81,9 @@ public:
     // reset the sampler state
     void reset();
 
+    // reset the performance counters
+    void perfReset();
+
     // extended sampling implementation:
     //
     // - set logits

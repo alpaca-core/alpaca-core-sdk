@@ -26,9 +26,6 @@ public:
     // do an empty model run to load model data in cache
     void warmup();
 
-    // reset sampler
-    void reset();
-
     struct SessionParams {
         bool conversation = false;
 

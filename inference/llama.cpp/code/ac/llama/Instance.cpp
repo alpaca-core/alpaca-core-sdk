@@ -79,11 +79,7 @@ void Instance::warmup() {
     llama_decode(lctx, llama_batch_get_one(tmp.data(), ntokens, 0, 0));
     llama_kv_cache_clear(lctx);
     llama_synchronize(lctx);
-    //llama_reset_timings(lctx);
-}
-
-void Instance::reset() {
-    m_sampler.reset();
+    llama_perf_reset(lctx, LLAMA_PERF_TYPE_CONTEXT);
 }
 
 Session Instance::newSession(std::string initialPrompt, const SessionParams params) {
@@ -98,7 +94,9 @@ Session Instance::newSession(std::string initialPrompt, const SessionParams para
 
     llama_kv_cache_clear(lctx);
     llama_synchronize(lctx);
-    //llama_reset_timings(lctx);
+    llama_perf_reset(lctx, LLAMA_PERF_TYPE_CONTEXT);
+    m_sampler.reset();
+    m_sampler.perfReset();
 
     ChatFormat chatFmt(m_model.getChatTemplateId());
     std::vector<ChatMsg> chatMsgs;

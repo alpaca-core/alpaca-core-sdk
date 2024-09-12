@@ -139,7 +139,6 @@ public:
 
             void stopSession() {
                 m_session.reset();
-                m_instance.reset();
             }
 
         private:
