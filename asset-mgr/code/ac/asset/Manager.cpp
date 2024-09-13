@@ -24,7 +24,7 @@ class Manager::Impl {
     // if there are pending tasks, they will be finalized here and they may access other members
     xec::TaskExecutor m_executor;
     xec::LocalExecution m_execution;
-    std::jthread m_thread;
+    std::thread m_thread;
 
     auto getAssetInfo(std::string& id) {
         auto f = m_assets.find(id);
@@ -52,10 +52,11 @@ public:
 
     ~Impl() {
         m_executor.stop();
+        m_thread.join();
     }
 
     void launchThread() {
-        m_thread = std::jthread([this]() {
+        m_thread = std::thread([this]() {
             xec::SetThisThreadName("ac-assets");
             m_execution.run();
         });

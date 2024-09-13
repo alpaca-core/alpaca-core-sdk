@@ -240,7 +240,7 @@ class LocalProvider::Impl {
     xec::TaskExecutor m_executor;
     xec::LocalExecution m_execution;
     asset::Manager m_assetMgr;
-    std::jthread m_thread;
+    std::thread m_thread;
 public:
     Impl() : m_execution(m_executor) {
         launchThread();
@@ -251,6 +251,7 @@ public:
 
         // first shut down the local execution and thus stop any tasks issued to m_assetMgr
         m_executor.stop();
+        m_thread.join();
 
         // then m_assetMgr being the last member will be destroyed and shut down first so it, in turn,
         // stops issuing tasks to our executor
@@ -259,7 +260,7 @@ public:
     }
 
     void launchThread() {
-        m_thread = std::jthread([this]() {
+        m_thread = std::thread([this]() {
             xec::SetThisThreadName("ac-local");
             m_execution.run();
         });
