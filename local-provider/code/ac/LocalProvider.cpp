@@ -234,16 +234,20 @@ class LocalProvider::Impl {
     // note that they are not immutable, model sources could still change them, just never remove them
     astl::tsumap<std::unique_ptr<ModelManifestEntry>> m_modelManifest;
 
-    // keep the position order of the next items:
-    // * they must be the last (first to be destroyed)
-    // * the asset manager must be destroyed first
+    // assets
+    asset::Manager m_assetMgr;
+    std::thread m_assetThread;
+
+    // inference
     xec::TaskExecutor m_executor;
     xec::LocalExecution m_execution;
-    asset::Manager m_assetMgr;
-    std::thread m_thread;
+    std::thread m_inferenceThread;
 public:
-    Impl() : m_execution(m_executor) {
-        launchThread();
+    Impl(uint32_t)
+        : m_execution(m_executor)
+        , m_assetMgr(asset::Manager::No_LaunchThread)
+    {
+        launchThreads();
     }
 
     ~Impl() {
@@ -251,16 +255,21 @@ public:
 
         // first shut down the local execution and thus stop any tasks issued to m_assetMgr
         m_executor.stop();
-        m_thread.join();
+        m_inferenceThread.join();
 
-        // then m_assetMgr being the last member will be destroyed and shut down first so it, in turn,
-        // stops issuing tasks to our executor
+        // then stop m_assetMgr so it, in turn, stops issuing tasks to our executor
+        m_assetMgr.abortRun();
+        m_assetThread.join();
 
         // any hanging tasks are just discarded
     }
 
-    void launchThread() {
-        m_thread = std::thread([this]() {
+    void launchThreads() {
+        m_assetThread = std::thread([this]() {
+            xec::SetThisThreadName("ac-asset");
+            m_assetMgr.run();
+        });
+        m_inferenceThread = std::thread([this]() {
             xec::SetThisThreadName("ac-local");
             m_execution.run();
         });
@@ -390,7 +399,7 @@ public:
     }
 };
 
-LocalProvider::LocalProvider() : m_impl(std::make_unique<Impl>()) {}
+LocalProvider::LocalProvider(uint32_t flags) : m_impl(std::make_unique<Impl>(flags)) {}
 LocalProvider::~LocalProvider() = default;
 
 void LocalProvider::addModel(ModelInfo info) {

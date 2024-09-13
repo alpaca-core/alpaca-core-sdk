@@ -16,14 +16,14 @@ class Source;
 class AC_ASSET_EXPORT Manager {
 public:
     enum InitFlags : uint32_t {
-        None = 0,
+        Default_Init = 0,
 
         // if the manager does not launch it's own thread, it is the responsibility of the user to call
         // run and pushStop/abortRun appropriately - within the lifetime of the manager
         No_LaunchThread = 1,
     };
 
-    explicit Manager(uint32_t flags = 0);
+    explicit Manager(uint32_t flags = Default_Init);
     ~Manager();
 
     void addSource(std::unique_ptr<Source> source, int priority = 0);

@@ -20,7 +20,15 @@ struct ModelInfo;
 
 class AC_LOCAL_EXPORT LocalProvider final : public Provider {
 public:
-    LocalProvider();
+    enum InitFlags : uint32_t {
+        Default_Init = 0,
+
+        // if the provider does not launch it's own threads, it is the responsibility of the user to call
+        // runInference, runAssetManagement and abortThreads appropriately - within the lifetime of the provider
+        No_LaunchThreads = 1,
+    };
+
+    explicit LocalProvider(uint32_t flags = Default_Init);
     ~LocalProvider();
     virtual void createModel(std::string_view id, Dict params, Callback<ModelPtr> cb) override;
 
