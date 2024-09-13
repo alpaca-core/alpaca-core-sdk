@@ -6,6 +6,7 @@
 
 #include <xec/TaskExecutor.hpp>
 #include <xec/ThreadExecution.hpp>
+#include <xec/ThreadName.hpp>
 
 #include <astl/move_capture.hpp>
 #include <astl/move.hpp>
@@ -22,7 +23,8 @@ class Manager::Impl {
     // these must the last members (first to be destroyed)
     // if there are pending tasks, they will be finalized here and they may access other members
     xec::TaskExecutor m_executor;
-    xec::ThreadExecution m_execution;
+    xec::LocalExecution m_execution;
+    std::jthread m_thread;
 
     auto getAssetInfo(std::string& id) {
         auto f = m_assets.find(id);
@@ -45,7 +47,18 @@ class Manager::Impl {
     }
 public:
     Impl() : m_execution(m_executor) {
-        m_execution.launchThread("ac-assets");
+        launchThread();
+    }
+
+    ~Impl() {
+        m_executor.stop();
+    }
+
+    void launchThread() {
+        m_thread = std::jthread([this]() {
+            xec::SetThisThreadName("ac-assets");
+            m_execution.run();
+        });
     }
 
     void queryAsset(std::string id, QueryAssetCb cb) {

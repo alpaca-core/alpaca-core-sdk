@@ -12,6 +12,7 @@
 #include <ac/Instance.hpp>
 #include <xec/TaskExecutor.hpp>
 #include <xec/ThreadExecution.hpp>
+#include <xec/ThreadName.hpp>
 #include <astl/move_capture.hpp>
 #include <astl/tsumap.hpp>
 #include <astl/coro_lock.hpp>
@@ -237,23 +238,31 @@ class LocalProvider::Impl {
     // * they must be the last (first to be destroyed)
     // * the asset manager must be destroyed first
     xec::TaskExecutor m_executor;
-    xec::ThreadExecution m_execution;
+    xec::LocalExecution m_execution;
     asset::Manager m_assetMgr;
+    std::jthread m_thread;
 public:
     Impl() : m_execution(m_executor) {
-        m_execution.launchThread("ac-inference");
+        launchThread();
     }
 
     ~Impl() {
         // complex shutdown logic since we're running threads and communicating by raw refs :)
 
         // first shut down the local execution and thus stop any tasks issued to m_assetMgr
-        m_execution.stopAndJoinThread();
+        m_executor.stop();
 
         // then m_assetMgr being the last member will be destroyed and shut down first so it, in turn,
         // stops issuing tasks to our executor
 
         // any hanging tasks are just discarded
+    }
+
+    void launchThread() {
+        m_thread = std::jthread([this]() {
+            xec::SetThisThreadName("ac-local");
+            m_execution.run();
+        });
     }
 
     void addAssetSource(std::unique_ptr<asset::Source> source, int priority) {
