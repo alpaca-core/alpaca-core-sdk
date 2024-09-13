@@ -62,13 +62,17 @@ Source::BasicAssetInfo SourceHttp::fetchAssetSync(std::string_view id, ProgressC
         throw_ex{} << "Failed to open file for writing: " << ame.targetPath;
     }
 
-    pcb(0);
+    bool continueDownload = pcb(0);
 
     static constexpr size_t chunkSize = 1024 * 1024; // 1mb chunks
     std::vector<uint8_t> buf(chunkSize);
     size_t totalDownloaded = 0;
     xxhash::h64 hasher;
     while (!g.done()) {
+        if (!continueDownload) {
+            throw_ex{} << "abort";
+        }
+
         auto chunk = g.get_next_chunk(buf);
         fout.write((const char*)chunk.data(), chunk.size());
         hasher.update(chunk);
@@ -77,7 +81,10 @@ Source::BasicAssetInfo SourceHttp::fetchAssetSync(std::string_view id, ProgressC
         if (g.size()) {
             // if we have a size, we can report meaningful progress
             // otherwise only leave the 0 above
-            pcb(float(totalDownloaded) / *g.size());
+            continueDownload = pcb(float(totalDownloaded) / *g.size());
+        }
+        else {
+            continueDownload = pcb(0);
         }
     }
     fout.close();

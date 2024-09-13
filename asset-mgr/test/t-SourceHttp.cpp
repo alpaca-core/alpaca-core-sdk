@@ -53,8 +53,11 @@ TEST_CASE("AssetSourceHttp") {
 
     CHECK_THROWS_WITH_AS(src.fetchAssetSync("foo", {}), "Asset not found: foo", std::runtime_error);
 
-    std::optional<float> progress = 0;
-    auto pcb = [&](float p) { progress = p; };
+    std::optional<float> progress = 0.f;
+    auto pcb = [&](float p) {
+        progress = p;
+        return true;
+    };
 
     {
         auto info = src.fetchAssetSync("existing", pcb);
@@ -65,10 +68,33 @@ TEST_CASE("AssetSourceHttp") {
 
     progress.reset();
 
+    CHECK_THROWS_WITH_AS(
+        src.fetchAssetSync("bytes-150", [](float) { return false; }),
+        "abort",
+        std::runtime_error
+    );
+
     {
         auto info = src.fetchAssetSync("bytes-150", pcb);
         CHECK(info.path == dir + "/bytes-150");
         CHECK(*info.size == 150);
         CHECK(progress == 1);
+    }
+
+    // bytes-150 should be available from now on
+
+    {
+        auto info = src.checkAssetSync("bytes-150");
+        REQUIRE(info);
+        CHECK(info->path == dir + "/bytes-150");
+        CHECK(*info->size == 150);
+    }
+
+    {
+        progress = 8.f;
+        auto info = src.fetchAssetSync("bytes-150", pcb);
+        CHECK(info.path == dir + "/bytes-150");
+        CHECK(*info.size == 150);
+        CHECK(progress == 8); // the progress callback should not have been called
     }
 }

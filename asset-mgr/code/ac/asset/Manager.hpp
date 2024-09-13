@@ -23,8 +23,9 @@ public:
     using QueryAssetCb = std::function<void(std::string_view id, const Info& data)>;
     void queryAsset(std::string id, QueryAssetCb cb);
 
+    // return false from progressCb to abort the get
     using GetAssetCb = std::function<void(std::string_view id, const Info& data)>;
-    using GetAssetProgressCb = std::function<void(std::string_view id, float progress)>;
+    using GetAssetProgressCb = std::function<bool(std::string_view id, float progress)>;
     void getAsset(std::string id, GetAssetCb cb, GetAssetProgressCb progressCb);
 public:
     class Impl;

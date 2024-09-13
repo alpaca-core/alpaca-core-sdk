@@ -31,7 +31,9 @@ public:
     }
     virtual BasicAssetInfo fetchAssetSync(std::string_view id, ProgressCb progress) override {
         auto basicInfo = checkAssetSync(id);
-        progress(7); // dummy progress so we can check it
+        if (!progress(7)) { // dummy progress so we can check it
+            throw std::runtime_error("dummy abort");
+        }
         if (!basicInfo) {
             throw std::runtime_error("dummy not found");
         }
@@ -99,7 +101,7 @@ TEST_CASE("dummy-dir") {
     CHECK_FALSE(info.path);
     CHECK_FALSE(info.error);
 
-    auto g = [&](std::string_view qid) {
+    auto g = [&](std::string_view qid, bool abort = false) {
         std::latch latch(1);
         mgr.getAsset(std::string(qid),
             [&](std::string_view id, const ac::asset::Info& data) {
@@ -110,6 +112,7 @@ TEST_CASE("dummy-dir") {
             [&](std::string_view id, float f) {
                 CHECK(id == qid);
                 CHECK(f == 7);
+                return !abort;
             }
         );
         latch.wait();
@@ -120,6 +123,12 @@ TEST_CASE("dummy-dir") {
     CHECK_FALSE(info.size);
     CHECK_FALSE(info.path);
     CHECK(info.error == "Can't get asset. No source");
+
+    g("yes-such-asset", true);
+    CHECK(info.source);
+    CHECK(info.size == 1000 + 14);
+    CHECK_FALSE(info.path);
+    CHECK(info.error == "dummy abort");
 
     g(TA_BINARY_FILE);
     REQUIRE(info.source);

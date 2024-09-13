@@ -28,7 +28,8 @@ public:
     // return nullopt if the source does not have the asset
     virtual std::optional<BasicAssetInfo> checkAssetSync(std::string_view id) noexcept = 0;
 
-    using ProgressCb = std::function<void(float)>;
+    // return false in progressCb to abort the operation
+    using ProgressCb = std::function<bool(float)>;
     virtual BasicAssetInfo fetchAssetSync(std::string_view id, ProgressCb progressCb) = 0;
 };
 

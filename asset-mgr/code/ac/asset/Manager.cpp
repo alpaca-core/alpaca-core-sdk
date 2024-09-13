@@ -70,7 +70,7 @@ public:
             }
             try {
                 auto res = info.source->fetchAssetSync(id, [&](float p) {
-                    progressCb(id, p);
+                    return progressCb(id, p);
                 });
 
                 info.size = res.size;

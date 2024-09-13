@@ -355,6 +355,7 @@ public:
                     LOG_INFO("getting asset: ", aid);
                     asset = co_await AssetGet(aid, m_assetMgr, m_executor, [&](std::string_view, float p) {
                         cb.progressCb(aid, p);
+                        return true;
                     });
                 }
                 info.w().localAssets = astl::move(localAssets);
