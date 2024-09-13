@@ -11,48 +11,48 @@
 
 namespace {
 class DummyInstance final : public ac::Instance {
-    void runOp(std::string_view op, ac::Dict params, ac::Callback<void, ac::Dict> cb) override {
+    void runOp(std::string_view op, ac::Dict params, OpCallback cb) override {
         std::string_view tag = "stream";
 
+        cb.progressCb(tag, 1.f);
+
         if (op == "insta") {
-            cb.progressCb(tag, {{"insta", "success"}});
-            cb.resultCb({});
+            cb.streamCb({{"insta", "success"}});
+            cb.completionCb({});
             return;
         }
 
-        cb.progressCb(tag, {{"some", 42}});
+        cb.progressCb(tag, 2.f);
+        cb.streamCb({{"some", 42}});
 
         if (op == "error") {
-            cb.resultCb(itlib::unexpected(ac::Error{params.at("error").get<std::string>()}));
+            cb.completionCb(itlib::unexpected(ac::Error{params.at("error").get<std::string>()}));
         }
         else {
-            cb.progressCb(tag, {{"more", 1024}});
-            cb.resultCb({});
+            cb.streamCb({{"more", 1024}});
+            cb.completionCb({});
         }
     }
 
     void synchronize() override {} // not really testable
 
-    void initiateAbort(ac::Callback<void> cb) override {
-        cb.resultCb({});
+    void initiateAbort(ac::BasicCb<void> cb) override {
+        cb();
     }
 };
 
 class DummyModel final : public ac::Model {
-    void createInstance(std::string_view type, ac::Dict params, ac::Callback<ac::InstancePtr> cb) override {
-        cb.progressCb(type, 0.1f);
+    void createInstance(std::string_view type, ac::Dict params, ac::ResultCb<ac::InstancePtr> cb) override {
         if (type == "error") {
-            cb.resultCb(itlib::unexpected(ac::Error{params.at("error").get<std::string>()}));
+            cb(itlib::unexpected(ac::Error{params.at("error").get<std::string>()}));
             return;
         }
-
-        cb.progressCb(type, 1.f);
-        cb.resultCb(ac::InstancePtr{std::make_shared<DummyInstance>()});
+        cb(ac::InstancePtr{std::make_shared<DummyInstance>()});
     }
 };
 
 class DummyProvider final : public ac::Provider {
-    void createModel(std::string_view id, ac::Dict params, ac::Callback<ac::ModelPtr> cb) override {
+    void createModel(std::string_view id, ac::Dict params, Callback<ac::ModelPtr> cb) override {
         cb.progressCb(id, 0.2f);
 
         if (id == "error") {

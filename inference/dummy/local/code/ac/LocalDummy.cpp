@@ -62,7 +62,7 @@ public:
         streamCb({{"result", astl::move(result)}});
     }
 
-    virtual void runOpSync(std::string_view op, Dict params, std::function<void(Dict)> streamCb) override {
+    virtual void runOpSync(std::string_view op, Dict params, BasicCb<Dict> streamCb, ProgressCb) override {
         if (op == "run") {
             run(astl::move(params), astl::move(streamCb));
         }
@@ -89,12 +89,13 @@ public:
 
 class DummyModelLoader final : public LocalInferenceModelLoader {
 public:
-    virtual std::unique_ptr<LocalInferenceModel> loadModelSync(LocalModelInfoPtr info, Dict params, std::function<void(float)>) override {
+    virtual std::unique_ptr<LocalInferenceModel> loadModelSync(LocalModelInfoPtr info, Dict params, ProgressCb pcb) override {
         if (!info) throw_ex{} << "dummy: no model info";
         if (info->localAssets.size() != 1) throw_ex{} << "dummy: expected exactly one local asset";
         auto& fname = info->localAssets.front().path;
         if (!fname) throw_ex{} << "dummy: missing fname path";
         auto modelParams = ModelParams_fromDict(params);
+        if (pcb) pcb(*fname, 0.1f);
         return std::make_unique<DummyModel>(*fname, std::move(modelParams));
     }
 };

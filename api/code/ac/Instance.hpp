@@ -3,7 +3,7 @@
 //
 #pragma once
 #include "export.h"
-#include "Callback.hpp"
+#include "Callbacks.hpp"
 
 namespace ac {
 
@@ -24,6 +24,12 @@ public:
      */
     virtual ~Instance();
 
+    struct OpCallback {
+        ResultCb<void> completionCb;
+        BasicCb<Dict> streamCb;
+        ProgressCb progressCb;
+    };
+
     /**
      * @brief Run an operation on the instance.
      *
@@ -32,12 +38,12 @@ public:
      *
      * @param op The operation to run, specified as a string_view (e.g., "run").
      * @param params Parameters for the operation, provided as a Dict (e.g., prompt, max_tokens, antiprompts).
-     * @param cb Callback function to be called with the operation's result and intermediate updates.
+     * @param cb Callback function to be called with the operation's result, progress, and intermediate updates.
      *
      * Example usage:
      * @snippet inference/llama.cpp/local/example/e-local-llama.cpp Instance_runOp Usage Example
      */
-    virtual void runOp(std::string_view op, Dict params, Callback<void, Dict> cb) = 0;
+    virtual void runOp(std::string_view op, Dict params, OpCallback cb) = 0;
 
     /**
      * @brief Wait for all operations to finish.
@@ -57,7 +63,7 @@ public:
      *
      * @param cb Callback function to be called when the abort process is initiated.
      */
-    virtual void initiateAbort(Callback<void> cb) = 0;
+    virtual void initiateAbort(BasicCb<void> cb) = 0;
 };
 
 } // namespace ac

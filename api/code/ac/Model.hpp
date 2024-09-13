@@ -3,8 +3,8 @@
 //
 #pragma once
 #include "export.h"
+#include "Callbacks.hpp"
 #include "InstancePtr.hpp"
-#include "Callback.hpp"
 #include "Dict.hpp"
 
 namespace ac {
@@ -13,7 +13,7 @@ namespace ac {
  * @brief Abstract base class for models in the Alpaca Core library.
  *
  * The Model class serves as an interface for creating instances of various
- * model types within the Alpaca Core framework. 
+ * model types within the Alpaca Core framework.
  *
  */
 class AC_API_EXPORT Model {
@@ -32,12 +32,12 @@ public:
      *
      * @param type The type of model instance to create (e.g., "general").
      * @param params A dictionary of parameters for model instantiation.
-     * @param cb A callback function to be invoked with the created InstancePtr and optional progress updates.
+     * @param cb A callback function to be invoked with the created InstancePtr or an error.
      *
      * Example usage:
      * @snippet inference/llama.cpp/local/example/e-local-llama.cpp Model_createInstance Usage Example
      */
-    virtual void createInstance(std::string_view type, Dict params, Callback<InstancePtr> cb) = 0;
+    virtual void createInstance(std::string_view type, Dict params, ResultCb<InstancePtr> cb) = 0;
 };
 
 } // namespace ac

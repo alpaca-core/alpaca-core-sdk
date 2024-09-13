@@ -48,16 +48,14 @@ public:
 
     {}
 
-    virtual void runOp(std::string_view op, Dict params, Callback<void, Dict> cb) override {
+    virtual void runOp(std::string_view op, Dict params, OpCallback cb) override {
         m_executor.pushTask([selfcap, op = std::string(op), movecap(params, cb)]() mutable {
             try {
-                self->m_iinstance->runOpSync(op, astl::move(params), [&](Dict result) {
-                    cb.progressCb({}, astl::move(result));
-                });
-                cb.resultCb({});
+                self->m_iinstance->runOpSync(op, astl::move(params), astl::move(cb.streamCb), astl::move(cb.progressCb));
+                cb.completionCb({});
             }
             catch (std::exception& ex) {
-                cb.resultCb(itlib::unexpected(ac::Error{ ex.what() }));
+                cb.completionCb(itlib::unexpected(ac::Error{ex.what()}));
                 return;
             }
         }, m_opTaskToken);
@@ -69,10 +67,10 @@ public:
         });
         l.wait();
     }
-    virtual void initiateAbort(Callback<void> cb) override {
+    virtual void initiateAbort(BasicCb<void> cb) override {
         m_executor.cancelTasksWithToken(m_opTaskToken);
         m_executor.pushTask([movecap(cb)]() mutable {
-            cb.resultCb({});
+            cb();
         });
     }
 };
@@ -86,22 +84,22 @@ public:
         , m_executor(executor)
     {}
 
-    virtual void createInstance(std::string_view type, Dict params, Callback<InstancePtr> cb) override {
+    virtual void createInstance(std::string_view type, Dict params, ResultCb<InstancePtr> cb) override {
         m_executor.pushTask([selfcap, type = std::string(type), movecap(params, cb)]() mutable {
             try {
                 auto instance = self->m_imodel->createInstanceSync(type, astl::move(params));
 
                 if (!instance)
                 {
-                    cb.resultCb(itlib::unexpected(ac::Error{ "Instance couldn't be created!" }));
+                    cb(itlib::unexpected(ac::Error{ "Instance couldn't be created!" }));
                     return;
                 }
 
                 InstancePtr ptr = std::make_shared<LocalInstance>(self, astl::move(instance), self->m_executor);
-                cb.resultCb(astl::move(ptr));
+                cb(astl::move(ptr));
             }
             catch (std::exception& ex) {
-                cb.resultCb(itlib::unexpected(ac::Error{ ex.what() }));
+                cb(itlib::unexpected(ac::Error{ ex.what() }));
                 return;
             }
         });
@@ -362,12 +360,7 @@ public:
             }
 
             LOG_INFO("loading model: ", id);
-            auto model = loader.loadModelSync(info.detach(), astl::move(params), [&](float progress) {
-                assert(std::this_thread::get_id() == m_execution.threadId());
-                if (cb.progressCb) {
-                    cb.progressCb(id, progress);
-                }
-            });
+            auto model = loader.loadModelSync(info.detach(), astl::move(params), astl::move(cb.progressCb));
 
             if (!model) {
                 cb.resultCb(itlib::unexpected(ac::Error{"Model couldn't be loaded!"}));

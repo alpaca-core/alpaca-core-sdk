@@ -71,8 +71,7 @@ void on_op_result(const char* error, void* user_data) {
     atomic_store(&s->cur_step_done, true);
 }
 
-void on_op_stream(ac_sv tag, ac_dict_ref dict, void* user_data) {
-    CHECK(ac_sv_is_empty(tag));
+void on_op_stream(ac_dict_ref dict, void* user_data) {
     state* s = (state*)user_data;
     if (s->dict_root) {
         ac_dict_free_root(s->dict_root);
@@ -145,7 +144,7 @@ void dummy_provider(void) {
         ac_create_instance(
             s.model, "error",
             ac_dict_new_root_from_json("{\"error\": \"bad inst\"}", NULL),
-            on_instance_result, on_progress, &s
+            on_instance_result, &s
         );
         wait_for_cur_step(&s);
 
@@ -157,7 +156,7 @@ void dummy_provider(void) {
         ac_create_instance(
             s.model, "error",
             ac_dict_new_root_from_json("{\"error\": true}", NULL),
-            on_instance_result, on_progress, &s
+            on_instance_result, &s
         );
         wait_for_cur_step(&s);
 
@@ -170,7 +169,7 @@ void dummy_provider(void) {
         ac_create_instance(
             s.model, "insta",
             NULL,
-            on_instance_result, on_progress, &s
+            on_instance_result, &s
         );
         wait_for_cur_step(&s);
 
@@ -182,7 +181,7 @@ void dummy_provider(void) {
         ac_run_op(
             s.instance, "op",
             ac_dict_new_root_from_json("{}", NULL),
-            on_op_result, on_op_stream, &s
+            on_op_result, on_op_stream, on_progress, &s
         );
         ac_synchronize_instance(s.instance);
 
@@ -190,6 +189,7 @@ void dummy_provider(void) {
         CHECK_NOT_NULL(some);
         CHECK_EQ(ac_dict_value_type_number_int, ac_dict_get_type(some));
         CHECK_EQ(42, ac_dict_get_int_value(some));
+        s.last_progress = 0;
     }
 
     // expect the same behavior with param
@@ -200,7 +200,7 @@ void dummy_provider(void) {
         ac_run_op(
             s.instance, "op",
             NULL,
-            on_op_result, on_op_stream, &s
+            on_op_result, on_op_stream, on_progress, &s
         );
         ac_synchronize_instance(s.instance);
 
@@ -208,13 +208,14 @@ void dummy_provider(void) {
         CHECK_NOT_NULL(some);
         CHECK_EQ(ac_dict_value_type_number_int, ac_dict_get_type(some));
         CHECK_EQ(42, ac_dict_get_int_value(some));
+        s.last_progress = 0;
     }
 
     {
         ac_run_op(
             s.instance, "error",
             ac_dict_new_root_from_json("{\"error\": \"bad op\"}", NULL),
-            on_op_result, on_op_stream, &s
+            on_op_result, on_op_stream, on_progress, &s
         );
         ac_synchronize_instance(s.instance);
 
@@ -222,13 +223,14 @@ void dummy_provider(void) {
         CHECK_NOT_NULL(error);
         CHECK_EQ(ac_dict_value_type_string, ac_dict_get_type(error));
         CHECK_EQ_STR("bad op", ac_dict_get_string_value(error));
+        s.last_progress = 0;
     }
 
     {
         ac_run_op(
             s.instance, "more",
             NULL,
-            on_op_result, on_op_stream, &s
+            on_op_result, on_op_stream, on_progress, &s
         );
         ac_synchronize_instance(s.instance);
 
@@ -236,13 +238,14 @@ void dummy_provider(void) {
         CHECK_NOT_NULL(more);
         CHECK_EQ(ac_dict_value_type_number_int, ac_dict_get_type(more));
         CHECK_EQ(1024, ac_dict_get_int_value(more));
+        s.last_progress = 0;
     }
 
     {
         ac_run_op(
             s.instance, "insta",
             NULL,
-            on_op_result, on_op_stream, &s
+            on_op_result, on_op_stream, on_progress, &s
         );
         ac_synchronize_instance(s.instance);
 
@@ -250,6 +253,7 @@ void dummy_provider(void) {
         CHECK_NOT_NULL(insta);
         CHECK_EQ(ac_dict_value_type_string, ac_dict_get_type(insta));
         CHECK_EQ_STR("success", ac_dict_get_string_value(insta));
+        s.last_progress = 0;
     }
 
     ac_dict_free_root(s.dict_root);

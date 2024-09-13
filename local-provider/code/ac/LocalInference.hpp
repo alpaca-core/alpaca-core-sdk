@@ -4,9 +4,10 @@
 #pragma once
 #include "export.h"
 #include "LocalModelInfoPtr.hpp"
-#include <ac/Callback.hpp>
 #include <ac/Dict.hpp>
+#include <ac/Callbacks.hpp>
 #include <string_view>
+#include <functional>
 #include <memory>
 
 // inference interface for concrete inference instances
@@ -19,7 +20,7 @@ class AC_LOCAL_EXPORT LocalInferenceInstance {
 public:
     virtual ~LocalInferenceInstance();
 
-    virtual void runOpSync(std::string_view op, Dict params, std::function<void(Dict)> streamCb) = 0;
+    virtual void runOpSync(std::string_view op, Dict params, BasicCb<Dict> streamCb, ProgressCb pcb) = 0;
 };
 
 class AC_LOCAL_EXPORT LocalInferenceModel {
@@ -33,7 +34,7 @@ class AC_LOCAL_EXPORT LocalInferenceModelLoader {
 public:
     virtual ~LocalInferenceModelLoader();
 
-    virtual std::unique_ptr<LocalInferenceModel> loadModelSync(LocalModelInfoPtr info, Dict params, std::function<void(float)> progress) = 0;
+    virtual std::unique_ptr<LocalInferenceModel> loadModelSync(LocalModelInfoPtr info, Dict params, ProgressCb progress) = 0;
 };
 
 }

@@ -77,8 +77,7 @@ void on_run_op_result(const char* error, void* user_data) {
     atomic_store(&state->cur_step_done, true);
 }
 
-void on_op_stream(ac_sv tag, ac_dict_ref dict, void* user_data) {
-    UNUSED(tag);
+void on_op_stream(ac_dict_ref dict, void* user_data) {
     app_state* state = (app_state*)user_data;
     ac_dict_ref result = ac_dict_at_key(dict, "result");
     if (result) {
@@ -130,7 +129,6 @@ int main(void) {
         "general",
         NULL,
         on_instance_result,
-        on_progress,
         &state
     );
     wait_for_step(&state);
@@ -145,9 +143,10 @@ int main(void) {
     ac_run_op(
         state.instance,
         "run",
-        ac_dict_new_root_from_json("{\"prompt\": \"" PROMPT "\", \"max_tokens\": 20}", NULL),
+        ac_dict_new_root_from_json("{\"prompt\": \"" PROMPT "\", \"max_tokens\": 30}", NULL),
         on_run_op_result,
         on_op_stream,
+        on_progress,
         &state
     );
     wait_for_step(&state);

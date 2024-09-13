@@ -20,11 +20,15 @@ namespace {
 
 class DummyLocalInferenceInstance final : public ac::LocalInferenceInstance {
 public:
-    virtual void runOpSync(std::string_view op, ac::Dict params, std::function<void(ac::Dict)> streamCb) override {
+    virtual void runOpSync(std::string_view op, ac::Dict params, std::function<void(ac::Dict)> streamCb, ac::ProgressCb pcb) override {
+        pcb("stream", 0.1f);
+
         if (op == "insta") {
             streamCb({{"insta", "success"}});
             return;
         }
+
+        pcb("stream", 0.5f);
 
         streamCb({{"some", 42}});
 
@@ -88,27 +92,27 @@ public:
 std::unique_ptr<ac::LocalInferenceModel> DummyLocalInferenceModelLoader::loadModelSync(
     ac::LocalModelInfoPtr info,
     ac::Dict params,
-    std::function<void(float)> progress
+    ac::ProgressCb progress
 ) {
     auto& assets = info->localAssets;
     if (assets.size() != 2) {
         ac::throw_ex{} << "expected 2 assets, got " << assets.size();
     }
-    progress(0.2f);
+    progress("dummy model", 0.2f);
     for (auto& a : assets) {
         if (a.error) {
             ac::throw_ex{} << "asset error: " << a.error.value();
         }
     }
-    progress(0.4f);
+    progress("dummy model", 0.4f);
 
-    progress(0.5f);
+    progress("dummy model", 0.5f);
 
     if (ac::Dict_optValueAt(params, "error", false)) {
         return nullptr;
     }
 
-    progress(1.f);
+    progress("dummy model", 1.f);
     return std::unique_ptr<DummyLocalInferenceModel>(new DummyLocalInferenceModel());
 }
 

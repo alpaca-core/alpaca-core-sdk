@@ -68,8 +68,7 @@ int main() {
         [&](ac::CallbackResult<ac::InstancePtr> result) {
             instanceResult = std::move(result);
             latch->count_down();
-        },
-        {} // empty progress callback
+        }
     });
 
     latch->wait();
@@ -92,13 +91,13 @@ int main() {
         [&](ac::CallbackResult<void> result) {
             if (result.has_error()) {
                 opError = std::move(result.error().text);
-                return;
             }
             latch->count_down();
         },
-        [](std::string_view, ac::Dict result) {
+        [](ac::Dict result) {
             std::cout << result.at("result").get<std::string_view>();
-        }
+        },
+        {} // empty progress callback
     });
 
     latch->wait();

@@ -103,15 +103,13 @@ AC_API_EXPORT void ac_free_instance(ac_instance* i);
  * @param instance_type Type of instance to be created (e.g., "general")
  * @param dict_root Dictionary containing instance parameters (can be NULL for default parameters)
  * @param result_cb Callback function to be called with the result
- * @param progress_cb Callback function for progress updates (can be NULL if not needed)
- * @param cb_user_data User data to be passed to the callbacks
+ * @param cb_user_data User data to be passed to the callback
  */
 AC_API_EXPORT void ac_create_instance(
     ac_model* m,
     const char* instance_type,
     ac_dict_root* dict_root,
     void (*result_cb)(ac_instance* i, const char* error, void* user_data),
-    void (*progress_cb)(ac_sv tag, float progress, void* user_data),
     void* cb_user_data
 );
 
@@ -124,16 +122,18 @@ AC_API_EXPORT void ac_create_instance(
  * @param i Pointer to the instance
  * @param op Name of the operation to run (e.g., "run")
  * @param dict_root Dictionary containing operation parameters
- * @param result_cb Callback function to be called with the final result
- * @param stream_cb Callback function for streaming updates (can be NULL if not needed)
+ * @param completion_cb Callback function to be called upon completion (error will be null if successful)
+ * @param stream_cb Callback function for the result (can be called multiple times, depending on op)
+ * @param progress_cb Callback function for non-result-related progress (can be NULL if not needed)
  * @param cb_user_data User data to be passed to the callbacks
  */
 AC_API_EXPORT void ac_run_op(
     ac_instance* i,
     const char* op,
     ac_dict_root* dict_root,
-    void (*result_cb)(const char* error, void* user_data),
-    void (*stream_cb)(ac_sv tag, ac_dict_ref dict, void* user_data),
+    void (*completion_cb)(const char* error, void* user_data),
+    void (*stream_cb)(ac_dict_ref dict, void* user_data),
+    void (*progress_cb)(ac_sv tag, float progress, void* user_data),
     void* cb_user_data
 );
 
@@ -156,12 +156,12 @@ AC_API_EXPORT void ac_synchronize_instance(ac_instance* i);
  * that no more callbacks will be called.
  *
  * @param i Pointer to the instance
- * @param done_cb Callback function to be called when the abort operation is complete
+ * @param done_cb Callback function to be called when the abort operation is complete (can be NULL)
  * @param cb_user_data User data to be passed to the callback function
  */
 AC_API_EXPORT void ac_initiate_instance_abort(
     ac_instance* i,
-    void (*done_cb)(const char* error, void* user_data),
+    void (*done_cb)(void* user_data),
     void* cb_user_data
 );
 

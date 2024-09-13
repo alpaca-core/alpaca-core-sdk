@@ -67,8 +67,7 @@ void on_op_result(const char* error, void* user_data) {
     set_error(s, error);
 }
 
-void on_op_stream(ac_sv tag, ac_dict_ref dict, void* user_data) {
-    EXPECT_SV("stream", tag);
+void on_op_stream(ac_dict_ref dict, void* user_data) {
     state* s = (state*)user_data;
     if (s->dict_root) {
         ac_dict_free_root(s->dict_root);
@@ -113,7 +112,7 @@ void dummy_provider(void) {
     ac_create_instance(
         s.model, "error",
         ac_dict_new_root_from_json("{\"error\": \"bad inst\"}", NULL),
-        on_instance_result, on_progress, &s
+        on_instance_result, &s
     );
     CHECK_EQ_STR("bad inst", s.last_error);
     CHECK_NULL(s.instance);
@@ -122,7 +121,7 @@ void dummy_provider(void) {
     ac_create_instance(
         s.model, "insta",
         NULL,
-        on_instance_result, on_progress, &s
+        on_instance_result, &s
     );
     CHECK_EQ_STR("", s.last_error);
     CHECK_NOT_NULL(s.instance);
@@ -130,7 +129,7 @@ void dummy_provider(void) {
     ac_run_op(
         s.instance, "error",
         ac_dict_new_root_from_json("{\"error\": \"bad op\"}", NULL),
-        on_op_result, on_op_stream, &s
+        on_op_result, on_op_stream, on_progress, &s
     );
     CHECK_EQ_STR("bad op", s.last_error);
     CHECK_EQ_FLT(0, s.last_progress);
@@ -142,7 +141,7 @@ void dummy_provider(void) {
     ac_run_op(
         s.instance, "op",
         ac_dict_new_root_from_json("{}", NULL),
-        on_op_result, on_op_stream, &s
+        on_op_result, on_op_stream, on_progress, &s
     );
     CHECK_EQ_STR("", s.last_error);
     CHECK_EQ_FLT(0, s.last_progress);
@@ -158,7 +157,7 @@ void dummy_provider(void) {
     ac_run_op(
         s.instance, "op",
         NULL,
-        on_op_result, on_op_stream, &s
+        on_op_result, on_op_stream, on_progress, &s
     );
     CHECK_EQ_STR("", s.last_error);
     CHECK_EQ_FLT(0, s.last_progress);
@@ -170,7 +169,7 @@ void dummy_provider(void) {
     ac_run_op(
         s.instance, "insta",
         ac_dict_new_root_from_json("{}", NULL),
-        on_op_result, on_op_stream, &s
+        on_op_result, on_op_stream, on_progress, &s
     );
     CHECK_EQ_STR("", s.last_error);
     CHECK_EQ_FLT(0, s.last_progress);

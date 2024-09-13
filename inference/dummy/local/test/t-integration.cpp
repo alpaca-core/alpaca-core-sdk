@@ -57,8 +57,7 @@ struct TestHelper {
             [&](ac::CallbackResult<ac::InstancePtr> result) {
                 instance = result.value_or(nullptr);
                 latch->count_down();
-            },
-            {}
+            }
         });
         latch->wait();
     }
@@ -73,11 +72,11 @@ struct TestHelper {
                 }
                 latch->count_down();
             },
-            [&](std::string_view tag, ac::Dict res) {
-                CHECK(tag.empty());
+            [&](ac::Dict res) {
                 REQUIRE(ret.has_value());
                 ret->push_back(astl::move(res));
-            }
+            },
+            {}
         });
         latch->wait();
         return ret;

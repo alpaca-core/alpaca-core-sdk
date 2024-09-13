@@ -28,7 +28,9 @@ public:
 
     void run(Dict params, std::function<void(Dict)> streamCb) {
         auto value = params.find("audioBinaryMono");
-        throw_ex{} << "missing input 'audioBinaryMono' in params";
+        if (!value->is_binary()) {
+            throw_ex{} << "missing input 'audioBinaryMono' in params";
+        }
 
         auto pcmu8 = value->get_binary();
         auto pcmf32 = reinterpret_cast<float*>(pcmu8.data());
@@ -38,7 +40,7 @@ public:
         streamCb({{"result", astl::move(result)}});
     }
 
-    virtual void runOpSync(std::string_view op, Dict params, std::function<void(Dict)> streamCb) override {
+    virtual void runOpSync(std::string_view op, Dict params, BasicCb<Dict> streamCb, ProgressCb) override {
         if (op == "transcribe") {
             run(astl::move(params), astl::move(streamCb));
         }
@@ -65,7 +67,7 @@ public:
 
 class WhisperModelLoader final : public LocalInferenceModelLoader {
 public:
-    virtual std::unique_ptr<LocalInferenceModel> loadModelSync(LocalModelInfoPtr info, Dict /*params*/, std::function<void(float)> /*progressCb*/) override {
+    virtual std::unique_ptr<LocalInferenceModel> loadModelSync(LocalModelInfoPtr info, Dict /*params*/, ProgressCb /*progressCb*/) override {
         if (!info) throw_ex{} << "whisper: no model info";
         if (info->localAssets.size() != 1) throw_ex{} << "whisper: expected exactly one local asset";
         auto& bin = info->localAssets.front().path;

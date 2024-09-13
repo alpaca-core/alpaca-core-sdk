@@ -64,9 +64,8 @@ int main() {
                 instance = std::move(result.value());
             }
             latch->count_down();
-        },
-        {} // empty progress callback
-        });
+        }
+    });
     latch->wait();
 
     if (!instance) return 2;
@@ -81,9 +80,10 @@ int main() {
             }
             latch->count_down();
         },
-        [&](std::string_view, ac::Dict result) {
+        [&](ac::Dict result) {
             inferenceResult += result["result"].get<std::string>();
-        }
+        },
+        {}
     });
     latch->wait();
 

@@ -14,6 +14,7 @@
 #include <ac/LocalInference.hpp>
 
 #include <astl/move.hpp>
+#include <astl/move_capture.hpp>
 #include <astl/iile.h>
 #include <astl/throw_ex.hpp>
 
@@ -33,7 +34,7 @@ public:
         : m_instance(model, {})
     {}
 
-    void run(Dict params, std::function<void(Dict)> streamCb) {
+    void run(Dict params, BasicCb<Dict> streamCb) {
         auto prompt = ac::LlamaSchema::RunParams::prompt(params);
         auto antiprompts = ac::LlamaSchema::RunParams::antiprompts(params);
         const uint32_t maxTokens = ac::LlamaSchema::RunParams::max_tokens(params);
@@ -66,7 +67,7 @@ public:
         streamCb(resultDict);
     }
 
-    virtual void runOpSync(std::string_view op, Dict params, std::function<void(Dict)> streamCb) override {
+    virtual void runOpSync(std::string_view op, Dict params, BasicCb<Dict> streamCb, ProgressCb) override {
         if (op == "run") {
             run(astl::move(params), astl::move(streamCb));
         }
@@ -93,13 +94,18 @@ public:
 
 class LlamaModelLoader final : public LocalInferenceModelLoader {
 public:
-    virtual std::unique_ptr<LocalInferenceModel> loadModelSync(LocalModelInfoPtr info, Dict, std::function<void(float)> progressCb) override {
+    virtual std::unique_ptr<LocalInferenceModel> loadModelSync(LocalModelInfoPtr info, Dict, ProgressCb progressCb) override {
         if (!info) throw_ex{} << "llama: no model info";
         if (info->localAssets.size() != 1) throw_ex{} << "llama: expected exactly one local asset";
         auto& gguf = info->localAssets.front().path;
         if (!gguf) throw_ex{} << "llama: missing gguf path";
         llama::Model::Params modelParams;
-        return std::make_unique<LlamaModel>(*gguf, std::move(progressCb), modelParams);
+        std::string progressTag = "loading " + *gguf;
+        return std::make_unique<LlamaModel>(*gguf, [movecap(progressTag, progressCb)](float p) {
+            if (progressCb) {
+                progressCb(progressTag, p);
+            }
+        }, modelParams);
     }
 };
 }

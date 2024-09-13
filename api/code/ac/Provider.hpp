@@ -4,7 +4,7 @@
 #pragma once
 #include "export.h"
 #include "ModelPtr.hpp"
-#include "Callback.hpp"
+#include "Callbacks.hpp"
 #include "Dict.hpp"
 
 namespace ac {
@@ -24,6 +24,34 @@ public:
      * @brief Virtual destructor for the Provider class.
      */
     virtual ~Provider();
+
+    /**
+     * @brief A structure representing a callback with result and progress functions.
+     *
+     * This structure is used to handle asynchronous operations in the provider.
+     * It provides callbacks for both the final result and intermediate progress updates.
+     *
+     * @tparam R The type of the result.
+     *
+     * Example usage:
+     * @snippet inference/llama.cpp/local/example/e-local-llama.cpp Provider_createModel Usage Example
+     */
+    template <typename R>
+    struct Callback {
+        /**
+         * @brief The result callback function.
+         */
+        ResultCb<R> resultCb;
+
+        /**
+         * @brief The progress callback function.
+         *
+         * This function is called periodically to report progress during the asynchronous operation.
+         * The use of tags in the callback allows for more flexible progress reporting,
+         * especially in complex operations composed of multiple subtasks.
+         */
+        ProgressCb progressCb;
+    };
 
     /**
      * @brief Creates a model asynchronously.

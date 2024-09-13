@@ -69,8 +69,7 @@ int main() {
         [&](ac::CallbackResult<ac::InstancePtr> result) {
             instanceResult = std::move(result);
             latch->count_down();
-        },
-        {} // empty progress callback
+        }
     });
 
     latch->wait();
@@ -103,9 +102,10 @@ int main() {
             }
             latch->count_down();
         },
-        [](std::string_view, ac::Dict result) {
+        [](ac::Dict result) {
             std::cout << result.at("result").get<std::string_view>();
-        }
+        },
+        {}
     });
 
     latch->wait();

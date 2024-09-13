@@ -9,7 +9,7 @@ public:
     virtual std::unique_ptr<ac::LocalInferenceModel> loadModelSync(
         ac::LocalModelInfoPtr info,
         ac::Dict params,
-        std::function<void(float)> progress
+        ac::ProgressCb progress
     ) override;
 };
 

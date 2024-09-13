@@ -16,7 +16,8 @@ target_link_libraries(ac-api
 target_sources(ac-api PRIVATE
     ac/export.h
 
-    ac/Callback.hpp
+    ac/CallbackResult.hpp
+    ac/Callbacks.hpp
     ac/Dict.hpp
     ac/Provider.hpp
     ac/InstancePtr.hpp

@@ -78,7 +78,6 @@ void ac_create_instance(
     const char* instance_type,
     ac_dict_root* dict_root,
     void (*result_cb)(ac_instance* i, const char* error, void* user_data),
-    void (*progress_cb)(ac_sv tag, float progress, void* user_data),
     void* cb_user_data
 ) {
     m->model->createInstance(instance_type, Dict_from_dict_root_consume(dict_root), {
@@ -89,11 +88,6 @@ void ac_create_instance(
             else {
                 result_cb(nullptr, result.error().text.c_str(), cb_user_data);
             }
-        },
-        [=](std::string_view tag, float progress) {
-            if (progress_cb) {
-                progress_cb(ac_sv::from_std(tag), progress, cb_user_data);
-            }
         }
     });
 }
@@ -102,22 +96,26 @@ void ac_run_op(
     ac_instance* i,
     const char* op,
     ac_dict_root* dict_root,
-    void (*result_cb)(const char* error, void* user_data),
-    void (*stream_cb)(ac_sv tag, ac_dict_ref dict, void* user_data),
+    void (*completion_cb)(const char* error, void* user_data),
+    void (*stream_cb)(ac_dict_ref dict, void* user_data),
+    void (*progress_cb)(ac_sv tag, float progress, void* user_data),
     void* cb_user_data
 ) {
     i->instance->runOp(op, Dict_from_dict_root_consume(dict_root), {
         [=](ac::CallbackResult<void> result) {
             if (result.has_value()) {
-                result_cb(nullptr, cb_user_data);
+                completion_cb(nullptr, cb_user_data);
             }
             else {
-                result_cb(result.error().text.c_str(), cb_user_data);
+                completion_cb(result.error().text.c_str(), cb_user_data);
             }
         },
-        [=](std::string_view tag, ac::Dict dict) {
-            if (stream_cb) {
-                stream_cb(ac_sv::from_std(tag), Dict_to_dict_ref(dict), cb_user_data);
+        [=](ac::Dict dict) {
+            stream_cb(Dict_to_dict_ref(dict), cb_user_data);
+        },
+        [=](std::string_view tag, float progress) {
+            if (progress_cb) {
+                progress_cb(ac_sv::from_std(tag), progress, cb_user_data);
             }
         }
     });
@@ -129,19 +127,13 @@ void ac_synchronize_instance(ac_instance* i) {
 
 void ac_initiate_instance_abort(
     ac_instance* i,
-    void (*done_cb)(const char* error, void* user_data),
+    void (*done_cb)(void* user_data),
     void* cb_user_data
 ) {
-    i->instance->initiateAbort({
-        [=](ac::CallbackResult<void> result) {
-            if (result.has_value()) {
-                done_cb(nullptr, cb_user_data);
-            }
-            else {
-                done_cb(result.error().text.c_str(), cb_user_data);
-            }
-        },
-        {}
+    i->instance->initiateAbort([=]() {
+        if (done_cb) {
+            done_cb(cb_user_data);
+        }
     });
 }
 

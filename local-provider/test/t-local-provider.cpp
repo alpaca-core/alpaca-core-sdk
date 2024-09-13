@@ -107,8 +107,7 @@ struct AcTestHelper {
             [&](ac::CallbackResult<ac::InstancePtr> result) {
                 instanceResult = astl::move(result);
                 latch->count_down();
-            },
-            {} // no progress callback
+            }
         });
         latch->wait();
     }
@@ -210,42 +209,41 @@ TEST_CASE("run ops") {
     auto instance = h.instanceResult.value();
     std::string opError;
     ac::Dict opResult;
+    std::vector<float> progress;
     unsigned resultsCount = 0;
 
-    instance->runOp("insta", {}, {
+    ac::Instance::OpCallback cb = {
         [&](ac::CallbackResult<void> result) {
             if (result.has_error()) {
-                opError = astl::move(result.error().text);
-                return;
+                opError = result.error().text;
             }
         },
-        [&](std::string_view tag, ac::Dict result) {
-            CHECK(tag.empty());
+        [&](ac::Dict result) {
             opResult[resultsCount++] = result;
+        },
+        [&](std::string_view tag,float p) {
+            CHECK(tag == "stream");
+            progress.push_back(p);
         }
-    });
+    };
+
+
+    instance->runOp("insta", {}, cb);
     instance->synchronize();
 
     CHECK(resultsCount == 1);
     CHECK(opResult[0]["insta"] == "success");
+    CHECK(progress == std::vector<float>{0.1f});
 
     resultsCount = 0;
     opResult = {};
+    progress.clear();
 
-    instance->runOp("more", {}, {
-        [&](ac::CallbackResult<void> result) {
-            if (result.has_error()) {
-                opError = astl::move(result.error().text);
-                return;
-            }
-        },
-        [&](std::string_view, ac::Dict result) {
-            opResult[resultsCount++] = result;
-        }
-    });
+    instance->runOp("more", {}, cb);
     instance->synchronize();
 
     CHECK(resultsCount == 2);
     CHECK(opResult[0]["some"] == 42);
     CHECK(opResult[1]["more"] == 1024);
+    CHECK(progress == std::vector<float>{0.1f, 0.5f});
 }
