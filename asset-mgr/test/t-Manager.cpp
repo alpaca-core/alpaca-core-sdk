@@ -202,7 +202,7 @@ TEST_CASE("external execution") {
     mgr.queryAsset("nope", qcb);
     mgr.queryAsset("local", qcb);
     mgr.queryAsset("sizeless", qcb);
-    mgr.stopPush();
+    mgr.pushStop();
 
     mgr.run();
 

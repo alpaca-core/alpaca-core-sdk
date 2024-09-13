@@ -53,10 +53,10 @@ public:
     }
 
     ~Impl() {
-        // now we could always call stopAbort() here, but that has the potential to hide misuse
+        // now we could always call abortRun() here, but that has the potential to hide misuse
         // so to increase the likelihood of a crash, we do it only if we own the execution
         if (m_thread.joinable()) {
-            stopAbort();
+            abortRun();
             m_thread.join();
         }
     }
@@ -109,11 +109,11 @@ public:
         });
     }
 
-    void stopAbort() {
+    void abortRun() {
         m_executor.stop();
     }
 
-    void stopPush() {
+    void pushStop() {
         m_executor.pushTask([this]() {
             m_executor.stop();
         });
@@ -143,12 +143,12 @@ void Manager::run() {
     m_impl->run();
 }
 
-void Manager::stopAbort() {
-    m_impl->stopAbort();
+void Manager::abortRun() {
+    m_impl->abortRun();
 }
 
-void Manager::stopPush() {
-    m_impl->stopPush();
+void Manager::pushStop() {
+    m_impl->pushStop();
 }
 
 Source::~Source() = default; // export vtable

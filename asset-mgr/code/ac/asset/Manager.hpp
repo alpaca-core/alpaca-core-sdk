@@ -18,8 +18,8 @@ public:
     enum InitFlags : uint32_t {
         None = 0,
 
-        // if the manager does not launch it's own thread, it is the reponsibility of the user to call
-        // run() and stop() appropraitely - within the lifetime of the manager
+        // if the manager does not launch it's own thread, it is the responsibility of the user to call
+        // run and pushStop/abortRun appropriately - within the lifetime of the manager
         No_LaunchThread = 1,
     };
 
@@ -39,8 +39,8 @@ public:
     //////////////////////////////////////////////////////////////////////////
     // no thread functions
     void run(); // blocks the current thread until stop is called
-    void stopAbort(); // stops the manager execution potentially aborting any in-flight operations
-    void stopPush(); // stops the manager execution after all in-flight operations are completed
+    void abortRun(); // stops the manager execution potentially aborting any in-flight operations
+    void pushStop(); // stops the manager execution after all in-flight operations are completed
 public:
     class Impl;
     std::unique_ptr<Impl> m_impl;
