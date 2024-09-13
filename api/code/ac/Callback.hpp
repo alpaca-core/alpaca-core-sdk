@@ -11,7 +11,7 @@ namespace ac {
 
 /**
  * @brief A type alias for the result of a callback operation.
- * 
+ *
  * @tparam R The type of the successful result.
  */
 template <typename R>
@@ -19,10 +19,10 @@ using CallbackResult = itlib::expected<R, Error>;
 
 /**
  * @brief A structure representing a callback with result and progress functions.
- * 
+ *
  * This structure is used to handle asynchronous operations in the Alpaca Core library.
  * It provides callbacks for both the final result and intermediate progress updates.
- * 
+ *
  * @tparam R The type of the result.
  * @tparam S The type of the progress value (default is float)
  *

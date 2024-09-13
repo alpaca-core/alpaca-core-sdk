@@ -8,7 +8,7 @@
  * @file ApiCUtil.hpp
  * @brief Utilities for the C API provider interface.
  *
- * This file contains utility functions for converting between C and C++ 
+ * This file contains utility functions for converting between C and C++
  * representations of the API provider.
  */
 

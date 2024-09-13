@@ -27,7 +27,7 @@ public:
 
     /**
      * @brief Creates a model asynchronously.
-     * 
+     *
      * This pure virtual function is to be implemented by derived classes to create
      * a model with the given ID and parameters. The created model is returned via
      * the provided callback.
