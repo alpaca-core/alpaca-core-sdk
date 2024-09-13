@@ -66,13 +66,15 @@ TEST_CASE("AssetSourceHttp") {
         CHECK(progress == 0);
     }
 
-    progress.reset();
 
-    CHECK_THROWS_WITH_AS(
-        src.fetchAssetSync("bytes-150", [](float) { return false; }),
-        "abort",
-        std::runtime_error
-    );
+    {
+        auto info = src.fetchAssetSync("bytes-150", [](float) { return false; });
+        // aborted, but still the size should be available at this point
+        CHECK_FALSE(info.path);
+        CHECK(*info.size == 150);
+    }
+
+    progress.reset();
 
     {
         auto info = src.fetchAssetSync("bytes-150", pcb);

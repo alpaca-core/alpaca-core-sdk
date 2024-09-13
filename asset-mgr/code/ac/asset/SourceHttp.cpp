@@ -62,6 +62,9 @@ Source::BasicAssetInfo SourceHttp::fetchAssetSync(std::string_view id, ProgressC
         throw_ex{} << "Failed to open file for writing: " << ame.targetPath;
     }
 
+     // set info size here, thus even if we abort, we will have the correct size available
+    ame.info.size = g.size();
+
     bool continueDownload = pcb(0);
 
     static constexpr size_t chunkSize = 1024 * 1024; // 1mb chunks
@@ -70,7 +73,8 @@ Source::BasicAssetInfo SourceHttp::fetchAssetSync(std::string_view id, ProgressC
     xxhash::h64 hasher;
     while (!g.done()) {
         if (!continueDownload) {
-            throw_ex{} << "abort";
+            // return incomplete info (abort is not an error)
+            return ame.info;
         }
 
         auto chunk = g.get_next_chunk(buf);
@@ -80,10 +84,10 @@ Source::BasicAssetInfo SourceHttp::fetchAssetSync(std::string_view id, ProgressC
 
         if (g.size()) {
             // if we have a size, we can report meaningful progress
-            // otherwise only leave the 0 above
             continueDownload = pcb(float(totalDownloaded) / *g.size());
         }
         else {
+            // otherwise report zero, but still keep asking if we should continue
             continueDownload = pcb(0);
         }
     }

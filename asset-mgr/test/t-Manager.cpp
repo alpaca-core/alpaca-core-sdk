@@ -32,7 +32,7 @@ public:
     virtual BasicAssetInfo fetchAssetSync(std::string_view id, ProgressCb progress) override {
         auto basicInfo = checkAssetSync(id);
         if (!progress(7)) { // dummy progress so we can check it
-            throw std::runtime_error("dummy abort");
+            return std::move(*basicInfo);
         }
         if (!basicInfo) {
             throw std::runtime_error("dummy not found");
@@ -128,7 +128,7 @@ TEST_CASE("dummy-dir") {
     CHECK(info.source);
     CHECK(info.size == 1000 + 14);
     CHECK_FALSE(info.path);
-    CHECK(info.error == "dummy abort");
+    CHECK_FALSE(info.error);
 
     g(TA_BINARY_FILE);
     REQUIRE(info.source);
