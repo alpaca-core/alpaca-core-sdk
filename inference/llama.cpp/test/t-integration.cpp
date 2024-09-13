@@ -56,7 +56,7 @@ TEST_CASE("inference") {
         inst.warmup(); // should be safe
 
         // choose a very, very suggestive prompt and hope that all architectures will agree
-        auto s = inst.newSession("President George Walker", {});
+        auto s = inst.newSession("President George W.", {});
         {
             auto t = s.getToken();
             REQUIRE(t != ac::llama::Token_Invalid);
