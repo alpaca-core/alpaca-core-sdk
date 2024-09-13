@@ -244,8 +244,8 @@ class LocalProvider::Impl {
     std::thread m_inferenceThread;
 public:
     Impl(uint32_t)
-        : m_execution(m_executor)
-        , m_assetMgr(asset::Manager::No_LaunchThread)
+        : m_assetMgr(asset::Manager::No_LaunchThread)
+        , m_execution(m_executor)
     {
         launchThreads();
     }
