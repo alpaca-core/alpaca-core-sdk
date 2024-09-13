@@ -9,6 +9,7 @@
 #include <itlib/qalgorithm.hpp>
 #include <itlib/stride_span.hpp>
 #include <span>
+#include <cmath>
 #include <cstddef>
 
 namespace ac::llama {
