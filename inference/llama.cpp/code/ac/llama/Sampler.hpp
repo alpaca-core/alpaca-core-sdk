@@ -108,8 +108,6 @@ private:
     // current tokens for sampling (one for each vocabulary entry)
     // kept as member so as to avoid reallocation on every sample call
     std::vector<llama_token_data> m_cur;
-
-    size_t m_numValidTokens = 0; // number of correct top tokens with correct probs
 };
 
 } // namespace ac::llama
