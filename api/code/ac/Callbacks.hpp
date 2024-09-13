@@ -8,6 +8,20 @@
 
 namespace ac {
 
+namespace impl {
+// gcc does not allow us to use std::function<void(void)>
+// standard does not allow us to specialize alias templates
+// well...
+template <typename R>
+struct BasicCb {
+    using type = std::function<void(R)>;
+};
+template <>
+struct BasicCb<void> {
+    using type = std::function<void()>;
+};
+} // namespace impl
+
 /**
  * @brief Type alias for a simple callback function.
  *
@@ -16,7 +30,7 @@ namespace ac {
  * This function is called when the asynchronous operation completes.
  */
 template <typename R>
-using BasicCb = std::function<void(R)>;
+using BasicCb = typename impl::BasicCb<R>::type;
 
 /**
  * @brief Type alias for a result callback function.
