@@ -5,6 +5,7 @@
 #include <ac/asset/Manager.hpp>
 #include <test-assets/assets.h>
 #include <doctest/doctest.h>
+#include <astl/tsumap.hpp>
 #include <latch>
 #include <cstring>
 
@@ -186,4 +187,50 @@ TEST_CASE("dir-dummy") {
     CHECK(info.size == TA_ANOTHER_BINARY_FILE_SIZE);
     CHECK(info.path == Bin_Path + "/" + TA_ANOTHER_BINARY_FILE);
     CHECK_FALSE(info.error);
+}
+
+TEST_CASE("external execution") {
+    ac::asset::Manager mgr(ac::asset::Manager::No_LaunchThread);
+    mgr.addSource(std::make_unique<DummyAssetSource>());
+
+    astl::tsumap<ac::asset::Info> infos;
+
+    auto qcb = [&infos](std::string_view id, const ac::asset::Info& data) {
+        infos[std::string(id)] = data;
+    };
+
+    mgr.queryAsset("nope", qcb);
+    mgr.queryAsset("local", qcb);
+    mgr.queryAsset("sizeless", qcb);
+    mgr.stopPush();
+
+    mgr.run();
+
+    CHECK(infos.size() == 3);
+
+    {
+        auto& info = infos["nope"];
+        CHECK_FALSE(info.source);
+        CHECK_FALSE(info.size);
+        CHECK_FALSE(info.path);
+        CHECK(info.error == "Asset not found");
+    }
+
+    {
+        auto& info = infos["local"];
+        REQUIRE(info.source);
+        CHECK(info.source->id() == "dummy");
+        CHECK(info.size == 1'000'000 + 5);
+        CHECK(info.path == "loc/local");
+        CHECK_FALSE(info.error);
+    }
+
+    {
+        auto& info = infos["sizeless"];
+        REQUIRE(info.source);
+        CHECK(info.source->id() == "dummy");
+        CHECK_FALSE(info.size);
+        CHECK_FALSE(info.path);
+        CHECK_FALSE(info.error);
+    }
 }

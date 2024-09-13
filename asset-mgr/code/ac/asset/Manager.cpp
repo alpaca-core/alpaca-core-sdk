@@ -46,19 +46,25 @@ class Manager::Impl {
         return m_assets.end();
     }
 public:
-    Impl() : m_execution(m_executor) {
-        launchThread();
+    Impl(uint32_t flags) : m_execution(m_executor) {
+        if (!(flags & No_LaunchThread)) {
+            launchThread();
+        }
     }
 
     ~Impl() {
-        m_executor.stop();
-        m_thread.join();
+        // now we could always call stopAbort() here, but that has the potential to hide misuse
+        // so to increase the likelihood of a crash, we do it only if we own the execution
+        if (m_thread.joinable()) {
+            stopAbort();
+            m_thread.join();
+        }
     }
 
     void launchThread() {
         m_thread = std::thread([this]() {
             xec::SetThisThreadName("ac-assets");
-            m_execution.run();
+            run();
         });
     }
 
@@ -102,9 +108,23 @@ public:
             m_sources[priority].push_back(astl::move(source));
         });
     }
+
+    void stopAbort() {
+        m_executor.stop();
+    }
+
+    void stopPush() {
+        m_executor.pushTask([this]() {
+            m_executor.stop();
+        });
+    }
+
+    void run() {
+        m_execution.run();
+    }
 };
 
-Manager::Manager() : m_impl(std::make_unique<Impl>()) {}
+Manager::Manager(uint32_t flags) : m_impl(std::make_unique<Impl>(flags)) {}
 Manager::~Manager() = default;
 
 void Manager::queryAsset(std::string id, QueryAssetCb cb) {
@@ -117,6 +137,18 @@ void Manager::getAsset(std::string id, GetAssetCb cb, GetAssetProgressCb progres
 
 void Manager::addSource(std::unique_ptr<Source> source, int priority) {
     m_impl->addSource(astl::move(source), priority);
+}
+
+void Manager::run() {
+    m_impl->run();
+}
+
+void Manager::stopAbort() {
+    m_impl->stopAbort();
+}
+
+void Manager::stopPush() {
+    m_impl->stopPush();
 }
 
 Source::~Source() = default; // export vtable
