@@ -42,7 +42,7 @@ jobs:
               title: 'Update submodules',
               body: `It's time to update our forks and submodules. Check for upstream updates and merge them if necessary.
 
-            Don't forget to use [guide](https://github.com/alpaca-core/alpaca-core/blob/master/doc/dev/updating-submodules.md).
+            Don't forget to use [the guide](https://github.com/alpaca-core/alpaca-core/blob/master/doc/dev/updating-submodules.md).
 
             Subbmodules to update:
 
