@@ -19,6 +19,7 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
+#include "export.h"
 #include "Dict.hpp"
 #include "dict_ref.h"
 #include "dict_root.h"

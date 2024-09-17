@@ -1,9 +1,8 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include <ac/api.h>
+#include <ac/local_provider.h>
 #include <stdint.h>
 
 uint64_t get_thread_id(void);
-ac_api_provider* create_dummy_provider(void);
-void add_dummy_inference(ac_api_provider* local_provider);
+void add_dummy_inference(ac_local_provider* local_provider);

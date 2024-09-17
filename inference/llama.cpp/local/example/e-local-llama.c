@@ -94,7 +94,7 @@ void on_op_stream(ac_dict_ref dict, void* user_data) {
 int main(void) {
     jalogc_init((jalogc_init_params) { .add_default_sink = true });
 
-    ac_api_provider* local_provider = ac_new_local_api_provider();
+    ac_local_provider* local_provider = ac_new_local_api_provider();
     app_state state;
 
     int ret = 0;
@@ -153,6 +153,6 @@ int main(void) {
 
 cleanup:
     free_state(&state);
-    ac_free_api_provider(local_provider);
+    ac_free_local_provider(local_provider);
     return ret;
 }

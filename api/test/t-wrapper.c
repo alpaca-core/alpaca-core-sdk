@@ -6,13 +6,12 @@
 #include <ac-test-util/unity.h>
 #include <string.h>
 
-ac_api_provider* create_dummy_provider(void);
+ac_model* create_dummy_model(void);
 void setUp(void) {}
 void tearDown(void) {}
 
 void free_null(void) {
     // all must be safe
-    ac_free_api_provider(NULL);
     ac_free_model(NULL);
     ac_free_instance(NULL);
 }
@@ -77,35 +76,9 @@ void on_op_stream(ac_dict_ref dict, void* user_data) {
     ac_dict_take(s->dict, dict);
 }
 
-void dummy_provider(void) {
-    ac_api_provider* provider = create_dummy_provider();
-    CHECK_NOT_NULL(provider);
-
+void dummy_model(void) {
     state s = {0};
-    ac_create_model(
-        provider, "error",
-        ac_dict_new_root_from_json("{\"error\": true}", NULL),
-        on_model_result, on_progress, &s
-    );
-    CHECK_EQ_STR("dummy id error", s.last_error);
-    CHECK_NULL(s.model);
-    CHECK_CLOSE(1e-5, 0.2, s.last_progress);
-    s.last_progress = 0;
-
-    ac_create_model(
-        provider, "model",
-        ac_dict_new_root_from_json("{\"error\": true}", NULL),
-        on_model_result, on_progress, &s
-    );
-    CHECK_EQ_STR("dummy param error", s.last_error);
-    CHECK_NULL(s.model);
-    s.last_progress = 0;
-
-    ac_create_model(
-        provider, "model",
-        NULL,
-        on_model_result, on_progress, &s
-    );
+    s.model = create_dummy_model();
     CHECK_EQ_STR("", s.last_error);
     CHECK_NOT_NULL(s.model);
 
@@ -181,12 +154,11 @@ void dummy_provider(void) {
     ac_dict_free_root(s.dict_root);
     ac_free_instance(s.instance);
     ac_free_model(s.model);
-    ac_free_api_provider(provider);
 }
 
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(free_null);
-    RUN_TEST(dummy_provider);
+    RUN_TEST(dummy_model);
     return UNITY_END();
 }

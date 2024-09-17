@@ -19,7 +19,6 @@ target_sources(ac-api PRIVATE
     ac/CallbackResult.hpp
     ac/Callbacks.hpp
     ac/Dict.hpp
-    ac/Provider.hpp
     ac/InstancePtr.hpp
     ac/Instance.hpp
     ac/Model.hpp

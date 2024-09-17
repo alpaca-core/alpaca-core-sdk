@@ -7,66 +7,21 @@
 #include "ApiCUtil.hpp"
 #include "Instance.hpp"
 #include "Model.hpp"
-#include "Provider.hpp"
 
 #include <astl/move.hpp>
 
 #include <cassert>
 
-namespace ac::cutil {
-Provider* Provider_from_provider(ac_api_provider* p) {
-    return reinterpret_cast<Provider*>(p);
-}
-ac_api_provider* Provider_to_provider(Provider* p) {
-    return reinterpret_cast<ac_api_provider*>(p);
-}
-}
-
-using namespace ac::cutil;
-
-struct ac_model {
-    ac::ModelPtr model;
-};
-
 struct ac_instance {
     ac::InstancePtr instance;
 };
 
-extern "C" {
+using namespace ac::cutil;
 
-void ac_free_api_provider(ac_api_provider* p) {
-    auto provider = Provider_from_provider(p);
-    delete provider;
-}
+extern "C" {
 
 void ac_free_model(ac_model* m) {
     delete m;
-}
-
-void ac_create_model(
-    ac_api_provider* p,
-    const char* model_id,
-    ac_dict_root* dict_root,
-    void (*result_cb)(ac_model* m, const char* error, void* user_data),
-    void (*progress_cb)(ac_sv tag, float progress, void* user_data),
-    void* cb_user_data
-) {
-    auto provider = Provider_from_provider(p);
-    provider->createModel(model_id, Dict_from_dict_root_consume(dict_root), {
-        [=](ac::CallbackResult<ac::ModelPtr> result) {
-            if (result.has_value()) {
-                result_cb(new ac_model{astl::move(result.value())}, nullptr, cb_user_data);
-            }
-            else {
-                result_cb(nullptr, result.error().text.c_str(), cb_user_data);
-            }
-        },
-        [=](std::string_view tag, float progress) {
-            if (progress_cb) {
-                progress_cb(ac_sv::from_std(tag), progress, cb_user_data);
-            }
-        }
-    });
 }
 
 void ac_free_instance(ac_instance* i) {

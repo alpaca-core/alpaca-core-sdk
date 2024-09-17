@@ -4,11 +4,11 @@
 #include "local_whisper.h"
 #include "LocalWhisper.hpp"
 #include <ac/LocalProvider.hpp>
-#include <ac/ApiCUtil.hpp>
+#include <ac/LocalProviderCUtil.hpp>
 #include <cassert>
 
-extern "C" void ac_add_local_whisper_inference(ac_api_provider* local_provider) {
-    auto localProvider = dynamic_cast<ac::LocalProvider*>(ac::cutil::Provider_from_provider(local_provider));
+extern "C" void ac_add_local_whisper_inference(ac_local_provider* local_provider) {
+    auto localProvider = ac::cutil::LocalProvider_toCpp(local_provider);
     assert(localProvider);
     ac::addLocalWhisperInference(*localProvider);
 }

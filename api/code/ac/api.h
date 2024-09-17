@@ -3,9 +3,9 @@
 //
 #pragma once
 #include "export.h"
-#include "api_provider.h"
 #include "dict_ref.h"
 #include "dict_root.h"
+#include "model.h"
 #include <astl/sv.h>
 
 /**
@@ -17,7 +17,6 @@
  * from C programs or other languages that can interface with C.
  *
  * Key components:
- * - ac_api_provider: Wraps the C++ Provider class
  * - ac_model: Wraps the C++ ModelPtr
  * - ac_instance: Wraps the C++ InstancePtr
  *
@@ -34,19 +33,6 @@ extern "C" {
 #endif
 
 // to obtain a provider use a library which can create it
-/**
- * @brief Free an API provider
- *
- * This function should be called to clean up the provider object when it's no longer needed.
- *
- * @param p Pointer to the API provider to be freed
- */
-AC_API_EXPORT void ac_free_api_provider(ac_api_provider* p);
-
-/**
- * @brief Opaque structure representing a model
- */
-typedef struct ac_model ac_model;
 
 /**
  * @brief Free a model
@@ -56,28 +42,6 @@ typedef struct ac_model ac_model;
  * @param m Pointer to the model to be freed
  */
 AC_API_EXPORT void ac_free_model(ac_model* m);
-
-/**
- * @brief Create a model asynchronously
- *
- * This function initiates the asynchronous creation of a model. The result is returned
- * via the provided callback function.
- *
- * @param p Pointer to the API provider
- * @param model_id Identifier for the model to be created (e.g., "gpt2")
- * @param dict_root Dictionary containing model parameters (can be NULL for default parameters)
- * @param result_cb Callback function to be called with the result
- * @param progress_cb Callback function for progress updates (can be NULL if not needed)
- * @param cb_user_data User data to be passed to the callbacks
- */
-AC_API_EXPORT void ac_create_model(
-    ac_api_provider* p,
-    const char* model_id,
-    ac_dict_root* dict_root,
-    void (*result_cb)(ac_model* m, const char* error, void* user_data),
-    void (*progress_cb)(ac_sv tag, float progress, void* user_data),
-    void* cb_user_data
-);
 
 /**
  * @brief Opaque structure representing an instance

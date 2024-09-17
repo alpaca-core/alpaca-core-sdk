@@ -4,7 +4,6 @@
 
 // a dummy synchronous provider used in tests only
 
-#include <ac/Provider.hpp>
 #include <ac/Model.hpp>
 #include <ac/Instance.hpp>
 #include <ac/ApiCUtil.hpp>
@@ -51,29 +50,8 @@ class DummyModel final : public ac::Model {
     }
 };
 
-class DummyProvider final : public ac::Provider {
-    void createModel(std::string_view id, ac::Dict params, Callback<ac::ModelPtr> cb) override {
-        cb.progressCb(id, 0.2f);
-
-        if (id == "error") {
-            cb.resultCb(itlib::unexpected(ac::Error{"dummy id error"}));
-            return;
-        }
-
-        cb.progressCb(id, 0.5f);
-
-        if (ac::Dict_optValueAt(params, "error", false)) {
-            cb.resultCb(itlib::unexpected(ac::Error{"dummy param error"}));
-            return;
-        }
-
-        cb.progressCb(id, 1.f);
-        cb.resultCb(ac::ModelPtr{std::make_shared<DummyModel>()});
-    }
-};
-
 } // anonymous namespace
 
-extern "C" ac_api_provider* create_dummy_provider() {
-    return ac::cutil::Provider_to_provider(new DummyProvider);
+extern "C" ac_model* create_dummy_model() {
+    return ac::cutil::ac_model_create(std::make_shared<DummyModel>());
 }

@@ -11,6 +11,8 @@
 
 #include <ac/LocalProvider.hpp>
 #include <ac/LocalModelInfo.hpp>
+#include <ac/local_provider.h>
+#include <ac/LocalProviderCUtil.hpp>
 
 #include <astl/throw_ex.hpp>
 
@@ -124,14 +126,9 @@ extern "C" uint64_t get_thread_id() {
     return std::hash<std::thread::id>{}(std::this_thread::get_id());
 }
 
-extern "C" ac_api_provider* create_dummy_provider() {
-    return ac::cutil::Provider_to_provider(new ac::LocalProvider);
-}
-
-extern "C" void add_dummy_inference(ac_api_provider* local_provider) {
+extern "C" void add_dummy_inference(ac_local_provider* local_provider) {
     static DummyLocalInferenceModelLoader loader;
-    auto localProvider = dynamic_cast<ac::LocalProvider*>(ac::cutil::Provider_from_provider(local_provider));
-    assert(localProvider);
+    auto localProvider = ac::cutil::LocalProvider_toCpp(local_provider);
     localProvider->addLocalInferenceLoader("dummy", loader);
 
     localProvider->addAssetSource(createDummyAssetSource(), 0);

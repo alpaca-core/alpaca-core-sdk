@@ -3,6 +3,7 @@
 //
 #include "tl-dummy-local-provider.h"
 #include <ac/dict.h>
+#include <ac/api.h>
 #include <ac-test-util/unity.h>
 
 #include <string.h>
@@ -93,7 +94,7 @@ void wait_for_cur_step(state* s) {
 }
 
 void dummy_provider(void) {
-    ac_api_provider* provider = create_dummy_provider();
+    ac_local_provider* provider = ac_new_local_api_provider();
     CHECK_NOT_NULL(provider);
     add_dummy_inference(provider);
 
@@ -259,7 +260,7 @@ void dummy_provider(void) {
     ac_dict_free_root(s.dict_root);
     ac_free_instance(s.instance);
     ac_free_model(s.model);
-    ac_free_api_provider(provider);
+    ac_free_local_provider(provider);
 }
 
 int main(void) {
