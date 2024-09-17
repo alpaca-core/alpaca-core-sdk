@@ -24,7 +24,16 @@ We'll think in a context of multiple apps, but all tests are done with 2 apps
 
 ## Asset downloading
 
-TBD
+To download an asset we have to create `URLSessionDownloadTask` which will download the file we've requested from provided URL.
+
+Those `URLSessionDownloadTask`s are created through `URLSessionConfiguration` from which depends if the download task will be a background or foreground task.
+
+- Background sessions (`URLSessionConfiguration.background`)
+    - the task will continue after the app termination
+    - if the app is resumed after termination, the system will notify the app for the completed downloads or any errors via delegate methods
+- Foreground sessions (`URLSessionConfiguration.default`)
+    - the task will stop when the app is terminated
+    - the task won't be resumed automatically when the app is relaunched
 
 ## Possible approaches for model sharing
 
