@@ -3,6 +3,7 @@
 //
 #pragma once
 #include "export.h"
+#include "ModelDesc.hpp"
 #include <ac/ModelPtr.hpp>
 #include <ac/Callbacks.hpp>
 #include <ac/Dict.hpp>
@@ -18,38 +19,25 @@ class Source;
 }
 
 class LocalInferenceModelLoader;
-struct ModelInfo;
 
 class AC_LOCAL_EXPORT LocalProvider {
 public:
     enum InitFlags : uint32_t {
         Default_Init = 0,
 
-        // if the provider does not launch it's own threads, it is the responsibility of the user to call
-        // runInference, runAssetManagement and abortWorkers appropriately - within the lifetime of the provider
-        No_LaunchThreads = 1,
+        // if the provider does not launch its own inference thread, it is the responsibility of the user to call
+        // run and pushStop/abortRun appropriately - within the lifetime of the provider
+        No_LaunchThread = 1,
     };
 
     explicit LocalProvider(uint32_t flags = Default_Init);
     ~LocalProvider();
 
-    /**
-     * @brief A structure representing a callback with result and progress functions.
-     *
-     * This structure is used to handle asynchronous operations in the provider.
-     * It provides callbacks for both the final result and intermediate progress updates.
-     *
-     * @tparam R The type of the result.
-     *
-     * Example usage:
-     * @snippet inference/llama.cpp/local/example/e-local-llama.cpp Provider_createModel Usage Example
-     */
-    template <typename R>
-    struct Callback {
+    struct ModelCb {
         /**
          * @brief The result callback function.
          */
-        ResultCb<R> resultCb;
+        ResultCb<ModelPtr> resultCb;
 
         /**
          * @brief The progress callback function.
@@ -60,17 +48,15 @@ public:
          */
         ProgressCb progressCb;
     };
-    void createModel(std::string_view id, Dict params, Callback<ModelPtr> cb);
+    void createModel(ModelDesc desc, Dict params, ModelCb cb);
 
-    void addAssetSource(std::unique_ptr<asset::Source> source, int priority);
-    void addModel(ModelInfo info);
     void addLocalInferenceLoader(std::string_view type, LocalInferenceModelLoader& loader);
 
     //////////////////////////////////////////////////////////////////////////
     // no thread functions
-    void runInference(); // blocks the current thread until abortWorkers is called
-    void runAssetManagement(); // blocks the current thread until abortWorkers is called
-    void abortWorkers(); // stops the inference and asset workers potentially aborting any in-flight operations
+    void run(); // block the current thread until stop is called
+    void abortRun(); // stop the provider execution potentially aborting any in-flight operations
+    void pushStop(); // stop the provider execution after all in-flight operations are completed
 private:
     class Impl;
     std::unique_ptr<Impl> m_impl;

@@ -2,15 +2,12 @@
 // SPDX-License-Identifier: MIT
 //
 #include <ac/LocalInference.hpp>
-#include <ac/asset/Source.hpp>
 
 class DummyLocalInferenceModelLoader final : public ac::LocalInferenceModelLoader {
 public:
     virtual std::unique_ptr<ac::LocalInferenceModel> loadModelSync(
-        ac::LocalModelInfoPtr info,
+        ac::ModelDesc desc,
         ac::Dict params,
         ac::ProgressCb progress
     ) override;
 };
-
-std::unique_ptr<ac::asset::Source> createDummyAssetSource();

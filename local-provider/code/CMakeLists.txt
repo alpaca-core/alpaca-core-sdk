@@ -12,7 +12,6 @@ target_link_libraries(ac-local
         xec::xec
     PUBLIC
         ac::api
-        ac::asset-mgr
 )
 target_sources(ac-local PRIVATE
     ac/export.h

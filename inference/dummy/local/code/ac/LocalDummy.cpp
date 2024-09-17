@@ -7,7 +7,6 @@
 #include <ac/dummy/Model.hpp>
 
 #include <ac/LocalProvider.hpp>
-#include <ac/LocalModelInfo.hpp>
 #include <ac/LocalInference.hpp>
 
 #include <astl/move.hpp>
@@ -89,14 +88,12 @@ public:
 
 class DummyModelLoader final : public LocalInferenceModelLoader {
 public:
-    virtual std::unique_ptr<LocalInferenceModel> loadModelSync(LocalModelInfoPtr info, Dict params, ProgressCb pcb) override {
-        if (!info) throw_ex{} << "dummy: no model info";
-        if (info->localAssets.size() != 1) throw_ex{} << "dummy: expected exactly one local asset";
-        auto& fname = info->localAssets.front().path;
-        if (!fname) throw_ex{} << "dummy: missing fname path";
+    virtual std::unique_ptr<LocalInferenceModel> loadModelSync(ModelDesc desc, Dict params, ProgressCb pcb) override {
+        if (desc.assets.size() != 1) throw_ex{} << "dummy: expected exactly one local asset";
+        auto& fname = desc.assets.front().path;
+        if (pcb) pcb(fname, 0.1f);
         auto modelParams = ModelParams_fromDict(params);
-        if (pcb) pcb(*fname, 0.1f);
-        return std::make_unique<DummyModel>(*fname, std::move(modelParams));
+        return std::make_unique<DummyModel>(fname, std::move(modelParams));
     }
 };
 }

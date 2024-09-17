@@ -102,9 +102,14 @@ void dummy_provider(void) {
     s.main_thread_id = get_thread_id();
     atomic_init(&s.cur_step_done, false);
 
+    ac_model_desc_asset assets[] = {
+        {"asset1", "tag1"},
+        {"asset2", "tag2"},
+    };
+
     {
         ac_create_model(
-            provider, "model",
+            provider, "dummy", assets, 2,
             ac_dict_new_root_from_json("{\"error\": true}", NULL),
             on_model_result, on_progress, &s
         );
@@ -118,7 +123,7 @@ void dummy_provider(void) {
 
     {
         ac_create_model(
-            provider, "empty",
+            provider, "not-dummy", NULL, 0,
             NULL,
             on_model_result, on_progress, &s
         );
@@ -131,7 +136,7 @@ void dummy_provider(void) {
     // note: create model with id "model" - successfully
     {
         ac_create_model(
-            provider, "model",
+            provider, "dummy", assets, 2,
             NULL,
             on_model_result, on_progress, &s
         );

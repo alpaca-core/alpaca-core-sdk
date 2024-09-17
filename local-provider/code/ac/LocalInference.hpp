@@ -3,7 +3,7 @@
 //
 #pragma once
 #include "export.h"
-#include "LocalModelInfoPtr.hpp"
+#include "ModelDesc.hpp"
 #include <ac/Dict.hpp>
 #include <ac/Callbacks.hpp>
 #include <string_view>
@@ -34,7 +34,7 @@ class AC_LOCAL_EXPORT LocalInferenceModelLoader {
 public:
     virtual ~LocalInferenceModelLoader();
 
-    virtual std::unique_ptr<LocalInferenceModel> loadModelSync(LocalModelInfoPtr info, Dict params, ProgressCb progress) = 0;
+    virtual std::unique_ptr<LocalInferenceModel> loadModelSync(ModelDesc desc, Dict params, ProgressCb progress) = 0;
 };
 
 }

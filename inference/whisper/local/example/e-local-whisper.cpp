@@ -3,10 +3,8 @@
 //
 #include <ac/LocalProvider.hpp>
 #include <ac/LocalWhisper.hpp>
-#include <ac/asset/SourceLocalDir.hpp>
 
 #include <ac/Model.hpp>
-#include <ac/ModelInfo.hpp>
 #include <ac/Instance.hpp>
 #include <ac/Dict.hpp>
 
@@ -34,25 +32,27 @@ int main() {
 
     ac::LocalProvider provider;
     ac::addLocalWhisperInference(provider);
-    provider.addAssetSource(ac::asset::SourceLocalDir_Create(AC_TEST_DATA_WHISPER_DIR), 0);
-
-    provider.addModel(ac::ModelInfo{
-        .id = "whisper_en",
-        .inferenceType = "whisper.cpp",
-        .assets = {{"whisper-base.en-f16.bin", {}}}
-    });
 
     std::optional<std::latch> latch;
 
     ac::CallbackResult<ac::ModelPtr> modelResult;
     latch.emplace(1);
-    provider.createModel("whisper_en", {}, {
-        [&](ac::CallbackResult<ac::ModelPtr> result) {
-            modelResult = std::move(result);
-            latch->count_down();
+    provider.createModel(
+        {
+            .inferenceType = "whisper.cpp",
+            .assets = {
+                {.path = AC_TEST_DATA_WHISPER_DIR "/whisper-base.en-f16.bin"}
+            }
         },
-        {} // empty progress callback
-    });
+        {}, // no params
+        {
+            [&](ac::CallbackResult<ac::ModelPtr> result) {
+                modelResult = std::move(result);
+                latch->count_down();
+            },
+            {} // empty progress callback
+        }
+    );
 
     latch->wait();
 

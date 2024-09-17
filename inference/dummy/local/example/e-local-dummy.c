@@ -5,7 +5,6 @@
 #include <ac/dict.h>
 #include <ac/local_provider.h>
 #include <ac/local_dummy.h>
-#include <ac/asset/source_local_dir.h>
 
 #include <jalogc.h>
 
@@ -101,17 +100,16 @@ int main(void) {
     init_app_state(&state);
 
     ac_add_local_dummy_inference(local_provider);
-    ac_add_asset_source(local_provider, ac_new_asset_source_local_dir(AC_TEST_DATA_DUMMY_DIR), 0);
 
-    {
-        ac_model_info_asset asset = { .id = AC_DUMMY_MODEL_SMALL_ASSET };
-        ac_add_model(local_provider, "dummy-small", "dummy", &asset, 1);
-    }
+    ac_model_desc_asset model_asset = {
+        .path = AC_DUMMY_MODEL_SMALL,
+        .tag = "x"
+    };
 
     printf("Loading model...\n");
     ac_create_model(
         local_provider,
-        "dummy-small",
+        "dummy", &model_asset, 1,
         NULL,
         on_model_result,
         on_progress,

@@ -8,7 +8,6 @@
 #include <ac/whisper/Model.hpp>
 
 #include <ac/LocalProvider.hpp>
-#include <ac/LocalModelInfo.hpp>
 #include <ac/LocalInference.hpp>
 
 #include <astl/move.hpp>
@@ -67,13 +66,11 @@ public:
 
 class WhisperModelLoader final : public LocalInferenceModelLoader {
 public:
-    virtual std::unique_ptr<LocalInferenceModel> loadModelSync(LocalModelInfoPtr info, Dict /*params*/, ProgressCb /*progressCb*/) override {
-        if (!info) throw_ex{} << "whisper: no model info";
-        if (info->localAssets.size() != 1) throw_ex{} << "whisper: expected exactly one local asset";
-        auto& bin = info->localAssets.front().path;
-        if (!bin) throw_ex{} << "whisper: missing gguf path";
+    virtual std::unique_ptr<LocalInferenceModel> loadModelSync(ModelDesc desc, Dict /*params*/, ProgressCb /*progressCb*/) override {
+        if (desc.assets.size() != 1) throw_ex{} << "whisper: expected exactly one local asset";
+        auto& bin = desc.assets.front().path;
         whisper::Model::Params modelParams;
-        return std::make_unique<WhisperModel>(*bin, modelParams);
+        return std::make_unique<WhisperModel>(bin, modelParams);
     }
 };
 }

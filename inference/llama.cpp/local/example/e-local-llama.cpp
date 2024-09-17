@@ -3,8 +3,6 @@
 //
 #include <ac/LocalProvider.hpp>
 #include <ac/LocalLlama.hpp>
-#include <ac/ModelInfo.hpp>
-#include <ac/asset/SourceLocalDir.hpp>
 
 #include <ac/Model.hpp>
 #include <ac/Instance.hpp>
@@ -24,34 +22,36 @@ int main() {
 
     ac::LocalProvider provider;
     ac::addLocalLlamaInference(provider);
-    provider.addAssetSource(ac::asset::SourceLocalDir_Create(AC_TEST_DATA_LLAMA_DIR), 0);
-
-    provider.addModel(ac::ModelInfo{
-        .id = "gpt2",
-        .inferenceType = "llama.cpp",
-        .assets = {{"gpt2-117m-q6_k.gguf", {}}}
-    });
 
     //! [Provider_createModel Usage Example]
     std::optional<std::latch> latch;
 
     ac::CallbackResult<ac::ModelPtr> modelResult;
     latch.emplace(1);
-    provider.createModel("gpt2", {}, {
-        [&](ac::CallbackResult<ac::ModelPtr> result) {
-            std::cout << '\n';
-            modelResult = std::move(result);
-            latch->count_down();
-        },
-        [](std::string_view tag, float) {
-            if (tag.empty()) {
-                std::cout.put('*');
+    provider.createModel(
+        {
+            .inferenceType = "llama.cpp",
+            .assets = {
+                {.path = AC_TEST_DATA_LLAMA_DIR "/gpt2-117m-q6_k.gguf"}
             }
-            else {
-                std::cout.put(tag[0]);
+        },
+        {},
+        {
+            [&](ac::CallbackResult<ac::ModelPtr> result) {
+                std::cout << '\n';
+                modelResult = std::move(result);
+                latch->count_down();
+            },
+            [](std::string_view tag, float) {
+                if (tag.empty()) {
+                    std::cout.put('*');
+                }
+                else {
+                    std::cout.put(tag[0]);
+                }
             }
         }
-    });
+    );
 
     latch->wait();
 

@@ -3,11 +3,7 @@
 //
 #include "LocalProvider.hpp"
 #include "LocalInference.hpp"
-#include "LocalModelInfo.hpp"
-#include "ModelInfo.hpp"
 #include "Logging.hpp"
-#include <ac/asset/Manager.hpp>
-#include <ac/asset/Source.hpp>
 #include <ac/Model.hpp>
 #include <ac/Instance.hpp>
 #include <xec/TaskExecutor.hpp>
@@ -15,15 +11,11 @@
 #include <xec/ThreadName.hpp>
 #include <astl/move_capture.hpp>
 #include <astl/tsumap.hpp>
-#include <astl/coro_lock.hpp>
-#include <astl/iile.h>
-#include <astl/cow.hpp>
 #include <itlib/shared_from.hpp>
 #include <itlib/make_ptr.hpp>
 #include <unordered_map>
 #include <latch>
 #include <atomic>
-#include <coroutine>
 
 #define LOG_INFO(...) AC_LOCAL_LOG(Info, __VA_ARGS__)
 
@@ -106,184 +98,38 @@ public:
         });
     }
 };
-
-// coroutines
-
-class CoTask {
-public:
-    struct promise_type {
-        CoTask get_return_object() noexcept {
-            return CoTask{ std::coroutine_handle<promise_type>::from_promise(*this) };
-        }
-        void unhandled_exception() noexcept { /* terminate? */ }
-        std::suspend_always initial_suspend() noexcept { return {}; }
-        std::suspend_never final_suspend() noexcept { return {}; }
-        void return_void() noexcept {}
-    };
-    using Handle = std::coroutine_handle<promise_type>;
-
-    CoTask(CoTask&& other) noexcept : m_handle(std::exchange(other.m_handle, nullptr)) {}
-    ~CoTask() {
-        if (m_handle) {
-            m_handle.destroy();
-        }
-    }
-    Handle take_handle() noexcept {
-        return std::exchange(m_handle, nullptr);
-    }
-private:
-    Handle m_handle;
-    explicit CoTask(Handle handle) noexcept : m_handle(handle) {}
-};
-
-struct async_resume {
-    std::coroutine_handle<> handle;
-
-    explicit async_resume(std::coroutine_handle<> h) : handle(h) {}
-
-    async_resume(const async_resume&) = delete;
-    async_resume& operator=(const async_resume&) = delete;
-    async_resume(async_resume&& other) noexcept : handle(std::exchange(other.handle, nullptr)) {}
-    async_resume& operator=(async_resume&& other) noexcept = delete; // don't move around
-
-    ~async_resume() {
-        // not resumed, so destoy the handle
-        if (handle) {
-            handle.destroy();
-        }
-    }
-    void operator()() {
-        auto h = std::exchange(handle, nullptr);
-        h.resume();
-    }
-};
-
-class AssetAwaitable {
-protected:
-    std::string_view m_id;
-    asset::Manager& m_mgr;
-    xec::TaskExecutor& m_executor;
-    std::optional<asset::Info> m_assetInfo;
-public:
-    AssetAwaitable(std::string_view id, asset::Manager& mgr, xec::TaskExecutor& executor)
-        : m_id(id)
-        , m_mgr(mgr)
-        , m_executor(executor)
-    {}
-
-    bool await_ready() const noexcept { return false; }
-    asset::Info await_resume() {
-        return std::move(*m_assetInfo);
-    }
-};
-
-class AssetQuery : public AssetAwaitable {
-public:
-    using AssetAwaitable::AssetAwaitable;
-
-    void await_suspend(std::coroutine_handle<> handle) {
-        m_mgr.queryAsset(std::string(m_id), [this, handle](std::string_view, const asset::Info& data) {
-            m_assetInfo = data;
-            m_executor.pushTask(async_resume(handle));
-        });
-    }
-};
-
-class AssetGet : public AssetAwaitable {
-    asset::Manager::GetAssetProgressCb m_progressCb;
-public:
-    AssetGet(std::string_view id, asset::Manager& mgr, xec::TaskExecutor& executor, asset::Manager::GetAssetProgressCb progressCb)
-        : AssetAwaitable(id, mgr, executor)
-        , m_progressCb(astl::move(progressCb))
-    {}
-
-    void await_suspend(std::coroutine_handle<> handle) {
-        m_mgr.getAsset(std::string(m_id),
-            [this, handle](std::string_view, const asset::Info& data) {
-                m_assetInfo = data;
-                m_executor.pushTask(async_resume(handle));
-            },
-            astl::move(m_progressCb)
-        );
-    }
-};
-
 } // anonymous namespace
 
 class LocalProvider::Impl {
     astl::tsumap<LocalInferenceModelLoader*> m_loaders;
 
-    struct ModelManifestEntry {
-        // this is a quite complex struct
-        // it contains the model info which is to be shared with the outside world upon model queries
-        // the info is also used across the provider (in a single strand) to manage model creation and assets
-        // some of the provider's methods are coroutines which get spliced into the strand
-        //
-        // 1. to facilitate sharing between threads we use the CoW object
-        // 2. to facilitate sharing between coroutines we use the coro_lock (thus coroutines wait before touching infos)
-
-        astl::coro_lock lock;
-        astl::sp_cow<LocalModelInfo> info;
-    };
-
-    // the complexity just grows
-    // the model manifest is a map of model ids to model infos (btw could be made into an unordered_set)
-    // since spliced coroutines lock entries, we should never remove them from the map, otherwise we could
-    // leave awaiters hanging with an invalid reference
-    // and thus we created the spec that model infos are permanent, yay :)
-    // note that they are not immutable, model sources could still change them, just never remove them
-    astl::tsumap<std::unique_ptr<ModelManifestEntry>> m_modelManifest;
-
-    // assets
-    asset::Manager m_assetMgr;
-    std::thread m_assetThread;
-
     // inference
     xec::TaskExecutor m_executor;
     xec::LocalExecution m_execution;
-    std::thread m_inferenceThread;
+    std::thread m_thread;
 public:
     Impl(uint32_t flags)
-        : m_assetMgr(asset::Manager::No_LaunchThread)
-        , m_execution(m_executor)
+        : m_execution(m_executor)
     {
-        if (!(flags & No_LaunchThreads)) {
-            launchThreads();
+        if (!(flags & No_LaunchThread)) {
+            launchThread();
         }
     }
 
     ~Impl() {
-        if (m_inferenceThread.joinable()) {
-            assert(m_assetThread.joinable()); // we must have launched both threads, no?
-
-            // complex shutdown logic since we're running threads and communicating by raw refs :)
-
-            abortWorkers();
-
-            // first shut down the local execution and thus stop any tasks issued to m_assetMgr
-            m_inferenceThread.join();
-
-            // then stop m_assetMgr so it, in turn, stops issuing tasks to our executor
-            m_assetThread.join();
-
-            // any hanging tasks are just discarded
+        // now we could always call abortRun() here, but that has the potential to hide misuse
+        // so to increase the likelihood of a crash, we do it only if we own the execution
+        if (m_thread.joinable()) {
+            abortRun();
+            m_thread.join();
         }
     }
 
-    void launchThreads() {
-        m_assetThread = std::thread([this]() {
-            xec::SetThisThreadName("ac-asset");
-            runAssetManagement();
-        });
-        m_inferenceThread = std::thread([this]() {
+    void launchThread() {
+        m_thread = std::thread([this]() {
             xec::SetThisThreadName("ac-local");
-            runInference();
+            run();
         });
-    }
-
-    void addAssetSource(std::unique_ptr<asset::Source> source, int priority) {
-        // asset manager is thread safe, so no need to push this to the executor
-        m_assetMgr.addSource(astl::move(source), priority);
     }
 
     void addLocalInferenceLoader(std::string_view type, LocalInferenceModelLoader& loader) {
@@ -292,157 +138,67 @@ public:
         });
     }
 
-    void co_splice(std::coroutine_handle<> h) {
-        m_executor.pushTask(async_resume(h));
-    }
-
-    void co_splice(CoTask task) {
-        co_splice(task.take_handle());
-    }
-
-    CoTask coAddModel(ModelInfo info) {
-        // spliced coroutine: prepare lock
-        astl::coro_lock::guard lockGuard;
-
-        LOG_INFO("adding model: ", info.id);
-
-        auto iter = m_modelManifest.find(info.id);
-        if (iter == m_modelManifest.end()) {
-            // creating a new model info
-            // update the manifest so that everyone knows it's there and immediately lock it
-            auto entry = std::make_unique<ModelManifestEntry>();
-            lockGuard = entry->lock.try_lock_guard(); // no need to await since it's just created
-            assert(lockGuard); // must be able to lock immediately
-            iter = m_modelManifest.emplace(info.id, astl::move(entry)).first;
-        }
-        else {
-            // we're updating the model info so just lock it
-            lockGuard = co_await iter->second->lock;
-        }
-
-        auto& localInfo = iter->second->info;
-        static_cast<ModelInfo&>(localInfo.w()) = std::move(info); // slice relevant part
-        localInfo.w().localAssets.reserve(localInfo->assets.size());
-
-        // since we can detach in a spliced coroutine, we can't use a range-based for loop here
-        for (size_t i = 0; i < localInfo->assets.size(); ++i) {
-            auto& asset = localInfo->assets[i];
-            LOG_INFO("querying asset: ", asset.id);
-            localInfo.w().localAssets.push_back(co_await AssetQuery(asset.id, m_assetMgr, m_executor));
-        }
-    }
-
-    void addModel(ModelInfo info) {
-        co_splice(coAddModel(astl::move(info)));
-    }
-
-    CoTask coCreateModel(std::string id, Dict params, Callback<ModelPtr> cb) {
-        try {
-            auto f = m_modelManifest.find(id);
-            if (f == m_modelManifest.end()) {
-                cb.resultCb(itlib::unexpected(ac::Error{"Unknown model id"}));
-                co_return;
-            }
-            auto infoLock = co_await f->second->lock;
-            auto& info = f->second->info;
-            auto& type = info->inferenceType;
-
-            auto it = m_loaders.find(type);
-            if (it == m_loaders.end()) {
-                cb.resultCb(itlib::unexpected(ac::Error{"Unknown model type"}));
-                co_return;
-            }
-            auto& loader = *it->second;
-
-            // find assets which are not loaded and don't have an error
-            // (we won't try to load assets with errors)
-            auto gettable = [&](const asset::Info& a) {
-                return !a.path && !a.error;
-            };
-            auto hasAssetsToLoad = iile([&] {
-                for (auto& a : info->localAssets) {
-                    if (!a.path && !a.error) {
-                        return true;
-                    }
+    void createModel(ModelDesc desc, Dict params, ModelCb cb) {
+        m_executor.pushTask([this, movecap(desc, params, cb)]() mutable {
+            try {
+                auto it = m_loaders.find(desc.inferenceType);
+                if (it == m_loaders.end()) {
+                    cb.resultCb(itlib::unexpected(ac::Error{ "Unknown model type" }));
+                    return;
                 }
-                return false;
-            });
-            if (hasAssetsToLoad) {
-                auto localAssets = info->localAssets;
-                assert(localAssets.size() == info->assets.size());
-                for (size_t i = 0; i < localAssets.size(); ++i) {
-                    auto& asset = localAssets[i];
-                    if (!gettable(asset)) continue;
+                auto& loader = *it->second;
 
-                    auto& aid = info->assets[i].id;
-                    LOG_INFO("getting asset: ", aid);
-                    asset = co_await AssetGet(aid, m_assetMgr, m_executor, [&](std::string_view, float p) {
-                        cb.progressCb(aid, p);
-                        return true;
-                    });
+                LOG_INFO("loading model: ", desc.name);
+                auto model = loader.loadModelSync(astl::move(desc), astl::move(params), astl::move(cb.progressCb));
+
+                if (!model) {
+                    cb.resultCb(itlib::unexpected(ac::Error{ "Model couldn't be loaded!" }));
+                    return;
                 }
-                info.w().localAssets = astl::move(localAssets);
+
+                ModelPtr ptr = std::make_shared<LocalModel>(astl::move(model), m_executor);
+                cb.resultCb(astl::move(ptr));
             }
-
-            LOG_INFO("loading model: ", id);
-            auto model = loader.loadModelSync(info.detach(), astl::move(params), astl::move(cb.progressCb));
-
-            if (!model) {
-                cb.resultCb(itlib::unexpected(ac::Error{"Model couldn't be loaded!"}));
-                co_return;
+            catch (std::exception& ex) {
+                cb.resultCb(itlib::unexpected(ac::Error{ex.what()}));
             }
-
-            ModelPtr ptr = std::make_shared<LocalModel>(astl::move(model), m_executor);
-            cb.resultCb(astl::move(ptr));
-        }
-        catch (std::exception& ex) {
-            cb.resultCb(itlib::unexpected(ac::Error{ex.what()}));
-        }
+        });
     }
 
-    void createModel(std::string_view id, Dict params, Callback<ModelPtr> cb) {
-        co_splice(coCreateModel(std::string(id), astl::move(params), astl::move(cb)));
-    }
-
-    void runInference() {
-        m_execution.run();
-    }
-    void runAssetManagement() {
-        m_assetMgr.run();
-    }
-    void abortWorkers() {
+    void abortRun() {
         m_executor.stop();
-        m_assetMgr.abortRun();
+    }
+    void pushStop() {
+        m_executor.pushTask([this]() {
+            m_executor.stop();
+        });
+    }
+    void run() {
+        m_execution.run();
     }
 };
 
 LocalProvider::LocalProvider(uint32_t flags) : m_impl(std::make_unique<Impl>(flags)) {}
 LocalProvider::~LocalProvider() = default;
 
-void LocalProvider::addModel(ModelInfo info) {
-    m_impl->addModel(astl::move(info));
-}
-
-void LocalProvider::createModel(std::string_view id, Dict params, Callback<ModelPtr> cb) {
-    m_impl->createModel(id, astl::move(params), astl::move(cb));
+void LocalProvider::createModel(ModelDesc desc, Dict params, ModelCb cb) {
+    m_impl->createModel(astl::move(desc), astl::move(params), astl::move(cb));
 }
 
 void LocalProvider::addLocalInferenceLoader(std::string_view type, LocalInferenceModelLoader& loader) {
     m_impl->addLocalInferenceLoader(type, loader);
 }
 
-void LocalProvider::addAssetSource(std::unique_ptr<asset::Source> source, int priority) {
-    m_impl->addAssetSource(astl::move(source), priority);
+void LocalProvider::run() {
+    m_impl->run();
 }
 
-void LocalProvider::runInference() {
-    m_impl->runInference();
+void LocalProvider::abortRun() {
+    m_impl->abortRun();
 }
-void LocalProvider::runAssetManagement() {
-    m_impl->runAssetManagement();
-}
-void LocalProvider::abortWorkers() {
-    m_impl->abortWorkers();
+
+void LocalProvider::pushStop() {
+    m_impl->pushStop();
 }
 
 } // namespace ac

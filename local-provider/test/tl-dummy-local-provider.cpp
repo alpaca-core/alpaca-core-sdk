@@ -10,7 +10,6 @@
 #include <ac/ApiCUtil.hpp>
 
 #include <ac/LocalProvider.hpp>
-#include <ac/LocalModelInfo.hpp>
 #include <ac/local_provider.h>
 #include <ac/LocalProviderCUtil.hpp>
 
@@ -56,54 +55,21 @@ public:
     }
 };
 
-class DummyAssetSource final : public ac::asset::Source {
-public:
-    virtual std::string_view id() const noexcept override { return "dummy-asset-source"; }
-
-    virtual std::optional<BasicAssetInfo> checkAssetSync(std::string_view id) noexcept override {
-        if (id == "asset1") {
-            return BasicAssetInfo{1024, "/home/asset1"};
-        }
-        if (id == "asset2") {
-            return BasicAssetInfo{{}, {}};
-        }
-        if (id == "bad-remote-asset") {
-            return BasicAssetInfo{{}, {}};
-        }
-        return std::nullopt;
-    }
-
-    virtual BasicAssetInfo fetchAssetSync(std::string_view id, ProgressCb progressCb) override {
-        if (id == "asset2") {
-            progressCb(0.2f);
-            progressCb(0.5f);
-            progressCb(1.f);
-            return BasicAssetInfo{512, "/home/asset2"};
-        }
-        else if (id == "bad-remote-asset") {
-            progressCb(0.2f);
-            throw std::runtime_error("Bad remote asset");
-        }
-        // shouldn't get called for asset1
-        throw std::runtime_error("Can't get asset");
-    }
-};
-
 } // anonymous namespace
 
 std::unique_ptr<ac::LocalInferenceModel> DummyLocalInferenceModelLoader::loadModelSync(
-    ac::LocalModelInfoPtr info,
+    ac::ModelDesc desc,
     ac::Dict params,
     ac::ProgressCb progress
 ) {
-    auto& assets = info->localAssets;
+    auto& assets = desc.assets;
     if (assets.size() != 2) {
         ac::throw_ex{} << "expected 2 assets, got " << assets.size();
     }
     progress("dummy model", 0.2f);
     for (auto& a : assets) {
-        if (a.error) {
-            ac::throw_ex{} << "asset error: " << a.error.value();
+        if (a.tag == "error") {
+            ac::throw_ex{} << "asset error: " << a.path;
         }
     }
     progress("dummy model", 0.4f);
@@ -118,10 +84,6 @@ std::unique_ptr<ac::LocalInferenceModel> DummyLocalInferenceModelLoader::loadMod
     return std::unique_ptr<DummyLocalInferenceModel>(new DummyLocalInferenceModel());
 }
 
-std::unique_ptr<ac::asset::Source> createDummyAssetSource() {
-    return std::make_unique<DummyAssetSource>();
-}
-
 extern "C" uint64_t get_thread_id() {
     return std::hash<std::thread::id>{}(std::this_thread::get_id());
 }
@@ -130,16 +92,4 @@ extern "C" void add_dummy_inference(ac_local_provider* local_provider) {
     static DummyLocalInferenceModelLoader loader;
     auto localProvider = ac::cutil::LocalProvider_toCpp(local_provider);
     localProvider->addLocalInferenceLoader("dummy", loader);
-
-    localProvider->addAssetSource(createDummyAssetSource(), 0);
-
-    localProvider->addModel(ac::ModelInfo{"empty"});
-    localProvider->addModel(ac::ModelInfo{
-        .id = "model",
-        .inferenceType = "dummy",
-        .assets = {
-            {"asset1", "tag1"},
-            {"asset2", "tag2"}
-        }
-    });
 }

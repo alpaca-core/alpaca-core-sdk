@@ -3,8 +3,6 @@
 //
 #include <ac/LocalProvider.hpp>
 #include <ac/LocalDummy.hpp>
-#include <ac/ModelInfo.hpp>
-#include <ac/asset/SourceLocalDir.hpp>
 
 #include <ac/Model.hpp>
 #include <ac/Instance.hpp>
@@ -24,31 +22,32 @@ int main() {
 
     ac::LocalProvider provider;
     ac::addLocalDummyInference(provider);
-    provider.addAssetSource(ac::asset::SourceLocalDir_Create(AC_TEST_DATA_DUMMY_DIR), 0);
-    provider.addModel(ac::ModelInfo{
-        .id = "dummy-large",
-        .inferenceType = "dummy",
-        .assets = {
-            {AC_DUMMY_MODEL_LARGE_ASSET, "x"},
-        }
-    });
 
     std::optional<std::latch> latch;
 
     ac::ModelPtr model;
     latch.emplace(1);
-    provider.createModel("dummy-large", {}, {
-        [&](ac::CallbackResult<ac::ModelPtr> result) {
-            if (result.has_error()) {
-                std::cerr << "model load error: " << result.error().text << "\n";
+    provider.createModel(
+        {
+            .inferenceType = "dummy",
+            .assets = {
+                {.path = AC_DUMMY_MODEL_LARGE, .tag = "x"}
             }
-            else {
-                model = std::move(result.value());
-            }
-            latch->count_down();
         },
-        {}
-    });
+        {},
+        {
+            [&](ac::CallbackResult<ac::ModelPtr> result) {
+                if (result.has_error()) {
+                    std::cerr << "model load error: " << result.error().text << "\n";
+                }
+                else {
+                    model = std::move(result.value());
+                }
+                latch->count_down();
+            },
+            {}
+        }
+    );
     latch->wait();
 
     if (!model) return 1;

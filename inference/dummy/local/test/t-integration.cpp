@@ -7,8 +7,6 @@
 
 #include <ac/LocalInference.hpp>
 #include <ac/LocalProvider.hpp>
-#include <ac/ModelInfo.hpp>
-#include <ac/asset/SourceLocalDir.hpp>
 
 #include <ac/Model.hpp>
 #include <ac/Instance.hpp>
@@ -25,21 +23,12 @@ struct TestHelper {
 
     TestHelper() {
         ac::addLocalDummyInference(provider);
-        provider.addAssetSource(ac::asset::SourceLocalDir_Create(AC_TEST_DATA_DUMMY_DIR), 0);
-
-        provider.addModel(ac::ModelInfo{
-            .id = "dummy-small",
-            .inferenceType = "dummy",
-            .assets = {
-                {AC_DUMMY_MODEL_SMALL_ASSET, "x"},
-            }
-        });
     }
 
     ac::ModelPtr model;
-    void createModel(std::string_view id, ac::Dict params) {
+    void createModel(ac::ModelDesc desc, ac::Dict params) {
         latch.emplace(1);
-        provider.createModel(id, params, {
+        provider.createModel(astl::move(desc), astl::move(params), {
             [&](ac::CallbackResult<ac::ModelPtr> result) {
                 model = result.value_or(nullptr);
                 latch->count_down();
@@ -96,15 +85,25 @@ struct TestHelper {
     }
 };
 
+const ac::ModelDesc Model_Desc = {
+    .inferenceType = "dummy",
+    .assets = {
+        {.path = AC_DUMMY_MODEL_SMALL}
+    }
+};
+
 TEST_CASE("bad model") {
     TestHelper helper;
-    helper.createModel("nope", {});
+    helper.createModel({
+        .inferenceType = "dummy",
+        .assets = {},
+    }, {});
     CHECK_FALSE(helper.model);
 }
 
 TEST_CASE("bad instance") {
     TestHelper helper;
-    helper.createModel("dummy-small", {});
+    helper.createModel(Model_Desc, {});
     REQUIRE(helper.model);
     helper.createInstance("nope", {});
     CHECK_FALSE(helper.instance);
@@ -114,7 +113,7 @@ TEST_CASE("bad instance") {
 
 TEST_CASE("general") {
     TestHelper helper;
-    helper.createModel("dummy-small", {});
+    helper.createModel(Model_Desc, {});
     REQUIRE(helper.model);
 
     helper.createInstance("general", {});
