@@ -18,6 +18,7 @@
 #include <string>
 #include <optional>
 #include <latch>
+#include <thread>
 
 struct GlobalFixture {
     jalog::Instance jl;
@@ -31,6 +32,7 @@ GlobalFixture globalFixture;
 enum TestHelperFlags {
     Add_Inference = 1,
     Add_AssetSource = 2,
+    No_ProviderThreads = 4,
 };
 
 struct AcTestHelper {
@@ -41,7 +43,9 @@ struct AcTestHelper {
     DummyLocalInferenceModelLoader modelLoader;
     ac::CallbackResult<ac::InstancePtr> instanceResult;
 
-    AcTestHelper(int flags) {
+    AcTestHelper(int flags)
+        : provider((flags & No_ProviderThreads) ? ac::LocalProvider::No_LaunchThreads : ac::LocalProvider::Default_Init)
+    {
         if (flags & Add_Inference) {
             provider.addLocalInferenceLoader("dummy", modelLoader);
         }
@@ -246,4 +250,26 @@ TEST_CASE("run ops") {
     CHECK(opResult[0]["some"] == 42);
     CHECK(opResult[1]["more"] == 1024);
     CHECK(progress == std::vector<float>{0.1f, 0.5f});
+}
+
+TEST_CASE("no threads") {
+    AcTestHelper h(Add_Inference | Add_AssetSource | No_ProviderThreads);
+
+    std::thread asset = std::thread([&]() {
+        h.provider.runAssetManagement();
+    });
+    std::thread inference = std::thread([&]() {
+        h.provider.runInference();
+    });
+
+    h.createModelAndWait("model", {});
+    h.createInstanceAndWait({});
+
+    h.provider.abortWorkers();
+
+    REQUIRE(h.instanceResult.has_value() == true);
+    CHECK(h.instanceResult.value());
+
+    inference.join();
+    asset.join();
 }
