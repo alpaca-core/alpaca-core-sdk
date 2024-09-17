@@ -24,7 +24,7 @@ public:
         Default_Init = 0,
 
         // if the provider does not launch it's own threads, it is the responsibility of the user to call
-        // runInference, runAssetManagement and abortThreads appropriately - within the lifetime of the provider
+        // runInference, runAssetManagement and abortWorkers appropriately - within the lifetime of the provider
         No_LaunchThreads = 1,
     };
 
@@ -35,6 +35,12 @@ public:
     void addAssetSource(std::unique_ptr<asset::Source> source, int priority);
     void addModel(ModelInfo info);
     void addLocalInferenceLoader(std::string_view type, LocalInferenceModelLoader& loader);
+
+    //////////////////////////////////////////////////////////////////////////
+    // no thread functions
+    void runInference(); // blocks the current thread until abortWorkers is called
+    void runAssetManagement(); // blocks the current thread until abortWorkers is called
+    void abortWorkers(); // stops the inference and asset workers potentially aborting any in-flight operations
 private:
     class Impl;
     std::unique_ptr<Impl> m_impl;

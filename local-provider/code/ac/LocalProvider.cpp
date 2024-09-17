@@ -243,35 +243,41 @@ class LocalProvider::Impl {
     xec::LocalExecution m_execution;
     std::thread m_inferenceThread;
 public:
-    Impl(uint32_t)
+    Impl(uint32_t flags)
         : m_assetMgr(asset::Manager::No_LaunchThread)
         , m_execution(m_executor)
     {
-        launchThreads();
+        if (!(flags & No_LaunchThreads)) {
+            launchThreads();
+        }
     }
 
     ~Impl() {
-        // complex shutdown logic since we're running threads and communicating by raw refs :)
+        if (m_inferenceThread.joinable()) {
+            assert(m_assetThread.joinable()); // we must have launched both threads, no?
 
-        // first shut down the local execution and thus stop any tasks issued to m_assetMgr
-        m_executor.stop();
-        m_inferenceThread.join();
+            // complex shutdown logic since we're running threads and communicating by raw refs :)
 
-        // then stop m_assetMgr so it, in turn, stops issuing tasks to our executor
-        m_assetMgr.abortRun();
-        m_assetThread.join();
+            abortWorkers();
 
-        // any hanging tasks are just discarded
+            // first shut down the local execution and thus stop any tasks issued to m_assetMgr
+            m_inferenceThread.join();
+
+            // then stop m_assetMgr so it, in turn, stops issuing tasks to our executor
+            m_assetThread.join();
+
+            // any hanging tasks are just discarded
+        }
     }
 
     void launchThreads() {
         m_assetThread = std::thread([this]() {
             xec::SetThisThreadName("ac-asset");
-            m_assetMgr.run();
+            runAssetManagement();
         });
         m_inferenceThread = std::thread([this]() {
             xec::SetThisThreadName("ac-local");
-            m_execution.run();
+            runInference();
         });
     }
 
@@ -397,6 +403,17 @@ public:
     void createModel(std::string_view id, Dict params, Callback<ModelPtr> cb) {
         co_splice(coCreateModel(std::string(id), astl::move(params), astl::move(cb)));
     }
+
+    void runInference() {
+        m_execution.run();
+    }
+    void runAssetManagement() {
+        m_assetMgr.run();
+    }
+    void abortWorkers() {
+        m_executor.stop();
+        m_assetMgr.abortRun();
+    }
 };
 
 LocalProvider::LocalProvider(uint32_t flags) : m_impl(std::make_unique<Impl>(flags)) {}
@@ -416,6 +433,16 @@ void LocalProvider::addLocalInferenceLoader(std::string_view type, LocalInferenc
 
 void LocalProvider::addAssetSource(std::unique_ptr<asset::Source> source, int priority) {
     m_impl->addAssetSource(astl::move(source), priority);
+}
+
+void LocalProvider::runInference() {
+    m_impl->runInference();
+}
+void LocalProvider::runAssetManagement() {
+    m_impl->runAssetManagement();
+}
+void LocalProvider::abortWorkers() {
+    m_impl->abortWorkers();
 }
 
 } // namespace ac
