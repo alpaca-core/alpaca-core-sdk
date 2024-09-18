@@ -4,6 +4,7 @@
 #include <ac/dummy/Model.hpp>
 #include "ac-test-data-dummy-models.h"
 #include <doctest/doctest.h>
+#include <algorithm>
 
 TEST_CASE("simple") {
     ac::dummy::Model model(AC_DUMMY_MODEL_LARGE, {});
@@ -29,6 +30,14 @@ TEST_CASE("splice") {
     CHECK(data[3] == "bate");
     CHECK(data[4] == "Soco");
     CHECK(data[5] == "vira");
+}
+
+TEST_CASE("synthetic") {
+    ac::dummy::Model model({});
+    auto& data = model.data();
+
+    auto rawData = ac::dummy::Model::rawSynteticModelData();
+    CHECK(std::equal(data.begin(), data.end(), rawData.begin(), rawData.end()));
 }
 
 TEST_CASE("exceptions") {

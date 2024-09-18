@@ -5,10 +5,10 @@
 #include "export.h"
 #include <string>
 #include <vector>
-#include <functional>
+#include <span>
+#include <string_view>
 
 namespace ac::dummy {
-using ModelLoadProgressCb = std::function<void(float)>;
 
 class AC_DUMMY_EXPORT Model {
 public:
@@ -17,10 +17,15 @@ public:
     };
 
     Model(const char* path, Params params);
+    explicit Model(Params params); // synthetic model
     ~Model();
 
     const std::vector<std::string>& data() const noexcept { return m_data; }
+
+    static std::span<const std::string_view> rawSynteticModelData() noexcept;
 private:
+    void addDataItem(std::string item);
+
     const Params m_params;
     std::vector<std::string> m_data;
 };

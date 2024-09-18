@@ -96,7 +96,9 @@ TEST_CASE("bad model") {
     TestHelper helper;
     helper.createModel({
         .inferenceType = "dummy",
-        .assets = {},
+        .assets = {
+            {.path = "nope"}
+        }
     }, {});
     CHECK_FALSE(helper.model);
 }
@@ -145,5 +147,21 @@ TEST_CASE("general") {
     res = helper.runInstantOp("run", {{"input", {"a", "b", "c"}}});
     REQUIRE(res.has_value());
     CHECK(res.value().at("result").get<std::string>() == "a soco b bate c soco");
+}
+
+TEST_CASE("synthetic") {
+    TestHelper helper;
+
+    helper.createModel({
+        .inferenceType = "dummy",
+        .assets = {}
+    }, {});
+    REQUIRE(helper.model);
+
+    helper.createInstance("general", {});
+
+    auto res = helper.runInstantOp("run", {{"input", {"a", "b"}}});
+    REQUIRE(res.has_value());
+    CHECK(res.value().at("result").get<std::string>() == "a one b two");
 }
 

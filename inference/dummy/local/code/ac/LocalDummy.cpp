@@ -77,6 +77,7 @@ public:
     DummyModel(const std::string& fname, dummy::Model::Params params)
         : m_model(fname.c_str(), params)
     {}
+    explicit DummyModel(dummy::Model::Params params)  : m_model(params) {}
 
     virtual std::unique_ptr<LocalInferenceInstance> createInstanceSync(std::string_view type, Dict params) override {
         if (type != "general") {
@@ -89,11 +90,19 @@ public:
 class DummyModelLoader final : public LocalInferenceModelLoader {
 public:
     virtual std::unique_ptr<LocalInferenceModel> loadModelSync(ModelDesc desc, Dict params, ProgressCb pcb) override {
-        if (desc.assets.size() != 1) throw_ex{} << "dummy: expected exactly one local asset";
-        auto& fname = desc.assets.front().path;
-        if (pcb) pcb(fname, 0.1f);
+        if (desc.assets.size() > 1) throw_ex{} << "dummy: expected one or zero assets";
+
         auto modelParams = ModelParams_fromDict(params);
-        return std::make_unique<DummyModel>(fname, std::move(modelParams));
+
+        if (desc.assets.empty()) {
+            // synthetic model
+            return std::make_unique<DummyModel>(std::move(modelParams));
+        }
+        else {
+            auto& fname = desc.assets.front().path;
+            if (pcb) pcb(fname, 0.1f);
+            return std::make_unique<DummyModel>(fname, std::move(modelParams));
+        }
     }
 };
 }
