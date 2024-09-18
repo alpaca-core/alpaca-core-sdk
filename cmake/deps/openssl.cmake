@@ -8,12 +8,13 @@ endif()
 
 if(ANDROID)
     set(OPENSSL_USE_STATIC_LIBS YES) # related to #90
+    set(androidOpenSSLVersion 3.3.1)
 
     # https://github.com/viaduck/openssl-cmake
     CPMAddPackage(
         NAME openssl-android
-        VERSION 3.3.1
-        URL https://builds.viaduck.org/prebuilts/openssl/3.3.1/${CMAKE_ANDROID_ARCH_ABI}-android.tar.gz
+        VERSION ${androidOpenSSLVersion}
+        URL https://builds.viaduck.org/prebuilts/openssl/${androidOpenSSLVersion}/${CMAKE_ANDROID_ARCH_ABI}-android.tar.gz
     )
 
     list(APPEND CMAKE_FIND_ROOT_PATH ${openssl-android_SOURCE_DIR})
