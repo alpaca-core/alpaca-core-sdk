@@ -120,8 +120,6 @@ endif()
 
 add_subdirectory(common)
 
-add_subdirectory(asset-mgr)
-
 if(AC_BUILD_API)
     add_subdirectory(api)
     if(AC_BUILD_LOCAL_PROVIDER)
