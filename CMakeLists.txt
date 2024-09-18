@@ -48,6 +48,8 @@ if(NOT MSVC)
 	add_compile_options(-Wno-missing-field-initializers)
 endif()
 
+option(BUILD_SHARED_LIBS "${CMAKE_PROJECT_NAME}: build shared libraries" ON)
+
 option(AC_BUILD_API "${CMAKE_PROJECT_NAME}: build API" ON)
 cmake_dependent_option(AC_BUILD_LOCAL_PROVIDER "${CMAKE_PROJECT_NAME}: build local inference provider" ON
     AC_BUILD_API OFF)

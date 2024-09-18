@@ -6,8 +6,13 @@ if(TARGET OpenSSL::SSL)
     return()
 endif()
 
+if(BUILD_SHARED_LIBS)
+    set(OPENSSL_USE_STATIC_LIBS NO)
+else()
+    set(OPENSSL_USE_STATIC_LIBS YES)
+endif()
+
 if(ANDROID)
-    set(OPENSSL_USE_STATIC_LIBS YES) # related to #90
     set(androidOpenSSLVersion 3.3.1)
 
     # https://github.com/viaduck/openssl-cmake
