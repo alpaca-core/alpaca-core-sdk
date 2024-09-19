@@ -30,7 +30,11 @@ A collection of somewhat loose notes on the design and architecture of the SDK. 
     * We will provide API wrappers for popular languages
     * Eventually we will provide REST and WebSocket interfaces to the API.
     * The C wrapper will be part of this repo.
-    * Wrappers for other languages would come in separate repos using this one as a submodule or package.
+    * Wrappers for other languages that we maintain will be part of this repo.
+    * In other repos we shall have Wrappers whose build can't be controlled by CMake like for example:
+        * Android: can't use CMake for multi-arch APK builds. Need to use gradle
+        * Zig (if we do it): can't use CMake for Zig builds. Need to use the Zig build system
+        * This rule, too, may change in the future (can we have an Uber Monorepo?)
 * SDK Glossary:
     * Provider: an "instance" of the API of sorts.
         * ... which also include a meta-provider: a provider which internally manages multiple concrete providers.
