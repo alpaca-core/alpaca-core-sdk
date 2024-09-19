@@ -17,4 +17,5 @@ public class Adder {
     protected native void finalize() throws Throwable;
 
     public native int add(int a, int b);
+    public native void seti(int i);
 }
