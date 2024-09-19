@@ -8,5 +8,13 @@ public class Adder {
         System.loadLibrary("ac-jni");
     }
 
-    public static native int add(int a, int b);
+    public Adder(int i) {
+        initialize(i);
+    }
+
+    private long nativePtr;
+    protected native void initialize(int i);
+    protected native void finalize() throws Throwable;
+
+    public native int add(int a, int b);
 }
