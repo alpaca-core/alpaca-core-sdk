@@ -19,4 +19,13 @@ public class TestSandbox {
         a.seti(42);
         assertEquals(45, a.add(1, 2));
     }
+
+    @Test
+    public void testClone() {
+        Sandbox a = new Sandbox(5);
+        Sandbox b = a.clone();
+        a.seti(42);
+        assertEquals(45, a.add(1, 2));
+        assertEquals(8, b.add(1, 2));
+    }
 }

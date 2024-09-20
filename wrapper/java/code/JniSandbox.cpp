@@ -27,9 +27,14 @@ public:
         m_i = i;
     }
 
-    //jni::Local<jni::Object<Sandbox>> clone(JNIEnv& env) {
-    //    jni::Local<jni::Object<Sandbox>> result(env, std::make_unique<Sandbox>(env, m_i));
-    //}
+    jni::Local<jni::Object<Sandbox>> clone(JNIEnv& env) {
+        auto cls = jni::Class<Sandbox>::Find(env);
+        auto m = cls.GetStaticMethod<jni::Object<Sandbox>(jlong)>(env, "fromNative");
+        auto ptr = std::make_unique<Sandbox>(env, m_i);
+        auto ret = cls.Call(env, m, reinterpret_cast<jlong>(ptr.get()));
+        ptr.release();
+        return ret;
+    }
 };
 
 } // namespace
@@ -43,7 +48,7 @@ void JniSandbox_register(jni::JNIEnv& env) {
         , "finalize"
         , METHOD("add", &Sandbox::add)
         , METHOD("seti", &Sandbox::seti)
-        //, METHOD("clone", &Sandbox::clone)
+        , METHOD("clone", &Sandbox::clone)
     );
 }
 
