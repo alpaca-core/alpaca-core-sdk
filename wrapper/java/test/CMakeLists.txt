@@ -19,7 +19,7 @@ add_jar(test-ac-java-Sandbox
     SOURCES
         TestSandbox.java
     INCLUDE_JARS
-        alpaca-core-java
+        alpaca-core-jar
         ${junitJar}
 )
 
@@ -31,6 +31,6 @@ endif()
 
 add_test(NAME ac-java-Sandbox COMMAND ${Java_JAVA_EXECUTABLE}
     -Djava.library.path=$<TARGET_FILE_DIR:ac-jni>
-    -cp "$<TARGET_PROPERTY:alpaca-core-java,JAR_FILE>${sep}${junitJar}${sep}$<TARGET_PROPERTY:test-ac-java-Sandbox,JAR_FILE>"
+    -cp "$<TARGET_PROPERTY:alpaca-core-jar,JAR_FILE>${sep}${junitJar}${sep}$<TARGET_PROPERTY:test-ac-java-Sandbox,JAR_FILE>"
     org.junit.runner.JUnitCore com.alpacacore.api.TestSandbox
 )

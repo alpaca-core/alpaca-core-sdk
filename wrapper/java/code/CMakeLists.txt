@@ -24,7 +24,7 @@ target_link_libraries(ac-jni
         ac::api
 )
 
-add_jar(alpaca-core-java
+add_jar(alpaca-core-jar
     SOURCES
         Sandbox.java
         Dict.java
