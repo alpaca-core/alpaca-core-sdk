@@ -1,0 +1,36 @@
+{
+  "version": "0.2.1",
+  "defaults": {},
+  "configurations": [
+    {
+      "type": "dll",
+      "exe": "C:\\tools\\jdk-17.0.12+7\\bin\\java.exe",
+      "args": [
+        "-Djava.library.path=../../bin",
+        "-cp",
+        "code/alpaca-core.jar;${workspaceRoot}/wrapper/java/test/lib/junit-4.10.jar;test/test-ac-java-Sandbox.jar",
+        "org.junit.runner.JUnitCore",
+        "com.alpacacore.api.TestSandbox"
+      ],
+      "currentDir": "out/build/${cmake.name}/wrapper/java",
+      "project": "CMakeLists.txt",
+      "projectTarget": "ac-api.dll (bin\\ac-api.dll)",
+      "name": "java-Sandbox test"
+    },
+    {
+      "type": "dll",
+      "exe": "C:\\tools\\jdk-17.0.12+7\\bin\\java.exe",
+      "args": [
+        "-Djava.library.path=../../bin",
+        "-cp",
+        "test/test-ac-java-Dict.jar;${workspaceRoot}/wrapper/java/test/lib/junit-4.10.jar;test/test-ac-java-Dict.jar",
+        "org.junit.runner.JUnitCore",
+        "com.alpacacore.api.TestDict"
+      ],
+      "currentDir": "out/build/${cmake.name}/wrapper/java",
+      "project": "CMakeLists.txt",
+      "projectTarget": "ac-api.dll (bin\\ac-api.dll)",
+      "name": "java-Dict test"
+    }
+  ]
+}
