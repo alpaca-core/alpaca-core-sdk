@@ -83,8 +83,14 @@ struct DictToMapConverter {
             return boolCache.create(env, dict.get<bool>());
         case Dict::value_t::number_integer:
             return intCache.create(env, dict.get<int>());
-        case Dict::value_t::number_unsigned:
-            return longCache.create(env, dict.get<unsigned>());
+        case Dict::value_t::number_unsigned: {
+            auto uval = dict.get<unsigned>();
+            if (uval <= unsigned(std::numeric_limits<jint>::max())) {
+                // return int if it fits
+                return intCache.create(env, uval);
+            }
+            return longCache.create(env, uval);
+        }
         case Dict::value_t::number_float:
             return doubleCache.create(env, dict.get<double>());
         case Dict::value_t::string: {
@@ -122,8 +128,8 @@ jni::Local<jni::Object<>> Dict_toMap(jni::JNIEnv& env, const Dict& dict) {
     return DictToMapConverter(env).convert(dict);
 }
 
-Dict Map_toDict(jni::JNIEnv& env, jni::Local<Map> map) {
-    return {};
-}
+//Dict Map_toDict(jni::JNIEnv& env, jni::Local<Map> map) {
+//    return {};
+//}
 
 } // namespace ac::java

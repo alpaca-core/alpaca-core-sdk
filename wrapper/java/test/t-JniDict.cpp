@@ -19,7 +19,9 @@ Java_com_alpacacore_api_TestDict_getMapFromPojoDict(jni::JNIEnv* env, jni::jclas
         "int": 42,
         "inner": {
             "str": "hello",
-            "float": 3.14
+            "float": 3.14,
+            "neg": -100,
+            "big": 3000000000
         },
         "inner2": {
             "str": "world",
