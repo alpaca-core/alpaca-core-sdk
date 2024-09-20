@@ -15,22 +15,48 @@ if(NOT EXISTS ${junitJar})
     )
 endif()
 
-add_jar(test-ac-java-Sandbox
-    SOURCES
-        TestSandbox.java
-    INCLUDE_JARS
-        alpaca-core-jar
-        ${junitJar}
-)
-
 if(WIN32)
     set(sep ";")
 else()
     set(sep ":")
 endif()
 
-add_test(NAME ac-java-Sandbox COMMAND ${Java_JAVA_EXECUTABLE}
-    -Djava.library.path=$<TARGET_FILE_DIR:ac-jni>
-    -cp "$<TARGET_PROPERTY:alpaca-core-jar,JAR_FILE>${sep}${junitJar}${sep}$<TARGET_PROPERTY:test-ac-java-Sandbox,JAR_FILE>"
-    org.junit.runner.JUnitCore com.alpacacore.api.TestSandbox
-)
+function(add_java_test name)
+    cmake_parse_arguments(ARG "" "" "SOURCES;JARS;LIBS" ${ARGN})
+    set(tgt test-ac-java-${name})
+    add_jar(${tgt}
+        SOURCES
+            Test${name}.java
+            ${ARG_SOURCES}
+        INCLUDE_JARS
+            ${junitJar}
+            ${ARG_JARS}
+    )
+
+    set(libPaths)
+    foreach(lib IN LISTS ARG_LIBS)
+        list(APPEND libPaths $<TARGET_FILE_DIR:${lib}>)
+    endforeach()
+    list(JOIN libPaths "${sep}" javaLibraryPath)
+
+    set(jarPaths
+        ${junitJar}
+        $<TARGET_PROPERTY:${tgt},JAR_FILE>
+    )
+    foreach(jar IN LISTS ARG_JARS)
+        list(APPEND jarPaths $<TARGET_PROPERTY:${jar},JAR_FILE>)
+    endforeach()
+    list(JOIN jarPaths "${sep}" javaClassPath)
+
+    add_test(NAME ac-java-${name} COMMAND ${Java_JAVA_EXECUTABLE}
+        "-Djava.library.path=${javaLibraryPath}"
+        -cp "${javaClassPath}"
+        org.junit.runner.JUnitCore com.alpacacore.api.Test${name}
+    )
+endfunction()
+
+add_java_test(Sandbox JARS alpaca-core-jar LIBS ac-jni)
+
+add_library(test-ac-java-dict MODULE t-JniDict.cpp)
+target_link_libraries(test-ac-java-dict PRIVATE ac-jni-dict)
+add_java_test(Dict LIBS test-ac-java-dict)

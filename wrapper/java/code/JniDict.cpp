@@ -1,38 +1,36 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include "jni.hpp"
-#include <ac/Dict.hpp>
+#include "JniDict.hpp"
 #include <memory>
 
 namespace ac::java {
 
-// how do we handle references to the underlying C++ object?
-// we could employ the C api and have distict refs and roots, but this is not idicomatic Java and will be very
-// unusual to Java programmers
-// So instead we'll use a shared_ptr to manage the lifetime of the root and have a refernce to the concrete item here
+namespace {
 
-class JniDict {
-public:
-    static constexpr auto Name() { return "com/alpacacore/api/Dict"; }
+struct DictToMapCache {
+    jni::JNIEnv& env;
+    jni::Local<jni::Class<HashMapTag>> cls;
+    jni::Constructor<HashMapTag> ctor;
 
-    std::shared_ptr<ac::Dict> m_root;
-    ac::Dict& m_dict; // points somewhere within m_root
-
-    JniDict(JNIEnv&)
-        : m_root(std::make_shared<ac::Dict>())
-        , m_dict(*m_root)
+    DictToMapCache(jni::JNIEnv& env)
+        : env(env)
+        , cls(jni::Class<HashMapTag>::Find(env))
+        , ctor(cls.GetConstructor(env))
     {}
-
-
 };
 
-void JniDict_register(jni::JNIEnv& env) {
-    jni::RegisterNativePeer<JniDict>(env, jni::Class<JniDict>::Find(env), "nativePtr"
-        , jni::MakePeer<JniDict>
-        , "initialize"
-        , "finalize"
-    );
+
+} // namespace
+
+jni::Local<HashMap> Dict_toMap(jni::JNIEnv& env, const Dict& map) {
+    DictToMapCache c(env);
+
+    return ret;
+}
+
+Dict Map_toDict(jni::JNIEnv& env, jni::Local<Map> map) {
+    return {};
 }
 
 } // namespace ac::java
