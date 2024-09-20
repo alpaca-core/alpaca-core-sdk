@@ -3,12 +3,12 @@
 //
 package com.alpacacore.api;
 
-public class Adder {
+public class Sandbox {
     static {
         System.loadLibrary("ac-jni");
     }
 
-    public Adder(int i) {
+    public Sandbox(int i) {
         initialize(i);
     }
 

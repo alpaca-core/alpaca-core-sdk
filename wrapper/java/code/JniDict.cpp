@@ -5,6 +5,8 @@
 #include <ac/Dict.hpp>
 #include <memory>
 
+namespace ac::java {
+
 // how do we handle references to the underlying C++ object?
 // we could employ the C api and have distict refs and roots, but this is not idicomatic Java and will be very
 // unusual to Java programmers
@@ -32,3 +34,5 @@ void JniDict_register(jni::JNIEnv& env) {
         , "finalize"
     );
 }
+
+} // namespace ac::java

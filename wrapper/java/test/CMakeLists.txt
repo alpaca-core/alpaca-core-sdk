@@ -15,9 +15,9 @@ if(NOT EXISTS ${junitJar})
     )
 endif()
 
-add_jar(test-ac-java-Adder
+add_jar(test-ac-java-Sandbox
     SOURCES
-        TestAdder.java
+        TestSandbox.java
     INCLUDE_JARS
         alpaca-core-java
         ${junitJar}
@@ -29,8 +29,8 @@ else()
     set(sep ":")
 endif()
 
-add_test(NAME ac-java-Adder COMMAND ${Java_JAVA_EXECUTABLE}
+add_test(NAME ac-java-Sandbox COMMAND ${Java_JAVA_EXECUTABLE}
     -Djava.library.path=$<TARGET_FILE_DIR:ac-jni>
-    -cp "$<TARGET_PROPERTY:alpaca-core-java,JAR_FILE>${sep}${junitJar}${sep}$<TARGET_PROPERTY:test-ac-java-Adder,JAR_FILE>"
-    org.junit.runner.JUnitCore com.alpacacore.api.TestAdder
+    -cp "$<TARGET_PROPERTY:alpaca-core-java,JAR_FILE>${sep}${junitJar}${sep}$<TARGET_PROPERTY:test-ac-java-Sandbox,JAR_FILE>"
+    org.junit.runner.JUnitCore com.alpacacore.api.TestSandbox
 )

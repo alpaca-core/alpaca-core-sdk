@@ -8,6 +8,7 @@ target_include_directories(mapbox-jni.hpp INTERFACE ${jni.hpp_SOURCE_DIR}/includ
 
 add_library(ac-jni MODULE
     ac-jni.cpp
+    JniSandbox.cpp
     JniDict.cpp
 )
 if(NOT WIN32)
@@ -25,7 +26,7 @@ target_link_libraries(ac-jni
 
 add_jar(alpaca-core-java
     SOURCES
-        Adder.java
+        Sandbox.java
         Dict.java
     OUTPUT_NAME
         alpaca-core
