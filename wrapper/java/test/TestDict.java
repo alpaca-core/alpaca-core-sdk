@@ -13,13 +13,24 @@ public class TestDict {
         System.loadLibrary("test-ac-java-dict");
     }
 
-    private native Map getTestMapFromDict();
-    private native void runCppTestWithMap(Map dict);
+    private static native Map getMapFromEmptyDict();
+    private static native Map getMapFromPojoDict();
+    private static native Map getMapFromDictWithBinary();
+
+    private static native void runCppTestWithNullMap(Map map);
+    private static native void runCppTestWithPojoMap(Map map);
+    private static native void runCppTestWithMapWithBinary(Map map);
 
     @Test
-    public void testCppDict() {
-        Map map = getTestMapFromDict();
+    public void testEmptyDict() {
+        Map map = getMapFromEmptyDict();
+        assertNull(map);
+    }
+
+    @Test
+    public void testPojoDict() {
+        Map map = getMapFromPojoDict();
         assertNotNull(map);
-        assertTrue(map.isEmpty());
+        assertEquals(6, map.size());
     }
 }
