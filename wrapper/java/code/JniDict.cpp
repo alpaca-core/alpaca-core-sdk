@@ -49,11 +49,20 @@ struct PrimitiveTypeCache {
     }
 };
 
-struct DictToMapConverter {
+struct BasicConverter {
     jni::JNIEnv& env;
 
-    jni::Local<jni::Class<HashMapTag>> m_hashMapClass;
-    jni::Constructor<HashMapTag> m_hashMapCtor;
+    jni::Local<jni::Class<HashMapTag>> hashMapClass;
+    jni::Constructor<HashMapTag> hashMapCtor;
+
+    BasicConverter(jni::JNIEnv& env)
+        : env(env)
+        , hashMapClass(jni::Class<HashMapTag>::Find(env))
+        , hashMapCtor(hashMapClass.GetConstructor<>(env))
+    {}
+};
+
+struct DictToMapConverter : BasicConverter {
     jni::Method<HashMapTag, jni::Object<>(jni::Object<>, jni::Object<>)> m_hashMapPut;
 
     PrimitiveTypeCache<BooleanTag> boolCache;
@@ -62,19 +71,12 @@ struct DictToMapConverter {
     PrimitiveTypeCache<DoubleTag> doubleCache;
 
     DictToMapConverter(jni::JNIEnv& env)
-        : env(env)
-        , m_hashMapClass(jni::Class<HashMapTag>::Find(env))
-        , m_hashMapCtor(m_hashMapClass.GetConstructor<>(env))
-        , m_hashMapPut(m_hashMapClass.GetMethod<jni::Object<>(jni::Object<>, jni::Object<>)>(env, "put"))
+        : BasicConverter(env)
+        , m_hashMapPut(hashMapClass.GetMethod<jni::Object<>(jni::Object<>, jni::Object<>)>(env, "put"))
     {}
 
     jni::Local<HashMap> newHashMap() {
-        return m_hashMapClass.New(env, m_hashMapCtor);
-    }
-
-    void addToHashMap(jni::Local<HashMap>& map, const std::string& key, jni::Local<jni::Object<>> value) {
-        auto keyObj = jni::Make<jni::String>(env, key);
-        map.Call(env, m_hashMapPut, keyObj, value);
+        return hashMapClass.New(env, hashMapCtor);
     }
 
     jni::Local<jni::Object<>> convert(const Dict& dict) {
@@ -111,7 +113,8 @@ struct DictToMapConverter {
         case Dict::value_t::object: {
             auto ret = newHashMap();
             for (auto& [k, v] : dict.items()) {
-                addToHashMap(ret, k, convert(v));
+                auto keyObj = jni::Make<jni::String>(env, k);
+                ret.Call(env, m_hashMapPut, keyObj, convert(v));
             }
             return ret;
         }
@@ -120,6 +123,12 @@ struct DictToMapConverter {
             return jni::Local<jni::Object<>>(nullptr);
         }
     }
+};
+
+struct MapToDictConverter : BasicConverter {
+    MapToDictConverter(jni::JNIEnv& env)
+        : BasicConverter(env)
+    {}
 };
 
 } // namespace
