@@ -43,7 +43,7 @@ struct PrimitiveTypeCache {
     jni::Local<jni::Object<Tag>> create(jni::JNIEnv& env, cpp_t val) {
         if (!cls) {
             cls = jni::Class<Tag>::Find(env);
-            ctor.emplace(cls.GetConstructor<cpp_t>(env));
+            ctor.emplace(cls.template GetConstructor<cpp_t>(env));
         }
         return cls.New(env, *ctor, val);
     }
