@@ -3,6 +3,7 @@
 //
 #include "JniDict.hpp"
 #include <astl/throw_ex.hpp>
+#include <itlib/generator.hpp>
 #include <memory>
 
 DISABLE_MSVC_WARNING(4996) // codecvt deprecations
@@ -11,15 +12,37 @@ namespace ac::java {
 
 namespace {
 
-struct HashMapTag {
-    static constexpr auto Name() { return "java/util/HashMap"; }
-};
-using HashMap = jni::Object<HashMapTag>;
+struct HashMapClass {
+    jni::JNIEnv& env;
 
-struct MapTag {
-    static constexpr auto Name() { return "java/util/Map"; }
+    struct Tag {
+        static constexpr auto Name() { return "java/util/HashMap"; }
+    };
+
+    jni::Local<jni::Class<Tag>> cls;
+    jni::Constructor<Tag> ctor;
+    jni::Method<Tag, Obj(Obj, Obj)> putFunc;
+
+    HashMapClass(jni::JNIEnv& env)
+        : env(env)
+        , cls(jni::Class<Tag>::Find(env)),
+        ctor(cls.GetConstructor<>(env)),
+        putFunc(cls.GetMethod<Obj(Obj, Obj)>(env, "put"))
+    {}
+
+    struct Instance {
+        HashMapClass& parent;
+        jni::Local<jni::Object<Tag>> obj;
+
+        void put(jni::Local<Obj> key, jni::Local<Obj> value) {
+            obj.Call(parent.env, parent.putFunc, key, value);
+        }
+    };
+
+    Instance newInstance() {
+        return { *this, cls.New(env, ctor) };
+    }
 };
-using Map = jni::Object<MapTag>;
 
 struct BooleanTag {
     static constexpr auto Name() { return "java/lang/Boolean"; }
@@ -102,10 +125,8 @@ using DoubleClass = PrimitiveClass<DoubleTag>;
 
 struct DictToMapConverter {
     jni::JNIEnv& env;
-    jni::Local<jni::Class<HashMapTag>> hashMapClass;
-    jni::Constructor<HashMapTag> hashMapCtor;
-    jni::Method<HashMapTag, Obj(Obj, Obj)> m_hashMapPut;
 
+    HashMapClass hashMapCls;
     BooleanClass boolCls;
     IntegerClass intCls;
     LongClass longCls;
@@ -113,18 +134,12 @@ struct DictToMapConverter {
 
     DictToMapConverter(jni::JNIEnv& env)
         : env(env)
-        , hashMapClass(jni::Class<HashMapTag>::Find(env))
-        , hashMapCtor(hashMapClass.GetConstructor<>(env))
-        , m_hashMapPut(hashMapClass.GetMethod<Obj(Obj, Obj)>(env, "put"))
+        , hashMapCls(env)
         , boolCls(env)
         , intCls(env)
         , longCls(env)
         , doubleCls(env)
     {}
-
-    jni::Local<HashMap> newHashMap() {
-        return hashMapClass.New(env, hashMapCtor);
-    }
 
     jni::Local<Obj> convert(const Dict& dict) {
         switch (dict.type()) {
@@ -158,12 +173,14 @@ struct DictToMapConverter {
             return ret;
         }
         case Dict::value_t::object: {
-            auto ret = newHashMap();
+            auto ret = hashMapCls.newInstance();
             for (auto& [k, v] : dict.items()) {
-                auto keyObj = jni::Make<jni::String>(env, k);
-                ret.Call(env, m_hashMapPut, keyObj, convert(v));
+                ret.put(
+                    jni::Make<jni::String>(env, k),
+                    convert(v)
+                );
             }
-            return ret;
+            return std::move(ret.obj);
         }
         case Dict::value_t::null:
         default:
@@ -172,8 +189,81 @@ struct DictToMapConverter {
     }
 };
 
-struct SetTag {
-    static constexpr auto Name() { return "java/util/Set"; }
+struct MapClass {
+    jni::JNIEnv& env;
+
+    struct Tag {
+        static constexpr auto Name() { return "java/util/Map"; }
+    };
+
+    jni::Local<jni::Class<Tag>> cls;
+
+    struct SetTag {
+        static constexpr auto Name() { return "java/util/Set"; }
+    };
+    jni::Local<jni::Class<SetTag>> setCls;
+
+    struct IteratorTag {
+        static constexpr auto Name() { return "java/util/Iterator"; }
+    };
+    jni::Local<jni::Class<IteratorTag>> iteratorCls;
+
+    struct MapEntryTag {
+        static constexpr auto Name() { return "java/util/Map$Entry"; }
+    };
+    jni::Local<jni::Class<MapEntryTag>> mapEntryCls;
+
+    jni::Method<Tag, jni::Object<SetTag>()> entrySetFunc;
+    jni::Method<SetTag, jni::Object<IteratorTag>()> iteratorFunc;
+    jni::Method<IteratorTag, jboolean()> hasNextFunc;
+    jni::Method<IteratorTag, Obj()> nextFunc;
+    jni::Method<MapEntryTag, Obj()> getKeyFunc;
+    jni::Method<MapEntryTag, Obj()> getValueFunc;
+
+    MapClass(jni::JNIEnv& env)
+        : env(env)
+        , cls(jni::Class<Tag>::Find(env))
+        , setCls(jni::Class<SetTag>::Find(env))
+        , iteratorCls(jni::Class<IteratorTag>::Find(env))
+        , mapEntryCls(jni::Class<MapEntryTag>::Find(env))
+        , entrySetFunc(cls.GetMethod<jni::Object<SetTag>()>(env, "entrySet"))
+        , iteratorFunc(setCls.GetMethod<jni::Object<IteratorTag>()>(env, "iterator"))
+        , hasNextFunc(iteratorCls.GetMethod<jboolean()>(env, "hasNext"))
+        , nextFunc(iteratorCls.GetMethod<Obj()>(env, "next"))
+        , getKeyFunc(mapEntryCls.GetMethod<Obj()>(env, "getKey"))
+        , getValueFunc(mapEntryCls.GetMethod<Obj()>(env, "getValue"))
+    {}
+
+    struct Instance {
+        const MapClass& parent;
+        jni::Local<jni::Object<Tag>> obj;
+
+        struct Kv {
+            jni::Local<Obj> key;
+            jni::Local<Obj> value;
+        };
+
+        itlib::generator<Kv&> items() {
+            auto& penv = parent.env;
+            auto entrySet = obj.Call(penv, parent.entrySetFunc);
+            auto iterator = entrySet.Call(penv, parent.iteratorFunc);
+            while (iterator.Call(penv, parent.hasNextFunc)) {
+                auto entry = unsafeCast<MapEntryTag>(penv, iterator.Call(penv, parent.nextFunc));
+                Kv y = {
+                    entry.Call(penv, parent.getKeyFunc),
+                    entry.Call(penv, parent.getValueFunc)
+                };
+                co_yield y;
+            }
+        }
+    };
+
+    Instance cast(jni::Local<Obj> obj) const {
+        return {
+            *this,
+            unsafeCast<Tag>(env, std::move(obj))
+        };
+    }
 };
 
 struct MapToDictConverter {
@@ -181,9 +271,7 @@ struct MapToDictConverter {
     jni::Local<jni::Class<jni::StringTag>> stringClass;
     jni::Local<jni::Class<jni::ArrayTag<Obj>>> objArrayClass;
 
-    jni::Local<jni::Class<MapTag>> mapClass;
-
-
+    MapClass mapCls;
     BooleanClass boolCls;
     IntegerClass intCls;
     LongClass longCls;
@@ -193,7 +281,7 @@ struct MapToDictConverter {
         : env(env)
         , stringClass(jni::Class<jni::StringTag>::Find(env))
         , objArrayClass(jni::Class<jni::ArrayTag<Obj>>::Find(env))
-        , mapClass(jni::Class<MapTag>::Find(env))
+        , mapCls(env)
         , boolCls(env)
         , intCls(env)
         , longCls(env)
@@ -229,21 +317,30 @@ struct MapToDictConverter {
 
         ret[size - 1] = {}; // hacky reserve
 
-        for (jsize i = 0; i < size; ++i) {
+        for (jni::jsize i = 0; i < size; ++i) {
             ret[i] = convert(arr.Get(env, i));
         }
 
         return ret;
     }
 
-    Dict getObject(const jni::Local<Obj>& obj) {
-        if (!obj.IsInstanceOf(env, mapClass)) {
+    std::optional<Dict> getObject(jni::Local<Obj>& obj) {
+        if (!obj.IsInstanceOf(env, mapCls.cls)) {
             return {};
         }
 
-        auto map = unsafeCast<MapTag>(env, obj);
+        auto map = mapCls.cast(std::move(obj));
 
         Dict ret;
+
+        for (auto& item : map.items()) {
+            auto key = safeGetString(item.key);
+            if (!key) {
+                throw std::runtime_error("Unsupported key type");
+            }
+
+            ret[*key] = convert(std::move(item.value));
+        }
 
         return ret;
     }
@@ -256,10 +353,10 @@ struct MapToDictConverter {
             return std::move(*str);
         }
         if (auto b = boolCls.safeGet(obj)) {
-            return std::move(*b);
+            return !!*b;
         }
         if (auto i = intCls.safeGet(obj)) {
-            return std::move(*i);
+            return *i;
         }
         if (auto l = longCls.safeGet(obj)) {
             // longs are special...
@@ -269,10 +366,13 @@ struct MapToDictConverter {
             return std::move(*l);
         }
         if (auto d = doubleCls.safeGet(obj)) {
-            return std::move(*d);
+            return *d;
         }
         if (auto arr = safeGetArray(obj)) {
             return std::move(*arr);
+        }
+        if (auto o = getObject(obj)) {
+            return std::move(*o);
         }
 
         throw std::runtime_error("Unsupported type");
@@ -281,20 +381,12 @@ struct MapToDictConverter {
 
 } // namespace
 
-jni::Local<Obj> Dict_toObject(jni::JNIEnv& env, const Dict& dict) try {
+jni::Local<Obj> Dict_toObject(jni::JNIEnv& env, const Dict& dict) {
     return DictToMapConverter(env).convert(dict);
 }
-catch (...) {
-    jni::ThrowJavaError(env, std::current_exception());
-    return jni::Local<Obj>(nullptr); // reachable by C++, but not by Java
-}
 
-Dict Object_toDict(jni::JNIEnv& env, jni::Local<Obj> obj) try {
+Dict Object_toDict(jni::JNIEnv& env, jni::Local<Obj> obj) {
     return MapToDictConverter(env).convert(std::move(obj));
-}
-catch (...) {
-    jni::ThrowJavaError(env, std::current_exception());
-    return {};
 }
 
 } // namespace ac::java
