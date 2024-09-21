@@ -7,6 +7,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 import java.util.Map;
+import java.util.HashMap;
 
 public class TestDict {
     static {
@@ -17,9 +18,9 @@ public class TestDict {
     private static native Object getObjectFromPojoDict();
     private static native Object getObjectFromDictWithBinary();
 
-    private static native void runCppTestWithNullObject(Object obj);
-    private static native void runCppTestWithPojoObject(Object obj);
-    private static native void runCppTestWithObjectWithBinary(Object obj);
+    private static native boolean runCppTestWithNullObject(Object obj);
+    private static native boolean runCppTestWithPojoObject(Object obj);
+    private static native boolean runCppTestWithObjectWithBinary(Object obj);
 
     @Test
     public void testEmptyDict() {
@@ -83,5 +84,17 @@ public class TestDict {
         Map empty_dict = (Map)map.get("empty_dict");
         assertNotNull(empty_dict);
         assertEquals(0, empty_dict.size());
+    }
+
+    @Test
+    public void testNullObject() {
+        assertTrue(runCppTestWithNullObject(null));
+    }
+
+    @Test
+    public void testPojoObject() {
+        Map map = new HashMap() ;
+        map.put("false", false);
+        assertTrue(runCppTestWithPojoObject(map));
     }
 }

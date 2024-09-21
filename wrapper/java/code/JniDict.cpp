@@ -182,7 +182,7 @@ struct MapToDictConverter {
     jni::Local<jni::Class<jni::ArrayTag<Obj>>> objArrayClass;
 
     jni::Local<jni::Class<MapTag>> mapClass;
-    //jni::Method
+
 
     BooleanClass boolCls;
     IntegerClass intCls;
@@ -192,8 +192,8 @@ struct MapToDictConverter {
     MapToDictConverter(jni::JNIEnv& env)
         : env(env)
         , stringClass(jni::Class<jni::StringTag>::Find(env))
-        , mapClass(jni::Class<MapTag>::Find(env))
         , objArrayClass(jni::Class<jni::ArrayTag<Obj>>::Find(env))
+        , mapClass(jni::Class<MapTag>::Find(env))
         , boolCls(env)
         , intCls(env)
         , longCls(env)
@@ -213,7 +213,7 @@ struct MapToDictConverter {
         return jni::Make<std::string>(env, str);
     }
 
-    Dict getArray(const jni::Local<Obj>& obj) {
+    std::optional<Dict> safeGetArray(const jni::Local<Obj>& obj) {
         if (!obj.IsInstanceOf(env, objArrayClass)) {
             return {};
         }
@@ -253,26 +253,26 @@ struct MapToDictConverter {
             return {};
         }
         if (auto str = safeGetString(obj)) {
-            return *str;
+            return std::move(*str);
         }
         if (auto b = boolCls.safeGet(obj)) {
-            return *b;
+            return std::move(*b);
         }
         if (auto i = intCls.safeGet(obj)) {
-            return *i;
+            return std::move(*i);
         }
         if (auto l = longCls.safeGet(obj)) {
             // longs are special...
             // first try to fit into int
             // ... then into unsigned
             // ... finally into double
-            return *l;
+            return std::move(*l);
         }
         if (auto d = doubleCls.safeGet(obj)) {
-            return *d;
+            return std::move(*d);
         }
-        if (auto arr = getArray(obj)) {
-            return arr;
+        if (auto arr = safeGetArray(obj)) {
+            return std::move(*arr);
         }
 
         throw std::runtime_error("Unsupported type");
@@ -281,12 +281,20 @@ struct MapToDictConverter {
 
 } // namespace
 
-jni::Local<Obj> Dict_toObject(jni::JNIEnv& env, const Dict& dict) {
+jni::Local<Obj> Dict_toObject(jni::JNIEnv& env, const Dict& dict) try {
     return DictToMapConverter(env).convert(dict);
 }
+catch (...) {
+    jni::ThrowJavaError(env, std::current_exception());
+    return jni::Local<Obj>(nullptr); // reachable by C++, but not by Java
+}
 
-Dict Object_toDict(jni::JNIEnv& env, jni::Local<Obj> obj) {
+Dict Object_toDict(jni::JNIEnv& env, jni::Local<Obj> obj) try {
     return MapToDictConverter(env).convert(std::move(obj));
+}
+catch (...) {
+    jni::ThrowJavaError(env, std::current_exception());
+    return {};
 }
 
 } // namespace ac::java
