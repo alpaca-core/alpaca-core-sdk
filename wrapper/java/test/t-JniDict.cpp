@@ -7,12 +7,12 @@
 extern "C" {
 
 JNIEXPORT jni::jobject* JNICALL
-Java_com_alpacacore_api_TestDict_getMapFromEmptyDict(jni::JNIEnv* env, jni::jclass* /*cls*/) {
-    return ac::java::Dict_toMap(*env, {}).release();
+Java_com_alpacacore_api_TestDict_getObjectFromEmptyDict(jni::JNIEnv* env, jni::jclass* /*cls*/) {
+    return ac::java::Dict_toObject(*env, {}).release();
 }
 
 JNIEXPORT jni::jobject* JNICALL
-Java_com_alpacacore_api_TestDict_getMapFromPojoDict(jni::JNIEnv* env, jni::jclass* /*cls*/) {
+Java_com_alpacacore_api_TestDict_getObjectFromPojoDict(jni::JNIEnv* env, jni::jclass* /*cls*/) {
     auto dict = ac::Dict::parse(R"json(
     {
         "bool": true,
@@ -32,11 +32,11 @@ Java_com_alpacacore_api_TestDict_getMapFromPojoDict(jni::JNIEnv* env, jni::jclas
         "empty_dict": {}
     }
     )json");
-    return ac::java::Dict_toMap(*env, dict).release();
+    return ac::java::Dict_toObject(*env, dict).release();
 }
 
 //JNIEXPORT void JNICALL
-//Java_com_alpacacore_api_TestDict_runCppTestWithPojoMap(JNIEnv* /*env*/, jni::jclass* /*cls*/, jni::jobject* /*map*/) {
+//Java_com_alpacacore_api_TestDict_runCppTestWithPojoObject(JNIEnv* /*env*/, jni::jclass* /*cls*/, jni::jobject* /*map*/) {
 //}
 
 } // extern "C"

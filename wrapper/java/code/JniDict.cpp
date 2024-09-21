@@ -9,8 +9,6 @@ DISABLE_MSVC_WARNING(4996) // codecvt deprecations
 
 namespace ac::java {
 
-using Obj = jni::Object<>;
-
 namespace {
 
 struct HashMapTag {
@@ -18,66 +16,89 @@ struct HashMapTag {
 };
 using HashMap = jni::Object<HashMapTag>;
 
+struct MapTag {
+    static constexpr auto Name() { return "java/util/Map"; }
+};
+using Map = jni::Object<MapTag>;
+
 struct BooleanTag {
     static constexpr auto Name() { return "java/lang/Boolean"; }
     using cpp_t = jboolean;
-    static constexpr auto valueFunc = "booleanValue";
+    static constexpr auto valueFuncName = "booleanValue";
 };
 struct IntegerTag {
     static constexpr auto Name() { return "java/lang/Integer"; }
     using cpp_t = jint;
-    static constexpr auto valueFunc = "intValue";
+    static constexpr auto valueFuncName = "intValue";
 };
 struct LongTag {
     static constexpr auto Name() { return "java/lang/Long"; }
     using cpp_t = jlong;
-    static constexpr auto valueFunc = "longValue";
+    static constexpr auto valueFuncName = "longValue";
 };
 struct DoubleTag {
     static constexpr auto Name() { return "java/lang/Double"; }
     using cpp_t = jdouble;
-    static constexpr auto valueFunc = "doubleValue";
+    static constexpr auto valueFuncName = "doubleValue";
 };
 
+template <class OutTagType, class T>
+jni::Local<jni::Object<OutTagType>> unsafeCast(jni::JNIEnv& env, const T& object)
+{
+    auto ptr = reinterpret_cast<typename jni::Object<OutTagType>::UntaggedType*>(jni::NewLocal(env, object).release());
+    return jni::Local<jni::Object<OutTagType>>(env, ptr);
+}
+
 template <typename Tag>
-struct PrimitiveTypeCache {
+struct PrimitiveClass {
+    jni::JNIEnv& env;
+
     using cpp_t = typename Tag::cpp_t;
+
     jni::Local<jni::Class<Tag>> cls;
-    std::optional<jni::Constructor<Tag, cpp_t>> ctor;
-    std::optional<jni::Method<Tag, cpp_t()>> getter;
+    jni::Constructor<Tag, cpp_t> ctor;
+    jni::Method<Tag, cpp_t()> valueFunc;
 
-    PrimitiveTypeCache() : cls(nullptr) {}
+    PrimitiveClass(jni::JNIEnv& env)
+        : env(env),
+        cls(jni::Class<Tag>::Find(env)),
+        ctor(cls.template GetConstructor<cpp_t>(env)),
+        valueFunc(cls.template GetMethod<cpp_t()>(env, Tag::valueFuncName))
+    {}
 
-    void initCls(jni::JNIEnv& env) {
-        if (!cls) {
-            cls = jni::Class<Tag>::Find(env);
+    struct Instance {
+        const PrimitiveClass& parent;
+        jni::Local<jni::Object<Tag>> obj;
+
+        cpp_t value() const {
+            return obj.Call(parent.env, parent.valueFunc);
         }
+    };
+
+    Instance newInstance(cpp_t value) const {
+        return {*this, cls.New(env, ctor, value)};
     }
 
-    jni::Local<jni::Object<Tag>> create(jni::JNIEnv& env, cpp_t val) {
-        if (!ctor) {
-            initCls(env);
-            ctor.emplace(cls.template GetConstructor<cpp_t>(env));
-        }
-        return cls.New(env, *ctor, val);
+    Instance cast(jni::Local<Obj> obj) const {
+        return {
+            *this,
+            unsafeCast<Tag>(env, std::move(obj))
+        };
     }
 
-    std::optional<cpp_t> get(jni::JNIEnv& env, const jni::Local<Obj>& obj) {
-        initCls(env);
-
+    std::optional<cpp_t> safeGet(jni::Local<Obj>& obj) const {
         if (!obj.IsInstanceOf(env, cls)) {
             return {};
         }
 
-        if (!getter) {
-            getter.emplace(cls.template GetMethod<cpp_t()>(env, Tag::valueFunc));
-        }
-
-        auto cast = jni::Cast<Tag>(env, cls, obj);
-
-        return cast.Call(env, *getter);
+        return cast(std::move(obj)).value();
     }
 };
+
+using BooleanClass = PrimitiveClass<BooleanTag>;
+using IntegerClass = PrimitiveClass<IntegerTag>;
+using LongClass = PrimitiveClass<LongTag>;
+using DoubleClass = PrimitiveClass<DoubleTag>;
 
 struct DictToMapConverter {
     jni::JNIEnv& env;
@@ -85,16 +106,20 @@ struct DictToMapConverter {
     jni::Constructor<HashMapTag> hashMapCtor;
     jni::Method<HashMapTag, Obj(Obj, Obj)> m_hashMapPut;
 
-    PrimitiveTypeCache<BooleanTag> boolCache;
-    PrimitiveTypeCache<IntegerTag> intCache;
-    PrimitiveTypeCache<LongTag> longCache;
-    PrimitiveTypeCache<DoubleTag> doubleCache;
+    BooleanClass boolCls;
+    IntegerClass intCls;
+    LongClass longCls;
+    DoubleClass doubleCls;
 
     DictToMapConverter(jni::JNIEnv& env)
         : env(env)
         , hashMapClass(jni::Class<HashMapTag>::Find(env))
         , hashMapCtor(hashMapClass.GetConstructor<>(env))
         , m_hashMapPut(hashMapClass.GetMethod<Obj(Obj, Obj)>(env, "put"))
+        , boolCls(env)
+        , intCls(env)
+        , longCls(env)
+        , doubleCls(env)
     {}
 
     jni::Local<HashMap> newHashMap() {
@@ -104,19 +129,19 @@ struct DictToMapConverter {
     jni::Local<Obj> convert(const Dict& dict) {
         switch (dict.type()) {
         case Dict::value_t::boolean:
-            return boolCache.create(env, dict.get<bool>());
+            return boolCls.newInstance(dict.get<bool>()).obj;
         case Dict::value_t::number_integer:
-            return intCache.create(env, dict.get<int>());
+            return intCls.newInstance(dict.get<int>()).obj;
         case Dict::value_t::number_unsigned: {
             auto uval = dict.get<unsigned>();
             if (uval <= unsigned(std::numeric_limits<jint>::max())) {
                 // return int if it fits
-                return intCache.create(env, uval);
+                return intCls.newInstance(uval).obj;
             }
-            return longCache.create(env, uval);
+            return longCls.newInstance(uval).obj;
         }
         case Dict::value_t::number_float:
-            return doubleCache.create(env, dict.get<double>());
+            return doubleCls.newInstance(dict.get<double>()).obj;
         case Dict::value_t::string: {
             auto sv = dict.get<std::string_view>();
             auto begin = sv.data();
@@ -159,29 +184,32 @@ struct MapToDictConverter {
     jni::Local<jni::Class<MapTag>> mapClass;
     //jni::Method
 
-    PrimitiveTypeCache<BooleanTag> boolCache;
-    PrimitiveTypeCache<IntegerTag> intCache;
-    PrimitiveTypeCache<LongTag> longCache;
-    PrimitiveTypeCache<DoubleTag> doubleCache;
+    BooleanClass boolCls;
+    IntegerClass intCls;
+    LongClass longCls;
+    DoubleClass doubleCls;
 
     MapToDictConverter(jni::JNIEnv& env)
         : env(env)
         , stringClass(jni::Class<jni::StringTag>::Find(env))
         , mapClass(jni::Class<MapTag>::Find(env))
         , objArrayClass(jni::Class<jni::ArrayTag<Obj>>::Find(env))
+        , boolCls(env)
+        , intCls(env)
+        , longCls(env)
+        , doubleCls(env)
     {}
 
     bool getNull(const jni::Local<Obj>& obj) {
         return !obj;
     }
 
-    std::optional<std::string> getString(const jni::Local<Obj>& obj) {
+    std::optional<std::string> safeGetString(const jni::Local<Obj>& obj) {
         if (!obj.IsInstanceOf(env, stringClass)) {
             return {};
         }
 
-        auto str = jni::Cast<jni::StringTag>(env, stringClass, obj);
-
+        auto str = unsafeCast<jni::StringTag>(env, obj);
         return jni::Make<std::string>(env, str);
     }
 
@@ -213,7 +241,7 @@ struct MapToDictConverter {
             return {};
         }
 
-        auto map = jni::Cast<MapTag>(env, mapClass, obj);
+        auto map = unsafeCast<MapTag>(env, obj);
 
         Dict ret;
 
@@ -224,23 +252,23 @@ struct MapToDictConverter {
         if (getNull(obj)) {
             return {};
         }
-        if (auto str = getString(obj)) {
+        if (auto str = safeGetString(obj)) {
             return *str;
         }
-        if (auto b = boolCache.get(env, obj)) {
+        if (auto b = boolCls.safeGet(obj)) {
             return *b;
         }
-        if (auto i = intCache.get(env, obj)) {
+        if (auto i = intCls.safeGet(obj)) {
             return *i;
         }
-        if (auto l = longCache.get(env, obj)) {
+        if (auto l = longCls.safeGet(obj)) {
             // longs are special...
             // first try to fit into int
             // ... then into unsigned
             // ... finally into double
             return *l;
         }
-        if (auto d = doubleCache.get(env, obj)) {
+        if (auto d = doubleCls.safeGet(obj)) {
             return *d;
         }
         if (auto arr = getArray(obj)) {
@@ -253,12 +281,12 @@ struct MapToDictConverter {
 
 } // namespace
 
-jni::Local<Obj> Dict_toMap(jni::JNIEnv& env, const Dict& dict) {
+jni::Local<Obj> Dict_toObject(jni::JNIEnv& env, const Dict& dict) {
     return DictToMapConverter(env).convert(dict);
 }
 
-Dict Map_toDict(jni::JNIEnv& env, jni::Local<Map> map) {
-    return MapToDictConverter(env).convert(std::move(map));
+Dict Object_toDict(jni::JNIEnv& env, jni::Local<Obj> obj) {
+    return MapToDictConverter(env).convert(std::move(obj));
 }
 
 } // namespace ac::java

@@ -7,13 +7,9 @@
 
 namespace ac::java {
 
-jni::Local<jni::Object<>> Dict_toMap(jni::JNIEnv& env, const Dict& map);
+using Obj = jni::Object<>;
 
-struct MapTag {
-    static constexpr auto Name() { return "java/util/Map"; }
-};
-using Map = jni::Object<MapTag>;
-
-Dict Map_toDict(jni::JNIEnv& env, jni::Local<Map> map);
+jni::Local<Obj> Dict_toObject(jni::JNIEnv& env, const Dict& dict);
+Dict Object_toDict(jni::JNIEnv& env, jni::Local<Obj> obj);
 
 } // namespace ac::java
