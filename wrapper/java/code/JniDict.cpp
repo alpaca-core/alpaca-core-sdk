@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #include "JniDict.hpp"
+#include <astl/throw_ex.hpp>
 #include <memory>
 
 DISABLE_MSVC_WARNING(4996) // codecvt deprecations
@@ -146,11 +147,17 @@ struct DictToMapConverter {
     }
 };
 
+struct SetTag {
+    static constexpr auto Name() { return "java/util/Set"; }
+};
+
 struct MapToDictConverter {
     jni::JNIEnv& env;
     jni::Local<jni::Class<jni::StringTag>> stringClass;
-    jni::Local<jni::Class<MapTag>> mapClass;
     jni::Local<jni::Class<jni::ArrayTag<Obj>>> objArrayClass;
+
+    jni::Local<jni::Class<MapTag>> mapClass;
+    //jni::Method
 
     PrimitiveTypeCache<BooleanTag> boolCache;
     PrimitiveTypeCache<IntegerTag> intCache;
@@ -184,8 +191,33 @@ struct MapToDictConverter {
         }
 
         auto cast = jni::Cast<jni::ArrayTag<Obj>>(env, objArrayClass, obj);
+        jni::Local<jni::Array<Obj>> arr(env, cast.release()); // silly secondary cast since Array is not Object :(
 
-        return {};
+        auto size = arr.Length(env);
+
+        Dict ret = Dict::array();
+
+        if (size == 0) return ret; // empty
+
+        ret[size - 1] = {}; // hacky reserve
+
+        for (jsize i = 0; i < size; ++i) {
+            ret[i] = convert(arr.Get(env, i));
+        }
+
+        return ret;
+    }
+
+    Dict getObject(const jni::Local<Obj>& obj) {
+        if (!obj.IsInstanceOf(env, mapClass)) {
+            return {};
+        }
+
+        auto map = jni::Cast<MapTag>(env, mapClass, obj);
+
+        Dict ret;
+
+        return ret;
     }
 
     Dict convert(jni::Local<Obj> obj) {
@@ -211,7 +243,11 @@ struct MapToDictConverter {
         if (auto d = doubleCache.get(env, obj)) {
             return *d;
         }
+        if (auto arr = getArray(obj)) {
+            return arr;
+        }
 
+        throw std::runtime_error("Unsupported type");
     }
 };
 
@@ -222,7 +258,7 @@ jni::Local<Obj> Dict_toMap(jni::JNIEnv& env, const Dict& dict) {
 }
 
 Dict Map_toDict(jni::JNIEnv& env, jni::Local<Map> map) {
-    return {};
+    return MapToDictConverter(env).convert(std::move(map));
 }
 
 } // namespace ac::java
