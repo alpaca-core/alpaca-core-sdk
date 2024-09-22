@@ -182,6 +182,12 @@ struct DictToMapConverter {
             }
             return std::move(ret.obj);
         }
+        case Dict::value_t::binary: {
+            auto& buf = dict.get_binary();
+            auto ret = jni::Local<jni::Array<jbyte>>::New(env, buf.size());
+            jni::SetArrayRegion(env, *ret.get(), 0, buf.size(), reinterpret_cast<const jni::jbyte*>(buf.data()));
+            return ret;
+        }
         case Dict::value_t::null:
         default:
             return jni::Local<Obj>(nullptr);
@@ -270,6 +276,7 @@ struct MapToDictConverter {
     jni::JNIEnv& env;
     jni::Local<jni::Class<jni::StringTag>> stringClass;
     jni::Local<jni::Class<jni::ArrayTag<Obj>>> objArrayClass;
+    jni::Local<jni::Class<jni::ArrayTag<jbyte>>> byteArrClass;
 
     MapClass mapCls;
     BooleanClass boolCls;
@@ -281,6 +288,7 @@ struct MapToDictConverter {
         : env(env)
         , stringClass(jni::Class<jni::StringTag>::Find(env))
         , objArrayClass(jni::Class<jni::ArrayTag<Obj>>::Find(env))
+        , byteArrClass(jni::Class<jni::ArrayTag<jbyte>>::Find(env))
         , mapCls(env)
         , boolCls(env)
         , intCls(env)
@@ -324,7 +332,7 @@ struct MapToDictConverter {
         return ret;
     }
 
-    std::optional<Dict> getObject(jni::Local<Obj>& obj) {
+    std::optional<Dict> safeGetObject(jni::Local<Obj>& obj) {
         if (!obj.IsInstanceOf(env, mapCls.cls)) {
             return {};
         }
@@ -341,6 +349,23 @@ struct MapToDictConverter {
 
             ret[*key] = convert(std::move(item.value));
         }
+
+        return ret;
+    }
+
+    std::optional<Dict> safeGetBinary(const jni::Local<Obj>& obj) {
+        if (!obj.IsInstanceOf(env, byteArrClass)) {
+            return {};
+        }
+
+        auto cast = jni::Cast<jni::ArrayTag<jbyte>>(env, byteArrClass, obj);
+        jni::Local<jni::Array<jbyte>> arr(env, cast.release()); // silly secondary cast since Array is not Object :(
+
+        auto size = arr.Length(env);
+
+        std::vector<uint8_t> ret(size);
+
+        jni::GetArrayRegion(env, *arr.get(), 0, size, reinterpret_cast<jbyte*>(ret.data()));
 
         return ret;
     }
@@ -387,8 +412,11 @@ struct MapToDictConverter {
         if (auto arr = safeGetArray(obj)) {
             return std::move(*arr);
         }
-        if (auto o = getObject(obj)) {
+        if (auto o = safeGetObject(obj)) {
             return std::move(*o);
+        }
+        if (auto bin = safeGetBinary(obj)) {
+            return Dict::binary(std::move(*bin));
         }
 
         throw std::runtime_error("Unsupported value type");

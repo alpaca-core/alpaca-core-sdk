@@ -19,7 +19,7 @@ public class TestDict {
     private static native Object getObjectFromDictWithBinary();
 
     private static native boolean runCppTestWithNullObject(Object obj);
-    private static native int runCppTestWithJsonLikeObject(Object obj);
+    private static native boolean runCppTestWithJsonLikeObject(Object obj);
     private static native boolean runCppTestWithObjectWithBinary(Object obj);
 
     @Test
@@ -48,7 +48,7 @@ public class TestDict {
     }
 
     @Test
-    public void testPojoDict() {
+    public void testComplexDict() {
         Map map = (Map)getObjectFromDictByJson("""
         {
             "bool": true,
@@ -112,6 +112,23 @@ public class TestDict {
     }
 
     @Test
+    public void testDictWithBinary() {
+        Map map = (Map)getObjectFromDictWithBinary();
+        assertNotNull(map);
+
+        assertEquals(3, map.size());
+        assertEquals(3, map.get("int"));
+        assertEquals("hello", map.get("str"));
+
+        byte[] bytes = (byte[])map.get("bytes");
+        assertNotNull(bytes);
+        assertEquals(256, bytes.length);
+        for (int i = 0; i < 256; i++) {
+            assertEquals((byte)i, bytes[i]);
+        }
+    }
+
+    @Test
     public void testNullObject() {
         assertTrue(runCppTestWithNullObject(null));
     }
@@ -142,7 +159,7 @@ public class TestDict {
         Object[] arr = {inAr, true, 0.5, "world"};
         map.put("arr", arr);
 
-        assertEquals(0, runCppTestWithJsonLikeObject(map));
+        assertTrue(runCppTestWithJsonLikeObject(map));
     }
 
     @Test
@@ -176,5 +193,19 @@ public class TestDict {
         catch (Error e) {
             assertEquals("Unsupported value type", e.getMessage());
         }
+    }
+
+    @Test
+    public void testObjectWithBinary() {
+        Map map = new HashMap();
+        map.put("hello", "wold");
+
+        byte[] bytes = new byte[256];
+        for (int i = 0; i < 256; i++) {
+            bytes[i] = (byte)(255 - i);
+        }
+
+        map.put("bytes", bytes);
+        assertTrue(runCppTestWithObjectWithBinary(map));
     }
 }
