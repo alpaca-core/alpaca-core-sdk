@@ -39,6 +39,9 @@ add_jar(alpaca-core-jar
         Sandbox.java
         Instance.java
         Model.java
+        ModelDesc.java
+        LocalProvider.java
+        Impl.java
     OUTPUT_NAME
         alpaca-core
 )
