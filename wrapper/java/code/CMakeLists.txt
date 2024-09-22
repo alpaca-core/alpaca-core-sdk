@@ -37,6 +37,8 @@ target_link_libraries(ac-jni PRIVATE
 add_jar(alpaca-core-jar
     SOURCES
         Sandbox.java
+        Instance.java
+        Model.java
     OUTPUT_NAME
         alpaca-core
 )
