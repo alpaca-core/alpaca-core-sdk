@@ -8,6 +8,7 @@ import static org.junit.Assert.*;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 public class TestDict {
     static {
@@ -142,5 +143,38 @@ public class TestDict {
         map.put("arr", arr);
 
         assertEquals(0, runCppTestWithJsonLikeObject(map));
+    }
+
+    @Test
+    public void testExceptions() {
+        try {
+            Map map = new HashMap();
+            map.put(1, 1);
+            runCppTestWithJsonLikeObject(map);
+            fail("Should have thrown an exception");
+        }
+        catch (Error e) {
+            assertEquals("Unsupported key type", e.getMessage());
+        }
+
+        try {
+            Map map = new HashMap();
+            map.put("too_long", Long.MAX_VALUE);
+            runCppTestWithJsonLikeObject(map);
+            fail("Should have thrown an exception");
+        }
+        catch (Error e) {
+            assertEquals("long value too large", e.getMessage());
+        }
+
+        try {
+            Map map = new HashMap();
+            map.put("nope", new LinkedList());
+            runCppTestWithJsonLikeObject(map);
+            fail("Should have thrown an exception");
+        }
+        catch (Error e) {
+            assertEquals("Unsupported value type", e.getMessage());
+        }
     }
 }

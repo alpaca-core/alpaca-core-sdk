@@ -391,7 +391,7 @@ struct MapToDictConverter {
             return std::move(*o);
         }
 
-        throw std::runtime_error("Unsupported type");
+        throw std::runtime_error("Unsupported value type");
     }
 };
 
