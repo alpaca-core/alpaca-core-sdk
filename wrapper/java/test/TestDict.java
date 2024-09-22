@@ -14,8 +14,7 @@ public class TestDict {
         System.loadLibrary("test-ac-java-dict");
     }
 
-    private static native Object getObjectFromEmptyDict();
-    private static native Object getObjectFromPojoDict();
+    private static native Object getObjectFromDictByJson(String json);
     private static native Object getObjectFromDictWithBinary();
 
     private static native boolean runCppTestWithNullObject(Object obj);
@@ -24,16 +23,14 @@ public class TestDict {
 
     @Test
     public void testEmptyDict() {
-        Object obj = getObjectFromEmptyDict();
+        Object obj = getObjectFromDictByJson("");
         assertNull(obj);
     }
 
     @Test
     public void testPojoDict() {
-        Map map = (Map)getObjectFromPojoDict();
-        assertNotNull(map);
-
-        /*
+        Map map = (Map)getObjectFromDictByJson("""
+        {
             "bool": true,
             "int": 42,
             "inner": {
@@ -49,7 +46,10 @@ public class TestDict {
             },
             "empty_list": [],
             "empty_dict": {}
-        */
+        }
+        """);
+        assertNotNull(map);
+
         assertEquals(6, map.size());
         assertEquals(true, map.get("bool"));
         assertEquals(42, map.get("int"));
