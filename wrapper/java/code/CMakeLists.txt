@@ -37,7 +37,6 @@ target_link_libraries(ac-jni PRIVATE
 add_jar(alpaca-core-jar
     SOURCES
         Sandbox.java
-        Dict.java
     OUTPUT_NAME
         alpaca-core
 )
