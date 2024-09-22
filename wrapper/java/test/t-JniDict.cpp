@@ -3,6 +3,7 @@
 //
 #include "jni.hpp"
 #include "JniDict.hpp"
+#include <astl/throw_ex.hpp>
 
 extern "C" {
 
@@ -27,10 +28,101 @@ catch (...) {
     return false; // reachable by C++, but not by Java
 }
 
-JNIEXPORT jboolean JNICALL
-Java_com_alpacacore_api_TestDict_runCppTestWithPojoObject(JNIEnv* env, jni::jclass* /*cls*/, jni::jobject* obj) try {
-    auto dict = ac::java::Object_toDict(*env, jni::Local<ac::java::Obj>(*env, obj));
-    return true;
+void do_test(bool b, const char* check, const char* file, int line) {
+    if (!b) {
+        ac::throw_ex{} << "FAIL " << file << ":" << line << ": " << check;
+    }
+}
+
+#define TEST(b) do_test((b), #b, __FILE__, __LINE__)
+
+JNIEXPORT jint JNICALL
+Java_com_alpacacore_api_TestDict_runCppTestWithJsonLikeObject(JNIEnv* env, jni::jclass* /*cls*/, jni::jobject* javaObj) try {
+    auto dict = ac::java::Object_toDict(*env, jni::Local<ac::java::Obj>(*env, javaObj));
+    /*
+    Map map = new HashMap();
+    map.put("false", false);
+    map.put("null", null);
+    map.put("int", 101);
+    map.put("long_i", 5L);
+    map.put("long_u", 3000000000L);
+    map.put("long_d", 5000000000L);
+    map.put("long_d2", -3000000000L);
+    map.put("str", "hello");
+
+    Map obj1 = new HashMap();
+    obj1.put("key", 1);
+    obj1.put("pi", 3.14);
+    obj1.put("empty_list", new Object[0]);
+    obj1.put("full_list", new Object[]{ 1, "horse", false });
+
+    map.put("obj", obj1);
+
+    Map inAr = new HashMap();
+    inAr.put("key", 1);
+    inAr.put("key2", "val");
+    Object[] arr = { inAr, true, 0.5, "world" };
+    map.put("arr", arr);
+    */
+
+    TEST(dict.size() == 10);
+    TEST(dict.is_object());
+    TEST(dict["false"].is_boolean());
+    TEST(dict["false"].get<bool>() == false);
+    TEST(dict["null"].is_null());
+    TEST(dict["int"].is_number_integer());
+    TEST(dict["int"].get<int>() == 101);
+    TEST(dict["long_i"].is_number_integer());
+    TEST(dict["long_i"].get<int>() == 5);
+    TEST(dict["long_u"].is_number_unsigned());
+    TEST(dict["long_u"].get<unsigned>() == 3'000'000'000u);
+    TEST(dict["long_d"].is_number_float());
+    TEST(dict["long_d"].get<double>() == 5'000'000'000.0);
+    TEST(dict["long_d2"].is_number_float());
+    TEST(dict["long_d2"].get<double>() == -3'000'000'000.0);
+    TEST(dict["str"].is_string());
+    TEST(dict["str"].get<std::string_view>() == "hello");
+
+    auto obj = dict["obj"];
+    TEST(obj.is_object());
+    TEST(obj.size() == 4);
+    TEST(obj["key"].is_number_integer());
+    TEST(obj["key"].get<int>() == 1);
+    TEST(obj["pi"].is_number_float());
+    TEST(obj["pi"].get<double>() == 3.14);
+    TEST(obj["empty_list"].is_array());
+    TEST(obj["empty_list"].size() == 0);
+
+    auto full_list = obj["full_list"];
+    TEST(full_list.is_array());
+    TEST(full_list.size() == 3);
+    TEST(full_list[0].is_number_integer());
+    TEST(full_list[0].get<int>() == 1);
+    TEST(full_list[1].is_string());
+    TEST(full_list[1].get<std::string_view>() == "horse");
+    TEST(full_list[2].is_boolean());
+    TEST(full_list[2].get<bool>() == false);
+
+    auto arr = dict["arr"];
+    TEST(arr.is_array());
+    TEST(arr.size() == 4);
+
+    auto inAr = arr[0];
+    TEST(inAr.is_object());
+    TEST(inAr.size() == 2);
+    TEST(inAr["key"].is_number_integer());
+    TEST(inAr["key"].get<int>() == 1);
+    TEST(inAr["key2"].is_string());
+    TEST(inAr["key2"].get<std::string_view>() == "val");
+
+    TEST(arr[1].is_boolean());
+    TEST(arr[1].get<bool>() == true);
+    TEST(arr[2].is_number_float());
+    TEST(arr[2].get<double>() == 0.5);
+    TEST(arr[3].is_string());
+    TEST(arr[3].get<std::string_view>() == "world");
+
+    return 0;
 }
 catch (...) {
     jni::ThrowJavaError(*env, std::current_exception());

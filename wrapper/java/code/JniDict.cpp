@@ -359,11 +359,27 @@ struct MapToDictConverter {
             return *i;
         }
         if (auto l = longCls.safeGet(obj)) {
+            auto val = *l;
             // longs are special...
+
             // first try to fit into int
+            if (val >= std::numeric_limits<int>::min() && val <= std::numeric_limits<int>::max()) {
+                return int(val);
+            }
+
             // ... then into unsigned
+            if (val >= 0 && val <= std::numeric_limits<unsigned>::max()) {
+                return unsigned(val);
+            }
+
             // ... finally into double
-            return std::move(*l);
+            // json imposed limits (max integer which can be stored in a double)
+            static constexpr int64_t Max_JsonInt64 = 9007199254740992ll;
+            if (val >= -Max_JsonInt64 && val <= Max_JsonInt64) {
+                return double(val);
+            }
+
+            throw std::runtime_error("long value too large");
         }
         if (auto d = doubleCls.safeGet(obj)) {
             return *d;

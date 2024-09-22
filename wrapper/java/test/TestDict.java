@@ -18,13 +18,32 @@ public class TestDict {
     private static native Object getObjectFromDictWithBinary();
 
     private static native boolean runCppTestWithNullObject(Object obj);
-    private static native boolean runCppTestWithPojoObject(Object obj);
+    private static native int runCppTestWithJsonLikeObject(Object obj);
     private static native boolean runCppTestWithObjectWithBinary(Object obj);
 
     @Test
     public void testEmptyDict() {
         Object obj = getObjectFromDictByJson("");
         assertNull(obj);
+    }
+
+    @Test
+    public void testBasicDict() {
+        Map map = (Map)getObjectFromDictByJson("""
+        {
+            "bool": true,
+            "int": 42,
+            "str": "hello",
+            "float": 3.14
+        }
+        """);
+        assertNotNull(map);
+
+        assertEquals(4, map.size());
+        assertEquals(true, map.get("bool"));
+        assertEquals(42, map.get("int"));
+        assertEquals("hello", map.get("str"));
+        assertEquals(3.14, map.get("float"));
     }
 
     @Test
@@ -41,7 +60,7 @@ public class TestDict {
             },
             "inner2": {
                 "str": "world",
-                "ilist": [1, "two", null, false],
+                "ilist": [1, "two", null, false, {"key": 1, "key2": "val"}],
                 "null": null
             },
             "empty_list": [],
@@ -69,11 +88,16 @@ public class TestDict {
 
         Object[] ilist = (Object[])inner2.get("ilist");
         assertNotNull(ilist);
-        assertEquals(4, ilist.length);
+        assertEquals(5, ilist.length);
         assertEquals(1, ilist[0]);
         assertEquals("two", ilist[1]);
         assertNull(ilist[2]);
         assertEquals(false, ilist[3]);
+        Map listobj = (Map)ilist[4];
+        assertNotNull(listobj);
+        assertEquals(2, listobj.size());
+        assertEquals(1, listobj.get("key"));
+        assertEquals("val", listobj.get("key2"));
 
         assertNull(inner2.get("null"));
 
@@ -95,6 +119,28 @@ public class TestDict {
     public void testPojoObject() {
         Map map = new HashMap() ;
         map.put("false", false);
-        assertTrue(runCppTestWithPojoObject(map));
+        map.put("null", null);
+        map.put("int", 101);
+        map.put("long_i", 5L);
+        map.put("long_u", 3000000000L);
+        map.put("long_d", 5000000000L);
+        map.put("long_d2", -3000000000L);
+        map.put("str", "hello");
+
+        Map obj1 = new HashMap();
+        obj1.put("key", 1);
+        obj1.put("pi", 3.14);
+        obj1.put("empty_list", new Object[0]);
+        obj1.put("full_list", new Object[]{1, "horse", false});
+
+        map.put("obj", obj1);
+
+        Map inAr = new HashMap();
+        inAr.put("key", 1);
+        inAr.put("key2", "val");
+        Object[] arr = {inAr, true, 0.5, "world"};
+        map.put("arr", arr);
+
+        assertEquals(0, runCppTestWithJsonLikeObject(map));
     }
 }
