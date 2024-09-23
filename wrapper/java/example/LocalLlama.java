@@ -15,6 +15,6 @@ public class LocalLlama {
         ModelDesc desc = new ModelDesc();
         desc.inferenceType = "llama.cpp";
 
-        // LocalProvider.loadModel
+        LocalProvider.sandbox("jjj");
     }
 }

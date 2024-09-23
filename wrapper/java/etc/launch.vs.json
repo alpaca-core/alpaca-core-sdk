@@ -31,6 +31,20 @@
       "project": "CMakeLists.txt",
       "projectTarget": "ac-api.dll (bin\\ac-api.dll)",
       "name": "java-Dict test"
+    },
+    {
+      "type": "dll",
+      "exe": "C:\\tools\\jdk-17.0.12+7\\bin\\java.exe",
+      "args": [
+        "-Djava.library.path=../../bin",
+        "-cp",
+        "code/alpaca-core.jar;example/ac-example-local-llama.jar",
+        "com.alpacacore.api.example.LocalLlama"
+      ],
+      "currentDir": "out/build/${cmake.name}/wrapper/java",
+      "project": "CMakeLists.txt",
+      "projectTarget": "ac-api.dll (bin\\ac-api.dll)",
+      "name": "java example LocalLLama"
     }
   ]
 }

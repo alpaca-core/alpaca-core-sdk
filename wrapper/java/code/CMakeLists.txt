@@ -23,6 +23,7 @@ target_link_libraries(ac-jni-dict PUBLIC
 add_library(ac-jni MODULE
     ac-jni.cpp
     JniSandbox.cpp
+    JniApi.cpp
 )
 if(NOT WIN32)
     target_compile_options(ac-jni PRIVATE
