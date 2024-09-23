@@ -56,11 +56,12 @@ struct LocalProvider {
     }
 };
 
+#define jniMakeNativeMethod(cls, mthd) jni::MakeNativeMethod<decltype(&cls::mthd), &cls::mthd>(#mthd)
 
 void JniApi_register(jni::JNIEnv& env) {
     auto lpc = jni::Class<LocalProvider>::Find(env);
     jni::RegisterNatives(env, *lpc,
-        jni::MakeNativeMethod<decltype(&LocalProvider::sandbox), &LocalProvider::sandbox>("sandbox")
+        jniMakeNativeMethod(LocalProvider, sandbox)
     );
 }
 
