@@ -18,5 +18,5 @@ public class LocalProvider {
 
     public static native void loadModel(ModelDesc desc, Map params, LoadModelCallback cb);
 
-    public static native void sandbox(String str);
+    public static native void sandbox(ModelDesc desc);
 }

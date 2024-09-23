@@ -17,6 +17,7 @@ target_link_libraries(ac-jni-dict PUBLIC
     JNI::JNI
     mapbox::jni.hpp
     ac::api
+    ac::local
 )
 
 # main module
