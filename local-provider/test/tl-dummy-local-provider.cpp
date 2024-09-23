@@ -21,7 +21,7 @@ namespace {
 
 class DummyLocalInferenceInstance final : public ac::LocalInferenceInstance {
 public:
-    virtual void runOpSync(std::string_view op, ac::Dict params, std::function<void(ac::Dict)> streamCb, ac::ProgressCb pcb) override {
+    virtual void runOpSync(std::string_view op, ac::Dict params, ac::BasicCb<ac::Dict> streamCb, ac::ProgressCb pcb) override {
         pcb("stream", 0.1f);
 
         if (op == "insta") {
