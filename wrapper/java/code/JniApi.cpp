@@ -1,7 +1,6 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#pragma once
 #include "JniApi.hpp"
 #include <ac/ModelDesc.hpp>
 #include <iostream>
@@ -30,7 +29,7 @@ struct ModelDesc {
         auto assetsArray = obj.Get(env, assetsField);
         auto assetsArrayLength = assetsArray.Length(env);
         ret.assets.reserve(assetsArrayLength);
-        for (int i = 0; i < assetsArrayLength; ++i) {
+        for (size_t i = 0; i < assetsArrayLength; ++i) {
             auto assetInfo = assetsArray.Get(env, i);
             auto name = jni::Make<std::string>(env, assetInfo.Get(env, assetInfoNameField));
             auto tag = jni::Make<std::string>(env, assetInfo.Get(env, assetInfoTagField));
