@@ -3,8 +3,6 @@
 //
 package com.alpacacore.api;
 
-import java.util.Map;
-
 class ModelImpl implements Model {
     long nativePtr;
     private ModelImpl(long ptr) {
@@ -14,7 +12,7 @@ class ModelImpl implements Model {
     protected native void finalize() throws Throwable;
 
     @Override
-    public native void createInstance(String type, Map params, CreateInstanceCallback cb);
+    public native void createInstance(String type, Object params, CreateInstanceCallback cb);
 }
 
 class InstanceImpl implements Instance {
@@ -26,7 +24,7 @@ class InstanceImpl implements Instance {
     protected native void finalize() throws Throwable;
 
     @Override
-    public native void runOp(String op, Map params, OpCallback cb);
+    public native void runOp(String op, Object params, OpCallback cb);
 
     @Override
     public native void synchronize();

@@ -3,7 +3,10 @@
 //
 #include "JniApi.hpp"
 #include <ac/ModelDesc.hpp>
+#include <ac/LocalProvider.hpp>
+#include "JniDict.hpp"
 #include <iostream>
+#include <thread>
 
 namespace ac::java {
 
@@ -54,15 +57,50 @@ struct LocalProvider {
             std::cout << "  asset: " << asset.path << " tag: " << asset.tag << '\n';
         }
     }
+
+    static ac::LocalProvider m_provider;
+    static std::thread m_thread;
+
+    static void launch(jni::JavaVM& jvm) {
+        m_thread = std::thread([&jvm] {
+            auto env = jni::AttachCurrentThread(jvm);
+            m_provider.run();
+            jni::DetachCurrentThread(jvm, std::move(env));
+        });
+    }
+
+    struct LoadModelCallback {
+        constexpr static auto Name() { return "com/alpacacore/api/LocalProvider$LoadModelCallback"; }
+    };
+
+    static void loadModel(jni::JNIEnv& env, jni::Class<LocalProvider>&, jni::Object<ModelDesc>& jdesc, jni::Object<>& jparams, jni::Object<LoadModelCallback>& jcb) {
+        auto desc = ModelDesc::get(env, jdesc);
+        auto params = Object_toDict(env, jni::NewLocal(env, jparams));
+        //m_provider.createModel(std::move(desc), std::move(params), {
+        //    [cb = jni::NewGlobal(env, jcb)](CallbackResult<ModelPtr> result) {
+        //        if (result.has_value()) {
+        //        }
+        //        else {
+        //        }
+        //    },
+        //    [cb = jni::NewGlobal(env, jcb)](std::string_view tag, float progress) {
+        //    }
+        //});
+    }
 };
+
+ac::LocalProvider LocalProvider::m_provider{ac::LocalProvider::No_LaunchThread};
+std::thread LocalProvider::m_thread;
 
 #define jniMakeNativeMethod(cls, mthd) jni::MakeNativeMethod<decltype(&cls::mthd), &cls::mthd>(#mthd)
 
-void JniApi_register(jni::JNIEnv& env) {
+void JniApi_register(jni::JavaVM& jvm, jni::JNIEnv& env) {
     auto lpc = jni::Class<LocalProvider>::Find(env);
     jni::RegisterNatives(env, *lpc,
         jniMakeNativeMethod(LocalProvider, sandbox)
     );
+
+    //LocalProvider::launch(jvm);
 }
 
 } // namespace ac::java

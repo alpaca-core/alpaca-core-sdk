@@ -5,5 +5,5 @@
 #include "jni.hpp"
 
 namespace ac::java {
-void JniApi_register(jni::JNIEnv& env);
+void JniApi_register(jni::JavaVM& jvm, jni::JNIEnv& env);
 }

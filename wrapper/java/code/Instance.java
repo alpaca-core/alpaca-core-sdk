@@ -3,16 +3,14 @@
 //
 package com.alpacacore.api;
 
-import java.util.Map;
-
 public interface Instance {
     public interface OpCallback {
         void onComplete();
         void onError(String error);
         void onProgress(String tag, float progress);
-        void onStream(Map data);
+        void onStream(Object data);
     }
-    public void runOp(String op, Map params, OpCallback cb);
+    public void runOp(String op, Object params, OpCallback cb);
 
     public void synchronize();
 

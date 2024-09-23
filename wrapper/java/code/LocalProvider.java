@@ -3,8 +3,6 @@
 //
 package com.alpacacore.api;
 
-import java.util.Map;
-
 public class LocalProvider {
     static {
         System.loadLibrary("ac-jni");
@@ -16,7 +14,7 @@ public class LocalProvider {
         void onProgress(String tag, float progress);
     }
 
-    public static native void loadModel(ModelDesc desc, Map params, LoadModelCallback cb);
+    public static native void loadModel(ModelDesc desc, Object params, LoadModelCallback cb);
 
     public static native void sandbox(ModelDesc desc);
 }

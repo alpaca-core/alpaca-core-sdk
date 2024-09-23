@@ -3,11 +3,11 @@
 #include "JniApi.hpp"
 #include <iostream>
 
-extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void*) {
-    auto& env = jni::GetEnv(*vm);
+extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* jvm, void*) {
+    auto& env = jni::GetEnv(*jvm);
 
     ac::java::JniSandbox_register(env);
-    ac::java::JniApi_register(env);
+    ac::java::JniApi_register(*jvm, env);
 
     return JNI_VERSION_1_6;
 }
