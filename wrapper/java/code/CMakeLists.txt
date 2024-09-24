@@ -17,7 +17,6 @@ target_link_libraries(ac-jni-dict PUBLIC
     JNI::JNI
     mapbox::jni.hpp
     ac::api
-    ac::local
 )
 
 # main module
@@ -34,6 +33,8 @@ if(NOT WIN32)
 endif()
 target_link_libraries(ac-jni PRIVATE
     ac-jni-dict
+    ac::local
+    ac::local-dummy
 )
 
 add_jar(alpaca-core-jar
