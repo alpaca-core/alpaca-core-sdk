@@ -8,28 +8,15 @@ import com.alpacacore.api.LocalProvider;
 import com.alpacacore.api.Model;
 import com.alpacacore.api.Instance;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import java.util.concurrent.CountDownLatch;
 
-final class Box<T> {
-    private T value;
-    public Box() {
-        this.value = null;
-    }
-    public Box(T value) {
-        this.value = value;
-    }
-    public T get() {
-        return value;
-    }
-    public void set(T value) {
-        this.value = value;
-    }
-}
-
 public class LocalLlama {
+    static final class Box<T> {
+        T value;
+    }
+
     public static void main(String[] args) throws Exception {
         System.out.println("Llama example");
 
@@ -43,7 +30,7 @@ public class LocalLlama {
             @Override
             public void onComplete(Model result) {
                 System.out.println("Model loaded");
-                modelBox.set(result);
+                modelBox.value = result;
                 loadModelLatch.countDown();
             }
 
@@ -61,7 +48,7 @@ public class LocalLlama {
 
         loadModelLatch.await();
 
-        Model model = modelBox.get();
+        Model model = modelBox.value;
         if (model == null) {
             System.out.println("Model load failed");
             return;
@@ -73,7 +60,7 @@ public class LocalLlama {
             @Override
             public void onComplete(Instance result) {
                 System.out.println("Instance created");
-                instanceBox.set(result);
+                instanceBox.value = result;
                 createInstanceLatch.countDown();
             }
 
@@ -86,7 +73,7 @@ public class LocalLlama {
 
         createInstanceLatch.await();
 
-        Instance instance = instanceBox.get();
+        Instance instance = instanceBox.value;
         if (instance == null) {
             System.out.println("Instance create failed");
             return;
@@ -94,9 +81,7 @@ public class LocalLlama {
 
         Box<String> opResultBox = new Box<String>();
         CountDownLatch opLatch = new CountDownLatch(1);
-        HashMap params = new HashMap();
-        params.put("input", new String[]{"a", "b", "c"});
-        instance.runOp("run", params, new Instance.OpCallback() {
+        instance.runOp("run", Map.of("input", new String[]{"a", "b", "c"}), new Instance.OpCallback() {
             @Override
             public void onComplete() {
                 System.out.println("\nOp complete");
@@ -117,13 +102,13 @@ public class LocalLlama {
             @Override
             public void onStream(Object data) {
                 Map hm = (Map)data;
-                opResultBox.set((String)hm.get("result"));
+                opResultBox.value = (String)hm.get("result");
             }
         });
 
         opLatch.await();
 
-        String opResult = opResultBox.get();
+        String opResult = opResultBox.value;
 
         System.out.println("Op result: " + opResult);
     }
