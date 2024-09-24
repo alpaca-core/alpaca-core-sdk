@@ -35,6 +35,8 @@ target_link_libraries(ac-jni PRIVATE
     ac-jni-dict
     ac::local
     ac::local-dummy
+    ac::local-llama
+    ac::local-whisper
 )
 
 add_jar(alpaca-core-jar

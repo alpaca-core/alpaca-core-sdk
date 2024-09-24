@@ -63,8 +63,10 @@ function(add_java_test name)
     endif()
 endfunction()
 
-add_java_test(Sandbox JARS alpaca-core-jar LIBS ac-jni)
-
 add_library(test-ac-java-dict MODULE t-JniDict.cpp)
 target_link_libraries(test-ac-java-dict PRIVATE ac-jni-dict)
 add_java_test(Dict LIBS test-ac-java-dict)
+
+add_java_test(Sandbox JARS alpaca-core-jar LIBS ac-jni)
+
+add_java_test(LocalProvider JARS alpaca-core-jar LIBS ac-jni)

@@ -4,9 +4,13 @@
 #include "JniApi.hpp"
 #include "JniDict.hpp"
 
+#include <ac/LocalDummy.hpp>
+#include <ac/LocalLlama.hpp>
+#include <ac/LocalWhisper.hpp>
+
 #include <ac/ModelDesc.hpp>
 #include <ac/LocalProvider.hpp>
-#include <ac/LocalDummy.hpp>
+
 #include <ac/Model.hpp>
 #include <ac/Instance.hpp>
 
@@ -30,25 +34,31 @@ struct ModelDesc {
         ret.inferenceType = jni::Make<std::string>(env, obj.Get(env, inferenceTypeField));
 
         auto assetInfoClass = jni::Class<AssetInfo>::Find(env);
-        auto assetInfoNameField = assetInfoClass.GetField<jni::String>(env, "path");
+        auto assetInfoPathField = assetInfoClass.GetField<jni::String>(env, "path");
         auto assetInfoTagField = assetInfoClass.GetField<jni::String>(env, "tag");
 
         auto assetsField = cls.GetField<jni::Array<jni::Object<AssetInfo>>>(env, "assets");
         auto assetsArray = obj.Get(env, assetsField);
-        // treat null as empty array
+
+        // treat null as empty
+
         if (assetsArray) {
             auto assetsArrayLength = assetsArray.Length(env);
             ret.assets.reserve(assetsArrayLength);
             for (size_t i = 0; i < assetsArrayLength; ++i) {
                 auto assetInfo = assetsArray.Get(env, i);
-                auto name = jni::Make<std::string>(env, assetInfo.Get(env, assetInfoNameField));
-                auto tag = jni::Make<std::string>(env, assetInfo.Get(env, assetInfoTagField));
-                ret.assets.push_back({name, tag});
+                auto& asset = ret.assets.emplace_back();
+                asset.path = jni::Make<std::string>(env, assetInfo.Get(env, assetInfoPathField));
+                if (auto jtag = assetInfo.Get(env, assetInfoTagField)) {
+                    asset.tag = jni::Make<std::string>(env, jtag);
+                }
             }
         }
 
         auto nameField = cls.GetField<jni::String>(env, "name");
-        ret.name = jni::Make<std::string>(env, obj.Get(env, nameField));
+        if (auto jname = obj.Get(env, nameField)) {
+            ret.name = jni::Make<std::string>(env, jname);
+        }
 
         return ret;
     }
@@ -357,6 +367,8 @@ void JniApi_register(jni::JavaVM& jvm, jni::JNIEnv& env) {
     providerSingleton->launch(jvm);
 
     addLocalDummyInference(*providerSingleton);
+    addLocalLlamaInference(*providerSingleton);
+    addLocalWhisperInference(*providerSingleton);
 }
 
 } // namespace ac::java

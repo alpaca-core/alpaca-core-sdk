@@ -35,6 +35,20 @@
       "exe": "C:\\tools\\jdk-17.0.12+7\\bin\\java.exe",
       "args": [
         "-cp",
+        "../wrapper/java/test/test-ac-java-Dict.jar;${workspaceRoot}/wrapper/java/test/lib/junit-4.10.jar;../wrapper/java/test/test-ac-java-LocalProvider.jar",
+        "org.junit.runner.JUnitCore",
+        "com.alpacacore.api.TestLocalProvider"
+      ],
+      "currentDir": "out/build/${cmake.name}/bin",
+      "project": "CMakeLists.txt",
+      "projectTarget": "ac-api.dll (bin\\ac-api.dll)",
+      "name": "java-LocalProvider test"
+    },
+    {
+      "type": "dll",
+      "exe": "C:\\tools\\jdk-17.0.12+7\\bin\\java.exe",
+      "args": [
+        "-cp",
         "../wrapper/java/code/alpaca-core.jar;../wrapper/java/example/ac-example-local-llama.jar",
         "com.alpacacore.api.example.LocalLlama"
       ],

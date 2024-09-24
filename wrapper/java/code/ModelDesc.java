@@ -4,9 +4,16 @@
 package com.alpacacore.api;
 
 public class ModelDesc {
+    public ModelDesc() {}
+    public ModelDesc(String inferenceType, AssetInfo[] assets, String name) {
+        this.inferenceType = inferenceType;
+        this.assets = assets;
+        this.name = name;
+    }
+
     public String inferenceType;
 
-    public class AssetInfo {
+    public static class AssetInfo {
         public String path;
         public String tag;
     }
