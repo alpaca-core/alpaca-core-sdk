@@ -59,7 +59,7 @@ function(add_java_test name)
     )
     if(WIN32)
         # with no rpath on windows we need to set the path to the related dlls
-        set_tests_properties(ac-java-${name} PROPERTIES ENVIRONMENT "PATH=${javaLibraryPath};$ENV{PATH}")
+        set_tests_properties(ac-java-${name} PROPERTIES ENVIRONMENT_MODIFICATION "Path=path_list_prepend:${javaLibraryPath}")
     endif()
 endfunction()
 
