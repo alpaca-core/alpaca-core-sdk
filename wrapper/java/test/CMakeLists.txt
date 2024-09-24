@@ -48,11 +48,19 @@ function(add_java_test name)
     endforeach()
     list(JOIN jarPaths "${sep}" javaClassPath)
 
-    add_test(NAME ac-java-${name} COMMAND ${Java_JAVA_EXECUTABLE}
-        "-Djava.library.path=${javaLibraryPath}"
-        -cp "${javaClassPath}"
-        org.junit.runner.JUnitCore com.alpacacore.api.Test${name}
+    add_test(
+        NAME
+            ac-java-${name}
+        COMMAND
+            ${Java_JAVA_EXECUTABLE}
+            "-Djava.library.path=${javaLibraryPath}"
+            -cp "${javaClassPath}"
+            org.junit.runner.JUnitCore com.alpacacore.api.Test${name}
     )
+    if(WIN32)
+        # with no rpath on windows we need to set the path to the related dlls
+        set_tests_properties(ac-java-${name} PROPERTIES ENVIRONMENT "PATH=${javaLibraryPath};$ENV{PATH}")
+    endif()
 endfunction()
 
 add_java_test(Sandbox JARS alpaca-core-jar LIBS ac-jni)
