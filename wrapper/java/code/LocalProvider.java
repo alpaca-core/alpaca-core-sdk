@@ -6,6 +6,11 @@ package com.alpacacore.api;
 public class LocalProvider {
     static {
         System.loadLibrary("ac-jni");
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                LocalProvider.shutdown();
+            }
+        });
     }
 
     public interface LoadModelCallback {
@@ -17,4 +22,6 @@ public class LocalProvider {
     public static native void loadModel(ModelDesc desc, Object params, LoadModelCallback cb);
 
     public static native void sandbox(ModelDesc desc);
+
+    private static native void shutdown();
 }

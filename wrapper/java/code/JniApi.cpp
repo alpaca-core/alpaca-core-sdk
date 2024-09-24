@@ -46,6 +46,30 @@ struct ModelDesc {
     }
 };
 
+struct LocalProviderSingleton : public ac::LocalProvider {
+    LocalProviderSingleton() : ac::LocalProvider(ac::LocalProvider::No_LaunchThread) {}
+    ~LocalProviderSingleton() {
+        abortRun();
+        if (m_thread.joinable()) {
+            m_thread.join();
+        }
+    }
+
+    std::thread m_thread;
+
+    void launch(jni::JavaVM& jvm) {
+        m_thread = std::thread([this, &jvm] {
+            jni::JNIEnv* penv;
+            jvm.AttachCurrentThreadAsDaemon(reinterpret_cast<void**>(&penv), nullptr);
+            auto env = jni::UniqueEnv(penv, jni::JNIEnvDeleter(jvm));
+
+            run();
+        });
+    }
+};
+
+std::unique_ptr<LocalProviderSingleton> providerSingleton;
+
 struct LocalProvider {
     static constexpr auto Name() { return "com/alpacacore/api/LocalProvider"; }
 
@@ -58,17 +82,6 @@ struct LocalProvider {
         }
     }
 
-    static ac::LocalProvider m_provider;
-    static std::thread m_thread;
-
-    static void launch(jni::JavaVM& jvm) {
-        m_thread = std::thread([&jvm] {
-            auto env = jni::AttachCurrentThread(jvm);
-            m_provider.run();
-            jni::DetachCurrentThread(jvm, std::move(env));
-        });
-    }
-
     struct LoadModelCallback {
         constexpr static auto Name() { return "com/alpacacore/api/LocalProvider$LoadModelCallback"; }
     };
@@ -76,31 +89,34 @@ struct LocalProvider {
     static void loadModel(jni::JNIEnv& env, jni::Class<LocalProvider>&, jni::Object<ModelDesc>& jdesc, jni::Object<>& jparams, jni::Object<LoadModelCallback>& jcb) {
         auto desc = ModelDesc::get(env, jdesc);
         auto params = Object_toDict(env, jni::NewLocal(env, jparams));
-        //m_provider.createModel(std::move(desc), std::move(params), {
-        //    [cb = jni::NewGlobal(env, jcb)](CallbackResult<ModelPtr> result) {
-        //        if (result.has_value()) {
-        //        }
-        //        else {
-        //        }
-        //    },
-        //    [cb = jni::NewGlobal(env, jcb)](std::string_view tag, float progress) {
-        //    }
-        //});
+        providerSingleton->createModel(std::move(desc), std::move(params), {
+            [cb = jni::NewGlobal(env, jcb)](CallbackResult<ModelPtr> result) {
+                if (result.has_value()) {
+                }
+                else {
+                }
+            },
+            [cb = jni::NewGlobal(env, jcb)](std::string_view tag, float progress) {
+            }
+        });
+    }
+
+    static void shutdown(jni::JNIEnv& env, jni::Class<LocalProvider>&) {
+        providerSingleton.reset();
     }
 };
-
-ac::LocalProvider LocalProvider::m_provider{ac::LocalProvider::No_LaunchThread};
-std::thread LocalProvider::m_thread;
 
 #define jniMakeNativeMethod(cls, mthd) jni::MakeNativeMethod<decltype(&cls::mthd), &cls::mthd>(#mthd)
 
 void JniApi_register(jni::JavaVM& jvm, jni::JNIEnv& env) {
     auto lpc = jni::Class<LocalProvider>::Find(env);
     jni::RegisterNatives(env, *lpc,
-        jniMakeNativeMethod(LocalProvider, sandbox)
+        jniMakeNativeMethod(LocalProvider, sandbox),
+        jniMakeNativeMethod(LocalProvider, shutdown)
     );
 
-    //LocalProvider::launch(jvm);
+    providerSingleton = std::make_unique<LocalProviderSingleton>();
+    providerSingleton->launch(jvm);
 }
 
 } // namespace ac::java
