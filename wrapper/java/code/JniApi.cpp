@@ -97,7 +97,7 @@ struct PrivateNativeClass {
 
     static void finalize(jni::JNIEnv& env, jni::Object<Tag>& obj) {
         auto cls = jni::Class<Tag>::Find(env);
-        auto payloadField = cls.GetField<jni::jlong>(env, "nativePtr");
+        auto payloadField = cls.template GetField<jni::jlong>(env, "nativePtr");
         auto payload = obj.Get(env, payloadField);
         auto ptr = reinterpret_cast<Payload*>(payload);
         delete ptr;
@@ -105,7 +105,7 @@ struct PrivateNativeClass {
 
     static jni::Local<jni::Object<Tag>> create(jni::JNIEnv& env, PL payloadData) {
         auto cls = jni::Class<Tag>::Find(env);
-        auto ctor = cls.GetConstructor<jni::jlong>(env);
+        auto ctor = cls.template GetConstructor<jni::jlong>(env);
         auto payload = std::make_unique<Payload>(std::move(payloadData));
         auto nativePtr = reinterpret_cast<jni::jlong>(payload.get());
         auto obj = cls.New(env, ctor, nativePtr);
@@ -115,7 +115,7 @@ struct PrivateNativeClass {
 
     static PL& getPayload(jni::JNIEnv& env, jni::Object<Tag>& obj) {
         auto cls = jni::Class<Tag>::Find(env);
-        auto payloadField = cls.GetField<jni::jlong>(env, "nativePtr");
+        auto payloadField = cls.template GetField<jni::jlong>(env, "nativePtr");
         auto payload = obj.Get(env, payloadField);
         auto ptr = reinterpret_cast<Payload*>(payload);
         return ptr->data;
