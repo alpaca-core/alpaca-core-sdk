@@ -5,15 +5,15 @@
 #include "export.h"
 #include "Vocab.hpp"
 #include <astl/mem_ext.hpp>
+#include <itlib/ufunction.hpp>
 #include <string>
-#include <functional>
 
 struct llama_model;
 //struct llama_model_params;
 
 namespace ac::llama {
 class Job;
-using ModelLoadProgressCb = std::function<void(float)>;
+using ModelLoadProgressCb = itlib::ufunction<void(float)>;
 
 class AC_LLAMA_EXPORT Model {
 public:

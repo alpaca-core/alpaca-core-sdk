@@ -43,7 +43,7 @@ public:
         : m_instance(model, astl::move(params))
     {}
 
-    void run(Dict params, std::function<void(Dict)> streamCb) {
+    void run(Dict params, BasicCb<Dict> streamCb) {
         auto input = params.at("input").get<std::vector<std::string>>();
         auto sparams = SessionParams_fromDict(params);
 

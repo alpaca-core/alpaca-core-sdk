@@ -25,7 +25,7 @@ public:
         : m_instance(model, {})
     {}
 
-    void run(Dict params, std::function<void(Dict)> streamCb) {
+    void run(Dict params, BasicCb<Dict> streamCb) {
         auto value = params.find("audioBinaryMono");
         if (!value->is_binary()) {
             throw_ex{} << "missing input 'audioBinaryMono' in params";

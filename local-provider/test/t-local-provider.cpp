@@ -184,23 +184,20 @@ TEST_CASE("run ops") {
     std::vector<float> progress;
     unsigned resultsCount = 0;
 
-    ac::Instance::OpCallback cb = {
-        [&](ac::CallbackResult<void> result) {
-            if (result.has_error()) {
-                opError = result.error().text;
-            }
-        },
-        [&](ac::Dict result) {
-            opResult[resultsCount++] = result;
-        },
-        [&](std::string_view tag,float p) {
-            CHECK(tag == "stream");
-            progress.push_back(p);
+    auto resultCb = [&](ac::CallbackResult<void> result) {
+        if (result.has_error()) {
+            opError = result.error().text;
         }
     };
+    auto streamCb = [&](ac::Dict result) {
+        opResult[resultsCount++] = result;
+    };
+    auto progressCb = [&](std::string_view tag, float p) {
+        CHECK(tag == "stream");
+        progress.push_back(p);
+    };
 
-
-    instance->runOp("insta", {}, cb);
+    instance->runOp("insta", {}, {resultCb, streamCb, progressCb});
     instance->synchronize();
 
     CHECK(resultsCount == 1);
@@ -211,7 +208,7 @@ TEST_CASE("run ops") {
     opResult = {};
     progress.clear();
 
-    instance->runOp("more", {}, cb);
+    instance->runOp("more", {}, {resultCb, streamCb, progressCb});
     instance->synchronize();
 
     CHECK(resultsCount == 2);

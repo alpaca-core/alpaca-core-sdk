@@ -106,7 +106,7 @@ if(AC_BUILD_DOCS)
 endif()
 
 CPMAddPackage(gh:iboB/splat@1.3.3)
-CPMAddPackage(gh:iboB/itlib@1.11.3)
+CPMAddPackage(gh:iboB/itlib@1.11.4)
 CPMAddPackage(gh:iboB/jalog@0.4.3)
 
 if(AC_BUILD_TESTS)

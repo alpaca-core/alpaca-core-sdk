@@ -3,22 +3,22 @@
 //
 #pragma once
 #include "CallbackResult.hpp"
-#include <functional>
+#include <itlib/ufunction.hpp> // C++23: replace with std::move_only_function
 #include <string_view>
 
 namespace ac {
 
 namespace impl {
-// gcc does not allow us to use std::function<void(void)>
+// gcc does not allow us to use itlib::ufunction<void(void)>
 // standard does not allow us to specialize alias templates
 // well...
 template <typename R>
 struct BasicCb {
-    using type = std::function<void(R)>;
+    using type = itlib::ufunction<void(R)>;
 };
 template <>
 struct BasicCb<void> {
-    using type = std::function<void()>;
+    using type = itlib::ufunction<void()>;
 };
 } // namespace impl
 
@@ -52,6 +52,6 @@ using ResultCb = BasicCb<CallbackResult<R>>;
  *            async tasks, tags allow for more granular progress reporting.
  * @param progress A float between 0 and 1
  */
-using ProgressCb = std::function<void(std::string_view tag, float progress)>;
+using ProgressCb = itlib::ufunction<void(std::string_view tag, float progress)>;
 
 } // namespace ac
