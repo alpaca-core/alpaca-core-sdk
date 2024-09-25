@@ -1,0 +1,10 @@
+# android
+local.properties
+
+# ides
+.idea/
+
+# gradle
+.gradle/
+.cxx/
+

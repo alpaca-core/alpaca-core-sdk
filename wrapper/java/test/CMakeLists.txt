@@ -70,7 +70,7 @@ add_java_test(Dict
     LIBS test-ac-java-dict
 )
 
-set(testFixturesDir "../ac/src/testFixtures/java/com/alpacacore") # ridiculous
+set(testFixturesDir "../src/testFixtures/java/com/alpacacore") # ridiculous
 
 add_java_test(Sandbox
     SOURCES ${testFixturesDir}/TestSandbox.java

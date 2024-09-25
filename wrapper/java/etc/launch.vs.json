@@ -7,7 +7,7 @@
       "exe": "C:\\tools\\jdk-17.0.12+7\\bin\\java.exe",
       "args": [
         "-cp",
-        "../wrapper/java/ac/alpaca-core.jar;${workspaceRoot}/wrapper/java/test/lib/junit-4.10.jar;../wrapper/java/test/test-ac-java-Sandbox.jar",
+        "../wrapper/java/src/alpaca-core.jar;${workspaceRoot}/wrapper/java/test/lib/junit-4.10.jar;../wrapper/java/test/test-ac-java-Sandbox.jar",
         "org.junit.runner.JUnitCore",
         "com.alpacacore.TestSandbox"
       ],
@@ -35,7 +35,7 @@
       "exe": "C:\\tools\\jdk-17.0.12+7\\bin\\java.exe",
       "args": [
         "-cp",
-        "../wrapper/java/ac/alpaca-core.jar;${workspaceRoot}/wrapper/java/test/lib/junit-4.10.jar;../wrapper/java/test/test-ac-java-LocalProvider.jar",
+        "../wrapper/java/src/alpaca-core.jar;${workspaceRoot}/wrapper/java/test/lib/junit-4.10.jar;../wrapper/java/test/test-ac-java-LocalProvider.jar",
         "org.junit.runner.JUnitCore",
         "com.alpacacore.TestLocalProvider"
       ],
@@ -49,7 +49,7 @@
       "exe": "C:\\tools\\jdk-17.0.12+7\\bin\\java.exe",
       "args": [
         "-cp",
-        "../wrapper/java/ac/alpaca-core.jar;../wrapper/java/example/ac-example-local-llama.jar",
+        "../wrapper/java/src/alpaca-core.jar;../wrapper/java/example/ac-example-local-llama.jar",
         "com.alpacacore.example.LocalLlama"
       ],
       "currentDir": "out/build/${cmake.name}/bin",

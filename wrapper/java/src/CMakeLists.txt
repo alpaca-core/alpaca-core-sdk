@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 #
 
-set(jdir src/main/java/com/alpacacore) # ridiculous
+set(jdir main/java/com/alpacacore) # ridiculous
 
 add_jar(alpaca-core-jar
     SOURCES
