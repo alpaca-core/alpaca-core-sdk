@@ -7,6 +7,7 @@
 #include <itlib/flat_map.hpp>
 #include <astl/mem_ext.hpp>
 #include <vector>
+#include <string>
 
 struct llama_token_data;
 struct llama_context;
