@@ -7,9 +7,9 @@
       "exe": "C:\\tools\\jdk-17.0.12+7\\bin\\java.exe",
       "args": [
         "-cp",
-        "../wrapper/java/code/alpaca-core.jar;${workspaceRoot}/wrapper/java/test/lib/junit-4.10.jar;../wrapper/java/test/test-ac-java-Sandbox.jar",
+        "../wrapper/java/ac/alpaca-core.jar;${workspaceRoot}/wrapper/java/test/lib/junit-4.10.jar;../wrapper/java/test/test-ac-java-Sandbox.jar",
         "org.junit.runner.JUnitCore",
-        "com.alpacacore.api.TestSandbox"
+        "com.alpacacore.TestSandbox"
       ],
       "currentDir": "out/build/${cmake.name}/bin",
       "project": "CMakeLists.txt",
@@ -23,7 +23,7 @@
         "-cp",
         "../wrapper/java/test/test-ac-java-Dict.jar;${workspaceRoot}/wrapper/java/test/lib/junit-4.10.jar;../wrapper/java/test/test-ac-java-Dict.jar",
         "org.junit.runner.JUnitCore",
-        "com.alpacacore.api.TestDict"
+        "com.alpacacore.TestDict"
       ],
       "currentDir": "out/build/${cmake.name}/bin",
       "project": "CMakeLists.txt",
@@ -35,9 +35,9 @@
       "exe": "C:\\tools\\jdk-17.0.12+7\\bin\\java.exe",
       "args": [
         "-cp",
-        "../wrapper/java/test/test-ac-java-Dict.jar;${workspaceRoot}/wrapper/java/test/lib/junit-4.10.jar;../wrapper/java/test/test-ac-java-LocalProvider.jar",
+        "../wrapper/java/ac/alpaca-core.jar;${workspaceRoot}/wrapper/java/test/lib/junit-4.10.jar;../wrapper/java/test/test-ac-java-LocalProvider.jar",
         "org.junit.runner.JUnitCore",
-        "com.alpacacore.api.TestLocalProvider"
+        "com.alpacacore.TestLocalProvider"
       ],
       "currentDir": "out/build/${cmake.name}/bin",
       "project": "CMakeLists.txt",
@@ -49,8 +49,8 @@
       "exe": "C:\\tools\\jdk-17.0.12+7\\bin\\java.exe",
       "args": [
         "-cp",
-        "../wrapper/java/code/alpaca-core.jar;../wrapper/java/example/ac-example-local-llama.jar",
-        "com.alpacacore.api.example.LocalLlama"
+        "../wrapper/java/ac/alpaca-core.jar;../wrapper/java/example/ac-example-local-llama.jar",
+        "com.alpacacore.example.LocalLlama"
       ],
       "currentDir": "out/build/${cmake.name}/bin",
       "project": "CMakeLists.txt",

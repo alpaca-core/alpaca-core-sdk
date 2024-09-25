@@ -26,6 +26,7 @@ function(add_java_test name)
     set(tgt test-ac-java-${name})
     add_jar(${tgt}
         SOURCES
+            src/main/com/alpacacore/testutil
             ${ARG_SOURCES}
         INCLUDE_JARS
             ${junitJar}
@@ -69,14 +70,16 @@ add_java_test(Dict
     LIBS test-ac-java-dict
 )
 
+set(testFixturesDir "../ac/src/testFixtures/java/com/alpacacore") # ridiculous
+
 add_java_test(Sandbox
-    SOURCES com/alpacacore/TestSandbox.java
+    SOURCES ${testFixturesDir}/TestSandbox.java
     JARS alpaca-core-jar
     LIBS ac-jni
 )
 
 add_java_test(LocalProvider
-    SOURCES com/alpacacore/TestLocalProvider.java
+    SOURCES ${testFixturesDir}/TestLocalProvider.java
     JARS alpaca-core-jar
     LIBS ac-jni
 )
