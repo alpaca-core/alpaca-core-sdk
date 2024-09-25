@@ -79,7 +79,14 @@ struct LocalProviderSingleton : public ac::LocalProvider {
     void launch(jni::JavaVM& jvm) {
         m_thread = std::thread([this, &jvm] {
             auto env = jni::AttachCurrentThreadAsDaemon(jvm);
+#if defined(__ANDROID__)
+            // andrdoid really hates us disposing of the worker env here
+            // likely because the process is always killed before the thread is joined
+            // so... we simply leak it (not a big deal, since it's a singleton)
+            workerEnv = env.release();
+#else
             workerEnv = env.get();
+#endif
             run();
         });
     }
@@ -236,12 +243,12 @@ struct ModelImpl : public PrivateNativeClass<ModelImpl, ModelPtr> {
 
         jni::JNIEnv& env;
         jni::Global<jni::Object<CreateInstanceCallback>> jcb;
-        jni::Local<jni::Class<CreateInstanceCallback>> cls;
+        const jni::Class<CreateInstanceCallback>& cls;
 
         CreateInstanceCallback(jni::JNIEnv& env, jni::Global<jni::Object<CreateInstanceCallback>> jcb)
             : env(env)
             , jcb(std::move(jcb))
-            , cls(jni::Class<CreateInstanceCallback>::Find(env))
+            , cls(jni::Class<CreateInstanceCallback>::Singleton(env))
         {}
 
         void onComplete(InstancePtr instance) {
@@ -361,6 +368,7 @@ void JniApi_register(jni::JavaVM& jvm, jni::JNIEnv& env) {
         , jniMakeNativeMethod(LocalProvider, loadModel)
         , jniMakeNativeMethod(LocalProvider, shutdown)
     );
+    [[maybe_unused]] auto& reg = jni::Class<LocalProvider::LoadModelCallback>::Singleton(env);
 
     providerSingleton = std::make_unique<LocalProviderSingleton>();
     providerSingleton->launch(jvm);
