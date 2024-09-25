@@ -12,12 +12,14 @@ target_link_libraries(example-ac-llama-basic PRIVATE
 )
 set_target_properties(example-ac-llama-basic PROPERTIES FOLDER example)
 
-add_executable(example-ac-llama-gui e-gui.cpp)
-target_link_libraries(example-ac-llama-gui PRIVATE
-    ac::llama
-    ac-test-data::llama
-    jalog::jalog
-    jalog::sinklib
-    ac-dev::imgui
-)
-set_target_properties(example-ac-llama-gui PROPERTIES FOLDER example)
+if(TARGET ac-dev::imgui)
+    add_executable(example-ac-llama-gui e-gui.cpp)
+    target_link_libraries(example-ac-llama-gui PRIVATE
+        ac::llama
+        ac-test-data::llama
+        jalog::jalog
+        jalog::sinklib
+        ac-dev::imgui
+    )
+    set_target_properties(example-ac-llama-gui PROPERTIES FOLDER example)
+endif()

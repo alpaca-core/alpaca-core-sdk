@@ -1,7 +1,11 @@
 # Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
-find_package(SDL2 REQUIRED)
+find_package(SDL2)
+if(NOT SDL2_FOUND)
+    message(STATUS "${CMAKE_PROJECT_NAME}: SDL was not found. ImGui examples will be unavailable")
+    return()
+endif()
 
 CPMAddPackage(gh:ocornut/imgui@1.90.9)
 
