@@ -297,11 +297,11 @@ struct LocalProvider {
 
         jni::JNIEnv& env;
         jni::Global<jni::Object<LoadModelCallback>> jcb;
-        jni::Local<jni::Class<LoadModelCallback>> cls;
+        const jni::Class<LoadModelCallback>& cls;
         LoadModelCallback(jni::JNIEnv& env, jni::Global<jni::Object<LoadModelCallback>> jcb)
             : env(env)
             , jcb(std::move(jcb))
-            , cls(jni::Class<LoadModelCallback>::Find(env))
+            , cls(jni::Class<LoadModelCallback>::Singleton(env))
         {}
 
         void onComplete(ModelPtr model) {

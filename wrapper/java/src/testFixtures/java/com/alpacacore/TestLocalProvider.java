@@ -9,12 +9,12 @@ import static org.junit.Assert.*;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-final class Result<T> {
-    public T value;
-    public String error;
-}
-
 public class TestLocalProvider {
+    static final class Result<T> {
+        public T value;
+        public String error;
+    }
+
     static final class SyncHelper {
         Result<Model> model = new Result<Model>();
         String modelProgressTag;
