@@ -16,6 +16,7 @@ endif()
 find_package(Java REQUIRED)
 include(UseJava)
 
+add_subdirectory(jni.hpp)
 add_subdirectory(code)
 ac_add_test_subdir()
 ac_add_example_subdir()

@@ -78,9 +78,8 @@ struct LocalProviderSingleton : public ac::LocalProvider {
 
     void launch(jni::JavaVM& jvm) {
         m_thread = std::thread([this, &jvm] {
-            jvm.AttachCurrentThreadAsDaemon(reinterpret_cast<void**>(&workerEnv), nullptr);
-            auto env = jni::UniqueEnv(workerEnv, jni::JNIEnvDeleter(jvm));
-
+            auto env = jni::AttachCurrentThreadAsDaemon(jvm);
+            workerEnv = env.get();
             run();
         });
     }

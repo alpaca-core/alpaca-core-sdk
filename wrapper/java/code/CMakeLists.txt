@@ -1,9 +1,6 @@
 # Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
-add_library(mapbox-jni.hpp INTERFACE)
-add_library(mapbox::jni.hpp ALIAS mapbox-jni.hpp)
-target_include_directories(mapbox-jni.hpp INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../jni.hpp/include)
 
 # have this as a static lib so it can be tested in isolation
 add_library(ac-jni-dict STATIC
