@@ -26,7 +26,6 @@ function(add_java_test name)
     set(tgt test-ac-java-${name})
     add_jar(${tgt}
         SOURCES
-            Test${name}.java
             ${ARG_SOURCES}
         INCLUDE_JARS
             ${junitJar}
@@ -55,7 +54,7 @@ function(add_java_test name)
             ${Java_JAVA_EXECUTABLE}
             "-Djava.library.path=${javaLibraryPath}"
             -cp "${javaClassPath}"
-            org.junit.runner.JUnitCore com.alpacacore.api.Test${name}
+            org.junit.runner.JUnitCore com.alpacacore.Test${name}
     )
     if(WIN32)
         # with no rpath on windows we need to set the path to the related dlls
@@ -65,8 +64,19 @@ endfunction()
 
 add_library(test-ac-java-dict MODULE t-JniDict.cpp)
 target_link_libraries(test-ac-java-dict PRIVATE ac-jni-dict)
-add_java_test(Dict LIBS test-ac-java-dict)
+add_java_test(Dict
+    SOURCES TestDict.java
+    LIBS test-ac-java-dict
+)
 
-add_java_test(Sandbox JARS alpaca-core-jar LIBS ac-jni)
+add_java_test(Sandbox
+    SOURCES com/alpacacore/TestSandbox.java
+    JARS alpaca-core-jar
+    LIBS ac-jni
+)
 
-add_java_test(LocalProvider JARS alpaca-core-jar LIBS ac-jni)
+add_java_test(LocalProvider
+    SOURCES com/alpacacore/TestLocalProvider.java
+    JARS alpaca-core-jar
+    LIBS ac-jni
+)

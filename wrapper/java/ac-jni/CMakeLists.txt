@@ -17,7 +17,7 @@ target_link_libraries(ac-jni-dict PUBLIC
 
 # main module
 add_library(ac-jni MODULE
-    ac-jni.cpp
+    JniEntrypoint.cpp
     JniSandbox.cpp
     JniApi.cpp
 )
@@ -33,16 +33,4 @@ target_link_libraries(ac-jni PRIVATE
     ac::local-dummy
     ac::local-llama
     ac::local-whisper
-)
-
-add_jar(alpaca-core-jar
-    SOURCES
-        Sandbox.java
-        Instance.java
-        Model.java
-        ModelDesc.java
-        LocalProvider.java
-        Impl.java
-    OUTPUT_NAME
-        alpaca-core
 )

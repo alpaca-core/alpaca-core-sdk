@@ -1,7 +1,7 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-package com.alpacacore.api;
+package com.alpacacore;
 
 class ModelImpl implements Model {
     long nativePtr;

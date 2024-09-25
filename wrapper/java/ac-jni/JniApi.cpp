@@ -20,10 +20,10 @@
 namespace ac::java {
 
 struct ModelDesc {
-    static constexpr auto Name() { return "com/alpacacore/api/ModelDesc"; }
+    static constexpr auto Name() { return "com/alpacacore/ModelDesc"; }
 
     struct AssetInfo {
-        static constexpr auto Name() { return "com/alpacacore/api/ModelDesc$AssetInfo"; }
+        static constexpr auto Name() { return "com/alpacacore/ModelDesc$AssetInfo"; }
     };
 
     static ac::ModelDesc get(JNIEnv& env, jni::Object<ModelDesc>& obj) {
@@ -122,11 +122,11 @@ struct PrivateNativeClass {
 };
 
 struct InstanceBase {
-    static constexpr auto Name() { return "com/alpacacore/api/Instance"; }
+    static constexpr auto Name() { return "com/alpacacore/Instance"; }
 };
 
 struct InstanceImpl : public PrivateNativeClass<InstanceImpl, InstancePtr> {
-    static constexpr auto Name() { return "com/alpacacore/api/InstanceImpl"; }
+    static constexpr auto Name() { return "com/alpacacore/InstanceImpl"; }
     using SuperTag = InstanceBase;
 
     static void synchronize(jni::JNIEnv& env, jni::Object<InstanceImpl>& obj) {
@@ -135,7 +135,7 @@ struct InstanceImpl : public PrivateNativeClass<InstanceImpl, InstancePtr> {
     }
 
     struct OpCallback {
-        static constexpr auto Name() { return "com/alpacacore/api/Instance$OpCallback"; }
+        static constexpr auto Name() { return "com/alpacacore/Instance$OpCallback"; }
 
         jni::JNIEnv& env;
         jni::Global<jni::Object<OpCallback>> jcb;
@@ -195,7 +195,7 @@ struct InstanceImpl : public PrivateNativeClass<InstanceImpl, InstancePtr> {
     }
 
     struct AbortCallback {
-        static constexpr auto Name() { return "com/alpacacore/api/Instance$AbortCallback"; }
+        static constexpr auto Name() { return "com/alpacacore/Instance$AbortCallback"; }
 
         jni::JNIEnv& env;
         jni::Global<jni::Object<AbortCallback>> jcb;
@@ -224,15 +224,15 @@ struct InstanceImpl : public PrivateNativeClass<InstanceImpl, InstancePtr> {
 };
 
 struct ModelBase {
-    static constexpr auto Name() { return "com/alpacacore/api/Model"; }
+    static constexpr auto Name() { return "com/alpacacore/Model"; }
 };
 
 struct ModelImpl : public PrivateNativeClass<ModelImpl, ModelPtr> {
-    static constexpr auto Name() { return "com/alpacacore/api/ModelImpl"; }
+    static constexpr auto Name() { return "com/alpacacore/ModelImpl"; }
     using SuperTag = ModelBase;
 
     struct CreateInstanceCallback {
-        constexpr static auto Name() { return "com/alpacacore/api/Model$CreateInstanceCallback"; }
+        constexpr static auto Name() { return "com/alpacacore/Model$CreateInstanceCallback"; }
 
         jni::JNIEnv& env;
         jni::Global<jni::Object<CreateInstanceCallback>> jcb;
@@ -274,7 +274,7 @@ struct ModelImpl : public PrivateNativeClass<ModelImpl, ModelPtr> {
 };
 
 struct LocalProvider {
-    static constexpr auto Name() { return "com/alpacacore/api/LocalProvider"; }
+    static constexpr auto Name() { return "com/alpacacore/LocalProvider"; }
 
     static void sandbox(jni::JNIEnv& env, jni::Class<LocalProvider>&, jni::Object<ModelDesc>& jdesc) {
         auto desc = ModelDesc::get(env, jdesc);
@@ -286,7 +286,7 @@ struct LocalProvider {
     }
 
     struct LoadModelCallback {
-        constexpr static auto Name() { return "com/alpacacore/api/LocalProvider$LoadModelCallback"; }
+        constexpr static auto Name() { return "com/alpacacore/LocalProvider$LoadModelCallback"; }
 
         jni::JNIEnv& env;
         jni::Global<jni::Object<LoadModelCallback>> jcb;

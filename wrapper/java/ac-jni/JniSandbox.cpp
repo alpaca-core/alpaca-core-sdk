@@ -9,7 +9,7 @@ namespace {
 
 class Sandbox {
 public:
-    static constexpr auto Name() { return "com/alpacacore/api/Sandbox"; }
+    static constexpr auto Name() { return "com/alpacacore/Sandbox"; }
 
     jni::jint m_i;
     Sandbox(JNIEnv&, jint i) : m_i(i) {

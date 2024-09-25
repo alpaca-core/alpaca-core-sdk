@@ -18,10 +18,16 @@ if(NOT JNI_FOUND)
     return()
 endif()
 
-find_package(Java REQUIRED)
-include(UseJava)
-
 add_subdirectory(jni.hpp)
-add_subdirectory(code)
-ac_add_test_subdir()
-ac_add_example_subdir()
+add_subdirectory(ac-jni)
+
+# only buld java with CMake if we are the root project
+# otherwise we're a subproject (likely of a gradle build and the java build is handled there)
+if(alpacaCoreIsRoot)
+    find_package(Java REQUIRED)
+    include(UseJava)
+
+    add_subdirectory(java)
+    ac_add_test_subdir()
+    ac_add_example_subdir()
+endif()

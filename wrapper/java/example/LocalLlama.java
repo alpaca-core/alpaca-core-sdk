@@ -1,12 +1,12 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-package com.alpacacore.api.example;
+package com.alpacacore.example;
 
-import com.alpacacore.api.ModelDesc;
-import com.alpacacore.api.LocalProvider;
-import com.alpacacore.api.Model;
-import com.alpacacore.api.Instance;
+import com.alpacacore.ModelDesc;
+import com.alpacacore.LocalProvider;
+import com.alpacacore.Model;
+import com.alpacacore.Instance;
 
 import java.util.Map;
 

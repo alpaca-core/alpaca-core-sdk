@@ -9,7 +9,7 @@ extern "C" {
 
 
 JNIEXPORT jni::jobject* JNICALL
-Java_com_alpacacore_api_TestDict_getObjectFromDictByJson(jni::JNIEnv* env, jni::jclass* /*cls*/, jni::jstring* jjson) {
+Java_com_alpacacore_TestDict_getObjectFromDictByJson(jni::JNIEnv* env, jni::jclass* /*cls*/, jni::jstring* jjson) {
     auto json = jni::Make<std::string>(*env, jni::Local<jni::String>(*env, jjson));
     if (json.empty()) {
         return ac::java::Dict_toObject(*env, {}).release();
@@ -19,7 +19,7 @@ Java_com_alpacacore_api_TestDict_getObjectFromDictByJson(jni::JNIEnv* env, jni::
 }
 
 JNIEXPORT jni::jobject* JNICALL
-Java_com_alpacacore_api_TestDict_getObjectFromDictWithBinary(jni::JNIEnv* env, jni::jclass* /*cls*/) {
+Java_com_alpacacore_TestDict_getObjectFromDictWithBinary(jni::JNIEnv* env, jni::jclass* /*cls*/) {
     ac::Dict dict;
     dict["int"] = 3;
     dict["str"] = "hello";
@@ -34,7 +34,7 @@ Java_com_alpacacore_api_TestDict_getObjectFromDictWithBinary(jni::JNIEnv* env, j
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_alpacacore_api_TestDict_runCppTestWithNullObject(jni::JNIEnv* env, jni::jclass* /*cls*/, jni::jobject* obj) try {
+Java_com_alpacacore_TestDict_runCppTestWithNullObject(jni::JNIEnv* env, jni::jclass* /*cls*/, jni::jobject* obj) try {
     auto dict = ac::java::Object_toDict(*env, jni::Local<ac::java::Obj>(*env, obj));
     return dict.is_null();
 }
@@ -52,7 +52,7 @@ void do_test(bool b, const char* check, const char* file, int line) {
 #define TEST(b) do_test((b), #b, __FILE__, __LINE__)
 
 JNIEXPORT jboolean JNICALL
-Java_com_alpacacore_api_TestDict_runCppTestWithJsonLikeObject(JNIEnv* env, jni::jclass* /*cls*/, jni::jobject* javaObj) try {
+Java_com_alpacacore_TestDict_runCppTestWithJsonLikeObject(JNIEnv* env, jni::jclass* /*cls*/, jni::jobject* javaObj) try {
     auto dict = ac::java::Object_toDict(*env, jni::Local<ac::java::Obj>(*env, javaObj));
     /*
     Map map = new HashMap();
@@ -145,7 +145,7 @@ catch (...) {
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_alpacacore_api_TestDict_runCppTestWithObjectWithBinary(JNIEnv* env, jni::jclass* /*cls*/, jni::jobject* javaObj) try {
+Java_com_alpacacore_TestDict_runCppTestWithObjectWithBinary(JNIEnv* env, jni::jclass* /*cls*/, jni::jobject* javaObj) try {
     auto dict = ac::java::Object_toDict(*env, jni::Local<ac::java::Obj>(*env, javaObj));
 
     /*

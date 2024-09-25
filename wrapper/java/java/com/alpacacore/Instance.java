@@ -1,7 +1,7 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-package com.alpacacore.api;
+package com.alpacacore;
 
 public interface Instance {
     public interface OpCallback {
