@@ -68,7 +68,7 @@ class Consumer : public xec::TaskExecutor {
     xec::LocalExecution m_execution;
     //Producer& m_producer;
 public:
-    Consumer(Producer& producer) : m_execution(*this)/*, m_producer(producer)*/ {}
+    Consumer(Producer& /*producer*/) : m_execution(*this)/*, m_producer(producer)*/ {}
 
     void co_splice(CoTask task) {
         pushTask([this, h = task.take_handle()]() {
