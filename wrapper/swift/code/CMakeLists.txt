@@ -18,6 +18,11 @@ target_link_libraries(AlpacaCoreObjC
         ac::api
 )
 
+target_include_directories(AlpacaCoreObjC
+    PUBLIC
+        ${CMAKE_SOURCE_DIR}/api/code
+)
+
 add_library(AlpacaCoreSW STATIC DummyACapi.swift)
 
 # From the Root CMAKE there are C++ compile options which conflict with Swift compiler
