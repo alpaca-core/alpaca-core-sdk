@@ -7,6 +7,11 @@ if(NOT AC_JAVA_WRAPPER)
     return()
 endif()
 
+if(ANDROID)
+    # find_package(JNI) does not work on Android with earlier versions of CMake
+    cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
+endif()
+
 find_package(JNI ${AC_JAVA_WRAPPER_REQUIRED})
 if(NOT JNI_FOUND)
     message(STATUS "Could not find JNI. Skpping Java wrapper library")
