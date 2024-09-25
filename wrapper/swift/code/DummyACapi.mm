@@ -1,10 +1,16 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
+#import "DummyACapi.h"
+
 NSString* runPayload() {
-    std::stringstream ss;
-
-    ss << "Running payload" << std::endl;
-
-    return [NSString stringWithUTF8String:ss.str().c_str()];;
+    return @"pesho";
 }
+
+@implementation MyObjCWrapper
+
++ (int)getIntegerFromCPP {
+    return 5;
+}
+
+@end
