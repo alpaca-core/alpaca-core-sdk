@@ -8,6 +8,5 @@ import AlpacaCoreSW
 struct ACExample {
     static func main() {
         AlpacaCoreSW.test()
-        print("sdasdasda")
     }
 }

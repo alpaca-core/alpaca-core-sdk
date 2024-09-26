@@ -2,10 +2,6 @@
 // SPDX-License-Identifier: MIT
 //
 public func test() {
-    print(MyObjCWrapper.getIntegerFromCPP())
-    print("deiba")
-    print(runPayload())
-
     let smallDictionary: [String: Any] = [
         "name": "Alice",
         "age": 28,
@@ -20,6 +16,6 @@ public func test() {
 
     print(smallDictionary)
 
-    let dictWrapper = DictionaryWrapper.init(dictionary: smallDictionary)
-    print(dictWrapper?.toJSONString(fromDict: smallDictionary))
+    let dictWrapper = DictionaryWrapper()
+    print(dictWrapper.toJSONString(fromDict: smallDictionary))
 }
