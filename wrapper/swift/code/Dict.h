@@ -8,10 +8,12 @@
 
 @interface DictionaryWrapper : NSObject
 
-- (ac::Dict)convertToJSON:(NSDictionary<NSString *, id> *)dictionary
++ (ac::Dict)convertToACDict:(NSDictionary<NSString *, id> *)dictionary
     NS_SWIFT_UNAVAILABLE("This method is unavailable in Swift");
 
-// Convert to JSON string using nlohmann::json
-- (NSString *)toJSONStringFromDict:(NSDictionary<NSString *, id> *)dictionary;
++ (NSDictionary<NSString *, id> *)convertToDictionary:(const ac::Dict&)json
+    NS_SWIFT_UNAVAILABLE("This method is unavailable in Swift");
 
 @end
+
+void convertAndPrintDictionary(NSDictionary<NSString *, id> *dictionary);

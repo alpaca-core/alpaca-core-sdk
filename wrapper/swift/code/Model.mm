@@ -26,7 +26,6 @@
 }
 
 - (void)createInstance {
-    DictionaryWrapper *dw = [DictionaryWrapper alloc];
     NSData *data = [NSData data]; // Replace with actual data if needed
 
     // Create the NSDictionary that mirrors the Swift dictionary structure
@@ -54,7 +53,10 @@
         @"empty_object": @{}
     };
 
-    ac::Dict d = [dw convertToJSON:dictionary];
+    ac::Dict d = [DictionaryWrapper convertToACDict:dictionary];
+
+    NSDictionary *dww= [DictionaryWrapper convertToDictionary:d];
+    NSLog(@"Dictionary: %@", dww);
     // Convert nlohmann::json to string and then to NSString
     std::string jsonString = d.dump();
     NSLog(@"%s", jsonString.c_str());
