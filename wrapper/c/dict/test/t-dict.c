@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #include <ac/dict.h>
-#include <ac-test-util/unity.h>
+#include <ac-unity.h>
 #include <string.h>
 #include <stdlib.h>
 

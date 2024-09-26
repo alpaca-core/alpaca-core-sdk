@@ -113,8 +113,6 @@ if(AC_BUILD_TESTS)
     CPMAddPackage(gh:iboB/doctest-util@0.1.2)
     set_target_properties(doctest PROPERTIES FOLDER test)
     set_target_properties(doctest-main PROPERTIES FOLDER test)
-    CPMAddPackage(gh:ThrowTheSwitch/Unity@2.6.0)
-    set_target_properties(unity PROPERTIES FOLDER test)
     enable_testing()
 endif()
 
@@ -135,11 +133,11 @@ if(NOT AC_INFERENCE_LIBS STREQUAL "none")
     add_subdirectory(inference)
 endif()
 
-# if(AC_BUILD_API AND AC_BUILD_LOCAL_PROVIDER)
-#     # add after inference libs so that elements from them can be wrapped as well
-#     add_subdirectory(wrapper)
-# endif()
-#
+if(AC_BUILD_API AND AC_BUILD_LOCAL_PROVIDER)
+    # add after inference libs so that elements from them can be wrapped as well
+    add_subdirectory(wrapper)
+endif()
+
 # if(AC_BUILD_POC)
 #     add_subdirectory(poc)
 # endif()
