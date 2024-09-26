@@ -51,9 +51,7 @@ endif()
 
 option(BUILD_SHARED_LIBS "${CMAKE_PROJECT_NAME}: build shared libraries" ON)
 
-option(AC_BUILD_API "${CMAKE_PROJECT_NAME}: build API" ON)
-cmake_dependent_option(AC_BUILD_LOCAL_PROVIDER "${CMAKE_PROJECT_NAME}: build local inference provider" ON
-    AC_BUILD_API OFF)
+option(AC_BUILD_LOCAL "${CMAKE_PROJECT_NAME}: build local inference api" ON)
 
 set(AC_INFERENCE_LIBS "all" CACHE STRING "${CMAKE_PROJECT_NAME}: inference libraries to build")
 
@@ -122,18 +120,15 @@ endif()
 add_subdirectory(common)
 add_subdirectory(dict)
 
-# if(AC_BUILD_API)
-#     add_subdirectory(api)
-#     if(AC_BUILD_LOCAL_PROVIDER)
-#         add_subdirectory(local-provider)
-#     endif()
-# endif()
+if(AC_BUILD_LOCAL)
+    add_subdirectory(local)
+endif()
 
 if(NOT AC_INFERENCE_LIBS STREQUAL "none")
     add_subdirectory(inference)
 endif()
 
-if(AC_BUILD_API AND AC_BUILD_LOCAL_PROVIDER)
+if(AC_BUILD_LOCAL)
     # add after inference libs so that elements from them can be wrapped as well
     add_subdirectory(wrapper)
 endif()

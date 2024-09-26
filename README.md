@@ -17,8 +17,7 @@ Use CMake. Some useful presets are provided in the repo.
 
 ### Options
 
-* `AC_BUILD_API` - build the public API. If `OFF`, only inference libraries will be available)
-    * `AC_BUILD_LOCAL_PROVIDER` - build the local inference provider and api integrations of inference libraries
+* `AC_BUILD_LOCAL` - build the local inference api and integrations of inference libraries
 * `AC_INFERENCE_LIBS` - `all` or `none` or semicolon separated list. Which inference libraries to build
 * Advanced and `OFF` by default if the project is a subdir:
     * `AC_BUILD_TESTS` - build tests. This means all tests for all active components. No finer-grain options are available yet

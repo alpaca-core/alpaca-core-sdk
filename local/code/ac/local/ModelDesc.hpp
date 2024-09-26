@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace ac {
+namespace ac::local {
 
 struct ModelDesc {
     std::string inferenceType;
@@ -19,4 +19,4 @@ struct ModelDesc {
     std::string name;
 };
 
-}
+} // namespace ac::local
