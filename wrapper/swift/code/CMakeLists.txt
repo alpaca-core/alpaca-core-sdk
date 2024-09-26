@@ -1,17 +1,8 @@
 # Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
-project (AlpacaCoreSwiftWrapper
-    LANGUAGES Swift CXX
-    )
 
 add_library(AlpacaCoreObjC STATIC DummyACapi.mm DummyACapi.h)
-
-# From the Root CMAKE there are C++ compile options which conflict with Swift compiler
-# so we clear them here
-set_target_properties(AlpacaCoreObjC PROPERTIES COMPILE_OPTIONS "")
-
-add_compile_options(-fvisibility=default)
 
 target_link_libraries(AlpacaCoreObjC
     PUBLIC
