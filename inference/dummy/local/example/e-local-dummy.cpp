@@ -1,96 +1,42 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include <ac/LocalProvider.hpp>
-#include <ac/LocalDummy.hpp>
+#include <ac/local/LocalDummy.hpp>
 
-#include <ac/Model.hpp>
-#include <ac/Instance.hpp>
+#include <ac/local/ModelFactory.hpp>
+#include <ac/local/Model.hpp>
+#include <ac/local/Instance.hpp>
 
 #include <jalog/Instance.hpp>
-#include <jalog/sinks/ColorSink.hpp>
+#include <jalog/sinks/DefaultSink.hpp>
 
 #include <iostream>
-#include <optional>
-#include <latch>
 
 #include "ac-test-data-dummy-models.h"
 
-int main() {
+int main() try {
     jalog::Instance jl;
-    jl.setup().add<jalog::sinks::ColorSink>();
+    jl.setup().add<jalog::sinks::DefaultSink>();
 
-    ac::LocalProvider provider;
-    ac::addLocalDummyInference(provider);
+    ac::local::ModelFactory factory;
+    ac::local::addDummyInference(factory);
 
-    std::optional<std::latch> latch;
-
-    ac::ModelPtr model;
-    latch.emplace(1);
-    provider.createModel(
-        {
-            .inferenceType = "dummy",
-            .assets = {
-                {.path = AC_DUMMY_MODEL_LARGE, .tag = "x"}
-            }
-        },
-        {},
-        {
-            [&](ac::CallbackResult<ac::ModelPtr> result) {
-                if (result.has_error()) {
-                    std::cerr << "model load error: " << result.error().text << "\n";
-                }
-                else {
-                    model = std::move(result.value());
-                }
-                latch->count_down();
-            },
-            {}
+    auto model = factory.createModel({
+        .inferenceType = "dummy",
+        .assets = {
+            {.path = AC_DUMMY_MODEL_LARGE, .tag = "x"}
         }
-    );
-    latch->wait();
+    }, {});
 
-    if (!model) return 1;
+    auto instance = model->createInstance("general", {});
 
-    ac::InstancePtr instance;
-    latch.emplace(1);
-    model->createInstance("general", {}, {
-        [&](ac::CallbackResult<ac::InstancePtr> result) {
-            if (result.has_error()) {
-                std::cerr << "instance load error: " << result.error().text << "\n";
-            }
-            else {
-                instance = std::move(result.value());
-            }
-            latch->count_down();
-        }
-    });
-    latch->wait();
+    auto opResult =  instance->runOp("run", {{"input", {"JFK", "said:"}}, {"splice", false}});
 
-    if (!instance) return 2;
-
-    std::string inferenceResult;
-
-    latch.emplace(1);
-    instance->runOp("run", {{"input", {"JFK", "said:"}}, {"splice", false}}, {
-        [&](ac::CallbackResult<void> result) {
-            if (result.has_error()) {
-                std::cerr << "run error: " << result.error().text << "\n";
-            }
-            latch->count_down();
-        },
-        [&](ac::Dict result) {
-            inferenceResult += result["result"].get<std::string>();
-        },
-        {}
-    });
-    latch->wait();
-
-    std::cout << "\n";
-
-    if (inferenceResult.empty()) return 3;
-
-    std::cout << "Inference result:\n" << inferenceResult << "\n";
+    std::cout << opResult << "\n";
 
     return 0;
+}
+catch (std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
 }

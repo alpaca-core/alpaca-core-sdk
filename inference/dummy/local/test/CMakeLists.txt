@@ -3,7 +3,7 @@
 #
 add_doctest_lib_test(integration ac-local-dummy
     SOURCES
-        t-integration.cpp
+        t-local-dummy.cpp
     LIBRARIES
         ac-test-data::dummy
         ac::local
