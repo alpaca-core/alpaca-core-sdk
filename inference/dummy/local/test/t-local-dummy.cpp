@@ -45,7 +45,7 @@ TEST_CASE("bad instance") {
     auto model = f.createModel(Model_Desc, {});
     REQUIRE(model);
     CHECK_THROWS_WITH(model->createInstance("nope", {}), "dummy: unknown instance type: nope");
-    CHECK_THROWS_WITH(model->createInstance("general", { {"cutoff", 40} }),
+    CHECK_THROWS_WITH(model->createInstance("general", {{"cutoff", 40}}),
         "Cutoff 40 greater than model size 3");
 }
 
