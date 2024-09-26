@@ -4,7 +4,7 @@
 #pragma once
 #include <memory>
 
-namespace ac {
+namespace ac::local {
 
 class Model;
 
@@ -18,4 +18,4 @@ class Model;
  */
 using ModelPtr = std::shared_ptr<Model>;
 
-} // namespace ac
+} // namespace ac::local
