@@ -31,11 +31,7 @@ public func test() {
         "empty_object": {}
     ]
 
-
-    print(smallDictionary)
-
-    let dictWrapper = DictionaryWrapper()
-    print(dictWrapper.toJSONString(fromDict: smallDictionary))
+    convertAndPrintDictionary(smallDictionary)
 
     let model = ACModel()
     model.createInstance()
