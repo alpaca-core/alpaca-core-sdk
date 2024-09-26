@@ -122,6 +122,7 @@ endif()
 # subdirs/targets
 
 add_subdirectory(common)
+add_subdirectory(dict)
 
 # if(AC_BUILD_API)
 #     add_subdirectory(api)
