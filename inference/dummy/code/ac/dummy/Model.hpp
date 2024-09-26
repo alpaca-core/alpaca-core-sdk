@@ -22,7 +22,7 @@ public:
 
     const std::vector<std::string>& data() const noexcept { return m_data; }
 
-    static std::span<const std::string_view> rawSynteticModelData() noexcept;
+    static std::span<const std::string_view> rawSyntheticModelData() noexcept;
 private:
     void addDataItem(std::string item);
 
