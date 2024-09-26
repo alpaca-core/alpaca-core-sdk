@@ -5,12 +5,10 @@
 # test only
 if(AC_BUILD_TESTS)
     add_subdirectory(ac-test-util)
-    add_subdirectory(doctest-unity)
 endif()
 
 # public
 add_subdirectory(astl)
-add_subdirectory(jalogc)
 add_subdirectory(ahttp)
 add_subdirectory(xxhash-cpp)
 

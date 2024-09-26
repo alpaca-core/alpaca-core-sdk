@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include "Dict.hpp"
+#include "export.h"
+#include <ac/Dict.hpp>
 #include "dict_ref.h"
 #include "dict_root.h"
 
@@ -15,15 +16,6 @@
  * implementing the C API functions that interact with the underlying C++ dictionary implementation.
  */
 
-// Copyright (c) Alpaca Core
-// SPDX-License-Identifier: MIT
-//
-#pragma once
-#include "export.h"
-#include "Dict.hpp"
-#include "dict_ref.h"
-#include "dict_root.h"
-
 namespace ac::cutil {
 
 /**
@@ -35,7 +27,7 @@ namespace ac::cutil {
  * @param d Pointer to the dictionary root to consume.
  * @return Dict A Dict object created from the consumed dictionary root.
  */
-AC_API_EXPORT Dict Dict_from_dict_root_consume(ac_dict_root* d);
+AC_C_DICT_EXPORT Dict Dict_from_dict_root_consume(ac_dict_root* d);
 
 /**
  * @brief Converts a C dictionary reference to a C++ Dict object reference.
@@ -46,7 +38,7 @@ AC_API_EXPORT Dict Dict_from_dict_root_consume(ac_dict_root* d);
  * @param d The dictionary reference to convert.
  * @return Dict& A reference to the converted Dict object.
  */
-AC_API_EXPORT Dict& Dict_from_dict_ref(ac_dict_ref d);
+AC_C_DICT_EXPORT Dict& Dict_from_dict_ref(ac_dict_ref d);
 
 /**
  * @brief Converts a C++ Dict object to a C dictionary reference.
@@ -58,7 +50,7 @@ AC_API_EXPORT Dict& Dict_from_dict_ref(ac_dict_ref d);
  * @param d The Dict object to convert.
  * @return ac_dict_ref The resulting dictionary reference.
  */
-AC_API_EXPORT ac_dict_ref Dict_to_dict_ref(Dict& d);
+AC_C_DICT_EXPORT ac_dict_ref Dict_to_dict_ref(Dict& d);
 
 /**
  * @brief Parses a JSON string into a Dict object.
@@ -70,6 +62,6 @@ AC_API_EXPORT ac_dict_ref Dict_to_dict_ref(Dict& d);
  * @param jsonEnd Optional pointer to the end of the JSON string. If nullptr, the entire string is parsed.
  * @return Dict The resulting Dict object parsed from the JSON string.
  */
-AC_API_EXPORT Dict Dict_parse(const char* json, const char* jsonEnd = nullptr);
+AC_C_DICT_EXPORT Dict Dict_parse(const char* json, const char* jsonEnd = nullptr);
 
 } // namespace ac::cutil

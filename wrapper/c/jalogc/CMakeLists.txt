@@ -13,6 +13,6 @@ target_link_libraries(jalogc
         jalog::jalog
         jalog::sinklib
 )
-add_library(ac::jalogc ALIAS jalogc)
+add_library(ac-c::jalogc ALIAS jalogc)
 
 ac_add_test_subdir()

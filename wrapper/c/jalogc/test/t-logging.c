@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #include <jalogc.h>
-#include <ac-test-util/unity.h>
+#include <ac-unity.h>
 #include <stdio.h>
 #include <string.h>
 

@@ -31,6 +31,6 @@
 
 #define CHECK_AR_ALL_PTR TEST_ASSERT_EACH_EQUAL_PTR
 
-// astl/sv.h utils
+// cutil/sv.h utils
 #define CHECK_EQ_SV(a, b) CHECK(ac_sv_eq(a, b))
 #define EXPECT_SV(expected, sv) CHECK_EQ_SV(ac_make_sv_str(expected), sv)

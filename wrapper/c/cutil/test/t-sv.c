@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 //
 #include "t-sv.h"
-#include <astl/sv.h>
-#include <ac-test-util/unity.h>
+#include <ac/sv.h>
+#include <ac-unity.h>
 
 static void sv(void) {
     ac_sv e = { 0 };
