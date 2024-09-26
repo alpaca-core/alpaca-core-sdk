@@ -17,3 +17,5 @@ add_subdirectory(cutil)
 add_subdirectory(jalogc)
 
 add_subdirectory(dict)
+
+ac_add_local_subdir()
