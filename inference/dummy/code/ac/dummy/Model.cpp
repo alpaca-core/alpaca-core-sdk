@@ -53,7 +53,7 @@ void Model::addDataItem(std::string item) {
     m_data.push_back(astl::move(item));
 }
 
-std::span<const std::string_view> Model::rawSynteticModelData() noexcept {
+std::span<const std::string_view> Model::rawSyntheticModelData() noexcept {
     return SyntheticModel_Data;
 }
 

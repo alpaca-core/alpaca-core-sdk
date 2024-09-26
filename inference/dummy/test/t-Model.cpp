@@ -36,7 +36,7 @@ TEST_CASE("synthetic") {
     ac::dummy::Model model({});
     auto& data = model.data();
 
-    auto rawData = ac::dummy::Model::rawSynteticModelData();
+    auto rawData = ac::dummy::Model::rawSyntheticModelData();
     CHECK(std::equal(data.begin(), data.end(), rawData.begin(), rawData.end()));
 }
 
