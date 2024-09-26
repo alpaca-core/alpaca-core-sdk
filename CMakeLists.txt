@@ -120,9 +120,7 @@ endif()
 add_subdirectory(common)
 add_subdirectory(dict)
 
-if(AC_BUILD_LOCAL)
-    add_subdirectory(local)
-endif()
+ac_add_local_subdir()
 
 if(NOT AC_INFERENCE_LIBS STREQUAL "none")
     add_subdirectory(inference)

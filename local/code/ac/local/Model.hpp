@@ -9,7 +9,7 @@
 
 namespace ac::local {
 class Instance;
-class Model : public itlib::enable_shared_from {
+class AC_LOCAL_EXPORT Model : public itlib::enable_shared_from {
 public:
     virtual ~Model();
 

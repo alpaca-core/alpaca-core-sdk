@@ -9,7 +9,7 @@
 #include <optional>
 
 namespace ac::local {
-class Instance {
+class AC_LOCAL_EXPORT Instance {
 public:
     virtual ~Instance();
 

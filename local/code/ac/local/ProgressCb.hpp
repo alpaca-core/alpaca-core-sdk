@@ -16,6 +16,6 @@ namespace ac::local {
  *            async tasks, tags allow for more granular progress reporting.
  * @param progress A float between 0 and 1
  */
-using ProgressCb = itlib::ufunction<void(std::string_view tag, float progress)>;
+using ProgressCb = itlib::ufunction<bool(std::string_view tag, float progress)>;
 
 } // namespace ac::local
