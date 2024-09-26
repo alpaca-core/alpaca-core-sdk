@@ -123,22 +123,22 @@ endif()
 
 add_subdirectory(common)
 
-if(AC_BUILD_API)
-    add_subdirectory(api)
-    if(AC_BUILD_LOCAL_PROVIDER)
-        add_subdirectory(local-provider)
-    endif()
-endif()
+# if(AC_BUILD_API)
+#     add_subdirectory(api)
+#     if(AC_BUILD_LOCAL_PROVIDER)
+#         add_subdirectory(local-provider)
+#     endif()
+# endif()
 
 if(NOT AC_INFERENCE_LIBS STREQUAL "none")
     add_subdirectory(inference)
 endif()
 
-if(AC_BUILD_API AND AC_BUILD_LOCAL_PROVIDER)
-    # add after inference libs so that elements from them can be wrapped as well
-    add_subdirectory(wrapper)
-endif()
-
-if(AC_BUILD_POC)
-    add_subdirectory(poc)
-endif()
+# if(AC_BUILD_API AND AC_BUILD_LOCAL_PROVIDER)
+#     # add after inference libs so that elements from them can be wrapped as well
+#     add_subdirectory(wrapper)
+# endif()
+#
+# if(AC_BUILD_POC)
+#     add_subdirectory(poc)
+# endif()
