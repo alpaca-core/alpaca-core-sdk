@@ -3,37 +3,14 @@
 //
 #import "DummyACapi.h"
 
-NSString* runPayload() {
-    return @"pesho";
-}
-
-@implementation MyObjCWrapper
-
-+ (int)getIntegerFromCPP {
-    return 5;
-}
-
-@end
-
-
 using json = nlohmann::json;
 
-@implementation DictionaryWrapper {
-    NSDictionary<NSString *, id> *_dictionary;
-}
-
-// Initialize with a dictionary
-- (instancetype)initWithDictionary:(NSDictionary<NSString *, id> *)dictionary {
-    self = [super init];
-    if (self) {
-        _dictionary = dictionary;
-    }
-    return self;
-}
+@implementation DictionaryWrapper
 
 // Helper method to convert NSDictionary to nlohmann::json
-- (json)convertToJSON:(NSDictionary<NSString *, id> *)dictionary {
-    json jsonObj;
+- (ac::Dict)convertToJSON:(NSDictionary<NSString *, id> *)dictionary {
+    //json jsonObj;
+    ac::Dict jsonObj;
 
     for (NSString *key in dictionary) {
         id value = dictionary[key];
@@ -63,15 +40,6 @@ using json = nlohmann::json;
 }
 
 // Convert to JSON string using nlohmann::json
-- (NSString *)toJSONString {
-    json jsonObj = [self convertToJSON:_dictionary];
-
-    // Convert nlohmann::json to string and then to NSString
-    std::string jsonString = jsonObj.dump();
-    return [NSString stringWithUTF8String:jsonString.c_str()];
-}
-
-// Convert to JSON string using nlohmann::json
 - (NSString *)toJSONStringFromDict:(NSDictionary<NSString *, id> *)dictionary {
     json jsonObj = [self convertToJSON:dictionary];
 
@@ -81,6 +49,3 @@ using json = nlohmann::json;
 }
 
 @end
-
-
-
