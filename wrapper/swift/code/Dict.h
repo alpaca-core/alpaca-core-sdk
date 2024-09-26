@@ -3,12 +3,13 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <iostream>
 
-#include <ac/Model.hpp>
 #include <ac/Dict.hpp>
 
 @interface DictionaryWrapper : NSObject
+
+- (ac::Dict)convertToJSON:(NSDictionary<NSString *, id> *)dictionary
+    NS_SWIFT_UNAVAILABLE("This method is unavailable in Swift");
 
 // Convert to JSON string using nlohmann::json
 - (NSString *)toJSONStringFromDict:(NSDictionary<NSString *, id> *)dictionary;

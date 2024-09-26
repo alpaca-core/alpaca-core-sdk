@@ -2,7 +2,14 @@
 # SPDX-License-Identifier: MIT
 #
 
-add_library(AlpacaCoreObjC STATIC DummyACapi.mm DummyACapi.h)
+add_library(AlpacaCoreObjC STATIC)
+
+target_sources(AlpacaCoreObjC PRIVATE
+    ./Dict.h
+    ./Dict.mm
+    ./Model.h
+    ./Model.mm
+)
 
 target_link_libraries(AlpacaCoreObjC
     PUBLIC

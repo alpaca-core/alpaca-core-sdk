@@ -1,15 +1,15 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#import "DummyACapi.h"
+#import "Dict.h"
 
-using json = nlohmann::json;
+#include <ac/Model.hpp>
+#include <ac/Dict.hpp>
 
 @implementation DictionaryWrapper
 
-// Helper method to convert NSDictionary to nlohmann::json
+// Helper method to convert NSDictionary to ac::Dict
 - (ac::Dict)convertToJSON:(NSDictionary<NSString *, id> *)dictionary {
-    //json jsonObj;
     ac::Dict jsonObj;
 
     for (NSString *key in dictionary) {
@@ -17,8 +17,10 @@ using json = nlohmann::json;
 
         if ([value isKindOfClass:[NSDictionary class]]) {
             jsonObj[key.UTF8String] = [self convertToJSON:(NSDictionary *)value];
-        } else if ([value isKindOfClass:[NSArray class]]) {
-            json arrayJson = json::array();
+        }
+
+        if ([value isKindOfClass:[NSArray class]]) {
+            ac::Dict arrayJson = ac::Dict::array();
             for (id item in (NSArray *)value) {
                 if ([item isKindOfClass:[NSDictionary class]]) {
                     arrayJson.push_back([self convertToJSON:(NSDictionary *)item]);
@@ -29,10 +31,16 @@ using json = nlohmann::json;
                 }
             }
             jsonObj[key.UTF8String] = arrayJson;
-        } else if ([value isKindOfClass:[NSString class]]) {
+        }
+        if ([value isKindOfClass:[NSString class]]) {
             jsonObj[key.UTF8String] = std::string([(NSString *)value UTF8String]);
-        } else if ([value isKindOfClass:[NSNumber class]]) {
+        }
+        if ([value isKindOfClass:[NSNumber class]]) {
             jsonObj[key.UTF8String] = [value doubleValue]; // Handle numbers
+        }
+        if ([value isKindOfClass:[NSData class]]) {
+            const uint8_t* bytes = (const uint8_t*)[value bytes];
+            jsonObj[key.UTF8String] = ac::Dict::binary(ac::Blob(bytes, bytes + [value length]));
         }
     }
 
@@ -41,7 +49,7 @@ using json = nlohmann::json;
 
 // Convert to JSON string using nlohmann::json
 - (NSString *)toJSONStringFromDict:(NSDictionary<NSString *, id> *)dictionary {
-    json jsonObj = [self convertToJSON:dictionary];
+    ac::Dict jsonObj = [self convertToJSON:dictionary];
 
     // Convert nlohmann::json to string and then to NSString
     std::string jsonString = jsonObj.dump();
