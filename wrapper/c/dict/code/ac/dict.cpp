@@ -28,6 +28,9 @@ Dict Dict_from_dict_root_consume(ac_dict_root* d) {
     ac_dict_free_root(d);
     return ret;
 }
+ac_dict_root* Dict_to_dict_root(Dict d) {
+    return new ac_dict_root{std::move(d)};
+}
 ac::Dict& Dict_from_dict_ref(ac_dict_ref ref) {
     assert(ref); // should never be null here
     return *reinterpret_cast<ac::Dict*>(ref);
