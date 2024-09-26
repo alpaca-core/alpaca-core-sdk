@@ -46,12 +46,14 @@ T Dict_optValueAt(const Dict& dict, std::string_view key, T defaultValue) {
  * @param dict The Dict object to search in.
  * @param key The key to look for in the Dict.
  * @param value The variable to which the value will be applied if found.
+ * @return true if the key was found and the value was applied, otherwise false.
  */
 template <typename T>
-void Dict_optApplyValueAt(const Dict& dict, std::string_view key, T& value) {
+bool Dict_optApplyValueAt(const Dict& dict, std::string_view key, T& value) {
     auto f = dict.find(key);
-    if (f == dict.end()) return;
+    if (f == dict.end()) return false;
     value = f->get<T>();
+    return true;
 }
 
 } // namespace ac

@@ -65,6 +65,17 @@ TEST_CASE("from json") {
 
     CHECK(ac::Dict_optValueAt(d, "seven", 6) == 7);
     CHECK(ac::Dict_optValueAt(d, "eight", 8) == 8);
+
+    {
+        int val = 53;
+        CHECK_FALSE(ac::Dict_optApplyValueAt(d, "eight", val));
+        CHECK(val == 53);
+
+        CHECK(ac::Dict_optApplyValueAt(d, "seven", val));
+        CHECK(val == 7);
+
+        CHECK_THROWS(ac::Dict_optApplyValueAt(d, "key", val));
+    }
 }
 
 TEST_CASE("to json") {
