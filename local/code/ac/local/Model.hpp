@@ -3,13 +3,12 @@
 //
 #pragma once
 #include "export.h"
-#include <itlib/shared_from.hpp>
 #include <ac/Dict.hpp>
 #include <string_view>
 
 namespace ac::local {
 class Instance;
-class AC_LOCAL_EXPORT Model : public itlib::enable_shared_from {
+class AC_LOCAL_EXPORT Model {
 public:
     virtual ~Model();
 
