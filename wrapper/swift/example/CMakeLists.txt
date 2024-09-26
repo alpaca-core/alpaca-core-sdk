@@ -7,16 +7,17 @@ add_executable(DummyExample DummyExample.swift)
 # so we clear them here
 set_target_properties(DummyExample PROPERTIES COMPILE_OPTIONS "")
 
-# Add C++ interop capability to the Swift target
+# Since wrapper library has it, the executable must has enabled it too
 set(CMAKE_Swift_FLAGS "-cxx-interoperability-mode=default")
-set(CMAKE_Swift_FLAGS "${CMAKE_Swift_FLAGS} -import-objc-header ${CMAKE_SOURCE_DIR}/wrapper/swift/code/DummyACapi-Bridging-Header.h" )
 
 # Include the directory where the Obj-C++ wrapper is located
 target_include_directories(DummyExample PRIVATE
     ${CMAKE_SOURCE_DIR}/wrapper/swift/code
 )
 
-target_link_libraries(DummyExample PUBLIC AlpacaCoreSW)
-target_link_libraries(DummyExample PUBLIC AlpacaCoreObjC)
+target_link_libraries(DummyExample
+    PRIVATE
+        AlpacaCoreSW
+)
 
 target_compile_options(DummyExample PRIVATE -parse-as-library)
