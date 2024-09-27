@@ -4,18 +4,7 @@
 package com.alpacacore;
 
 public interface Instance {
-    public interface OpCallback {
-        void onComplete();
-        void onError(String error);
-        void onProgress(String tag, float progress);
-        void onStream(Object data);
-    }
-    public void runOp(String op, Object params, OpCallback cb);
+    public Object runOp(String op, Object params, ProgressCallback cb);
 
-    public void synchronize();
-
-    public interface AbortCallback {
-        void onAbort();
-    }
-    public void initiateAbort(AbortCallback cb);
+    private long nativePtr;
 }

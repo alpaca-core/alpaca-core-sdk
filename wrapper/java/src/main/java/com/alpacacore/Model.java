@@ -3,10 +3,8 @@
 //
 package com.alpacacore;
 
-public interface Model {
-    public interface CreateInstanceCallback {
-        void onComplete(Instance instance);
-        void onError(String error);
-    }
-    public void createInstance(String type, Object params, CreateInstanceCallback cb);
+public class Model {
+    public native Instance createInstance(String type, Object params);
+
+    private long nativePtr;
 }
