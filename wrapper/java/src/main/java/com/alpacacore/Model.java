@@ -7,4 +7,5 @@ public class Model {
     public native Instance createInstance(String type, Object params);
 
     private long nativePtr;
+    private Model() {}
 }

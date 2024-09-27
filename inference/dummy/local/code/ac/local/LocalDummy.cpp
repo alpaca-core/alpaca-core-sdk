@@ -110,6 +110,11 @@ public:
 
         if (desc.assets.empty()) {
             // synthetic model
+            if (pcb) {
+                if (!pcb("synthetic", 0.5f)) {
+                    throw_ex{} << "dummy: loading model aborted";
+                }
+            }
             return std::make_shared<DummyModel>(std::move(modelParams));
         }
         else {

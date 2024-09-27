@@ -15,7 +15,7 @@
 #include <ac/local/Instance.hpp>
 
 #include <astl/move.hpp>
-
+#include <itlib/make_ptr.hpp>
 #include <iostream>
 
 namespace ac::java {
@@ -85,6 +85,18 @@ struct NativeClass {
     void setPtr(jni::JNIEnv& env, jni::Object<Tag>& obj, PL* payload) {
         obj.Set(env, nativePtrField, reinterpret_cast<jlong>(payload));
     }
+
+    jni::Local<jni::Object<Tag>> create(JNIEnv& env, std::unique_ptr<PL> payload) {
+        auto ret = cls.New(env, ctor);
+        setPtr(env, ret, payload.get());
+        payload.release();
+        return ret;
+    }
+
+    void release(JNIEnv& env, jni::Object<Tag>& obj) {
+        delete getPtr(env, obj);
+        setPtr(env, obj, nullptr);
+    }
 };
 
 struct ProgressCallback {
@@ -102,8 +114,15 @@ struct ProgressCallback {
         , onProgressMethod(cls.GetMethod<jni::jboolean(jni::String, jni::jfloat)>(env, "onProgress"))
     {}
 
-    bool onProgress(std::string_view tag, float progress) {
+    bool onProgress(std::string_view tag, float progress) const {
         return !!pcb.Call(env, onProgressMethod, jni::Make<jni::String>(env, std::string(tag)), progress);
+    }
+
+    static local::ProgressCb makeProgressCb(jni::JNIEnv& env, jni::Object<ProgressCallback>& pcb) {
+        if (!pcb) return {};
+        return [cb = ProgressCallback(env, pcb)](std::string_view tag, float progress) {
+            return cb.onProgress(tag, progress);
+        };
     }
 };
 
@@ -117,13 +136,7 @@ struct Instance {
 
         auto paramsDict = Object_toDict(env, jni::NewLocal(env, params));
 
-        local::ProgressCb cb;
-        if (pcb) {
-            ProgressCallback pc(env, pcb);
-            cb = [&](std::string_view tag, float progress) {
-                return pc.onProgress(tag, progress);
-            };
-        }
+        auto cb = ProgressCallback::makeProgressCb(env, pcb);
         auto result = instance->runOp(jni::Make<std::string>(env, op), astl::move(paramsDict), astl::move(cb));
         return Dict_toObject(env, result);
     }
@@ -147,17 +160,42 @@ struct Model {
 
         auto instance = model->createInstance(jni::Make<std::string>(env, type), astl::move(paramsDict));
 
-        auto& iclass = *Instance::nativeClass;
-        auto ret = iclass.cls.New(env, iclass.ctor);
-        iclass.setPtr(env, ret, instance.get());
-        instance.release();
-        return ret;
+        return Instance::nativeClass->create(env, astl::move(instance));
     }
 };
 
 std::optional<NativeClass<Model, Model::Payload>> Model::nativeClass;
 
 std::unique_ptr<local::ModelFactory> factorySingleton;
+
+struct AlpacaCore {
+    static constexpr auto Name() { return "com/alpacacore/AlpacaCore"; }
+
+    static jni::Local<jni::Object<Model>> createModel(
+        jni::JNIEnv& env,
+        jni::Class<AlpacaCore>&,
+        jni::Object<ModelDesc>& desc,
+        jni::Object<>& params,
+        jni::Object<ProgressCallback>& pcb
+    ) {
+        auto model = factorySingleton->createModel(
+            ModelDesc::get(env, desc),
+            Object_toDict(env, jni::NewLocal(env, params)),
+            ProgressCallback::makeProgressCb(env, pcb)
+        );
+        return Model::nativeClass->create(env, itlib::make_unique(Model::Payload{model}));
+    }
+
+    static void releaseModel(jni::JNIEnv& env, jni::Class<AlpacaCore>&, jni::Object<Model>& obj) {
+        if (!obj) return;
+        Model::nativeClass->release(env, obj);
+    }
+
+    static void releaseInstance(jni::JNIEnv& env, jni::Class<AlpacaCore>&, jni::Object<Instance>& obj) {
+        if (!obj) return;
+        Instance::nativeClass->release(env, obj);
+    }
+};
 
 #define jniMakeNativeMethod(cls, mthd) jni::MakeNativeMethod<decltype(&cls::mthd), &cls::mthd>(#mthd)
 
@@ -172,12 +210,12 @@ void JniApi_register(jni::JavaVM&, jni::JNIEnv& env) {
         , jniMakeNativeMethod(Model, createInstance)
     );
 
-    //auto lpc = jni::Class<LocalProvider>::Find(env);
-    //jni::RegisterNatives(env, *lpc
-    //    , jniMakeNativeMethod(LocalProvider, sandbox)
-    //    , jniMakeNativeMethod(LocalProvider, loadModel)
-    //    , jniMakeNativeMethod(LocalProvider, shutdown)
-    //);
+    auto acc = jni::Class<AlpacaCore>::Find(env);
+    jni::RegisterNatives(env, *acc
+        , jniMakeNativeMethod(AlpacaCore, createModel)
+        , jniMakeNativeMethod(AlpacaCore, releaseModel)
+        , jniMakeNativeMethod(AlpacaCore, releaseInstance)
+    );
 
     factorySingleton = std::make_unique<local::ModelFactory>();
 

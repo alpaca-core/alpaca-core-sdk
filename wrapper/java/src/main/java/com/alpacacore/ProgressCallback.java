@@ -4,5 +4,5 @@
 package com.alpacacore;
 
 public interface ProgressCallback {
-    public boolean createInstance(String tag, float progress);
+    public boolean onProgress(String tag, float progress);
 }

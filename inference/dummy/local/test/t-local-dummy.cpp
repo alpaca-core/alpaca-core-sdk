@@ -80,11 +80,19 @@ TEST_CASE("general") {
 TEST_CASE("synthetic") {
     DummyFactory f;
 
+    std::string tag;
+    float progress;
     auto model = f.createModel({
         .inferenceType = "dummy",
         .assets = {}
-    }, {});
+    }, {}, [&](const std::string_view t, float p) {
+        tag = std::string(t);
+        progress = p;
+        return true;
+    });
     REQUIRE(model);
+    CHECK(tag == "synthetic");
+    CHECK(progress == 0.5f);
 
     auto instance = model->createInstance("general", {});
 

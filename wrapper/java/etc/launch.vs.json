@@ -7,54 +7,40 @@
       "exe": "C:\\tools\\jdk-17.0.12+7\\bin\\java.exe",
       "args": [
         "-cp",
-        "../wrapper/java/src/alpaca-core.jar;${workspaceRoot}/wrapper/java/test/lib/junit-4.10.jar;../wrapper/java/test/test-ac-java-Sandbox.jar",
-        "org.junit.runner.JUnitCore",
-        "com.alpacacore.TestSandbox"
-      ],
-      "currentDir": "out/build/${cmake.name}/bin",
-      "project": "CMakeLists.txt",
-      "projectTarget": "ac-api.dll (bin\\ac-api.dll)",
-      "name": "java-Sandbox test"
-    },
-    {
-      "type": "dll",
-      "exe": "C:\\tools\\jdk-17.0.12+7\\bin\\java.exe",
-      "args": [
-        "-cp",
         "../wrapper/java/test/test-ac-java-Dict.jar;${workspaceRoot}/wrapper/java/test/lib/junit-4.10.jar;../wrapper/java/test/test-ac-java-Dict.jar",
         "org.junit.runner.JUnitCore",
         "com.alpacacore.TestDict"
       ],
       "currentDir": "out/build/${cmake.name}/bin",
       "project": "CMakeLists.txt",
-      "projectTarget": "ac-api.dll (bin\\ac-api.dll)",
-      "name": "java-Dict test"
+      "projectTarget": "ac-local.dll (bin\\ac-local.dll)",
+      "name": "java test Dict"
     },
     {
       "type": "dll",
       "exe": "C:\\tools\\jdk-17.0.12+7\\bin\\java.exe",
       "args": [
         "-cp",
-        "../wrapper/java/src/alpaca-core.jar;${workspaceRoot}/wrapper/java/test/lib/junit-4.10.jar;../wrapper/java/test/test-ac-java-LocalProvider.jar",
+        "../wrapper/java/src/alpaca-core.jar;${workspaceRoot}/wrapper/java/test/lib/junit-4.10.jar;../wrapper/java/test/test-ac-java-LocalDummy.jar",
         "org.junit.runner.JUnitCore",
-        "com.alpacacore.TestLocalProvider"
+        "com.alpacacore.TestLocalDummy"
       ],
       "currentDir": "out/build/${cmake.name}/bin",
       "project": "CMakeLists.txt",
-      "projectTarget": "ac-api.dll (bin\\ac-api.dll)",
-      "name": "java-LocalProvider test"
+      "projectTarget": "ac-local.dll (bin\\ac-local.dll)",
+      "name": "java test LocalDummy"
     },
     {
       "type": "dll",
       "exe": "C:\\tools\\jdk-17.0.12+7\\bin\\java.exe",
       "args": [
         "-cp",
-        "../wrapper/java/src/alpaca-core.jar;../wrapper/java/example/ac-example-local-llama.jar",
-        "com.alpacacore.example.LocalLlama"
+        "../wrapper/java/src/alpaca-core.jar;../wrapper/java/example/ac-example-local-dummy.jar",
+        "com.alpacacore.example.LocalDummyExample"
       ],
       "currentDir": "out/build/${cmake.name}/bin",
       "project": "CMakeLists.txt",
-      "projectTarget": "ac-api.dll (bin\\ac-api.dll)",
+      "projectTarget": "ac-local.dll (bin\\ac-local.dll)",
       "name": "java example LocalLLama"
     }
   ]

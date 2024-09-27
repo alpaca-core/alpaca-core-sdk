@@ -3,8 +3,9 @@
 //
 package com.alpacacore;
 
-public interface Instance {
-    public Object runOp(String op, Object params, ProgressCallback cb);
+public class Instance {
+    public native Object runOp(String op, Object params, ProgressCallback cb);
 
     private long nativePtr;
+    private Instance() {}
 }

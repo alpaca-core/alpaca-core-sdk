@@ -6,12 +6,11 @@ set(jdir main/java/com/alpacacore) # ridiculous
 
 add_jar(alpaca-core-jar
     SOURCES
-        ${jdir}/Sandbox.java
+        ${jdir}/AlpacaCore.java
         ${jdir}/Instance.java
         ${jdir}/Model.java
         ${jdir}/ModelDesc.java
-        ${jdir}/LocalProvider.java
-        ${jdir}/Impl.java
+        ${jdir}/ProgressCallback.java
     OUTPUT_NAME
         alpaca-core
 )

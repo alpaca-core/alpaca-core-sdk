@@ -24,8 +24,9 @@ bool on_progress(ac_sv tag, float progress, void* u) {
     if (!u) return true;
     progress_info* info = (progress_info*)u;
     size_t len = ac_sv_len(tag);
-    CHECK(len < sizeof(info->tag));
+    CHECK(len - 1 < sizeof(info->tag));
     memcpy(info->tag, tag.begin, len);
+    info->tag[len] = '\0';
     info->progress = progress;
     return true;
 }
@@ -102,9 +103,11 @@ void local_dummy(void) {
     CHECK_EQ_STR("a soco b bate c soco", ac_dict_get_string_value(ac_dict_at_key(ref, "result")));
     ac_dict_free_root(result);
 
-    ac_local_model* synthetic_model = ac_create_local_model(factory, "dummy", NULL, 0, NULL, NULL, NULL);
+    ac_local_model* synthetic_model = ac_create_local_model(factory, "dummy", NULL, 0, NULL, on_progress, &info);
     CHECK_NOT_NULL(synthetic_model);
     CHECK_NULL(ac_local_get_last_error());
+    CHECK_EQ_STR("synthetic", info.tag);
+    CHECK_EQ_FLT(0.5f, info.progress);
 
     ac_local_instance* synthetic_instance = ac_create_local_instance(synthetic_model, "general", NULL);
     CHECK_NOT_NULL(synthetic_instance);
