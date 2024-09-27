@@ -2,6 +2,5 @@
 # SPDX-License-Identifier: MIT
 #
 add_subdirectory(code)
-add_subdirectory(inference-libs)
 ac_add_test_subdir()
 ac_add_example_subdir()

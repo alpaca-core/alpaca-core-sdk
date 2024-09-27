@@ -2,21 +2,11 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include <splat/symbol_export.h>
+#include "export.h"
 
 #include <ac/dict_ref.h>
 #include <ac/dict_root.h>
 #include <ac/sv.h>
-
-#if AC_C_LOCAL_SHARED
-#   if BUILDING_AC_C_LOCAL
-#       define AC_C_LOCAL_EXPORT SYMBOL_EXPORT
-#   else
-#       define AC_C_LOCAL_EXPORT SYMBOL_IMPORT
-#   endif
-#else
-#   define AC_C_LOCAL_EXPORT
-#endif
 
 #if defined(__cplusplus)
 extern "C" {

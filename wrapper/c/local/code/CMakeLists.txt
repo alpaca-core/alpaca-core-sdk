@@ -10,8 +10,18 @@ target_link_libraries(ac-c-local
         ac-c::dict
     PRIVATE
         ac::local
+        ac::local-dummy
+        ac::local-llama
 )
 target_sources(ac-c-local PRIVATE
+    ac/export.h
+
     ac/local.h
     ac/local.cpp
+
+    ac/local_dummy.h
+    ac/local_dummy.cpp
+
+    ac/local_llama.h
+    ac/local_llama.cpp
 )
