@@ -89,7 +89,7 @@ class DummyModel final : public Model {
     std::shared_ptr<dummy::Model> m_model;
 public:
     DummyModel(const std::string& fname, dummy::Model::Params params)
-        : m_model(std::make_shared<dummy::Model>(fname.c_str(), params))
+        : m_model(std::make_shared<dummy::Model>(fname.c_str(), astl::move(params)))
     {}
     explicit DummyModel(dummy::Model::Params params) : m_model(std::make_shared<dummy::Model>(params)) {}
 
