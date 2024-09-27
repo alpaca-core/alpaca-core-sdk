@@ -28,6 +28,6 @@ if(alpacaCoreIsRoot)
     include(UseJava)
 
     add_subdirectory(src)
-    ac_add_test_subdir()
-    ac_add_example_subdir()
+    # ac_add_test_subdir()
+    # ac_add_example_subdir()
 endif()

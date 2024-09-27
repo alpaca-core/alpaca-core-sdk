@@ -4,18 +4,17 @@
 #include "JniApi.hpp"
 #include "JniDict.hpp"
 
-#include <ac/LocalDummy.hpp>
-#include <ac/LocalLlama.hpp>
-#include <ac/LocalWhisper.hpp>
+#include <ac/local/LocalDummy.hpp>
+#include <ac/local/LocalLlama.hpp>
+#include <ac/local/LocalWhisper.hpp>
 
-#include <ac/ModelDesc.hpp>
-#include <ac/LocalProvider.hpp>
+#include <ac/local/ModelDesc.hpp>
+#include <ac/local/ModelFactory.hpp>
 
-#include <ac/Model.hpp>
-#include <ac/Instance.hpp>
+#include <ac/local/Model.hpp>
+#include <ac/local/Instance.hpp>
 
 #include <iostream>
-#include <thread>
 
 namespace ac::java {
 
@@ -26,8 +25,8 @@ struct ModelDesc {
         static constexpr auto Name() { return "com/alpacacore/ModelDesc$AssetInfo"; }
     };
 
-    static ac::ModelDesc get(JNIEnv& env, jni::Object<ModelDesc>& obj) {
-        ac::ModelDesc ret;
+    static local::ModelDesc get(JNIEnv& env, jni::Object<ModelDesc>& obj) {
+        local::ModelDesc ret;
 
         auto cls = jni::Class<ModelDesc>::Find(env);
         auto inferenceTypeField = cls.GetField<jni::String>(env, "inferenceType");
@@ -64,118 +63,57 @@ struct ModelDesc {
     }
 };
 
-struct LocalProviderSingleton : public ac::LocalProvider {
-    LocalProviderSingleton() : ac::LocalProvider(ac::LocalProvider::No_LaunchThread) {}
-    ~LocalProviderSingleton() {
-        abortRun();
-        if (m_thread.joinable()) {
-            m_thread.join();
-        }
-    }
-
-    std::thread m_thread;
-    jni::JNIEnv* workerEnv = nullptr;
-
-    void launch(jni::JavaVM& jvm) {
-        m_thread = std::thread([this, &jvm] {
-            auto env = jni::AttachCurrentThreadAsDaemon(jvm);
-#if defined(__ANDROID__)
-            // andrdoid really hates us disposing of the worker env here
-            // likely because the process is always killed before the thread is joined
-            // so... we simply leak it (not a big deal, since it's a singleton)
-            workerEnv = env.release();
-#else
-            workerEnv = env.get();
-#endif
-            run();
-        });
-    }
-};
-
-std::unique_ptr<LocalProviderSingleton> providerSingleton;
+std::unique_ptr<local::ModelFactory> factorySingleton;
 
 template <typename Tag, typename PL>
-struct PrivateNativeClass {
-    struct Payload {
-        Payload(PL&& data) : data(std::move(data)) {}
-        PL data;
-    };
+struct NativeClass {
+    jni::Global<jni::Class<Tag>> cls;
+    jni::Field<Tag, jni::jlong> nativePtrField;
 
-    static void finalize(jni::JNIEnv& env, jni::Object<Tag>& obj) {
-        auto cls = jni::Class<Tag>::Find(env);
-        auto payloadField = cls.template GetField<jni::jlong>(env, "nativePtr");
+    NativeClass(jni::JNIEnv& env)
+        : cls(jni::Class<Tag>::Singleton(env))
+        , nativePtrField(cls.GetField<jni::jlong>(env, "nativePtr"))
+    {}
+
+    PL* getPayload(jni::JNIEnv& env, jni::Object<Tag>& obj) {
         auto payload = obj.Get(env, payloadField);
-        auto ptr = reinterpret_cast<Payload*>(payload);
-        delete ptr;
+        return reinterpret_cast<PL*>(payload);
     }
 
-    static jni::Local<jni::Object<Tag>> create(jni::JNIEnv& env, PL payloadData) {
-        auto cls = jni::Class<Tag>::Find(env);
-        auto ctor = cls.template GetConstructor<jni::jlong>(env);
-        auto payload = std::make_unique<Payload>(std::move(payloadData));
-        auto nativePtr = reinterpret_cast<jni::jlong>(payload.get());
-        auto obj = cls.New(env, ctor, nativePtr);
-        payload.release();
-        return obj;
-    }
-
-    static PL& getPayload(jni::JNIEnv& env, jni::Object<Tag>& obj) {
-        auto cls = jni::Class<Tag>::Find(env);
-        auto payloadField = cls.template GetField<jni::jlong>(env, "nativePtr");
-        auto payload = obj.Get(env, payloadField);
-        auto ptr = reinterpret_cast<Payload*>(payload);
-        return ptr->data;
+    void setPayload(jni::JNIEnv& env, jni::Object<Tag>& obj, PL* payload) {
+        obj.Set(env, payloadField, reinterpret_cast<jlong>(payload));
     }
 };
 
-struct InstanceBase {
+struct CreateInstanceCallback {
+    constexpr static auto Name() { return "com/alpacacore/Model$CreateInstanceCallback"; }
+
+    jni::JNIEnv& env;
+    jni::Global<jni::Object<CreateInstanceCallback>> jcb;
+    const jni::Class<CreateInstanceCallback>& cls;
+
+    CreateInstanceCallback(jni::JNIEnv& env, jni::Global<jni::Object<CreateInstanceCallback>> jcb)
+        : env(env)
+        , jcb(std::move(jcb))
+        , cls(jni::Class<CreateInstanceCallback>::Singleton(env))
+    {}
+
+    void onComplete(InstancePtr instance) {
+        auto obj = InstanceImpl::create(env, std::move(instance));
+        auto onComplete = cls.GetMethod<void(jni::Object<InstanceBase>)>(env, "onComplete");
+        jcb.Call(env, onComplete, obj);
+    }
+
+    void onError(std::string error) {
+        auto onError = cls.GetMethod<void(jni::String)>(env, "onError");
+        jcb.Call(env, onError, jni::Make<jni::String>(env, std::move(error)));
+    }
+};
+
+struct Instance : public NativeClass<Instance, local::Instance> {
     static constexpr auto Name() { return "com/alpacacore/Instance"; }
-};
 
-struct InstanceImpl : public PrivateNativeClass<InstanceImpl, InstancePtr> {
-    static constexpr auto Name() { return "com/alpacacore/InstanceImpl"; }
-    using SuperTag = InstanceBase;
-
-    static void synchronize(jni::JNIEnv& env, jni::Object<InstanceImpl>& obj) {
-        auto& instance = getPayload(env, obj);
-        instance->synchronize();
-    }
-
-    struct OpCallback {
-        static constexpr auto Name() { return "com/alpacacore/Instance$OpCallback"; }
-
-        jni::JNIEnv& env;
-        jni::Global<jni::Object<OpCallback>> jcb;
-        jni::Local<jni::Class<OpCallback>> cls;
-
-        OpCallback(jni::JNIEnv& env, jni::Global<jni::Object<OpCallback>> jcb)
-            : env(env)
-            , jcb(std::move(jcb))
-            , cls(jni::Class<OpCallback>::Find(env))
-        {}
-
-        void onComplete() {
-            auto onComplete = cls.GetMethod<void()>(env, "onComplete");
-            jcb.Call(env, onComplete);
-        }
-
-        void onError(std::string error) {
-            auto onError = cls.GetMethod<void(jni::String)>(env, "onError");
-            jcb.Call(env, onError, jni::Make<jni::String>(env, std::move(error)));
-        }
-
-        void onProgress(std::string_view tag, float progress) {
-            auto onProgress = cls.GetMethod<void(jni::String, jni::jfloat)>(env, "onProgress");
-            jcb.Call(env, onProgress, jni::Make<jni::String>(env, std::string(tag)), progress);
-        }
-
-        void onStream(Dict data) {
-            auto onStream = cls.GetMethod<void(jni::Object<>)>(env, "onStream");
-            jcb.Call(env, onStream, Dict_toObject(env, data));
-        }
-    };
-
-    static void runOp(jni::JNIEnv& env, jni::Object<InstanceImpl>& obj, jni::String& op, jni::Object<>& params, jni::Object<OpCallback>& jcb) {
+    static void runOp(jni::JNIEnv& env, jni::Object<Instance>& obj, jni::String& op, jni::Object<>& params, jni::Object<OpCallback>& jcb) {
         auto& instance = getPayload(env, obj);
 
         auto paramsDict = Object_toDict(env, jni::NewLocal(env, params));

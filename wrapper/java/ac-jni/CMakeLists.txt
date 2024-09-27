@@ -12,13 +12,12 @@ target_include_directories(ac-jni-dict INTERFACE .)
 target_link_libraries(ac-jni-dict PUBLIC
     JNI::JNI
     mapbox::jni.hpp
-    ac::api
+    ac::dict
 )
 
 # main module
 add_library(ac-jni MODULE
     JniEntrypoint.cpp
-    JniSandbox.cpp
     JniApi.cpp
 )
 if(NOT WIN32)

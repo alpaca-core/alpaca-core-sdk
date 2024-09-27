@@ -72,12 +72,6 @@ add_java_test(Dict
 
 set(testFixturesDir "../src/testFixtures/java/com/alpacacore") # ridiculous
 
-add_java_test(Sandbox
-    SOURCES ${testFixturesDir}/TestSandbox.java
-    JARS alpaca-core-jar
-    LIBS ac-jni
-)
-
 add_java_test(LocalProvider
     SOURCES ${testFixturesDir}/TestLocalProvider.java
     JARS alpaca-core-jar
