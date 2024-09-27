@@ -56,7 +56,7 @@ public:
     virtual bool haveStream() const noexcept override {
         return false;
     }
-    virtual void pushStream(Dict input) override {
+    virtual void pushStream(Dict) override {
         throw_ex{} << "whisper: pushStream not supported";
     }
     virtual std::optional<Dict> pullStream() override {
