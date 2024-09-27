@@ -26,6 +26,8 @@ int main() try {
         std::cout << token << ' ';
     }
 
+    std::cout << std::endl;
+
     return 0;
 }
 catch (const std::exception& e) {
