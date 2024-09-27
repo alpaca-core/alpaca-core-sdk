@@ -73,8 +73,8 @@ struct NativeClass {
 
     NativeClass(jni::JNIEnv& env)
         : cls(jni::Class<Tag>::Singleton(env))
-        , nativePtrField(cls.GetField<jni::jlong>(env, "nativePtr"))
-        , ctor(cls.GetConstructor<>(env))
+        , nativePtrField(cls.template GetField<jni::jlong>(env, "nativePtr"))
+        , ctor(cls.template GetConstructor<>(env))
     {}
 
     PL* getPtr(jni::JNIEnv& env, jni::Object<Tag>& obj) {
