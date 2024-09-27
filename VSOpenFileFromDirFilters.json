@@ -4,6 +4,9 @@
     ".vs",
     "build",
     "out",
-    "tmp"
+    "tmp",
+    ".cxx",
+    ".gradle",
+    ".idea"
   ]
 }
