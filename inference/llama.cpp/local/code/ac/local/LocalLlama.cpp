@@ -2,22 +2,23 @@
 // SPDX-License-Identifier: MIT
 //
 #include "LocalLlama.hpp"
-#include "LocalLlamaSchema.hpp"
 
 #include <ac/llama/Instance.hpp>
 #include <ac/llama/Init.hpp>
 #include <ac/llama/Model.hpp>
 #include <ac/llama/AntipromptManager.hpp>
 
-#include <ac/LocalProvider.hpp>
-#include <ac/LocalInference.hpp>
+#include <ac/local/Instance.hpp>
+#include <ac/local/Model.hpp>
+#include <ac/local/ModelLoader.hpp>
+#include <ac/local/ModelFactory.hpp>
 
 #include <astl/move.hpp>
 #include <astl/move_capture.hpp>
 #include <astl/iile.h>
 #include <astl/throw_ex.hpp>
 
-namespace ac {
+namespace ac::local {
 
 namespace {
 llama::Instance::SessionParams SessionParams_fromDict(const Dict& d) {
@@ -26,17 +27,19 @@ llama::Instance::SessionParams SessionParams_fromDict(const Dict& d) {
     return ret;
 }
 
-class LlamaInstance final : public LocalInferenceInstance {
+class LlamaInstance final : public Instance {
+    std::shared_ptr<llama::Model> m_model;
     llama::Instance m_instance;
 public:
-    LlamaInstance(llama::Model& model)
-        : m_instance(model, {})
+    LlamaInstance(std::shared_ptr<llama::Model> model)
+        : m_model(astl::move(model))
+        , m_instance(*m_model, {})
     {}
 
-    void run(Dict params, BasicCb<Dict> streamCb) {
-        auto prompt = ac::LlamaSchema::RunParams::prompt(params);
-        auto antiprompts = ac::LlamaSchema::RunParams::antiprompts(params);
-        const uint32_t maxTokens = ac::LlamaSchema::RunParams::max_tokens(params);
+    Dict run(Dict params) {
+        auto prompt = Dict_optValueAt(params, "prompt", std::string{});
+        auto antiprompts = Dict_optValueAt(params, "antiprompts", std::vector<std::string>{});
+        const auto maxTokens = Dict_optValueAt(params, "max_tokens", uint32_t(0));
 
         auto s = m_instance.newSession(astl::move(prompt), SessionParams_fromDict(params));
 
@@ -61,29 +64,37 @@ public:
             result += model.vocab().tokenToString(t);
         }
 
-        Dict resultDict;
-        ac::LlamaSchema::RunResult::set_result(resultDict, astl::move(result));
-        streamCb(resultDict);
+        return {{"result", astl::move(result)}};
     }
 
-    virtual void runOpSync(std::string_view op, Dict params, BasicCb<Dict> streamCb, ProgressCb) override {
+    virtual Dict runOp(std::string_view op, Dict params, ProgressCb) override {
         if (op == "run") {
-            run(astl::move(params), astl::move(streamCb));
+            return run(astl::move(params));
         }
         else {
             throw_ex{} << "llama: unknown op: " << op;
         }
     }
+
+    virtual bool haveStream() const noexcept override {
+        return false;
+    }
+    virtual void pushStream(Dict input) override {
+        throw_ex{} << "dummy: pushStream not supported";
+    }
+    virtual std::optional<Dict> pullStream() override {
+        throw_ex{} << "dummy: pushStream not supported";
+    }
 };
 
-class LlamaModel final : public LocalInferenceModel {
-    llama::Model m_model;
+class LlamaModel final : public Model {
+    std::shared_ptr<llama::Model> m_model;
 public:
     LlamaModel(const std::string& gguf, llama::ModelLoadProgressCb pcb, llama::Model::Params params)
-        : m_model(gguf.c_str(), std::move(pcb), params)
+        : m_model(std::make_shared<llama::Model>(gguf.c_str(), astl::move(pcb), astl::move(params)))
     {}
 
-    virtual std::unique_ptr<LocalInferenceInstance> createInstanceSync(std::string_view type, Dict) override {
+    virtual std::unique_ptr<Instance> createInstance(std::string_view type, Dict) override {
         if (type != "general") {
             throw_ex{} << "llama: unknown instance type: " << type;
         }
@@ -91,27 +102,27 @@ public:
     }
 };
 
-class LlamaModelLoader final : public LocalInferenceModelLoader {
+class LlamaModelLoader final : public ModelLoader {
 public:
-    virtual std::unique_ptr<LocalInferenceModel> loadModelSync(ModelDesc desc, Dict, ProgressCb progressCb) override {
+    virtual ModelPtr loadModel(ModelDesc desc, Dict, ProgressCb progressCb) override {
         if (desc.assets.size() != 1) throw_ex{} << "llama: expected exactly one local asset";
         auto& gguf = desc.assets.front().path;
         llama::Model::Params modelParams;
         std::string progressTag = "loading " + gguf;
-        return std::make_unique<LlamaModel>(gguf, [movecap(progressTag, progressCb)](float p) {
+        return std::make_shared<LlamaModel>(gguf, [movecap(progressTag, progressCb)](float p) {
             if (progressCb) {
                 progressCb(progressTag, p);
             }
-        }, modelParams);
+        }, astl::move(modelParams));
     }
 };
 }
 
-void addLocalLlamaInference(LocalProvider& provider) {
+void addLlamaInference(ModelFactory& provider) {
     ac::llama::initLibrary();
 
     static LlamaModelLoader loader;
-    provider.addLocalInferenceLoader("llama.cpp", loader);
+    provider.addLoader("llama.cpp", loader);
 }
 
 } // namespace ac
