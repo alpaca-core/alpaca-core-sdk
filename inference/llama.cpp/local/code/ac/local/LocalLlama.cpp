@@ -80,10 +80,10 @@ public:
         return false;
     }
     virtual void pushStream(Dict input) override {
-        throw_ex{} << "dummy: pushStream not supported";
+        throw_ex{} << "llama: pushStream not supported";
     }
     virtual std::optional<Dict> pullStream() override {
-        throw_ex{} << "dummy: pushStream not supported";
+        throw_ex{} << "llama: pushStream not supported";
     }
 };
 

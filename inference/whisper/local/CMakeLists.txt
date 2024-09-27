@@ -8,11 +8,9 @@ add_library(ac::local-whisper ALIAS ac-local-whisper)
 target_include_directories(ac-local-whisper PUBLIC code)
 
 target_sources(ac-local-whisper PRIVATE
-    code/ac/export.h
-    code/ac/LocalWhisper.hpp
-    code/ac/LocalWhisper.cpp
-    code/ac/local_whisper.h
-    code/ac/local_whisper.cpp
+    code/ac/local/export.h
+    code/ac/local/LocalWhisper.hpp
+    code/ac/local/LocalWhisper.cpp
 )
 
 target_link_libraries(ac-local-whisper
