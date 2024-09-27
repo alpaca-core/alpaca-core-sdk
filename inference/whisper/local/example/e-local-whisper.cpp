@@ -1,23 +1,20 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include <ac/LocalProvider.hpp>
-#include <ac/LocalWhisper.hpp>
+#include <ac/local/LocalWhisper.hpp>
 
-#include <ac/Model.hpp>
-#include <ac/Instance.hpp>
-#include <ac/Dict.hpp>
+#include <ac/local/ModelFactory.hpp>
+#include <ac/local/Model.hpp>
+#include <ac/local/Instance.hpp>
 
 #include <jalog/Instance.hpp>
-#include <jalog/sinks/ColorSink.hpp>
+#include <jalog/sinks/DefaultSink.hpp>
 
 #include <iostream>
-#include <optional>
-#include <latch>
 
 #include "ac-test-data-whisper-dir.h"
 
-#include "ac-audio.hpp"
+#include <ac-audio.hpp>
 
 ac::Blob convertF32ToBlob(std::span<float> f32data) {
     ac::Blob blob;
@@ -26,18 +23,14 @@ ac::Blob convertF32ToBlob(std::span<float> f32data) {
     return blob;
 }
 
-int main() {
+int main() try {
     jalog::Instance jl;
-    jl.setup().add<jalog::sinks::ColorSink>();
+    jl.setup().add<jalog::sinks::DefaultSink>();
 
-    ac::LocalProvider provider;
-    ac::addLocalWhisperInference(provider);
+    ac::local::ModelFactory factory;
+    ac::local::addWhisperInference(factory);
 
-    std::optional<std::latch> latch;
-
-    ac::CallbackResult<ac::ModelPtr> modelResult;
-    latch.emplace(1);
-    provider.createModel(
+    auto model = factory.createModel(
         {
             .inferenceType = "whisper.cpp",
             .assets = {
@@ -45,69 +38,24 @@ int main() {
             }
         },
         {}, // no params
-        {
-            [&](ac::CallbackResult<ac::ModelPtr> result) {
-                modelResult = std::move(result);
-                latch->count_down();
-            },
-            {} // empty progress callback
-        }
+        {} // empty progress callback
     );
 
-    latch->wait();
+    auto instance = model->createInstance("general", {});
 
-    if (modelResult.has_error()) {
-        std::cout << "Error: Model load error: " << modelResult.error().text << "\n";
-        return 1;
-    }
-    auto model = std::move(modelResult.value());
-
-    ac::CallbackResult<ac::InstancePtr> instanceResult;
-    latch.emplace(1);
-    model->createInstance("general", {}, {
-        [&](ac::CallbackResult<ac::InstancePtr> result) {
-            instanceResult = std::move(result);
-            latch->count_down();
-        }
-    });
-
-    latch->wait();
-    if (instanceResult.has_error()) {
-        std::cout << "Error: Instance create error: " << instanceResult.error().text << "\n";
-        return 1;
-    }
-    auto instance = std::move(instanceResult.value());
-
-    std::string modelBinFilePath = AC_TEST_DATA_WHISPER_DIR "/as-she-sat.wav";
-    auto pcmf32 = ac::audio::loadWavF32Mono(modelBinFilePath);
+    std::string audioFile = AC_TEST_DATA_WHISPER_DIR "/as-she-sat.wav";
+    auto pcmf32 = ac::audio::loadWavF32Mono(audioFile);
     auto audioBlob = convertF32ToBlob(pcmf32);
 
-    std::cout << "Local-whisper: Transcribing the audio [" << modelBinFilePath << "]: \n\n";
+    std::cout << "Local-whisper: Transcribing the audio [" << audioFile << "]: \n\n";
 
-    std::string opError;
-    latch.emplace(1);
+    auto result = instance->runOp("transcribe", {{"audioBinaryMono", ac::Dict::binary(std::move(audioBlob))}}, {});
 
-    instance->runOp("transcribe", {{"audioBinaryMono", ac::Dict::binary(std::move(audioBlob))}}, {
-        [&](ac::CallbackResult<void> result) {
-            if (result.has_error()) {
-                opError = std::move(result.error().text);
-            }
-            latch->count_down();
-        },
-        [](ac::Dict result) {
-            std::cout << result.at("result").get<std::string_view>();
-        },
-        {} // empty progress callback
-    });
-
-    latch->wait();
-
-    std::cout << "\n";
-
-    if (!opError.empty()) {
-        std::cout << "run error: " << opError << "\n";
-        return 1;
-    }
+    std::cout << result.at("result").get<std::string_view>() << '\n';
 
     return 0;
+}
+catch (std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
 }

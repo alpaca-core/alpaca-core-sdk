@@ -12,6 +12,7 @@ target_link_libraries(ac-c-local
         ac::local
         ac::local-dummy
         ac::local-llama
+        ac::local-whisper
 )
 target_sources(ac-c-local PRIVATE
     ac/export.h
@@ -24,4 +25,7 @@ target_sources(ac-c-local PRIVATE
 
     ac/local_llama.h
     ac/local_llama.cpp
+
+    ac/local_whisper.h
+    ac/local_whisper.cpp
 )
