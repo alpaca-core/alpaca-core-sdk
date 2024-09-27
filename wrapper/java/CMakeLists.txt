@@ -27,7 +27,7 @@ if(alpacaCoreIsRoot)
     find_package(Java REQUIRED)
     include(UseJava)
 
-    add_subdirectory(src)
+    # add_subdirectory(src)
     # ac_add_test_subdir()
     # ac_add_example_subdir()
 endif()

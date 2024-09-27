@@ -14,6 +14,8 @@
 #include <ac/local/Model.hpp>
 #include <ac/local/Instance.hpp>
 
+#include <astl/move.hpp>
+
 #include <iostream>
 
 namespace ac::java {
@@ -63,257 +65,125 @@ struct ModelDesc {
     }
 };
 
-std::unique_ptr<local::ModelFactory> factorySingleton;
-
 template <typename Tag, typename PL>
 struct NativeClass {
-    jni::Global<jni::Class<Tag>> cls;
+    const jni::Class<Tag>& cls;
     jni::Field<Tag, jni::jlong> nativePtrField;
+    jni::Constructor<Tag> ctor;
 
     NativeClass(jni::JNIEnv& env)
         : cls(jni::Class<Tag>::Singleton(env))
         , nativePtrField(cls.GetField<jni::jlong>(env, "nativePtr"))
+        , ctor(cls.GetConstructor<>(env))
     {}
 
-    PL* getPayload(jni::JNIEnv& env, jni::Object<Tag>& obj) {
-        auto payload = obj.Get(env, payloadField);
+    PL* getPtr(jni::JNIEnv& env, jni::Object<Tag>& obj) {
+        auto payload = obj.Get(env, nativePtrField);
         return reinterpret_cast<PL*>(payload);
     }
 
-    void setPayload(jni::JNIEnv& env, jni::Object<Tag>& obj, PL* payload) {
-        obj.Set(env, payloadField, reinterpret_cast<jlong>(payload));
+    void setPtr(jni::JNIEnv& env, jni::Object<Tag>& obj, PL* payload) {
+        obj.Set(env, nativePtrField, reinterpret_cast<jlong>(payload));
     }
 };
 
-struct CreateInstanceCallback {
-    constexpr static auto Name() { return "com/alpacacore/Model$CreateInstanceCallback"; }
+struct ProgressCallback {
+    constexpr static auto Name() { return "com/alpacacore/ProgressCallback"; }
 
     jni::JNIEnv& env;
-    jni::Global<jni::Object<CreateInstanceCallback>> jcb;
-    const jni::Class<CreateInstanceCallback>& cls;
+    jni::Object<ProgressCallback>& pcb;
+    const jni::Class<ProgressCallback>& cls;
+    jni::Method<ProgressCallback, jni::jboolean(jni::String, jni::jfloat)> onProgressMethod;
 
-    CreateInstanceCallback(jni::JNIEnv& env, jni::Global<jni::Object<CreateInstanceCallback>> jcb)
+    ProgressCallback(jni::JNIEnv& env, jni::Object<ProgressCallback>& pcb)
         : env(env)
-        , jcb(std::move(jcb))
-        , cls(jni::Class<CreateInstanceCallback>::Singleton(env))
+        , pcb(pcb)
+        , cls(jni::Class<ProgressCallback>::Singleton(env))
+        , onProgressMethod(cls.GetMethod<jni::jboolean(jni::String, jni::jfloat)>(env, "onProgress"))
     {}
 
-    void onComplete(InstancePtr instance) {
-        auto obj = InstanceImpl::create(env, std::move(instance));
-        auto onComplete = cls.GetMethod<void(jni::Object<InstanceBase>)>(env, "onComplete");
-        jcb.Call(env, onComplete, obj);
-    }
-
-    void onError(std::string error) {
-        auto onError = cls.GetMethod<void(jni::String)>(env, "onError");
-        jcb.Call(env, onError, jni::Make<jni::String>(env, std::move(error)));
+    bool onProgress(std::string_view tag, float progress) {
+        return !!pcb.Call(env, onProgressMethod, jni::Make<jni::String>(env, std::string(tag)), progress);
     }
 };
 
-struct Instance : public NativeClass<Instance, local::Instance> {
+struct Instance {
     static constexpr auto Name() { return "com/alpacacore/Instance"; }
 
-    static void runOp(jni::JNIEnv& env, jni::Object<Instance>& obj, jni::String& op, jni::Object<>& params, jni::Object<OpCallback>& jcb) {
-        auto& instance = getPayload(env, obj);
+    static std::optional<NativeClass<Instance, local::Instance>> nativeClass;
+
+    static jni::Local<jni::Object<>> runOp(jni::JNIEnv& env, jni::Object<Instance>& obj, jni::String& op, jni::Object<>& params, jni::Object<ProgressCallback>& pcb) {
+        auto instance = nativeClass->getPtr(env, obj);
 
         auto paramsDict = Object_toDict(env, jni::NewLocal(env, params));
 
-        instance->runOp(jni::Make<std::string>(env, op), std::move(paramsDict), {
-            [jcb = jni::NewGlobal(env, jcb)](CallbackResult<void> result) mutable {
-                OpCallback cb(*providerSingleton->workerEnv, std::move(jcb));
-                if (result.has_value()) {
-                    cb.onComplete();
-                }
-                else {
-                    cb.onError(std::move(result.error().text));
-                }
-            },
-            [jcb = jni::NewGlobal(env, jcb)](Dict data) mutable {
-                OpCallback cb(*providerSingleton->workerEnv, std::move(jcb));
-                cb.onStream(std::move(data));
-            },
-            [jcb = jni::NewGlobal(env, jcb)](std::string_view tag, float progress) mutable {
-                OpCallback cb(*providerSingleton->workerEnv, std::move(jcb));
-                cb.onProgress(tag, progress);
-            }
-        });
-    }
-
-    struct AbortCallback {
-        static constexpr auto Name() { return "com/alpacacore/Instance$AbortCallback"; }
-
-        jni::JNIEnv& env;
-        jni::Global<jni::Object<AbortCallback>> jcb;
-        jni::Local<jni::Class<AbortCallback>> cls;
-
-        AbortCallback(jni::JNIEnv& env, jni::Global<jni::Object<AbortCallback>> jcb)
-            : env(env)
-            , jcb(std::move(jcb))
-            , cls(jni::Class<AbortCallback>::Find(env))
-        {}
-
-        void onAbort() {
-            auto onAbort = cls.GetMethod<void()>(env, "onAbort");
-            jcb.Call(env, onAbort);
+        local::ProgressCb cb;
+        if (pcb) {
+            ProgressCallback pc(env, pcb);
+            cb = [&](std::string_view tag, float progress) {
+                return pc.onProgress(tag, progress);
+            };
         }
-    };
-
-    static void initiateAbort(jni::JNIEnv& env, jni::Object<InstanceImpl>& obj, jni::Object<AbortCallback>& jcb) {
-        auto& instance = getPayload(env, obj);
-
-        instance->initiateAbort([jcb = jni::NewGlobal(env, jcb)]() mutable {
-            AbortCallback cb(*providerSingleton->workerEnv, std::move(jcb));
-            cb.onAbort();
-        });
+        auto result = instance->runOp(jni::Make<std::string>(env, op), astl::move(paramsDict), astl::move(cb));
+        return Dict_toObject(env, result);
     }
 };
 
-struct ModelBase {
+std::optional<NativeClass<Instance, local::Instance>> Instance::nativeClass;
+
+struct Model {
     static constexpr auto Name() { return "com/alpacacore/Model"; }
-};
 
-struct ModelImpl : public PrivateNativeClass<ModelImpl, ModelPtr> {
-    static constexpr auto Name() { return "com/alpacacore/ModelImpl"; }
-    using SuperTag = ModelBase;
-
-    struct CreateInstanceCallback {
-        constexpr static auto Name() { return "com/alpacacore/Model$CreateInstanceCallback"; }
-
-        jni::JNIEnv& env;
-        jni::Global<jni::Object<CreateInstanceCallback>> jcb;
-        const jni::Class<CreateInstanceCallback>& cls;
-
-        CreateInstanceCallback(jni::JNIEnv& env, jni::Global<jni::Object<CreateInstanceCallback>> jcb)
-            : env(env)
-            , jcb(std::move(jcb))
-            , cls(jni::Class<CreateInstanceCallback>::Singleton(env))
-        {}
-
-        void onComplete(InstancePtr instance) {
-            auto obj = InstanceImpl::create(env, std::move(instance));
-            auto onComplete = cls.GetMethod<void(jni::Object<InstanceBase>)>(env, "onComplete");
-            jcb.Call(env, onComplete, obj);
-        }
-
-        void onError(std::string error) {
-            auto onError = cls.GetMethod<void(jni::String)>(env, "onError");
-            jcb.Call(env, onError, jni::Make<jni::String>(env, std::move(error)));
-        }
+    struct Payload {
+        local::ModelPtr model;
     };
 
-    static void createInstance(jni::JNIEnv& env, jni::Object<ModelImpl>& obj, jni::String& type, jni::Object<>& params, jni::Object<CreateInstanceCallback>& jcb) {
-        auto& model = getPayload(env, obj);
+    static std::optional<NativeClass<Model, Payload>> nativeClass;
+
+    static jni::Local<jni::Object<Instance>> createInstance(jni::JNIEnv& env, jni::Object<Model>& obj, jni::String& type, jni::Object<>& params) {
+        auto& model = nativeClass->getPtr(env, obj)->model;
 
         auto paramsDict = Object_toDict(env, jni::NewLocal(env, params));
 
-        model->createInstance(jni::Make<std::string>(env, type), std::move(paramsDict), [jcb = jni::NewGlobal(env, jcb)](CallbackResult<InstancePtr> result) mutable {
-            CreateInstanceCallback cb(*providerSingleton->workerEnv, std::move(jcb));
-            if (result.has_value()) {
-                cb.onComplete(std::move(*result));
-            }
-            else {
-                cb.onError(std::move(result.error().text));
-            }
-        });
+        auto instance = model->createInstance(jni::Make<std::string>(env, type), astl::move(paramsDict));
+
+        auto& iclass = *Instance::nativeClass;
+        auto ret = iclass.cls.New(env, iclass.ctor);
+        iclass.setPtr(env, ret, instance.get());
+        instance.release();
+        return ret;
     }
 };
 
-struct LocalProvider {
-    static constexpr auto Name() { return "com/alpacacore/LocalProvider"; }
+std::optional<NativeClass<Model, Model::Payload>> Model::nativeClass;
 
-    static void sandbox(jni::JNIEnv& env, jni::Class<LocalProvider>&, jni::Object<ModelDesc>& jdesc) {
-        auto desc = ModelDesc::get(env, jdesc);
-        std::cout << "desc: " << desc.name << '\n';
-        std::cout << "  inferenceType: " << desc.inferenceType << '\n';
-        for (const auto& asset : desc.assets) {
-            std::cout << "  asset: " << asset.path << " tag: " << asset.tag << '\n';
-        }
-    }
-
-    struct LoadModelCallback {
-        constexpr static auto Name() { return "com/alpacacore/LocalProvider$LoadModelCallback"; }
-
-        jni::JNIEnv& env;
-        jni::Global<jni::Object<LoadModelCallback>> jcb;
-        const jni::Class<LoadModelCallback>& cls;
-        LoadModelCallback(jni::JNIEnv& env, jni::Global<jni::Object<LoadModelCallback>> jcb)
-            : env(env)
-            , jcb(std::move(jcb))
-            , cls(jni::Class<LoadModelCallback>::Singleton(env))
-        {}
-
-        void onComplete(ModelPtr model) {
-            auto obj = ModelImpl::create(env, std::move(model));
-            auto onComplete = cls.GetMethod<void(jni::Object<ModelBase>)>(env, "onComplete");
-            jcb.Call(env, onComplete, obj);
-        }
-
-        void onError(std::string error) {
-            auto onError = cls.GetMethod<void(jni::String)>(env, "onError");
-            jcb.Call(env, onError, jni::Make<jni::String>(env, std::move(error)));
-        }
-
-        void onProgress(std::string_view tag, float progress) {
-            auto onProgress = cls.GetMethod<void(jni::String, jni::jfloat)>(env, "onProgress");
-            jcb.Call(env, onProgress, jni::Make<jni::String>(env, std::string(tag)), progress);
-        }
-    };
-
-    static void loadModel(jni::JNIEnv& env, jni::Class<LocalProvider>&, jni::Object<ModelDesc>& jdesc, jni::Object<>& jparams, jni::Object<LoadModelCallback>& jcb) {
-        auto desc = ModelDesc::get(env, jdesc);
-        auto params = Object_toDict(env, jni::NewLocal(env, jparams));
-        providerSingleton->createModel(std::move(desc), std::move(params), {
-            [jcb = jni::NewGlobal(env, jcb)](CallbackResult<ModelPtr> result) mutable {
-                LoadModelCallback cb(*providerSingleton->workerEnv, std::move(jcb));
-                if (result.has_value()) {
-                    cb.onComplete(std::move(*result));
-                }
-                else {
-                    cb.onError(std::move(result.error().text));
-                }
-            },
-            [jcb = jni::NewGlobal(env, jcb)](std::string_view tag, float progress) mutable {
-                LoadModelCallback cb(*providerSingleton->workerEnv, std::move(jcb));
-                cb.onProgress(tag, progress);
-            }
-        });
-    }
-
-    static void shutdown(jni::JNIEnv&, jni::Class<LocalProvider>&) {
-        providerSingleton.reset();
-    }
-};
+std::unique_ptr<local::ModelFactory> factorySingleton;
 
 #define jniMakeNativeMethod(cls, mthd) jni::MakeNativeMethod<decltype(&cls::mthd), &cls::mthd>(#mthd)
 
-void JniApi_register(jni::JavaVM& jvm, jni::JNIEnv& env) {
-    auto ic = jni::Class<InstanceImpl>::Find(env);
-    jni::RegisterNatives(env, *ic,
-        jniMakeNativeMethod(InstanceImpl, synchronize),
-        jniMakeNativeMethod(InstanceImpl, runOp),
-        jniMakeNativeMethod(InstanceImpl, initiateAbort)
+void JniApi_register(jni::JavaVM&, jni::JNIEnv& env) {
+    auto& ic = Instance::nativeClass.emplace(env);
+    jni::RegisterNatives(env, *ic.cls
+        , jniMakeNativeMethod(Instance, runOp)
     );
 
-    auto mc = jni::Class<ModelImpl>::Find(env);
-    jni::RegisterNatives(env, *mc
-        , jniMakeNativeMethod(ModelImpl, finalize)
-        , jniMakeNativeMethod(ModelImpl, createInstance)
+    auto& mc = Model::nativeClass.emplace(env);
+    jni::RegisterNatives(env, *mc.cls
+        , jniMakeNativeMethod(Model, createInstance)
     );
 
-    auto lpc = jni::Class<LocalProvider>::Find(env);
-    jni::RegisterNatives(env, *lpc
-        , jniMakeNativeMethod(LocalProvider, sandbox)
-        , jniMakeNativeMethod(LocalProvider, loadModel)
-        , jniMakeNativeMethod(LocalProvider, shutdown)
-    );
-    [[maybe_unused]] auto& reg = jni::Class<LocalProvider::LoadModelCallback>::Singleton(env);
+    //auto lpc = jni::Class<LocalProvider>::Find(env);
+    //jni::RegisterNatives(env, *lpc
+    //    , jniMakeNativeMethod(LocalProvider, sandbox)
+    //    , jniMakeNativeMethod(LocalProvider, loadModel)
+    //    , jniMakeNativeMethod(LocalProvider, shutdown)
+    //);
 
-    providerSingleton = std::make_unique<LocalProviderSingleton>();
-    providerSingleton->launch(jvm);
+    factorySingleton = std::make_unique<local::ModelFactory>();
 
-    addLocalDummyInference(*providerSingleton);
-    addLocalLlamaInference(*providerSingleton);
-    addLocalWhisperInference(*providerSingleton);
+    local::addDummyInference(*factorySingleton);
+    local::addLlamaInference(*factorySingleton);
+    local::addWhisperInference(*factorySingleton);
 }
 
 } // namespace ac::java
