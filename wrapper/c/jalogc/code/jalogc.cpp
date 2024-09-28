@@ -37,9 +37,7 @@ struct CallbackSink final : public jalog::Sink {
 };
 } // namespace
 
-#if defined(__cplusplus)
 extern "C" {
-#endif
 
 void jalogc_init(jalogc_init_params params) {
     assert(!instance);
@@ -86,6 +84,4 @@ void jalogc_log(jalogc_log_level level, _Printf_format_string_ const char* forma
     va_end(args);
 }
 
-#if defined(__cplusplus)
 }
-#endif
