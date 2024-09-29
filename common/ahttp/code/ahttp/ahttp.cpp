@@ -46,6 +46,7 @@ class http_stream {
 public:
     virtual ~http_stream() = default;
 
+    virtual void handshake(std::string_view host) = 0;
     virtual void write(const http::request<http::empty_body>& req) = 0;
     virtual void read_header(beast::flat_buffer& buf, http::response_parser<http::buffer_body>& parser) = 0;
     virtual void read(beast::flat_buffer& buf, http::response_parser<http::buffer_body>& parser) = 0;
@@ -77,6 +78,7 @@ public:
 class http_stream_tcp final : public http_stream_t<beast::tcp_stream> {
 public:
     using http_stream_t<beast::tcp_stream>::http_stream_t;
+    virtual void handshake(std::string_view) override {} // no-op for non-ssl
 };
 
 #if AHTTP_SSL
@@ -85,14 +87,22 @@ class http_stream_ssl final : public http_stream_t<ssl_stream> {
 public:
     http_stream_ssl(beast::tcp_stream&& stream, ssl::context& ctx)
         : http_stream_t<ssl_stream>(astl::move(stream), ctx)
-    {
-        m_stream.handshake(ssl::stream_base::client);
-    }
+    {}
 
     ~http_stream_ssl() {
         // too many tings can go wrong here, so instead of trying to handle them all, just ignore them
         [[maybe_unused]] beast::error_code ec;
         m_stream.shutdown(ec);
+    }
+
+    virtual void handshake(std::string_view host) override {
+        std::string hostStr(host); // open ssl needs that 0-terminated and our input may not be
+        if (!SSL_set_tlsext_host_name(m_stream.native_handle(), hostStr.c_str())) {
+            throw boost::system::system_error(
+                ::ERR_get_error(), boost::asio::error::get_ssl_category());
+        }
+
+        m_stream.handshake(ssl::stream_base::client);
     }
 };
 #endif
@@ -132,6 +142,8 @@ sync_generator get_sync(std::string_view url) {
                 ac::throw_ex{} << "unsupported scheme: " << splitUrl.scheme;
             }
         }();
+
+        stream->handshake(splitUrl.authority);
 
         http::request<http::empty_body> req;
         req.method(http::verb::get);
