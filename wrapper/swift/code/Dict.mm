@@ -87,7 +87,7 @@
     return nil;
 }
 
-+ (NSDictionary *)convertToDictionary:(ac::Dict)json {
++ (NSDictionary *)convertToDictionary:(const ac::Dict&)json {
     NSMutableDictionary *dict = [NSMutableDictionary dictionary];
 
     for (auto it = json.begin(); it != json.end(); ++it) {
