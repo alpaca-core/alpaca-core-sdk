@@ -98,4 +98,16 @@ TEST_CASE("redirect https->http") {
     CHECK(is_expectected(chunk));
 }
 
+TEST_CASE("download from hugging face") {
+    auto gen = ahttp::get_sync("https://huggingface.co/datasets/alpaca-core/ac-test-dataset-dummy/resolve/main/data/hello-world.txt");
+    auto size = gen.size();
+    CHECK(size.value_or(0) == 25); // should have size
+    std::vector<uint8_t> data(25);
+    auto chunk = gen.get_next_chunk(data);
+    CHECK(chunk.size() == 25);
+
+    std::string text(chunk.begin(), chunk.end());
+    CHECK(text == "Hello from Alpaca Core.\r\n");
+}
+
 #endif
