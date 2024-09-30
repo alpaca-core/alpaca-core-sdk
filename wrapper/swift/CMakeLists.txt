@@ -3,7 +3,7 @@
 #
 project (AlpacaCoreSwiftWrapper
     LANGUAGES Swift OBJCXX CXX
-    )
+)
 
 add_subdirectory(code)
 ac_add_example_subdir()

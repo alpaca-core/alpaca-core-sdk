@@ -14,7 +14,7 @@ set(AC_TEST_SOURCE
     ./TestDict.mm
 )
 
-xctest_add_bundle(test-ac-objc AlpacaCoreObjC
+xctest_add_bundle(test-ac-objc CAlpacaCore
     ${AC_TEST_SOURCE}
 )
 

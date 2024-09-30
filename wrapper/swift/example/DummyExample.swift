@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 //
 import Foundation
-import AlpacaCoreSW
+import AlpacaCore
 
 @main
 struct ACExample {
     static func main() {
-        AlpacaCoreSW.test()
+        AlpacaCore.test()
     }
 }
