@@ -4,21 +4,28 @@
 
 AI Inference SDK
 
-## API Wrappers
+## Bindings, Wrappers, and Integrations
 
+* C: API wrapper [in repo](wrapper/c)
 * Java
+    * Pure java wrapper [in repo](wrapper/java)
+    * [Android SDK with this repo as a submodule](https://github.com/alpaca-core/ac-android)
 * Swift
 
-## Demo Projects
+
+## Demos
 
 ## Build
 
 Use CMake. Some useful presets are provided in the repo.
 
-### Options
+### CMake Options
 
 * `AC_BUILD_LOCAL` - build the local inference api and integrations of inference libraries
-* `AC_INFERENCE_LIBS` - `all` or `none` or semicolon separated list. Which inference libraries to build
+* `AC_INFERENCE_LIBS` - `all` or `none` or semicolon separated list. Which inference libraries to build. The supported ones are:
+    * `dummy`: a dummy inference library for testing and experimenting
+    * `llama.cpp`: wrapping our fork of [ggerganov/llama.cpp](https://github.com/ggerganov/llama.cpp)
+    * `whisper`: wrapping our fork of [ggerganov/whisper.cpp](https://github.com/ggerganov/whisper.cpp)
 * Advanced and `OFF` by default if the project is a subdir:
     * `AC_BUILD_TESTS` - build tests. This means all tests for all active components. No finer-grain options are available yet
     * `AC_BUILD_EXAMPLES` - build examples. This means all examples for all active components. No finer-grain options are available yet
