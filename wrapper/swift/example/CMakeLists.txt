@@ -17,7 +17,7 @@ target_include_directories(DummyExample PRIVATE
 
 target_link_libraries(DummyExample
     PRIVATE
-        AlpacaCoreSW
+        AlpacaCore
 )
 
 target_compile_options(DummyExample PRIVATE -parse-as-library)
