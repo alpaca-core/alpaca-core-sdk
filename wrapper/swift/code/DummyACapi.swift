@@ -4,8 +4,6 @@
 public func test() {
     var data = Data() // "{\"pesho\": \"Hello, World!\"}".data(using: .utf8)!
     data.append("\"5\": 5".data(using: .utf8)!)
-    let d = try? JSONSerialization.jsonObject(with: data)
-
 
     let smallDictionary: [String: Any] = [
         "name": "Alice",
@@ -35,6 +33,4 @@ public func test() {
 
     let model = ACModel()
     model.createInstance()
-
-    print("kiiil")
 }

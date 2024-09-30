@@ -1,6 +1,7 @@
 # Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
+
 enable_testing()
 
 # Config XCTest
