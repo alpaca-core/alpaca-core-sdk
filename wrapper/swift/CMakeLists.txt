@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 #
 project (AlpacaCoreSwiftWrapper
-    LANGUAGES Swift CXX
+    LANGUAGES Swift OBJCXX CXX
     )
 
 add_subdirectory(code)
