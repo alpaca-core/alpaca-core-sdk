@@ -113,7 +113,7 @@ Session Instance::newSession(std::string initialPrompt, const SessionParams para
         tokens.push_back(llama_token_bos(m_model.lmodel()));
     }
     else {
-        if (params.conversation) {
+        if (params.applyChatFormat) {
             auto fmtChat = chatAddAndFormat("system", astl::move(initialPrompt));
             tokens = vocab.tokenize(fmtChat, true, true);
         }
@@ -252,7 +252,7 @@ Session Instance::newSession(std::string initialPrompt, const SessionParams para
     while (true) {
         auto& prompt = co_await Session::Prompt{};
         if (!prompt.empty()) {
-            if (params.conversation) {
+            if (params.applyChatFormat) {
                 chatAddAndFormat("assistant", "msg");
                 auto fmtChat = chatAddAndFormat("user", prompt);
                 tokens = vocab.tokenize(fmtChat, false, true);

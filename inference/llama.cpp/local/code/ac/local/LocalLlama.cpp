@@ -23,7 +23,7 @@ namespace ac::local {
 namespace {
 llama::Instance::SessionParams SessionParams_fromDict(const Dict& d) {
     llama::Instance::SessionParams ret;
-    Dict_optApplyValueAt(d, "conversation", ret.conversation);
+    Dict_optApplyValueAt(d, "apply_chat_format", ret.applyChatFormat);
     return ret;
 }
 

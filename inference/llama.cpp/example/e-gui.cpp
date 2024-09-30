@@ -357,8 +357,8 @@ int main(int, char**) {
                 if (auto session = selectedInstance->session()) {
                     session->update();
                     ImGui::Text("Session");
-                    ImGui::TextWrapped("Params: conversation=%d, gaFactor=%d, gaWidth=%d, infiniteContext=%d",
-                        session->params().conversation, session->params().gaFactor, session->params().gaWidth, session->params().infiniteContext);
+                    ImGui::TextWrapped("Params: applyChatFormat=%d, gaFactor=%d, gaWidth=%d, infiniteContext=%d",
+                        session->params().applyChatFormat, session->params().gaFactor, session->params().gaWidth, session->params().infiniteContext);
 
                     ImGui::Separator();
                     ImGui::TextWrapped("%s", session->text().c_str());
@@ -383,7 +383,7 @@ int main(int, char**) {
                 else {
                     ImGui::Text("New session");
                     ImGui::Separator();
-                    ImGui::Checkbox("conversation", &newSessionParams.conversation);
+                    ImGui::Checkbox("Apply chat format", &newSessionParams.applyChatFormat);
                     ImGui::InputScalar("gaFactor", ImGuiDataType_U32, &newSessionParams.gaFactor);
                     ImGui::InputScalar("gaWidth", ImGuiDataType_U32, &newSessionParams.gaWidth);
                     ImGui::Checkbox("infiniteContext", &newSessionParams.infiniteContext);
