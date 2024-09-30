@@ -18,6 +18,7 @@ target_link_libraries(AlpacaCoreObjC
 
 target_include_directories(AlpacaCoreObjC
     PUBLIC
+        ${CMAKE_SOURCE_DIR}/wrapper/swift/code
         ${CMAKE_SOURCE_DIR}/api/code
 )
 
