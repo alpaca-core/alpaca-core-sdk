@@ -189,8 +189,8 @@ void Sampler::reset() {
 
 void Sampler::perfReset() {
     // perf on grammar samplers is not supported upstream
-    // llama_perf_reset(m_grammarSampler.get(), ???);
-    llama_perf_reset(m_samplerChain.get(), LLAMA_PERF_TYPE_SAMPLER_CHAIN);
+    //llama_perf_sampler_reset(m_grammarSampler.get());
+    llama_perf_sampler_reset(m_samplerChain.get());
 }
 
 } // namespace ac::llama
