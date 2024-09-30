@@ -8,19 +8,6 @@
     ac::Model* _model;
 }
 
-//-(id)init() {
-//    _model = nullptr;
-//    return self;
-//}
-//
-//- (id)initWithModel:(ac::Model*)model {
-//    self = [super init];
-//    if (self) {
-//        _model = model;
-//    }
-//    return self;
-//}
-
 - (void)createInstance:(NSString *)type :(ac::Dict)params :(ac::ResultCb<ac::InstancePtr>*)cb {
     //_model->createInstance(type.UTF8String, params, cb);
 }
