@@ -13,7 +13,7 @@ target_sources(CAlpacaCore PRIVATE
 
 target_link_libraries(CAlpacaCore
     PUBLIC
-        ac::api
+        ac::dict
 )
 
 target_include_directories(CAlpacaCore
