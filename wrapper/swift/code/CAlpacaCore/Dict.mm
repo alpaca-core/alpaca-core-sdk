@@ -3,7 +3,6 @@
 //
 #import "Dict.h"
 
-#include <ac/Model.hpp>
 #include <ac/Dict.hpp>
 
 @implementation DictionaryWrapper

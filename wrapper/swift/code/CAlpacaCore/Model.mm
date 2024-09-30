@@ -4,11 +4,9 @@
 #import "Model.h"
 #import "Dict.h"
 
-@implementation ACModel {
-    ac::Model* _model;
-}
+@implementation ACModel
 
-- (void)createInstance:(NSString *)type :(ac::Dict)params :(ac::ResultCb<ac::InstancePtr>*)cb {
+- (void)createInstance:(NSString *)type :(ac::Dict)params {
     //_model->createInstance(type.UTF8String, params, cb);
 }
 
