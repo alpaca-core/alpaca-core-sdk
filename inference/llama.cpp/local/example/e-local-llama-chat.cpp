@@ -47,21 +47,18 @@ int main() try {
 
     std::cout << "Setup: " << setup << "\n";
 
-    std::cout << "User: ";
-    std::string user;
-    std::getline(std::cin, user);
-    setup += "User: " + user + "\nAssistant:";
-
     instance->runOp("chat", {{"setup", std::move(setup)}}, {});
 
     while (true) {
-        if (user == " /quit") break;
-        auto response = instance->pullStream();
-        std::cout << "AI:" << response->at("response").get<std::string_view>();
-        std::cout.put(' ');
+        std::cout << "User: ";
+        std::string user;
         std::getline(std::cin, user);
+        if (user == "/quit") break;
         user = ' ' + user;
         instance->pushStream({{"prompt", user}});
+
+        auto result = instance->pullStream();
+        std::cout << "AI: " << result->at("response").get<std::string_view>() << '\n';
     }
 
     return 0;

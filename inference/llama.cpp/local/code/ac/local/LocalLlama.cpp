@@ -27,23 +27,106 @@ llama::Instance::SessionParams SessionParams_fromDict(const Dict&) {
     return ret;
 }
 
+class ChatSession {
+    llama::Session m_session;
+    const llama::Vocab& m_vocab;
+    std::string m_userPrefix;
+    std::string m_assistantPrefix;
+
+    std::vector<llama::Token> m_promptTokens;
+
+    bool m_addUserPrefix = true;
+    bool m_addAssistantPrefix = true;
+public:
+    ChatSession(llama::Instance& instance, Dict& params)
+        : m_session(instance.newSession(SessionParams_fromDict(params)))
+        , m_vocab(instance.model().vocab())
+    {
+        auto setup = Dict_optValueAt(params, "setup", std::string_view{});
+        m_promptTokens = instance.model().vocab().tokenize(setup, true, true);
+        m_session.setInitialPrompt(m_promptTokens);
+
+        m_userPrefix = "\n";
+        m_userPrefix += Dict_optValueAt(params, "role_user", std::string_view("User"));
+        m_userPrefix += ":";
+        m_assistantPrefix = "\n";
+        m_assistantPrefix += Dict_optValueAt(params, "role_assistant", std::string_view("Assistant"));
+        m_assistantPrefix += ":";
+    }
+
+    void pushPrompt(Dict& params) {
+        auto prompt = Dict_optValueAt(params, "prompt", std::string{});
+
+        // prefix with space as the generated content doesn't include it
+        prompt = ' ' + prompt;
+
+        if (m_addUserPrefix) {
+            // we haven't had an interaction yet, so we need to add the user prefix
+            // subsequent interaction will have it generated
+            prompt = m_userPrefix + prompt;
+        }
+
+        // prepare for the next generation
+        prompt += m_assistantPrefix;
+
+        m_promptTokens = m_vocab.tokenize(prompt, false, false);
+        m_session.pushPrompt(m_promptTokens);
+        m_addAssistantPrefix = false;
+    }
+
+    Dict getResponse() {
+        if (m_addAssistantPrefix) {
+            // genrated responses are requested first, but we haven't yet fed the assistant prefix to the model
+            auto prompt = m_assistantPrefix;
+            assert(m_promptTokens.empty()); // nothing should be pending here
+            m_promptTokens = m_vocab.tokenize(prompt, false, false);
+            m_session.pushPrompt(m_promptTokens);
+        }
+
+
+        ac::llama::IncrementalStringFinder finder(m_userPrefix);
+
+        m_addUserPrefix = true;
+        std::string response;
+        while (true) {
+            auto t = m_session.getToken();
+            if (t == ac::llama::Token_Invalid) {
+                // no more tokens
+                break;
+            }
+
+            auto tokenStr = m_vocab.tokenToString(t);
+            response += tokenStr;
+
+            if (finder.feedText(tokenStr)) {
+                // user prefix was added by generation, so don't add it again
+                m_addUserPrefix = false;
+
+                // and also hide it from the return value
+                // note that we assume that m_userPrefix is always the final piece of text in the response
+                // TODO: update to better match the cutoff when issue #131 is done
+                response.resize(response.size() - m_userPrefix.size());
+                break;
+            }
+        }
+
+        // remove leading space if any
+        // we could add the space to the assistant prefix, but most models have a much easier time generating tokens
+        // with a leading space, so instead of burdening them with "unorthodox" tokens, we'll clear it here
+        if (!response.empty() && response[0] == ' ') {
+            response.erase(0, 1);
+        }
+
+        return {{"response", astl::move(response)}};
+    }
+};
+
+
 class LlamaInstance final : public Instance {
     std::shared_ptr<llama::Model> m_model;
     llama::Instance m_instance;
 
-    std::vector<llama::Token> m_promptTokens;
-
-    struct ChatSession {
-        llama::Session session;
-        std::string userPrefix;
-        std::string assistantPrefix;
-
-        explicit operator bool() const noexcept {
-            return !!session;
-        }
-    };
-
-    ChatSession m_chatSession;
+    std::optional<ChatSession> m_chatSession;
 
 public:
     LlamaInstance(std::shared_ptr<llama::Model> model)
@@ -56,9 +139,10 @@ public:
         auto antiprompts = Dict_optValueAt(params, "antiprompts", std::vector<std::string_view>{});
         const auto maxTokens = Dict_optValueAt(params, "max_tokens", uint32_t(0));
 
-        m_promptTokens = m_instance.model().vocab().tokenize(prompt, true, true);
         auto s = m_instance.newSession(SessionParams_fromDict(params));
-        s.setInitialPrompt(m_promptTokens);
+
+        auto promptTokens = m_instance.model().vocab().tokenize(prompt, true, true);
+        s.setInitialPrompt(promptTokens);
 
         auto& model = m_instance.model();
         ac::llama::AntipromptManager antiprompt;
@@ -85,25 +169,13 @@ public:
     }
 
     Dict chat(Dict& params) {
-        auto setup = Dict_optValueAt(params, "setup", std::string_view{});
-        auto roleUser = Dict_optValueAt(params, "role_user", std::string_view("User"));
-        auto roleAssistant = Dict_optValueAt(params, "role_assistant", std::string_view("Assistant"));
-
-        m_chatSession.session = m_instance.newSession(SessionParams_fromDict(params));
-        m_chatSession.userPrefix = roleUser;
-        m_chatSession.userPrefix += ":";
-        m_chatSession.assistantPrefix = roleAssistant;
-        m_chatSession.assistantPrefix += ":";
-
-        m_promptTokens = m_model->vocab().tokenize(setup, true, true);
-        m_chatSession.session.setInitialPrompt(m_promptTokens);
-
+        m_chatSession.emplace(m_instance, params);
         return {};
     }
 
     virtual Dict runOp(std::string_view op, Dict params, ProgressCb) override {
         if (m_chatSession) {
-            m_chatSession = {};
+            m_chatSession.reset();
         }
 
         if (op == "run") {
@@ -124,31 +196,13 @@ public:
         if (!m_chatSession) {
             throw_ex{} << "llama: no stream available";
         }
-        auto prompt = Dict_optValueAt(params, "prompt", std::string{});
-        prompt = prompt + "\n" + m_chatSession.assistantPrefix;
-        m_promptTokens = m_model->vocab().tokenize(prompt, true, true);
-        m_chatSession.session.pushPrompt(m_promptTokens);
+        m_chatSession->pushPrompt(params);
     }
     virtual std::optional<Dict> pullStream() override {
         if (!m_chatSession) {
             throw_ex{} << "llama: no stream available";
         }
-        std::string result;
-        ac::llama::IncrementalStringFinder finder(m_chatSession.userPrefix);
-        while (true) {
-            auto t = m_chatSession.session.getToken();
-            if (t == ac::llama::Token_Invalid) {
-                break;
-            }
-
-            auto tokenStr = m_model->vocab().tokenToString(t);
-            result += tokenStr;
-
-            if (finder.feedText(tokenStr)) {
-                break;
-            }
-        }
-        return ac::Dict{{"response", astl::move(result)}};
+        return m_chatSession->getResponse();
     }
 };
 
