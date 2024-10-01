@@ -8,7 +8,7 @@ macro(add_local_example name)
         ac-c::jalogc
         ac-test-data::${name}
     )
-    set_target_properties(example-ac-local-${name} PROPERTIES FOLDER example)
+    set_target_properties(example-ac-c-local-${name} PROPERTIES FOLDER example)
 endmacro()
 
 add_local_example(dummy)

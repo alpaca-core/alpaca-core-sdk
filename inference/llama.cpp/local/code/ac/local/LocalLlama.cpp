@@ -32,15 +32,28 @@ class LlamaInstance final : public Instance {
     llama::Instance m_instance;
 
     std::vector<llama::Token> m_promptTokens;
+
+    struct ChatSession {
+        llama::Session session;
+        std::string userPrefix;
+        std::string assistantPrefix;
+
+        explicit operator bool() const noexcept {
+            return !!session;
+        }
+    };
+
+    ChatSession m_chatSession;
+
 public:
     LlamaInstance(std::shared_ptr<llama::Model> model)
         : m_model(astl::move(model))
         , m_instance(*m_model, {})
     {}
 
-    Dict run(Dict params) {
-        auto prompt = Dict_optValueAt(params, "prompt", std::string{});
-        auto antiprompts = Dict_optValueAt(params, "antiprompts", std::vector<std::string>{});
+    Dict run(Dict& params) {
+        auto prompt = Dict_optValueAt(params, "prompt", std::string_view{});
+        auto antiprompts = Dict_optValueAt(params, "antiprompts", std::vector<std::string_view>{});
         const auto maxTokens = Dict_optValueAt(params, "max_tokens", uint32_t(0));
 
         m_promptTokens = m_instance.model().vocab().tokenize(prompt, true, true);
@@ -65,15 +78,39 @@ public:
                 break;
             }
 
-            result += model.vocab().tokenToString(t);
+            result += tokenStr;
         }
 
         return {{"result", astl::move(result)}};
     }
 
+    Dict chat(Dict& params) {
+        auto setup = Dict_optValueAt(params, "setup", std::string_view{});
+        auto roleUser = Dict_optValueAt(params, "role_user", std::string_view("User"));
+        auto roleAssistant = Dict_optValueAt(params, "role_assistant", std::string_view("Assistant"));
+
+        m_chatSession.session = m_instance.newSession(SessionParams_fromDict(params));
+        m_chatSession.userPrefix = roleUser;
+        m_chatSession.userPrefix += ":";
+        m_chatSession.assistantPrefix = roleAssistant;
+        m_chatSession.assistantPrefix += ":";
+
+        m_promptTokens = m_model->vocab().tokenize(setup, true, true);
+        m_chatSession.session.setInitialPrompt(m_promptTokens);
+
+        return {};
+    }
+
     virtual Dict runOp(std::string_view op, Dict params, ProgressCb) override {
+        if (m_chatSession) {
+            m_chatSession = {};
+        }
+
         if (op == "run") {
-            return run(astl::move(params));
+            return run(params);
+        }
+        if (op == "chat") {
+            return chat(params);
         }
         else {
             throw_ex{} << "llama: unknown op: " << op;
@@ -81,13 +118,37 @@ public:
     }
 
     virtual bool haveStream() const noexcept override {
-        return false;
+        return !!m_chatSession;
     }
-    virtual void pushStream(Dict) override {
-        throw_ex{} << "llama: pushStream not supported";
+    virtual void pushStream(Dict params) override {
+        if (!m_chatSession) {
+            throw_ex{} << "llama: no stream available";
+        }
+        auto prompt = Dict_optValueAt(params, "prompt", std::string{});
+        prompt = prompt + "\n" + m_chatSession.assistantPrefix;
+        m_promptTokens = m_model->vocab().tokenize(prompt, true, true);
+        m_chatSession.session.pushPrompt(m_promptTokens);
     }
     virtual std::optional<Dict> pullStream() override {
-        throw_ex{} << "llama: pushStream not supported";
+        if (!m_chatSession) {
+            throw_ex{} << "llama: no stream available";
+        }
+        std::string result;
+        ac::llama::IncrementalStringFinder finder(m_chatSession.userPrefix);
+        while (true) {
+            auto t = m_chatSession.session.getToken();
+            if (t == ac::llama::Token_Invalid) {
+                break;
+            }
+
+            auto tokenStr = m_model->vocab().tokenToString(t);
+            result += tokenStr;
+
+            if (finder.feedText(tokenStr)) {
+                break;
+            }
+        }
+        return ac::Dict{{"response", astl::move(result)}};
     }
 };
 
