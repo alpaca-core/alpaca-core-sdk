@@ -23,7 +23,8 @@ add_subdirectory(ac-jni)
 
 # only buld java with CMake if we are the root project
 # otherwise we're a subproject (likely of a gradle build and the java build is handled there)
-if(alpacaCoreIsRoot)
+# only build them where there are no saniziers as Java doesn't play well with them (TODO: #134)
+if(alpacaCoreIsRoot AND NOT sanitizerFlags)
     find_package(Java REQUIRED)
     include(UseJava)
 
