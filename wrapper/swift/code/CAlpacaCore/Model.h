@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: MIT
 //
 #import <Foundation/Foundation.h>
+#import "./Instance.h"
 
-#include "ac/Dict.hpp"
+#include "ac/local/ModelDesc.hpp"
+#include "ac/local/ModelPtr.hpp"
 
 @interface ACModel : NSObject
 
-- (void)createInstance:(NSString *)type :(ac::Dict)params;
-- (void)createInstance;
+- (instancetype)initWithModelPtr:(ac::local::ModelPtr)model;
+- (ACInstance*)createInstance:(NSString *)type :(NSDictionary*)params;
 
 @end
