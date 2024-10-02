@@ -4,9 +4,9 @@
 import Foundation
 
 @main
-struct ACExample {
+struct DummyExample {
     static func main() {
-        var desc = CAlpacaCore.ac.local.ModelDesc()
+        var desc = NativeAlpacaCore.ac.local.ModelDesc()
         desc.inferenceType = "dummy"
         desc.name = "synthetic dummy"
 
