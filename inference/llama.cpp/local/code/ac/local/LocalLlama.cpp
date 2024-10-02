@@ -168,21 +168,29 @@ public:
         return {{"result", astl::move(result)}};
     }
 
-    Dict chat(Dict& params) {
-        m_chatSession.emplace(m_instance, params);
-        return {};
-    }
-
     virtual Dict runOp(std::string_view op, Dict params, ProgressCb) override {
-        if (m_chatSession) {
-            m_chatSession.reset();
-        }
-
         if (op == "run") {
+            if (m_chatSession) {
+                m_chatSession.reset();
+            }
             return run(params);
         }
-        if (op == "chat") {
-            return chat(params);
+        if (op == "begin-chat") {
+            m_chatSession.emplace(m_instance, params);
+            return {};
+        }
+        if (op == "add-chat-prompt") {
+            if (!m_chatSession) {
+                throw_ex{} << "llama: chat not started";
+            }
+            m_chatSession->pushPrompt(params);
+            return {};
+        }
+        if (op == "get-chat-response") {
+            if (!m_chatSession) {
+                throw_ex{} << "llama: chat not started";
+            }
+            return m_chatSession->getResponse();
         }
         else {
             throw_ex{} << "llama: unknown op: " << op;
@@ -192,17 +200,10 @@ public:
     virtual bool haveStream() const noexcept override {
         return !!m_chatSession;
     }
-    virtual void pushStream(Dict params) override {
-        if (!m_chatSession) {
-            throw_ex{} << "llama: no stream available";
-        }
-        m_chatSession->pushPrompt(params);
+    virtual void pushStream(Dict) override {
     }
     virtual std::optional<Dict> pullStream() override {
-        if (!m_chatSession) {
-            throw_ex{} << "llama: no stream available";
-        }
-        return m_chatSession->getResponse();
+        return {};
     }
 };
 

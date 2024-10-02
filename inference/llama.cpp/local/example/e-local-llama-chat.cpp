@@ -47,7 +47,7 @@ int main() try {
 
     std::cout << "Setup: " << setup << "\n";
 
-    instance->runOp("chat", {{"setup", std::move(setup)}}, {});
+    instance->runOp("begin-chat", {{"setup", std::move(setup)}});
 
     while (true) {
         std::cout << "User: ";
@@ -55,10 +55,10 @@ int main() try {
         std::getline(std::cin, user);
         if (user == "/quit") break;
         user = ' ' + user;
-        instance->pushStream({{"prompt", user}});
+        instance->runOp("add-chat-prompt", {{"prompt", user}});
 
-        auto result = instance->pullStream();
-        std::cout << "AI: " << result->at("response").get<std::string_view>() << '\n';
+        auto result = instance->runOp("get-chat-response", {});
+        std::cout << "AI: " << result.at("response").get<std::string_view>() << '\n';
     }
 
     return 0;
