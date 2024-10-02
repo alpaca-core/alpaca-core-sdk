@@ -16,9 +16,16 @@
 - (NSDictionary*)runOp:(NSString*)op :(NSDictionary*) params :(progressCallback)progressCb {
     ac::Dict dict = [DictionaryWrapper convertToACDict:params];
     ac::Dict result = instance->runOp([op UTF8String], dict, ^(std::string_view tag, float progress){
-        return progressCb([[NSString alloc] initWithCString:tag.data() encoding:NSUTF8StringEncoding], progress);
+        NSString* tagStr = [[NSString alloc] initWithCString:tag.data() encoding:NSUTF8StringEncoding];
+        BOOL result = progressCb(tagStr, progress);
+        [tagStr release];
+        return result;
     });
     return [DictionaryWrapper convertToDictionary:result];
+}
+
+- (void)dealloc {
+    [super dealloc];
 }
 
 @end

@@ -29,5 +29,8 @@ struct DummyExample {
         ]
         let result = instance?.runOp("run", params, progress)
         print("Result from inference: \"\(result!["result"]!)\"\n")
+
+        AlpacaCore.release(instance)
+        AlpacaCore.release(model)
     }
 }
