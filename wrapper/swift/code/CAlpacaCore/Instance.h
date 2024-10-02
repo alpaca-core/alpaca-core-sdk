@@ -10,6 +10,8 @@
 @interface ACInstance : NSObject
 
 - (instancetype)initWithInstance:(std::unique_ptr<ac::local::Instance>)instancePtr;
-- (NSDictionary*)runOp:(NSString*)op :(NSDictionary*) params;//, ProgressCb cb = {})
+
+typedef BOOL (^progressCallback)(NSString* tag, float progress);
+- (NSDictionary*)runOp:(NSString*)op :(NSDictionary*)params :(progressCallback)progressCb;
 
 @end

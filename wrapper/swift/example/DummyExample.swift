@@ -3,6 +3,12 @@
 //
 import Foundation
 
+func progress(tag: Optional<String>, progress: Float) -> Bool {
+    print("[\(tag!)] progress: \(progress)\n")
+
+    return true
+}
+
 @main
 struct DummyExample {
     static func main() {
@@ -15,13 +21,13 @@ struct DummyExample {
 
         let modelFactory = AlpacaCore.getModelFactory()
         DummyInference.add(modelFactory)
-        let model = AlpacaCore.createModel(desc, dict)
+        let model = AlpacaCore.createModel(desc, dict, progress)
         let instance = model?.createInstance("general", [:])
 
         let params = [
             "input": ["a", "b", "c"]
         ]
-        let result = instance?.runOp("run", params)
-        print("Result from inference: \(result!["result"]!)")
+        let result = instance?.runOp("run", params, progress)
+        print("Result from inference: \"\(result!["result"]!)\"\n")
     }
 }
