@@ -11,6 +11,8 @@
 
 + (ac::local::ModelFactory*)getModelFactory;
 + (void)addModelLoader:(NSString*)loaderName :(ac::local::ModelLoader*)loader;
-+ (ACModel*)createModel:(ac::local::ModelDesc)description :(NSDictionary*)params;
+
+typedef BOOL (^progressCallback)(NSString* tag, float progress);
++ (ACModel*)createModel:(ac::local::ModelDesc)description :(NSDictionary*)params :(progressCallback)progressCb;
 
 @end

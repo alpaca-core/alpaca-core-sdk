@@ -4,8 +4,6 @@
 #import "./AlpacaCore.h"
 #import "./Dict.h"
 
-
-
 static ac::local::ModelFactory modelFactory;
 @implementation AlpacaCore
 
@@ -17,11 +15,13 @@ static ac::local::ModelFactory modelFactory;
     modelFactory.addLoader([loaderName UTF8String], *loader);
 }
 
-+ (ACModel*)createModel:(ac::local::ModelDesc)description :(NSDictionary*)params {
++ (ACModel*)createModel:(ac::local::ModelDesc)description :(NSDictionary*)params :(progressCallback)progressCb {
     NSLog(@"%s", "Model creation started!");
 
     ac::Dict dict = [DictionaryWrapper convertToACDict:params];
-    ac::local::ModelPtr model = modelFactory.createModel(description, dict);
+    ac::local::ModelPtr model = modelFactory.createModel(description, dict, ^(std::string_view tag, float progress){
+        return progressCb([[NSString alloc] initWithCString:tag.data() encoding:NSUTF8StringEncoding], progress);
+    });
     return [[ACModel alloc] initWithModelPtr:model];
 }
 
