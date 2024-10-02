@@ -17,7 +17,6 @@ target_include_directories(DummyInference
 )
 # End of DummyInference library
 
-
 add_executable(DummyExample DummyExample.swift)
 
 # From the Root CMAKE there are C++ compile options which conflict with Swift compiler
@@ -27,11 +26,6 @@ set_target_properties(DummyExample PROPERTIES COMPILE_OPTIONS "")
 # Since wrapper library has it, the executable must has enabled it too
 set(CMAKE_Swift_FLAGS "-cxx-interoperability-mode=default")
 set(CMAKE_Swift_FLAGS "${CMAKE_Swift_FLAGS} -import-objc-header ${CMAKE_SOURCE_DIR}/wrapper/swift/example/DummyInference-Bridging-Header.h")
-
-# Include the directory where the Obj-C++ wrapper is located
-target_include_directories(DummyExample PRIVATE
-    ${CMAKE_SOURCE_DIR}/wrapper/swift/code/AlpacaCore
-)
 
 target_link_libraries(DummyExample
     PRIVATE
