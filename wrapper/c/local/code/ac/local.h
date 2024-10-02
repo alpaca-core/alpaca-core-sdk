@@ -55,10 +55,6 @@ AC_C_LOCAL_EXPORT ac_dict_root* ac_run_local_op(
     void* cb_user_data
 );
 
-AC_C_LOCAL_EXPORT bool ac_have_local_stream(ac_local_instance* i);
-AC_C_LOCAL_EXPORT bool ac_push_local_stream(ac_local_instance* i, ac_dict_root* params_root);
-AC_C_LOCAL_EXPORT ac_dict_root* ac_pull_local_stream(ac_local_instance* i);
-
 /**
  * @brief Opaque structure representing a model
  */

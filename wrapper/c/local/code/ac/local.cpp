@@ -91,27 +91,6 @@ ac_dict_root* ac_run_local_op(
     });
 }
 
-bool ac_have_local_stream(ac_local_instance* i) {
-    return Instance_toCpp(i)->haveStream();
-}
-
-bool ac_push_local_stream(ac_local_instance* i, ac_dict_root* params_root) {
-    return local_try_catch([&] {
-        auto& instance = *Instance_toCpp(i);
-        instance.pushStream(Dict_from_dict_root_consume(params_root));
-        return true;
-    });
-}
-
-ac_dict_root* ac_pull_local_stream(ac_local_instance* i) {
-    return local_try_catch([&]() -> ac_dict_root* {
-        auto& instance = *Instance_toCpp(i);
-        auto result = instance.pullStream();
-        if (!result) return nullptr;
-        return Dict_to_dict_root(astl::move(*result));
-    });
-}
-
 void ac_free_local_model(ac_local_model* m) {
     delete m;
 }

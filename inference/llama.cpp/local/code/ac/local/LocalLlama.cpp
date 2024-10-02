@@ -196,15 +196,6 @@ public:
             throw_ex{} << "llama: unknown op: " << op;
         }
     }
-
-    virtual bool haveStream() const noexcept override {
-        return !!m_chatSession;
-    }
-    virtual void pushStream(Dict) override {
-    }
-    virtual std::optional<Dict> pullStream() override {
-        return {};
-    }
 };
 
 class LlamaModel final : public Model {

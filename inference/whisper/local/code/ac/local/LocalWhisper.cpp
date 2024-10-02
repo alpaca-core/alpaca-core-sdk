@@ -52,16 +52,6 @@ public:
             throw_ex{} << "whisper: unknown op: " << op;
         }
     }
-
-    virtual bool haveStream() const noexcept override {
-        return false;
-    }
-    virtual void pushStream(Dict) override {
-        throw_ex{} << "whisper: pushStream not supported";
-    }
-    virtual std::optional<Dict> pullStream() override {
-        throw_ex{} << "whisper: pushStream not supported";
-    }
 };
 
 class WhisperModel final : public Model {
