@@ -26,7 +26,6 @@ set_target_properties(DummyExample PROPERTIES COMPILE_OPTIONS "")
 
 # Since wrapper library has it, the executable must has enabled it too
 set(CMAKE_Swift_FLAGS "-cxx-interoperability-mode=default")
-# set(CMAKE_Swift_FLAGS "${CMAKE_Swift_FLAGS} -import-objc-header ${CMAKE_SOURCE_DIR}/wrapper/swift/code/CAlpacaCore/CAlpacaCore-Bridging-Header.h")
 set(CMAKE_Swift_FLAGS "${CMAKE_Swift_FLAGS} -import-objc-header ${CMAKE_SOURCE_DIR}/wrapper/swift/example/DummyInference-Bridging-Header.h")
 
 # Include the directory where the Obj-C++ wrapper is located
@@ -42,3 +41,7 @@ target_link_libraries(DummyExample
 )
 
 target_compile_options(DummyExample PRIVATE -parse-as-library)
+
+# TODO: In order to set generate correctly the project we need to set the
+# C++ Language Dialect to C++17 or above
+# target_compile_options(DummyExample PRIVATE -std=c++17) # This is not working since it's setting compiler options for Swift which is a missing option
