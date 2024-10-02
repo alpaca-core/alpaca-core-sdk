@@ -111,7 +111,7 @@
         dict[key] = value;
     }
 
-    return [dict copy];
+    return dict;
 }
 
 @end

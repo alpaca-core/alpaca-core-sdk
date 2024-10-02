@@ -20,9 +20,21 @@ static ac::local::ModelFactory modelFactory;
 
     ac::Dict dict = [DictionaryWrapper convertToACDict:params];
     ac::local::ModelPtr model = modelFactory.createModel(description, dict, ^(std::string_view tag, float progress){
-        return progressCb([[NSString alloc] initWithCString:tag.data() encoding:NSUTF8StringEncoding], progress);
+        NSString* tagStr = [[NSString alloc] initWithCString:tag.data() encoding:NSUTF8StringEncoding];
+        BOOL result = progressCb(tagStr, progress);
+        [tagStr release];
+        return result;
     });
     return [[ACModel alloc] initWithModelPtr:model];
 }
+
++ (void)releaseModel:(ACModel*)model {
+    [model release];
+}
+
++ (void)releaseInstance:(ACInstance*)instance {
+    [instance release];
+}
+
 
 @end

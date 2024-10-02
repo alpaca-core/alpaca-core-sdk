@@ -3,6 +3,7 @@
 //
 #import <Foundation/Foundation.h>
 #import "./Model.h"
+#import "./Instance.h"
 
 #include "ac/local/ModelFactory.hpp"
 #include "ac/local/ModelLoader.hpp"
@@ -14,5 +15,8 @@
 
 typedef BOOL (^progressCallback)(NSString* tag, float progress);
 + (ACModel*)createModel:(ac::local::ModelDesc)description :(NSDictionary*)params :(progressCallback)progressCb;
+
++ (void)releaseModel:(ACModel*)model;
++ (void)releaseInstance:(ACInstance*)instance;
 
 @end

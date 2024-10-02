@@ -10,6 +10,6 @@
 @interface ACModel : NSObject
 
 - (instancetype)initWithModelPtr:(ac::local::ModelPtr)model;
-- (ACInstance*)createInstance:(NSString *)type :(NSDictionary*)params;
+- (ACInstance*)createInstance:(NSString*)type :(NSDictionary*)params;
 
 @end
