@@ -25,7 +25,8 @@ int main() try {
         {
             .inferenceType = "llama.cpp",
             .assets = {
-                {.path = AC_TEST_DATA_LLAMA_DIR "/gpt2-117m-q6_k.gguf"}
+                // {.path = AC_TEST_DATA_LLAMA_DIR "/gpt2-117m-q6_k.gguf"}
+                {.path = "D:/mod/Mistral-7B-Instruct-v0.1-GGUF/mistral-7b-instruct-v0.1.Q8_0.gguf"}
             }
         },
         {},

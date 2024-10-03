@@ -9,6 +9,26 @@
 void setUp(void) {}
 void tearDown(void) {}
 
+void dict_arg(void) {
+    ac_dict_arg arg = ac_dict_arg_null();
+    CHECK_NULL(arg.ref);
+
+    ac_dict_root* root = ac_dict_new_root();
+    CHECK_NOT_NULL(root);
+    ac_dict_ref rr = ac_dict_make_ref(root);
+    CHECK_NOT_NULL(rr);
+
+    arg = ac_dict_arg_copy(rr);
+    CHECK(arg.ref = rr);
+    CHECK_TRUE(arg.copy);
+
+    arg = ac_dict_arg_take(rr);
+    CHECK(arg.ref = rr);
+    CHECK_FALSE(arg.copy);
+
+    ac_dict_free_root(root);
+}
+
 void do_parse_test(ac_dict_root* root) {
     CHECK_NOT_NULL(root);
     ac_dict_ref rr = ac_dict_make_ref(root);
@@ -173,10 +193,10 @@ void parse_copy_move(void) {
     ac_dict_root* root = ac_dict_new_root_from_json(JSON_TEXT, NULL);
     do_parse_test(root);
 
-    ac_dict_root* root2 = ac_dict_new_root_by_copy(ac_dict_make_ref(root));
+    ac_dict_root* root2 = ac_dict_new_root_from(ac_dict_arg_copy(ac_dict_make_ref(root)));
     do_parse_test(root2);
 
-    ac_dict_root* root3 = ac_dict_new_root_by_take(ac_dict_make_ref(root));
+    ac_dict_root* root3 = ac_dict_new_root_from(ac_dict_arg_take(ac_dict_make_ref(root)));
     CHECK(ac_dict_get_type(ac_dict_make_ref(root)) == ac_dict_value_type_null);
     do_parse_test(root3);
 
@@ -280,6 +300,7 @@ void binary(void) {
 
 int main(void) {
     UNITY_BEGIN();
+    RUN_TEST(dict_arg);
     RUN_TEST(parse_basic);
     RUN_TEST(parse_copy_move);
     RUN_TEST(build);

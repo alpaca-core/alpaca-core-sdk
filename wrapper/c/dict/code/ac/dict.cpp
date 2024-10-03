@@ -264,4 +264,16 @@ int ac_dict_dump_to(ac_dict_ref d, int indent, char* buf, int buf_size) {
     return s;
 }
 
+void ac_dict_transfer(ac_dict_ref target, ac_dict_arg src) {
+    if (!src.ref) {
+        ac_dict_set_null(target);
+    }
+    else if (src.copy) {
+        ac_dict_copy(target, src.ref);
+    }
+    else {
+        ac_dict_take(target, src.ref);
+    }
+}
+
 } // extern "C"

@@ -93,6 +93,28 @@ AC_C_DICT_EXPORT void ac_dict_copy(ac_dict_ref target, ac_dict_ref source);
  */
 AC_C_DICT_EXPORT void ac_dict_take(ac_dict_ref target, ac_dict_ref source);
 
+typedef struct ac_dict_arg {
+    ac_dict_ref ref;
+    bool copy; // or take (move) if false
+} ac_dict_arg;
+
+AC_INLINE ac_dict_arg ac_dict_arg_copy(ac_dict_ref ref) {
+    ac_dict_arg ret = {ref, true};
+    return ret;
+}
+
+AC_INLINE ac_dict_arg ac_dict_arg_take(ac_dict_ref ref) {
+    ac_dict_arg ret = {ref, false};
+    return ret;
+}
+
+AC_INLINE ac_dict_arg ac_dict_arg_null() {
+    ac_dict_arg ret = {0};
+    return ret;
+}
+
+AC_C_DICT_EXPORT void ac_dict_transfer(ac_dict_ref target, ac_dict_arg src);
+
 /**
  * @brief Create a new dictionary root from JSON.
  *
@@ -112,32 +134,10 @@ AC_INLINE ac_dict_root* ac_dict_new_root_from_json(const char* json, const char*
     return root;
 }
 
-/**
- * @brief Create a new dictionary root by copying another.
- *
- * @param source Source dictionary reference to copy.
- * @return ac_dict_root* New dictionary root containing a copy of source.
- * @note This function uses exception handling internally. Check ac_dict_get_last_error() for error details.
- */
-AC_INLINE ac_dict_root* ac_dict_new_root_by_copy(ac_dict_ref source) {
+AC_INLINE ac_dict_root* ac_dict_new_root_from(ac_dict_arg source) {
     ac_dict_root* root = ac_dict_new_root();
     if (root) {
-        ac_dict_copy(ac_dict_make_ref(root), source);
-    }
-    return root;
-}
-
-/**
- * @brief Create a new dictionary root by taking data from another.
- *
- * @param source Source dictionary reference to take from (becomes null).
- * @return ac_dict_root* New dictionary root containing data from source.
- * @note This function uses exception handling internally. Check ac_dict_get_last_error() for error details.
- */
-AC_INLINE ac_dict_root* ac_dict_new_root_by_take(ac_dict_ref source) {
-    ac_dict_root* root = ac_dict_new_root();
-    if (root) {
-        ac_dict_take(ac_dict_make_ref(root), source);
+        ac_dict_transfer(ac_dict_make_ref(root), source);
     }
     return root;
 }
