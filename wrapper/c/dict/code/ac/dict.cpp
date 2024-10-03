@@ -22,9 +22,6 @@ struct ac_dict_iter {
 };
 
 namespace ac::cutil {
-ac_dict_root* Dict_to_dict_root(Dict d) {
-    return new ac_dict_root{std::move(d)};
-}
 ac::Dict& Dict_from_dict_ref(ac_dict_ref ref) {
     assert(ref); // should never be null here
     return *reinterpret_cast<ac::Dict*>(ref);

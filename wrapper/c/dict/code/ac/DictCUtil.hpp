@@ -19,8 +19,6 @@
 
 namespace ac::cutil {
 
-AC_C_DICT_EXPORT ac_dict_root* Dict_to_dict_root(Dict d);
-
 /**
  * @brief Converts a C dictionary reference to a C++ Dict object reference.
  *

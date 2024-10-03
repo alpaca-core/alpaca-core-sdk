@@ -9,6 +9,18 @@
 void setUp(void) {}
 void tearDown(void) {}
 
+void free_null_root(void) {
+    ac_dict_free_root(NULL);
+}
+
+void empty(void) {
+    ac_dict_root* root = ac_dict_new_root();
+    CHECK_NOT_NULL(root);
+    ac_dict_ref rr = ac_dict_make_ref(root);
+    CHECK_EQ(ac_dict_value_type_null, ac_dict_get_type(rr));
+    ac_dict_free_root(root);
+}
+
 void dict_arg(void) {
     ac_dict_arg arg = ac_dict_arg_null();
     CHECK_NULL(arg.ref);
@@ -300,6 +312,8 @@ void binary(void) {
 
 int main(void) {
     UNITY_BEGIN();
+    RUN_TEST(free_null_root);
+    RUN_TEST(empty);
     RUN_TEST(dict_arg);
     RUN_TEST(parse_basic);
     RUN_TEST(parse_copy_move);
