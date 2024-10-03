@@ -40,7 +40,7 @@ int main(void) {
     ac_local_model* model = ac_create_local_model(
         factory,
         "llama.cpp", &llama_gguf, 1,
-        NULL, on_progress, NULL
+        ac_dict_arg_null(), on_progress, NULL
     );
     if (!model) {
         ret = 1;
@@ -48,7 +48,7 @@ int main(void) {
     }
 
     printf("Creating instance...\n");
-    instance = ac_create_local_instance(model, "general", NULL);
+    instance = ac_create_local_instance(model, "general", ac_dict_arg_null());
     if (!instance) {
         ret = 1;
         goto cleanup;
@@ -57,10 +57,19 @@ int main(void) {
 #define PROMPT "He was slow to"
     printf("Running op. Prompt: %s\n", PROMPT);
     printf("Generation: ");
+
+    ac_dict_root* params_root = ac_dict_new_root_from_json("{\"prompt\": \"" PROMPT "\", \"max_tokens\": 30}", NULL);
+    if (!params_root) {
+        ret = 1;
+        goto cleanup;
+    }
+
     ac_dict_root* result = ac_run_local_op(instance, "run",
-        ac_dict_new_root_from_json("{\"prompt\": \"" PROMPT "\", \"max_tokens\": 30}", NULL),
+        ac_dict_arg_take(ac_dict_make_ref(params_root)),
         NULL, NULL
     );
+
+    ac_dict_free_root(params_root);
     if (!result) {
         ret = 1;
         goto cleanup;

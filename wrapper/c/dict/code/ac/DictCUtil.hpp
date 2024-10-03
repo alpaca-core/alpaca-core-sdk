@@ -6,6 +6,7 @@
 #include <ac/Dict.hpp>
 #include "dict_ref.h"
 #include "dict_root.h"
+#include "dict_arg.h"
 
 /**
  * @file DictCUtil.hpp
@@ -17,17 +18,6 @@
  */
 
 namespace ac::cutil {
-
-/**
- * @brief Consumes a C dictionary root and returns the contained C++ Dict object.
- *
- * This function takes ownership of the ac_dict_root, extracts the Dict object,
- * and then frees the root structure. If the input is null, it returns an empty Dict.
- *
- * @param d Pointer to the dictionary root to consume.
- * @return Dict A Dict object created from the consumed dictionary root.
- */
-AC_C_DICT_EXPORT Dict Dict_from_dict_root_consume(ac_dict_root* d);
 
 AC_C_DICT_EXPORT ac_dict_root* Dict_to_dict_root(Dict d);
 
@@ -65,5 +55,7 @@ AC_C_DICT_EXPORT ac_dict_ref Dict_to_dict_ref(Dict& d);
  * @return Dict The resulting Dict object parsed from the JSON string.
  */
 AC_C_DICT_EXPORT Dict Dict_parse(const char* json, const char* jsonEnd = nullptr);
+
+AC_C_DICT_EXPORT Dict Dict_from_dict_arg(ac_dict_arg d);
 
 } // namespace ac::cutil

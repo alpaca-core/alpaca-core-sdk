@@ -22,12 +22,6 @@ struct ac_dict_iter {
 };
 
 namespace ac::cutil {
-Dict Dict_from_dict_root_consume(ac_dict_root* d) {
-    if (!d) return {};
-    auto ret = std::move(d->dict);
-    ac_dict_free_root(d);
-    return ret;
-}
 ac_dict_root* Dict_to_dict_root(Dict d) {
     return new ac_dict_root{std::move(d)};
 }
@@ -44,6 +38,19 @@ ac::Dict Dict_parse(const char* json, const char* json_end) {
     }
     return ac::Dict::parse(json, json_end);
 }
+
+Dict Dict_from_dict_arg(ac_dict_arg d) {
+    if (!d.ref) {
+        return {};
+    }
+    if (d.copy) {
+        return Dict_from_dict_ref(d.ref);
+    }
+    else {
+        return astl::move(Dict_from_dict_ref(d.ref));
+    }
+}
+
 } // namespace ac::cutil
 
 using namespace ac::cutil;
@@ -84,10 +91,10 @@ void ac_dict_free_root(ac_dict_root* d) {
     delete d;
 }
 
-bool ac_dict_parse_json(ac_dict_ref target, const char* json, const char* json_end) {
+ac_dict_ref ac_dict_parse_json(ac_dict_ref target, const char* json, const char* json_end) {
     return dict_try_catch([&] {
         Dict_from_dict_ref(target) = Dict_parse(json, json_end);
-        return true;
+        return target;
     });
 }
 

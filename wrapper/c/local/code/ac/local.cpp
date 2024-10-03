@@ -71,13 +71,13 @@ void ac_free_local_instance(ac_local_instance* i) {
 ac_dict_root* ac_run_local_op(
     ac_local_instance* i,
     const char* op,
-    ac_dict_root* params_root,
+    ac_dict_arg cparams,
     bool (*progress_cb)(ac_sv tag, float progress, void* user_data),
     void* cb_user_data
 ) {
     return local_try_catch([&] {
         auto& instance = *Instance_toCpp(i);
-        auto params = Dict_from_dict_root_consume(params_root);
+        auto params = Dict_from_dict_arg(cparams);
 
         ProgressCb pcb;
         if (progress_cb) {
@@ -98,10 +98,10 @@ void ac_free_local_model(ac_local_model* m) {
 ac_local_instance* ac_create_local_instance(
     ac_local_model* m,
     const char* instance_type,
-    ac_dict_root* params_root
+    ac_dict_arg cparams
 ) {
     return local_try_catch([&] {
-        auto instance = m->model->createInstance(instance_type, Dict_from_dict_root_consume(params_root));
+        auto instance = m->model->createInstance(instance_type, Dict_from_dict_arg(cparams));
         return Instance_fromCpp(instance.release());
     });
 }
@@ -121,7 +121,7 @@ ac_local_model* ac_create_local_model(
     const char* inference_type,
     ac_local_model_desc_asset* assets,
     size_t assets_count,
-    ac_dict_root* params_root,
+    ac_dict_arg cparams,
     bool (*progress_cb)(ac_sv tag, float progress, void* user_data),
     void* cb_user_data
 ) {
@@ -144,7 +144,7 @@ ac_local_model* ac_create_local_model(
             };
         }
 
-        auto model = f->factory.createModel(astl::move(desc), Dict_from_dict_root_consume(params_root), astl::move(pcb));
+        auto model = f->factory.createModel(astl::move(desc), Dict_from_dict_arg(cparams), astl::move(pcb));
         return new ac_local_model{astl::move(model)};
     });
 }

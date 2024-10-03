@@ -15,6 +15,7 @@
 #include "export.h"
 #include "dict_ref.h"
 #include "dict_root.h"
+#include "dict_arg.h"
 #include <ac/inline.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -75,7 +76,7 @@ AC_C_DICT_EXPORT ac_dict_ref ac_dict_make_ref(ac_dict_root* d);
  * @return bool True if parsing succeeded, false otherwise.
  * @note This function uses exception handling internally. Check ac_dict_get_last_error() for error details.
  */
-AC_C_DICT_EXPORT bool ac_dict_parse_json(ac_dict_ref target, const char* json, const char* json_end);
+AC_C_DICT_EXPORT ac_dict_ref ac_dict_parse_json(ac_dict_ref target, const char* json, const char* json_end);
 
 /**
  * @brief Deep copy a dictionary.
@@ -93,25 +94,6 @@ AC_C_DICT_EXPORT void ac_dict_copy(ac_dict_ref target, ac_dict_ref source);
  */
 AC_C_DICT_EXPORT void ac_dict_take(ac_dict_ref target, ac_dict_ref source);
 
-typedef struct ac_dict_arg {
-    ac_dict_ref ref;
-    bool copy; // or take (move) if false
-} ac_dict_arg;
-
-AC_INLINE ac_dict_arg ac_dict_arg_copy(ac_dict_ref ref) {
-    ac_dict_arg ret = {ref, true};
-    return ret;
-}
-
-AC_INLINE ac_dict_arg ac_dict_arg_take(ac_dict_ref ref) {
-    ac_dict_arg ret = {ref, false};
-    return ret;
-}
-
-AC_INLINE ac_dict_arg ac_dict_arg_null() {
-    ac_dict_arg ret = {0};
-    return ret;
-}
 
 AC_C_DICT_EXPORT void ac_dict_transfer(ac_dict_ref target, ac_dict_arg src);
 

@@ -6,6 +6,7 @@
 
 #include <ac/dict_ref.h>
 #include <ac/dict_root.h>
+#include <ac/dict_arg.h>
 #include <ac/sv.h>
 
 #if defined(__cplusplus)
@@ -50,7 +51,7 @@ AC_C_LOCAL_EXPORT void ac_free_local_instance(ac_local_instance* i);
 AC_C_LOCAL_EXPORT ac_dict_root* ac_run_local_op(
     ac_local_instance* i,
     const char* op,
-    ac_dict_root* params_root,
+    ac_dict_arg params,
     bool (*progress_cb)(ac_sv tag, float progress, void* user_data),
     void* cb_user_data
 );
@@ -77,7 +78,7 @@ AC_C_LOCAL_EXPORT void ac_free_local_model(ac_local_model* m);
 AC_C_LOCAL_EXPORT ac_local_instance* ac_create_local_instance(
     ac_local_model* m,
     const char* instance_type,
-    ac_dict_root* params_root
+    ac_dict_arg params
 );
 
 typedef struct ac_local_model_factory ac_local_model_factory;
@@ -94,7 +95,7 @@ AC_C_LOCAL_EXPORT ac_local_model* ac_create_local_model(
     const char* inference_type,
     ac_local_model_desc_asset* assets,
     size_t assets_count,
-    ac_dict_root* params_root,
+    ac_dict_arg params,
     bool (*progress_cb)(ac_sv tag, float progress, void* user_data),
     void* cb_user_data
 );
