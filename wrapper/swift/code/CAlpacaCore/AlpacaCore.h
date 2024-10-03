@@ -18,5 +18,6 @@ typedef BOOL (^progressCallback)(NSString* tag, float progress);
 
 + (void)releaseModel:(ACModel*)model;
 + (void)releaseInstance:(ACInstance*)instance;
++ (void)checkRetainValue:(id)object;
 
 @end
