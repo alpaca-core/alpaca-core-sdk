@@ -5,7 +5,6 @@
 #include "export.h"
 
 #include <ac/dict_ref.h>
-#include <ac/dict_root.h>
 #include <ac/dict_arg.h>
 #include <ac/sv.h>
 
@@ -48,7 +47,8 @@ AC_C_LOCAL_EXPORT void ac_free_local_instance(ac_local_instance* i);
  * @param cb_user_data User data to be passed to the callbacks
  * @return Dictionary containing the result of the operation
  */
-AC_C_LOCAL_EXPORT ac_dict_root* ac_run_local_op(
+AC_C_LOCAL_EXPORT ac_dict_ref ac_run_local_op(
+    ac_dict_ref target,
     ac_local_instance* i,
     const char* op,
     ac_dict_arg params,

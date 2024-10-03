@@ -73,27 +73,28 @@ void local_dummy(void) {
     CHECK_NOT_NULL(instance);
     CHECK_NULL(ac_local_get_last_error());
 
-    ac_dict_root* result = ac_run_local_op(instance, "nope", ac_dict_arg_null(), NULL, NULL);
+    ac_dict_root* result_root = ac_dict_new_root();
+    ac_dict_ref result = ac_dict_make_ref(result_root);
+
+    result = ac_run_local_op(ac_dict_make_ref(result_root), instance, "nope", ac_dict_arg_null(), NULL, NULL);
     CHECK_NULL(result);
     CHECK_EQ_STR("dummy: unknown op: nope", ac_local_get_last_error());
 
-    result = ac_run_local_op(instance, "run",
+    result = ac_run_local_op(ac_dict_make_ref(result_root), instance, "run",
         make_params(params, "{\"input\": [\"a\", \"b\"]}"), NULL, NULL);
     CHECK_NOT_NULL(result);
     CHECK_NULL(ac_local_get_last_error());
-    ac_dict_ref ref = ac_dict_make_ref(result);
-    CHECK_EQ_STR("a soco b bate", ac_dict_get_string_value(ac_dict_at_key(ref, "result")));
-    ac_dict_free_root(result);
+    CHECK_EQ_STR("a soco b bate", ac_dict_get_string_value(ac_dict_at_key(result, "result")));
 
-    result = ac_run_local_op(instance, "run",
+
+    result = ac_run_local_op(ac_dict_make_ref(result_root), instance, "run",
         make_params(params, "{\"input\": [\"a\", \"b\"], \"splice\": false}"), NULL, NULL);
     CHECK_NOT_NULL(result);
     CHECK_NULL(ac_local_get_last_error());
-    ref = ac_dict_make_ref(result);
-    CHECK_EQ_STR("a b soco bate vira", ac_dict_get_string_value(ac_dict_at_key(ref, "result")));
-    ac_dict_free_root(result);
+    CHECK_EQ_STR("a b soco bate vira", ac_dict_get_string_value(ac_dict_at_key(result, "result")));
 
-    result = ac_run_local_op(instance, "run",
+
+    result = ac_run_local_op(ac_dict_make_ref(result_root), instance, "run",
         make_params(params, "{\"input\": [\"a\", \"b\"], \"throw_on\": 2}"), NULL, NULL);
     CHECK_NULL(result);
     CHECK_EQ_STR("Throw on token 2", ac_local_get_last_error());
@@ -103,15 +104,15 @@ void local_dummy(void) {
     CHECK_NOT_NULL(cutoff_instance);
     CHECK_NULL(ac_local_get_last_error());
 
-    result = ac_run_local_op(cutoff_instance, "run",
+    result = ac_run_local_op(ac_dict_make_ref(result_root), cutoff_instance, "run",
         make_params(params, "{\"input\": [\"a\", \"b\", \"c\"]}"), NULL, NULL);
     CHECK_NOT_NULL(result);
     CHECK_NULL(ac_local_get_last_error());
-    ref = ac_dict_make_ref(result);
-    CHECK_EQ_STR("a soco b bate c soco", ac_dict_get_string_value(ac_dict_at_key(ref, "result")));
-    ac_dict_free_root(result);
+    CHECK_EQ_STR("a soco b bate c soco", ac_dict_get_string_value(ac_dict_at_key(result, "result")));
 
-    ac_local_model* synthetic_model = ac_create_local_model(factory, "dummy", NULL, 0, ac_dict_arg_null(), on_progress, &info);
+
+    ac_local_model* synthetic_model = ac_create_local_model(factory,
+        "dummy", NULL, 0, ac_dict_arg_null(), on_progress, &info);
     CHECK_NOT_NULL(synthetic_model);
     CHECK_NULL(ac_local_get_last_error());
     CHECK_EQ_STR("synthetic", info.tag);
@@ -121,15 +122,15 @@ void local_dummy(void) {
     CHECK_NOT_NULL(synthetic_instance);
     CHECK_NULL(ac_local_get_last_error());
 
-    result = ac_run_local_op(synthetic_instance, "run",
+    result = ac_run_local_op(ac_dict_make_ref(result_root), synthetic_instance, "run",
         make_params(params, "{\"input\": [\"x\", \"y\"]}"), NULL, NULL);
     CHECK_NOT_NULL(result);
     CHECK_NULL(ac_local_get_last_error());
-    ref = ac_dict_make_ref(result);
-    CHECK_EQ_STR("x one y two", ac_dict_get_string_value(ac_dict_at_key(ref, "result")));
-    ac_dict_free_root(result);
+    CHECK_EQ_STR("x one y two", ac_dict_get_string_value(ac_dict_at_key(result, "result")));
+
 
     ac_dict_free_root(params_root);
+    ac_dict_free_root(result_root);
     ac_free_local_instance(synthetic_instance);
     ac_free_local_model(synthetic_model);
     ac_free_local_instance(cutoff_instance);

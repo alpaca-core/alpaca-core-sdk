@@ -68,7 +68,8 @@ void ac_free_local_instance(ac_local_instance* i) {
     delete Instance_toCpp(i);
 }
 
-ac_dict_root* ac_run_local_op(
+ac_dict_ref ac_run_local_op(
+    ac_dict_ref target,
     ac_local_instance* i,
     const char* op,
     ac_dict_arg cparams,
@@ -86,8 +87,8 @@ ac_dict_root* ac_run_local_op(
             };
         }
 
-        auto result = instance.runOp(op, astl::move(params), astl::move(pcb));
-        return Dict_to_dict_root(result);
+        Dict_from_dict_ref(target) = instance.runOp(op, astl::move(params), astl::move(pcb));
+        return target;
     });
 }
 

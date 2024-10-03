@@ -52,21 +52,22 @@ int main(void) {
         goto cleanup;
     }
 
-    ac_dict_root* result = ac_run_local_op(instance, "run",
+    ac_dict_root* result_root = ac_dict_new_root();
+    ac_dict_ref result = ac_run_local_op(ac_dict_make_ref(result_root), instance, "run",
         ac_dict_arg_take(ac_dict_make_ref(params_root)),
         NULL, NULL);
 
     ac_dict_free_root(params_root);
     if (!result) {
+        ac_dict_free_root(result_root);
         ret = 1;
         goto cleanup;
     }
 
-    ac_dict_ref dict_ref = ac_dict_make_ref(result);
-    char* dump = ac_dict_dump(dict_ref, 2);
+    char* dump = ac_dict_dump(result , 2);
     printf("%s\n", dump);
     free(dump);
-    ac_dict_free_root(result);
+    ac_dict_free_root(result_root);
 
 cleanup:
     ac_free_local_instance(instance);

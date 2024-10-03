@@ -64,29 +64,30 @@ int main(void) {
         goto cleanup;
     }
 
-    ac_dict_root* result = ac_run_local_op(instance, "run",
+    ac_dict_root* result_root = ac_dict_new_root();
+    ac_dict_ref result = ac_run_local_op(ac_dict_make_ref(result_root), instance, "run",
         ac_dict_arg_take(ac_dict_make_ref(params_root)),
         NULL, NULL
     );
 
     ac_dict_free_root(params_root);
     if (!result) {
+        ac_dict_free_root(result_root);
         ret = 1;
         goto cleanup;
     }
 
-    ac_dict_ref dict_ref = ac_dict_make_ref(result);
-    ac_dict_ref result_val = ac_dict_at_key(dict_ref, "result");
+    ac_dict_ref result_val = ac_dict_at_key(result, "result");
     if (result_val) {
         printf("%s\n", ac_dict_get_string_value(result_val));
     }
     else {
-        char* dump = ac_dict_dump(dict_ref, 2);
+        char* dump = ac_dict_dump(result, 2);
         fprintf(stderr, "Error bad dict:\n%s\n", dump);
         free(dump);
         ret = 1;
     }
-    ac_dict_free_root(result);
+    ac_dict_free_root(result_root);
 
 cleanup:
     ac_free_local_instance(instance);
