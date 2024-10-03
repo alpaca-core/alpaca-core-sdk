@@ -8,9 +8,10 @@ add_executable(DummyExample DummyExample.swift)
 # so we clear them here
 set_target_properties(DummyExample PROPERTIES COMPILE_OPTIONS "")
 
-# Since wrapper library has it, the executable must has enabled it too
-set(CMAKE_Swift_FLAGS "-cxx-interoperability-mode=default")
-set(CMAKE_Swift_FLAGS "${CMAKE_Swift_FLAGS} -import-objc-header ${CMAKE_SOURCE_DIR}/wrapper/swift/util/DummyInference-Bridging-Header.h")
+target_compile_options(DummyExample PUBLIC
+  $<$<COMPILE_LANGUAGE:Swift>:-cxx-interoperability-mode=default -Xcc -std=c++20>
+  $<$<COMPILE_LANGUAGE:Swift>:-import-objc-header ${CMAKE_SOURCE_DIR}/wrapper/swift/util/DummyInference-Bridging-Header.h>
+)
 
 target_link_libraries(DummyExample
     PRIVATE
