@@ -6,5 +6,6 @@ project (AlpacaCoreSwiftWrapper
 )
 
 add_subdirectory(code)
+add_subdirectory(util)
 ac_add_example_subdir()
 ac_add_test_subdir()

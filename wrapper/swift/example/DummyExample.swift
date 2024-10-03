@@ -21,8 +21,10 @@ struct DummyExample {
 
         let modelFactory = AlpacaCore.getModelFactory()
         DummyInference.add(modelFactory)
-        let model = AlpacaCore.createModel(desc, dict, progress)
-        let instance = model?.createInstance("general", [:])
+        var model = AlpacaCore.createModel(desc, dict, progress)
+        AlpacaCore.checkRetainValue(model)
+        var instance = model?.createInstance("general", [:])
+        AlpacaCore.checkRetainValue(instance)
 
         let params = [
             "input": ["a", "b", "c"]

@@ -36,5 +36,12 @@ static ac::local::ModelFactory modelFactory;
     [instance release];
 }
 
++ (void)checkRetainValue:(id)object {
+    if (object == nullptr) {
+        return;
+    }
+
+    NSLog(@"Retain count: %ld", CFGetRetainCount((__bridge CFTypeRef)(object)));
+}
 
 @end
