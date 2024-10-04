@@ -114,7 +114,7 @@ Session Instance::newSession(const SessionParams params) {
     }
 
     const auto ctxLen = llama_n_ctx(lctx);
-    const auto maxTokens = ctxLen - 4; // ref #16
+    const auto maxTokens = ctxLen - 4; // (#16)
     if (initialPrompt.size() > maxTokens) {
         throw_ex{} << "Initial prompt too long. Got " << initialPrompt.size() << " tokens, max: " << ctxLen - 4;
     }
