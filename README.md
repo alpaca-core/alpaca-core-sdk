@@ -6,9 +6,10 @@ AI Inference SDK
 
 ## Bindings, Wrappers, and Integrations
 
-* C: API wrapper [in repo](wrapper/c)
-* Java: API wrapper [in repo](wrapper/java)
-* Swift
+* Internal
+    * [C wrapper](wrapper/c)
+    * [Java wrapper](wrapper/java)
+    * Swift wrapper
 
 ## Demos
 
