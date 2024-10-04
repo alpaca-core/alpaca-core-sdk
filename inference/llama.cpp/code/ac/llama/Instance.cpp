@@ -103,9 +103,10 @@ Session Instance::newSession(const SessionParams params) {
 
     Token initialToken; // used to reset the initial prompt to a single token
 
+    const auto tokenBos = llama_token_bos(m_model.lmodel());
     if (initialPrompt.empty()) {
         // Should not run without any tokens
-        initialToken = llama_token_bos(m_model.lmodel());
+        initialToken = tokenBos;
         initialPrompt = {&initialToken, 1};
     }
 
@@ -253,6 +254,11 @@ Session Instance::newSession(const SessionParams params) {
 
             // reset sampling and don't allow previous inputs to affect the generation
             m_sampler.reset();
+
+            if (m_model.prefixInputsWithBos()) {
+                // add bos token to the prompt
+                doDecode({&tokenBos, 1}, Source::InteractivePrompt);
+            }
 
             doDecode(prompt, Source::InteractivePrompt);
         }

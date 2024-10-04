@@ -1,6 +1,6 @@
 # Minor Design Notes
 
-This is a loose and not yet structured collection of notes on the design decisions of various components, but not the API or SDK as a whole. The global overarching design notes are in the [design-doc.md](design-doc.md) file.
+This is a loose and not yet structured collection of notes on the design decisions of various components, but not the API or SDK as a whole.
 
 ## Using submodules *and* packages
 
@@ -24,4 +24,4 @@ Streaming inference will definitely be a requirement (if it isn't already). Coro
 
 ## Seemingly excessive subdirs
 
-This is to restrict access to headers of targets which are not link-libraries of a given target. You won't be able to accidentally include `ac/LocalProvider.hpp` if you don't link against `ac::local`.
+This is to restrict access to headers of targets which are not link-libraries of a given target. You won't be able to accidentally include `ac/local/Model.hpp` if you don't link against `ac::local`.

@@ -20,6 +20,7 @@ public:
     struct Params {
         bool gpu = true; // try to load data on gpu
         bool vocabOnly = false; // do not load model, only vocab
+        bool prefixInputsWithBos = false; // add bos token to interactive inputs (#13)
     };
 
     Model(const char* pathToGguf, ModelLoadProgressCb loadProgressCb, Params params);
@@ -30,6 +31,7 @@ public:
     uint32_t trainCtxLength() const noexcept;
     bool shouldAddBosToken() const noexcept;
     bool hasEncoder() const noexcept;
+    bool prefixInputsWithBos() const noexcept { return m_params.prefixInputsWithBos; }
 
     // fallback to "chatml" if the uderlying model does not provide a chat template
     std::string getChatTemplateId() const;
