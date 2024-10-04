@@ -45,6 +45,16 @@ Instance::Instance(Model& model, InitParams params)
 
 Instance::~Instance() = default;
 
+namespace {
+llama_batch makeInputBatch(std::span<const Token> tokens, int32_t pos, int32_t seqId) {
+    // well, llama.cpp does not touch the tokens for input batches, but llama_batch needs them to be non-const
+    // (mostly for stupid C reasons)
+    // so... we have to do something evil here
+    auto nonConstTokens = const_cast<Token*>(tokens.data());
+    return llama_batch_get_one(nonConstTokens, int32_t(tokens.size()), pos, seqId);
+}
+}
+
 void Instance::warmup() {
     LLAMA_LOG(Info, "Running warmup");
 
@@ -65,10 +75,8 @@ void Instance::warmup() {
         tmp.push_back(0);
     }
 
-    const auto ntokens = int32_t(tmp.size());
-
     if (llama_model_has_encoder(model)) {
-        llama_encode(lctx, llama_batch_get_one(tmp.data(), ntokens, 0, 0));
+        llama_encode(lctx, makeInputBatch(tmp, 0, 0));
         llama_token decoder_start_token_id = llama_model_decoder_start_token(model);
         if (decoder_start_token_id == -1) {
             decoder_start_token_id = bos;
@@ -76,7 +84,7 @@ void Instance::warmup() {
         tmp.clear();
         tmp.push_back(decoder_start_token_id);
     }
-    llama_decode(lctx, llama_batch_get_one(tmp.data(), ntokens, 0, 0));
+    llama_decode(lctx, makeInputBatch(tmp, 0, 0));
     llama_kv_cache_clear(lctx);
     llama_synchronize(lctx);
     llama_perf_context_reset(lctx);
@@ -132,11 +140,7 @@ Session Instance::newSession(const SessionParams params) {
     }
 
     if (m_model.hasEncoder()) {
-        // well llama_encode does not touch the tokens, but llama_batch needs them to be non-const
-        // (mostly for stupid C reasons)
-        // so... we have to do something evil here
-        auto nonConstTokens = const_cast<Token*>(initialPrompt.data());
-        auto batch = llama_batch_get_one(nonConstTokens, int32_t(initialPrompt.size()), 0, 0);
+        auto batch = makeInputBatch(initialPrompt, 0, 0);
         auto res = llama_encode(lctx, batch);
         if (res != 0) {
             throw_ex{} << "Failed to encode input";
@@ -230,12 +234,7 @@ Session Instance::newSession(const SessionParams params) {
         while (!tokens.empty()) {
             auto batchTokens = tokens.size() > batchSize ? tokens.first(batchSize) : tokens;
             tokens = tokens.subspan(batchTokens.size());
-
-            // well llama_decode does not touch the tokens, but llama_batch needs them to be non-const
-            // (mostly for stupid C reasons)
-            // so... we have to do something evil here
-            auto nonConstTokens = const_cast<Token*>(batchTokens.data());
-            auto batch = llama_batch_get_one(nonConstTokens, int(batchTokens.size()), numPast, 0);
+            auto batch = makeInputBatch(batchTokens, numPast, 0);
             if (llama_decode(lctx, batch) != 0) {
                 throw_ex{} << "Failed to decode tokens";
             }
