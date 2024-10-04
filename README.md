@@ -7,11 +7,8 @@ AI Inference SDK
 ## Bindings, Wrappers, and Integrations
 
 * C: API wrapper [in repo](wrapper/c)
-* Java
-    * Pure java wrapper [in repo](wrapper/java)
-    * [Android SDK with this repo as a submodule](https://github.com/alpaca-core/ac-android)
+* Java: API wrapper [in repo](wrapper/java)
 * Swift
-
 
 ## Demos
 
@@ -30,6 +27,9 @@ Use CMake. Some useful presets are provided in the repo.
     * `AC_BUILD_TESTS` - build tests. This means all tests for all active components. No finer-grain options are available yet
     * `AC_BUILD_EXAMPLES` - build examples. This means all examples for all active components. No finer-grain options are available yet
     * `AC_BUILD_POC` - build proof of concept, sandbox, and experimental projects
+* Wrapper config:
+    * `AC_C_WRAPPER`: build C wrapper. `ON` by default
+    * `AC_JAVA_WRAPPER`: build Java wrapper. `Auto` by default, which means only build if JNI is available
 
 ## License
 
