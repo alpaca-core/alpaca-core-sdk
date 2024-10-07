@@ -27,7 +27,7 @@ ABBREVIATE_BRIEF       = "The $name class" \
 ALWAYS_DETAILED_SEC    = NO
 INLINE_INHERITED_MEMB  = NO
 FULL_PATH_NAMES        = YES
-STRIP_FROM_PATH        = local/code
+STRIP_FROM_PATH        = local/code dict/code
 SHORT_NAMES            = NO
 JAVADOC_AUTOBRIEF      = YES
 INHERIT_DOCS           = YES
@@ -80,7 +80,7 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # Configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = local/code/ac/local
+INPUT                  = local/code/ac/local dict/code/ac
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.h \
                          *.hh \
