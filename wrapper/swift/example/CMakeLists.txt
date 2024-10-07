@@ -14,10 +14,33 @@ target_compile_options(DummyExample PUBLIC
 )
 
 target_link_libraries(DummyExample
-    PRIVATE
-        CAlpacaCore
-        ac-local-dummy
-        DummyInference
+  PRIVATE
+      CAlpacaCore
+      ac-local-dummy
+      DummyInference
 )
 
 target_compile_options(DummyExample PRIVATE -parse-as-library)
+
+
+add_executable(CxxACExample CxxACExample.swift)
+
+# From the Root CMAKE there are C++ compile options which conflict with Swift compiler
+# so we clear them here
+set_target_properties(CxxACExample PROPERTIES COMPILE_OPTIONS "")
+target_link_libraries(CxxACExample
+  PRIVATE
+      CxxAlpacaCore
+)
+
+target_compile_options(CxxACExample
+  PUBLIC
+    $<$<COMPILE_LANGUAGE:Swift>:-cxx-interoperability-mode=default -Xcc -std=c++20>
+)
+
+target_include_directories(CxxACExample
+  PUBLIC
+    ${CMAKE_SOURCE_DIR}/wrapper/swift/code/CxxAlpacaCore
+)
+
+target_compile_options(CxxACExample PRIVATE -parse-as-library)
