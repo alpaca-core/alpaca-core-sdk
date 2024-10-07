@@ -8,10 +8,14 @@
 
 namespace ac::local {
 class Instance;
+
+/// An inference model.
 class AC_LOCAL_EXPORT Model {
 public:
     virtual ~Model();
 
+    /// Create an instance of the model.
+    /// The returned instance is not bound to the model lifetime. It maintains everything needed inside.
     virtual std::unique_ptr<Instance> createInstance(std::string_view type, Dict params) = 0;
 };
 } // namespace ac::local

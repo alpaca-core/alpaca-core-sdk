@@ -10,33 +10,17 @@
 
 namespace ac::local {
 
-/**
- * @brief Abstract base class for loading models.
- *
- * The ModelLoader class provides an interface to for loading models.
- *
- * Model loaders can be registered by interence type in @ref ModelFactory.
- */
+/// Base class for model loaders.
+/// Model loaders are responsible for loading models based on the provided description and parameters. They are typically
+/// facades for an underlying inference library. While model loaders can be used on their own, they are typically used
+/// via the `ModelFactory` class.
 class AC_LOCAL_EXPORT ModelLoader {
 public:
-    /**
-     * @brief Virtual destructor for ModelLoader.
-     */
     virtual ~ModelLoader();
 
-    /**
-     * @brief Loads a model based on the provided description and parameters.
-     *
-     * This function is responsible for synchronously loading a model using the given description and parameters.
-     * It also accepts a progress callback function to report the loading progress. It's typically invoked by the
-     * @ref ModelFactory after selecting the appropriate loader based on the model description.
-     *
-     * @param desc The description of the model to be loaded.
-     * @param params A dictionary of parameters required for loading the model.
-     * @param cb A callback function to report the progress of the model loading.
-     *
-     * @return A shared pointer to the loaded model.
-     */
+    /// Load a model based on the provided description and parameters.
+    /// The progress callback is optional and can be used to report the progress of the loading process.
+    /// The returned model is owned by the caller and is not bound to the loader in any way.
     virtual ModelPtr loadModel(ModelDesc desc, Dict params, ProgressCb cb) = 0;
 };
 
