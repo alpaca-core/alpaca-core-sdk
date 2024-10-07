@@ -26,6 +26,10 @@ struct CxxAlpacaCoreExample {
         print("Dict as string: \n\t \(acDict.dump())")
         print("Dict type: \n\t \(ac.getDictTypeAsString(acDict))")
 
+        // Check how we're going to handle errors
+        let k = acDict.getDictAt("kur")
+        let _ = k.getInt()
+        // end check
 
         let name = acDict.getDictAt("name")
         print("Type: \(ac.getDictTypeAsString(name)) - val; \(name.getString())")

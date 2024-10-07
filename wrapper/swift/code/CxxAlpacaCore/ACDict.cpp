@@ -4,6 +4,24 @@
 #include "ACDict.hpp"
 #include <iostream>
 
+namespace {
+
+template <typename F>
+auto dict_try_catch(F&& f) noexcept -> decltype(f()) {
+    try {
+        return f();
+    }
+    catch (const std::exception& e) {
+        std::cout << e.what();
+    }
+    catch (...) {
+        std::cout << "Unknown error" << std::endl;
+    }
+    return {};
+}
+
+}
+
 namespace ac {
 
 SwiftACDict::SwiftACDict()
@@ -44,31 +62,54 @@ void SwiftACDict::parseJson(const char* json, unsigned length) {
 }
 
 SwiftACDict SwiftACDict::getDictAt(KeyType key) const {
+    if (!m_dict->is_object()) {
+        std::cerr << "Dict is not object!" << std::endl;
+        return {};
+    }
+
     auto f = m_dict->find(key);
+    if (f == m_dict->end()) {
+        return SwiftACDict();
+    }
     return makeCopy(*f);
 }
 
 bool SwiftACDict::getBool() const {
-    return m_dict->get<bool>();
+    return dict_try_catch([&] {
+        return m_dict->get<bool>();
+    });
 }
 
 int SwiftACDict::getInt() const {
-    return m_dict->get<int>();
+    return dict_try_catch([&] {
+        return m_dict->get<int>();
+    });
 }
 
 unsigned SwiftACDict::getUnsigned() const {
-    return m_dict->get<unsigned>();
+    return dict_try_catch([&] {
+        return m_dict->get<unsigned>();
+    });
 }
 
 double SwiftACDict::getDouble() const {
-    return m_dict->get<double>();
+    return dict_try_catch([&] {
+        return m_dict->get<double>();
+    });
 }
 
 std::string SwiftACDict::getString() const {
-    return m_dict->get<std::string>();
+    return dict_try_catch([&] {
+        return m_dict->get<std::string>();
+    });
 }
 
 std::vector<SwiftACDict> SwiftACDict::getArray() const {
+    if (!m_dict->is_array()) {
+        std::cerr << "Dict is not array!" << std::endl;
+        return {};
+    }
+
     std::vector<SwiftACDict> vec;
     for (size_t i = 0; i < m_dict->size(); i++)
     {
@@ -79,6 +120,11 @@ std::vector<SwiftACDict> SwiftACDict::getArray() const {
 }
 
 Blob SwiftACDict::getBinary() const {
+    if (!m_dict->is_binary()) {
+        std::cerr << "Dict is not binary!" << std::endl;
+        return {};
+    }
+
     return m_dict->get_binary();
 }
 
