@@ -82,6 +82,41 @@ Blob SwiftACDict::getBinary() const {
     return m_dict->get_binary();
 }
 
+void SwiftACDict::setDictAt(KeyType key, SwiftACDict value) {
+    (*m_dict)[key] = *value.m_dict;
+}
+
+void SwiftACDict::setBool(bool value) {
+    *m_dict = value;
+}
+
+void SwiftACDict::setInt(int value) {
+    *m_dict = value;
+}
+
+void SwiftACDict::setUnsigned(unsigned value) {
+    *m_dict = value;
+}
+
+void SwiftACDict::setDouble(double value) {
+    *m_dict = value;
+}
+
+void SwiftACDict::setString(const std::string& value) {
+    *m_dict = value;
+}
+
+void SwiftACDict::setArray(const std::vector<SwiftACDict>& value) {
+    *m_dict = ac::Dict::array();
+    for (const auto& v : value) {
+        m_dict->push_back(*v.m_dict);
+    }
+}
+
+void SwiftACDict::setBinary(const uint8_t* data, uint32_t size) {
+    *m_dict = ac::Dict::binary(ac::Blob(data, data+size));
+}
+
 std::string SwiftACDict::dump() const {
     return m_dict->dump();
 }

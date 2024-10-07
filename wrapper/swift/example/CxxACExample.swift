@@ -57,5 +57,35 @@ struct CxxAlpacaCoreExample {
 
         let code = obj.getDictAt("postalCode")
         print("Type: \(ac.getDictTypeAsString(code)) - val; \(code.getString())")
+
+        var newDict = ac.SwiftACDict()
+        newDict.setString("pesho")
+        var anotherDict = ac.SwiftACDict()
+        anotherDict.setDictAt("name", newDict)
+
+        print("Dict as string: \n\t \(anotherDict.dump())")
+        newDict.setInt(33)
+        anotherDict.setDictAt("age", newDict)
+
+        newDict.setUnsigned(444444444)
+        anotherDict.setDictAt("weight", newDict)
+
+        newDict.setDouble(1.89)
+        anotherDict.setDictAt("height", newDict)
+
+        newDict.setBool(true)
+        anotherDict.setDictAt("isFunny", newDict)
+
+        let data = "pesho".data(using: .utf8)
+        data!.withUnsafeBytes { (rawBufferPointer: UnsafeRawBufferPointer) in
+            let ptr = rawBufferPointer.bindMemory(to: UInt8.self).baseAddress!
+            let size = data?.count
+
+            newDict.setBinary(ptr, UInt32(size!))
+        }
+
+        anotherDict.setDictAt("binary", newDict)
+
+        print("Dict as string: \n\t \(anotherDict.dump())")
     }
 }

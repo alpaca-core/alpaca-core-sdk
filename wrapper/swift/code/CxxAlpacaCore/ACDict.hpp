@@ -37,6 +37,7 @@ public:
 
     using KeyType = std::string;
 
+    // Getters
     SwiftACDict getDictAt(KeyType key) const;
     bool getBool() const;
     int getInt() const;
@@ -45,6 +46,16 @@ public:
     std::string getString() const;
     std::vector<SwiftACDict> getArray() const;
     Blob getBinary() const;
+
+    // Setters
+    void setDictAt(KeyType key, SwiftACDict value);
+    void setBool(bool value);
+    void setInt(int value);
+    void setUnsigned(unsigned value);
+    void setDouble(double value);
+    void setString(const std::string& value);
+    void setArray(const std::vector<SwiftACDict>& value);
+    void setBinary(const uint8_t* data, uint32_t size);
 
     std::string dump() const;
     DictValueType getType() const;
