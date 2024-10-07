@@ -91,7 +91,7 @@ void Instance::warmup() {
 }
 
 Session Instance::newSession(const SessionParams params) {
-    // see comments in Session::promiseType::initial_suspend on why this silly await is necessary
+    // not a real await as we return suspend_always initially
     auto initialPrompt = co_await Session::Prompt{};
 
     if (m_hasActiveSession) {

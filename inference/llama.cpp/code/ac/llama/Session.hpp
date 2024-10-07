@@ -28,14 +28,7 @@ public:
 
         Token value() const noexcept { return m_value; }
 
-        // ideally we would use std::suspend_never here and have an eager coroutine
-        // HOWEVER clang is stupid (or maybe pedantic is the right word)
-        // There is a defect in the standard tracked here https://github.com/cplusplus/CWG/issues/575
-        // MSVC and gcc do something reasonable if an exception is thrown in an eager coroutine before the first
-        // actual suspend
-        // clang however simply leaks the coroutine state and doesn't even call the destructors of local variables
-        // so, until the issue is resolved and compilers are updated (likely years from now) we must have a lazy
-        // coroutine here and use the setInitialPrompt shenanigans to work around it
+        // suspend until the initial prompt is set
         std::suspend_always initial_suspend() noexcept { return {}; }
 
         // keep the coroutine alive to make the last yield value available
