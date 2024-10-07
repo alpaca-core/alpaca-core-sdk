@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
+#include <astl/eager_coro_helper.hpp>
 #include <span>
 #include <cstdint>
 #include <utility>
@@ -15,23 +16,9 @@ class sync_generator {
 public:
     struct chunk_buf_t {};
 
-    struct promise_type {
+    struct promise_type : public astl::eager_coro_helper::promise {
         std::optional<size_t> m_size;
         std::span<uint8_t> m_chunk_buf;
-
-        // ah... exceptions and coroutines
-        // so, what happens here?
-        // this is an eager coroutine, which means that it will not suspend initially
-        // if an exception is thrown before the first suspend, there is no way to properly propagate it to the caller
-        // ...not when calling the coroutine function, at least
-        // to throw it to the caller, we can employ a hack: immediately rethrow in unhandled_exception
-        // this is generally a no-no as it will cause a leak of the coroutine buffer, but, as it turns out,
-        // all compilers will not cause a leak if the coroutine has not been suspended yet
-        // so, we rethrow if we've never been suspended, but store the exception an throw it later if we have
-        // ew
-        std::exception_ptr m_exception;
-        bool m_suspended = false;
-        bool m_has_exception_before_suspend = false;
 
         promise_type() noexcept = default;
         ~promise_type() = default;
@@ -59,15 +46,7 @@ public:
 
         void return_void() noexcept {}
 
-        void unhandled_exception() {
-            if (m_suspended) {
-                m_exception = std::current_exception();
-            }
-            else {
-                m_has_exception_before_suspend = true;
-                throw;
-            }
-        }
+        using astl::eager_coro_helper::promise::unhandled_exception;
 
         struct await_chunk_buf {
             std::span<uint8_t>& buf;
@@ -77,7 +56,7 @@ public:
         };
 
         await_chunk_buf await_transform(chunk_buf_t) noexcept {
-            m_suspended = true;
+            on_suspend();
             return await_chunk_buf{m_chunk_buf};
         }
     };
@@ -94,10 +73,7 @@ public:
     }
 
     ~sync_generator() {
-        // only destroy if there was no exception before the first suspend
-        if (m_handle && !m_handle.promise().m_has_exception_before_suspend) {
-            m_handle.destroy();
-        }
+        astl::eager_coro_helper::safe_destroy_handle(m_handle);
     }
 
     const std::optional<size_t>& size() const noexcept {
@@ -116,9 +92,7 @@ public:
         auto& p = m_handle.promise();
         p.m_chunk_buf = buffer;
         m_handle.resume();
-        if (p.m_exception) {
-            std::rethrow_exception(p.m_exception);
-        }
+        p.rethrow_if_exception();
         return p.m_chunk_buf;
     }
 private:
