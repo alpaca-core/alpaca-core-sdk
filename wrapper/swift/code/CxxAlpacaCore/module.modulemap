@@ -6,3 +6,13 @@ module CxxAlpacaCore {
 
     export *
 }
+
+module CxxACLocal {
+    header "./../../../../local/code/ac/local/ModelFactory.hpp"
+    header "./../../../../local/code/ac/local/ModelDesc.hpp"
+    header "./../../../../local/code/ac/local/Model.hpp"
+    header "./../../../../local/code/ac/local/ModelPtr.hpp"
+    header "./../../../../local/code/ac/local/Instance.hpp"
+
+    export *
+}

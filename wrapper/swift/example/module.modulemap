@@ -1,0 +1,8 @@
+// Copyright (c) Alpaca Core
+// SPDX-License-Identifier: MIT
+//
+module CxxDummyInference {
+    header "./../../../inference/dummy/local/code/ac/local/LocalDummy.hpp"
+
+    export *
+}
