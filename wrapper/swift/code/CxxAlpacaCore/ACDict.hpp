@@ -40,6 +40,7 @@ public:
     SwiftACDict getDictAt(KeyType key) const;
     bool getBool() const;
     int getInt() const;
+    unsigned getUnsigned() const;
     double getDouble() const;
     std::string getString() const;
     std::vector<SwiftACDict> getArray() const;

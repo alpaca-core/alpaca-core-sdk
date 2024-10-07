@@ -56,6 +56,10 @@ int SwiftACDict::getInt() const {
     return m_dict->get<int>();
 }
 
+unsigned SwiftACDict::getUnsigned() const {
+    return m_dict->get<unsigned>();
+}
+
 double SwiftACDict::getDouble() const {
     return m_dict->get<double>();
 }
