@@ -5462,7 +5462,18 @@ namespace _impl {
 extern "C" {
 #endif
 
-SWIFT_EXTERN void * _Nonnull $s10AlpacaCore8SwiftStrCACycfC(SWIFT_CONTEXT void * _Nonnull _self) SWIFT_NOEXCEPT SWIFT_CALL; // init()
+// Stub struct to be used to pass/return values to/from Swift functions.
+struct swift_interop_returnStub_AlpacaCore_uint64_t_0_8_void_ptr_8_16 {
+  uint64_t _1;
+  void * _Nullable _2;
+};
+
+static SWIFT_C_INLINE_THUNK void swift_interop_returnDirect_AlpacaCore_uint64_t_0_8_void_ptr_8_16(char * _Nonnull result, struct swift_interop_returnStub_AlpacaCore_uint64_t_0_8_void_ptr_8_16 value) {
+  memcpy(result + 0, &value._1, 8);
+  memcpy(result + 8, &value._2, 8);
+}
+
+SWIFT_EXTERN struct swift_interop_returnStub_AlpacaCore_uint64_t_0_8_void_ptr_8_16 $s10AlpacaCore9AssetInfoC6m_pathSSvg(SWIFT_CONTEXT void * _Nonnull _self) SWIFT_NOEXCEPT SWIFT_CALL; // _
 // Stub struct to be used to pass/return values to/from Swift functions.
 struct swift_interop_passStub_AlpacaCore_uint64_t_0_8_void_ptr_8_16 {
   uint64_t _1;
@@ -5476,20 +5487,40 @@ static SWIFT_C_INLINE_THUNK struct swift_interop_passStub_AlpacaCore_uint64_t_0_
   return result;
 }
 
-SWIFT_EXTERN void * _Nonnull $s10AlpacaCore8SwiftStrCyACSScfC(struct swift_interop_passStub_AlpacaCore_uint64_t_0_8_void_ptr_8_16 s, SWIFT_CONTEXT void * _Nonnull _self) SWIFT_NOEXCEPT SWIFT_CALL; // init(_:)
-SWIFT_EXTERN void $s10AlpacaCore8SwiftStrC9parseJsonyySSF(struct swift_interop_passStub_AlpacaCore_uint64_t_0_8_void_ptr_8_16 jsonString, SWIFT_CONTEXT void * _Nonnull _self) SWIFT_NOEXCEPT SWIFT_CALL; // parseJson(_:)
+SWIFT_EXTERN void $s10AlpacaCore9AssetInfoC6m_pathSSvs(struct swift_interop_passStub_AlpacaCore_uint64_t_0_8_void_ptr_8_16 value, SWIFT_CONTEXT void * _Nonnull _self) SWIFT_NOEXCEPT SWIFT_CALL; // _
+SWIFT_EXTERN struct swift_interop_returnStub_AlpacaCore_uint64_t_0_8_void_ptr_8_16 $s10AlpacaCore9AssetInfoC5m_tagSSvg(SWIFT_CONTEXT void * _Nonnull _self) SWIFT_NOEXCEPT SWIFT_CALL; // _
+SWIFT_EXTERN void $s10AlpacaCore9AssetInfoC5m_tagSSvs(struct swift_interop_passStub_AlpacaCore_uint64_t_0_8_void_ptr_8_16 value, SWIFT_CONTEXT void * _Nonnull _self) SWIFT_NOEXCEPT SWIFT_CALL; // _
+SWIFT_EXTERN void * _Nonnull $s10AlpacaCore9AssetInfoCACycfC(SWIFT_CONTEXT void * _Nonnull _self) SWIFT_NOEXCEPT SWIFT_CALL; // init()
+SWIFT_EXTERN void * _Nonnull $s10AlpacaCore9AssetInfoC5_path4_tagACSS_SStcfC(struct swift_interop_passStub_AlpacaCore_uint64_t_0_8_void_ptr_8_16 _path, struct swift_interop_passStub_AlpacaCore_uint64_t_0_8_void_ptr_8_16 _tag, SWIFT_CONTEXT void * _Nonnull _self) SWIFT_NOEXCEPT SWIFT_CALL; // init(_path:_tag:)
+SWIFT_EXTERN void * _Nonnull $s10AlpacaCore4DictCACycfC(SWIFT_CONTEXT void * _Nonnull _self) SWIFT_NOEXCEPT SWIFT_CALL; // init()
+SWIFT_EXTERN struct swift_interop_returnStub_AlpacaCore_uint64_t_0_8_void_ptr_8_16 $s10AlpacaCore9ModelDescC15m_inferenceTypeSSvg(SWIFT_CONTEXT void * _Nonnull _self) SWIFT_NOEXCEPT SWIFT_CALL; // _
+SWIFT_EXTERN void $s10AlpacaCore9ModelDescC15m_inferenceTypeSSvs(struct swift_interop_passStub_AlpacaCore_uint64_t_0_8_void_ptr_8_16 value, SWIFT_CONTEXT void * _Nonnull _self) SWIFT_NOEXCEPT SWIFT_CALL; // _
+SWIFT_EXTERN struct swift_interop_returnStub_AlpacaCore_uint64_t_0_8_void_ptr_8_16 $s10AlpacaCore9ModelDescC6m_nameSSvg(SWIFT_CONTEXT void * _Nonnull _self) SWIFT_NOEXCEPT SWIFT_CALL; // _
+SWIFT_EXTERN void $s10AlpacaCore9ModelDescC6m_nameSSvs(struct swift_interop_passStub_AlpacaCore_uint64_t_0_8_void_ptr_8_16 value, SWIFT_CONTEXT void * _Nonnull _self) SWIFT_NOEXCEPT SWIFT_CALL; // _
 // Stub struct to be used to pass/return values to/from Swift functions.
-struct swift_interop_returnStub_AlpacaCore_uint64_t_0_8_void_ptr_8_16 {
-  uint64_t _1;
-  void * _Nullable _2;
+struct swift_interop_returnStub_AlpacaCore_void_ptr_0_8 {
+  void * _Nullable _1;
 };
 
-static SWIFT_C_INLINE_THUNK void swift_interop_returnDirect_AlpacaCore_uint64_t_0_8_void_ptr_8_16(char * _Nonnull result, struct swift_interop_returnStub_AlpacaCore_uint64_t_0_8_void_ptr_8_16 value) {
+static SWIFT_C_INLINE_THUNK void swift_interop_returnDirect_AlpacaCore_void_ptr_0_8(char * _Nonnull result, struct swift_interop_returnStub_AlpacaCore_void_ptr_0_8 value) {
   memcpy(result + 0, &value._1, 8);
-  memcpy(result + 8, &value._2, 8);
 }
 
-SWIFT_EXTERN struct swift_interop_returnStub_AlpacaCore_uint64_t_0_8_void_ptr_8_16 $s10AlpacaCore8SwiftStrC4dumpSSyF(SWIFT_CONTEXT void * _Nonnull _self) SWIFT_NOEXCEPT SWIFT_CALL; // dump()
+SWIFT_EXTERN struct swift_interop_returnStub_AlpacaCore_void_ptr_0_8 $s10AlpacaCore9ModelDescC8m_assetsSayAA9AssetInfoCGvg(SWIFT_CONTEXT void * _Nonnull _self) SWIFT_NOEXCEPT SWIFT_CALL; // _
+// Stub struct to be used to pass/return values to/from Swift functions.
+struct swift_interop_passStub_AlpacaCore_void_ptr_0_8 {
+  void * _Nullable _1;
+};
+
+static SWIFT_C_INLINE_THUNK struct swift_interop_passStub_AlpacaCore_void_ptr_0_8 swift_interop_passDirect_AlpacaCore_void_ptr_0_8(const char * _Nonnull value) {
+  struct swift_interop_passStub_AlpacaCore_void_ptr_0_8 result;
+  memcpy(&result._1, value + 0, 8);
+  return result;
+}
+
+SWIFT_EXTERN void $s10AlpacaCore9ModelDescC8m_assetsSayAA9AssetInfoCGvs(struct swift_interop_passStub_AlpacaCore_void_ptr_0_8 value, SWIFT_CONTEXT void * _Nonnull _self) SWIFT_NOEXCEPT SWIFT_CALL; // _
+SWIFT_EXTERN void * _Nonnull $s10AlpacaCore9ModelDescCACycfC(SWIFT_CONTEXT void * _Nonnull _self) SWIFT_NOEXCEPT SWIFT_CALL; // init()
+SWIFT_EXTERN void * _Nonnull $s10AlpacaCore9ModelDescC14_inferenceType5_name7_assetsACSS_SSSayAA9AssetInfoCGtcfC(struct swift_interop_passStub_AlpacaCore_uint64_t_0_8_void_ptr_8_16 _inferenceType, struct swift_interop_passStub_AlpacaCore_uint64_t_0_8_void_ptr_8_16 _name, struct swift_interop_passStub_AlpacaCore_void_ptr_0_8 _assets, SWIFT_CONTEXT void * _Nonnull _self) SWIFT_NOEXCEPT SWIFT_CALL; // init(_inferenceType:_name:_assets:)
 
 #ifdef __cplusplus
 }
@@ -5498,54 +5529,56 @@ SWIFT_EXTERN struct swift_interop_returnStub_AlpacaCore_uint64_t_0_8_void_ptr_8_
 namespace AlpacaCore SWIFT_PRIVATE_ATTR SWIFT_SYMBOL_MODULE("AlpacaCore") {
 
 
-class SWIFT_SYMBOL("s:10AlpacaCore8SwiftStrC") SwiftStr;
+class SWIFT_SYMBOL("s:10AlpacaCore9AssetInfoC") AssetInfo;
 } // end namespace 
 
 namespace swift SWIFT_PRIVATE_ATTR {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wc++17-extensions"
 template<>
-static inline const constexpr bool isUsableInGenericContext<AlpacaCore::SwiftStr> = true;
+static inline const constexpr bool isUsableInGenericContext<AlpacaCore::AssetInfo> = true;
 #pragma clang diagnostic pop
 } // namespace swift
 
 namespace AlpacaCore SWIFT_PRIVATE_ATTR SWIFT_SYMBOL_MODULE("AlpacaCore") {
 namespace _impl {
 
-class _impl_SwiftStr;
-// Type metadata accessor for SwiftStr
-SWIFT_EXTERN swift::_impl::MetadataResponseTy $s10AlpacaCore8SwiftStrCMa(swift::_impl::MetadataRequestTy) SWIFT_NOEXCEPT SWIFT_CALL;
+class _impl_AssetInfo;
+// Type metadata accessor for AssetInfo
+SWIFT_EXTERN swift::_impl::MetadataResponseTy $s10AlpacaCore9AssetInfoCMa(swift::_impl::MetadataRequestTy) SWIFT_NOEXCEPT SWIFT_CALL;
 
 
 } // namespace _impl
 
-class SWIFT_SYMBOL("s:10AlpacaCore8SwiftStrC") SwiftStr : public swift::_impl::RefCountedClass {
+class SWIFT_SYMBOL("s:10AlpacaCore9AssetInfoC") AssetInfo : public swift::_impl::RefCountedClass {
 public:
   using RefCountedClass::RefCountedClass;
   using RefCountedClass::operator=;
-  static SWIFT_INLINE_THUNK SwiftStr init() SWIFT_SYMBOL("s:10AlpacaCore8SwiftStrCACycfc");
-  static SWIFT_INLINE_THUNK SwiftStr init(const swift::String& s) SWIFT_SYMBOL("s:10AlpacaCore8SwiftStrCyACSScfc");
-  SWIFT_INLINE_THUNK void parseJson(const swift::String& jsonString) SWIFT_SYMBOL("s:10AlpacaCore8SwiftStrC9parseJsonyySSF");
-  SWIFT_INLINE_THUNK swift::String dump() SWIFT_SYMBOL("s:10AlpacaCore8SwiftStrC4dumpSSyF");
+  SWIFT_INLINE_THUNK swift::String getM_path() SWIFT_SYMBOL("s:10AlpacaCore9AssetInfoC6m_pathSSvp");
+  SWIFT_INLINE_THUNK void setM_path(const swift::String& value) SWIFT_SYMBOL("s:10AlpacaCore9AssetInfoC6m_pathSSvp");
+  SWIFT_INLINE_THUNK swift::String getM_tag() SWIFT_SYMBOL("s:10AlpacaCore9AssetInfoC5m_tagSSvp");
+  SWIFT_INLINE_THUNK void setM_tag(const swift::String& value) SWIFT_SYMBOL("s:10AlpacaCore9AssetInfoC5m_tagSSvp");
+  static SWIFT_INLINE_THUNK AssetInfo init() SWIFT_SYMBOL("s:10AlpacaCore9AssetInfoCACycfc");
+  static SWIFT_INLINE_THUNK AssetInfo init(const swift::String& _path, const swift::String& _tag) SWIFT_SYMBOL("s:10AlpacaCore9AssetInfoC5_path4_tagACSS_SStcfc");
 protected:
-  SWIFT_INLINE_THUNK SwiftStr(void * _Nonnull ptr) noexcept : RefCountedClass(ptr) {}
+  SWIFT_INLINE_THUNK AssetInfo(void * _Nonnull ptr) noexcept : RefCountedClass(ptr) {}
 private:
-  friend class _impl::_impl_SwiftStr;
+  friend class _impl::_impl_AssetInfo;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wc++17-extensions"
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wreserved-identifier"
-  typedef char $s10AlpacaCore8SwiftStrCD;
-  static inline constexpr $s10AlpacaCore8SwiftStrCD __swift_mangled_name = 0;
+  typedef char $s10AlpacaCore9AssetInfoCD;
+  static inline constexpr $s10AlpacaCore9AssetInfoCD __swift_mangled_name = 0;
 #pragma clang diagnostic pop
 #pragma clang diagnostic pop
 };
 
 namespace _impl {
 
-class _impl_SwiftStr {
+class _impl_AssetInfo {
 public:
-static SWIFT_INLINE_THUNK SwiftStr makeRetained(void * _Nonnull ptr) noexcept { return SwiftStr(ptr); }
+static SWIFT_INLINE_THUNK AssetInfo makeRetained(void * _Nonnull ptr) noexcept { return AssetInfo(ptr); }
 };
 
 } // namespace _impl
@@ -5556,30 +5589,168 @@ namespace swift SWIFT_PRIVATE_ATTR {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wc++17-extensions"
 template<>
-struct TypeMetadataTrait<AlpacaCore::SwiftStr> {
+struct TypeMetadataTrait<AlpacaCore::AssetInfo> {
   static SWIFT_INLINE_PRIVATE_HELPER void * _Nonnull getTypeMetadata() {
-    return AlpacaCore::_impl::$s10AlpacaCore8SwiftStrCMa(0)._0;
+    return AlpacaCore::_impl::$s10AlpacaCore9AssetInfoCMa(0)._0;
   }
 };
 namespace _impl{
 template<>
-struct implClassFor<AlpacaCore::SwiftStr> { using type = AlpacaCore::_impl::_impl_SwiftStr; };
+struct implClassFor<AlpacaCore::AssetInfo> { using type = AlpacaCore::_impl::_impl_AssetInfo; };
 } // namespace
 #pragma clang diagnostic pop
 } // namespace swift
 
 namespace AlpacaCore SWIFT_PRIVATE_ATTR SWIFT_SYMBOL_MODULE("AlpacaCore") {
 
-  SWIFT_INLINE_THUNK SwiftStr SwiftStr::init() {
-  return _impl::_impl_SwiftStr::makeRetained(_impl::$s10AlpacaCore8SwiftStrCACycfC(swift::TypeMetadataTrait<SwiftStr>::getTypeMetadata()));
+
+class SWIFT_SYMBOL("s:10AlpacaCore4DictC") Dict;
+} // end namespace 
+
+namespace swift SWIFT_PRIVATE_ATTR {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wc++17-extensions"
+template<>
+static inline const constexpr bool isUsableInGenericContext<AlpacaCore::Dict> = true;
+#pragma clang diagnostic pop
+} // namespace swift
+
+namespace AlpacaCore SWIFT_PRIVATE_ATTR SWIFT_SYMBOL_MODULE("AlpacaCore") {
+namespace _impl {
+
+class _impl_Dict;
+// Type metadata accessor for Dict
+SWIFT_EXTERN swift::_impl::MetadataResponseTy $s10AlpacaCore4DictCMa(swift::_impl::MetadataRequestTy) SWIFT_NOEXCEPT SWIFT_CALL;
+
+
+} // namespace _impl
+
+class SWIFT_SYMBOL("s:10AlpacaCore4DictC") Dict : public swift::_impl::RefCountedClass {
+public:
+  using RefCountedClass::RefCountedClass;
+  using RefCountedClass::operator=;
+  static SWIFT_INLINE_THUNK Dict init() SWIFT_SYMBOL("s:10AlpacaCore4DictCACycfc");
+protected:
+  SWIFT_INLINE_THUNK Dict(void * _Nonnull ptr) noexcept : RefCountedClass(ptr) {}
+private:
+  friend class _impl::_impl_Dict;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wc++17-extensions"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreserved-identifier"
+  typedef char $s10AlpacaCore4DictCD;
+  static inline constexpr $s10AlpacaCore4DictCD __swift_mangled_name = 0;
+#pragma clang diagnostic pop
+#pragma clang diagnostic pop
+};
+
+namespace _impl {
+
+class _impl_Dict {
+public:
+static SWIFT_INLINE_THUNK Dict makeRetained(void * _Nonnull ptr) noexcept { return Dict(ptr); }
+};
+
+} // namespace _impl
+
+} // end namespace 
+
+namespace swift SWIFT_PRIVATE_ATTR {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wc++17-extensions"
+template<>
+struct TypeMetadataTrait<AlpacaCore::Dict> {
+  static SWIFT_INLINE_PRIVATE_HELPER void * _Nonnull getTypeMetadata() {
+    return AlpacaCore::_impl::$s10AlpacaCore4DictCMa(0)._0;
   }
-  SWIFT_INLINE_THUNK SwiftStr SwiftStr::init(const swift::String& s) {
-  alignas(alignof(swift::String)) char copyBuffer_consumedParamCopy_s[sizeof(swift::String)];
-  auto &consumedParamCopy_s = *(new(copyBuffer_consumedParamCopy_s) swift::String(s));
-  swift::_impl::ConsumedValueStorageDestroyer<swift::String> storageGuard_consumedParamCopy_s(consumedParamCopy_s);
-  return _impl::_impl_SwiftStr::makeRetained(_impl::$s10AlpacaCore8SwiftStrCyACSScfC(_impl::swift_interop_passDirect_AlpacaCore_uint64_t_0_8_void_ptr_8_16(swift::_impl::_impl_String::getOpaquePointer(consumedParamCopy_s)), swift::TypeMetadataTrait<SwiftStr>::getTypeMetadata()));
+};
+namespace _impl{
+template<>
+struct implClassFor<AlpacaCore::Dict> { using type = AlpacaCore::_impl::_impl_Dict; };
+} // namespace
+#pragma clang diagnostic pop
+} // namespace swift
+
+namespace AlpacaCore SWIFT_PRIVATE_ATTR SWIFT_SYMBOL_MODULE("AlpacaCore") {
+
+
+class SWIFT_SYMBOL("s:10AlpacaCore9ModelDescC") ModelDesc;
+} // end namespace 
+
+namespace swift SWIFT_PRIVATE_ATTR {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wc++17-extensions"
+template<>
+static inline const constexpr bool isUsableInGenericContext<AlpacaCore::ModelDesc> = true;
+#pragma clang diagnostic pop
+} // namespace swift
+
+namespace AlpacaCore SWIFT_PRIVATE_ATTR SWIFT_SYMBOL_MODULE("AlpacaCore") {
+namespace _impl {
+
+class _impl_ModelDesc;
+// Type metadata accessor for ModelDesc
+SWIFT_EXTERN swift::_impl::MetadataResponseTy $s10AlpacaCore9ModelDescCMa(swift::_impl::MetadataRequestTy) SWIFT_NOEXCEPT SWIFT_CALL;
+
+
+} // namespace _impl
+
+class SWIFT_SYMBOL("s:10AlpacaCore9ModelDescC") ModelDesc : public swift::_impl::RefCountedClass {
+public:
+  using RefCountedClass::RefCountedClass;
+  using RefCountedClass::operator=;
+  SWIFT_INLINE_THUNK swift::String getM_inferenceType() SWIFT_SYMBOL("s:10AlpacaCore9ModelDescC15m_inferenceTypeSSvp");
+  SWIFT_INLINE_THUNK void setM_inferenceType(const swift::String& value) SWIFT_SYMBOL("s:10AlpacaCore9ModelDescC15m_inferenceTypeSSvp");
+  SWIFT_INLINE_THUNK swift::String getM_name() SWIFT_SYMBOL("s:10AlpacaCore9ModelDescC6m_nameSSvp");
+  SWIFT_INLINE_THUNK void setM_name(const swift::String& value) SWIFT_SYMBOL("s:10AlpacaCore9ModelDescC6m_nameSSvp");
+  SWIFT_INLINE_THUNK swift::Array<AssetInfo> getM_assets() SWIFT_SYMBOL("s:10AlpacaCore9ModelDescC8m_assetsSayAA9AssetInfoCGvp");
+  SWIFT_INLINE_THUNK void setM_assets(const swift::Array<AssetInfo>& value) SWIFT_SYMBOL("s:10AlpacaCore9ModelDescC8m_assetsSayAA9AssetInfoCGvp");
+  static SWIFT_INLINE_THUNK ModelDesc init() SWIFT_SYMBOL("s:10AlpacaCore9ModelDescCACycfc");
+  static SWIFT_INLINE_THUNK ModelDesc init(const swift::String& _inferenceType, const swift::String& _name, const swift::Array<AssetInfo>& _assets) SWIFT_SYMBOL("s:10AlpacaCore9ModelDescC14_inferenceType5_name7_assetsACSS_SSSayAA9AssetInfoCGtcfc");
+protected:
+  SWIFT_INLINE_THUNK ModelDesc(void * _Nonnull ptr) noexcept : RefCountedClass(ptr) {}
+private:
+  friend class _impl::_impl_ModelDesc;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wc++17-extensions"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreserved-identifier"
+  typedef char $s10AlpacaCore9ModelDescCD;
+  static inline constexpr $s10AlpacaCore9ModelDescCD __swift_mangled_name = 0;
+#pragma clang diagnostic pop
+#pragma clang diagnostic pop
+};
+
+namespace _impl {
+
+class _impl_ModelDesc {
+public:
+static SWIFT_INLINE_THUNK ModelDesc makeRetained(void * _Nonnull ptr) noexcept { return ModelDesc(ptr); }
+};
+
+} // namespace _impl
+
+} // end namespace 
+
+namespace swift SWIFT_PRIVATE_ATTR {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wc++17-extensions"
+template<>
+struct TypeMetadataTrait<AlpacaCore::ModelDesc> {
+  static SWIFT_INLINE_PRIVATE_HELPER void * _Nonnull getTypeMetadata() {
+    return AlpacaCore::_impl::$s10AlpacaCore9ModelDescCMa(0)._0;
   }
-  SWIFT_INLINE_THUNK void SwiftStr::parseJson(const swift::String& jsonString) {
+};
+namespace _impl{
+template<>
+struct implClassFor<AlpacaCore::ModelDesc> { using type = AlpacaCore::_impl::_impl_ModelDesc; };
+} // namespace
+#pragma clang diagnostic pop
+} // namespace swift
+
+namespace AlpacaCore SWIFT_PRIVATE_ATTR SWIFT_SYMBOL_MODULE("AlpacaCore") {
+
+  SWIFT_INLINE_THUNK swift::String AssetInfo::getM_path() {
 void ***selfPtr_ = reinterpret_cast<void ***>( ::swift::_impl::_impl_RefCountedClass::getOpaquePointer(*this));
 #ifdef __arm64e__
 void **vtable_ = ptrauth_auth_data(*selfPtr_, ptrauth_key_process_independent_data, ptrauth_blend_discriminator(selfPtr_,27361));
@@ -5587,25 +5758,182 @@ void **vtable_ = ptrauth_auth_data(*selfPtr_, ptrauth_key_process_independent_da
 void **vtable_ = *selfPtr_;
 #endif
 struct FTypeAddress {
-decltype(_impl::$s10AlpacaCore8SwiftStrC9parseJsonyySSF) * func;
+decltype(_impl::$s10AlpacaCore9AssetInfoC6m_pathSSvg) * func;
 };
-FTypeAddress *fptrptr_ = reinterpret_cast<FTypeAddress *>(vtable_ + 128 / sizeof(void *));
-  (* fptrptr_->func)(_impl::swift_interop_passDirect_AlpacaCore_uint64_t_0_8_void_ptr_8_16(swift::_impl::_impl_String::getOpaquePointer(jsonString)), ::swift::_impl::_impl_RefCountedClass::getOpaquePointer(*this));
-  }
-  SWIFT_INLINE_THUNK swift::String SwiftStr::dump() {
-void ***selfPtr_ = reinterpret_cast<void ***>( ::swift::_impl::_impl_RefCountedClass::getOpaquePointer(*this));
-#ifdef __arm64e__
-void **vtable_ = ptrauth_auth_data(*selfPtr_, ptrauth_key_process_independent_data, ptrauth_blend_discriminator(selfPtr_,27361));
-#else
-void **vtable_ = *selfPtr_;
-#endif
-struct FTypeAddress {
-decltype(_impl::$s10AlpacaCore8SwiftStrC4dumpSSyF) * func;
-};
-FTypeAddress *fptrptr_ = reinterpret_cast<FTypeAddress *>(vtable_ + 136 / sizeof(void *));
+FTypeAddress *fptrptr_ = reinterpret_cast<FTypeAddress *>(vtable_ + 96 / sizeof(void *));
   return swift::_impl::_impl_String::returnNewValue([&](char * _Nonnull result) SWIFT_INLINE_THUNK_ATTRIBUTES {
     _impl::swift_interop_returnDirect_AlpacaCore_uint64_t_0_8_void_ptr_8_16(result, (* fptrptr_->func)(::swift::_impl::_impl_RefCountedClass::getOpaquePointer(*this)));
   });
+  }
+  SWIFT_INLINE_THUNK void AssetInfo::setM_path(const swift::String& value) {
+void ***selfPtr_ = reinterpret_cast<void ***>( ::swift::_impl::_impl_RefCountedClass::getOpaquePointer(*this));
+#ifdef __arm64e__
+void **vtable_ = ptrauth_auth_data(*selfPtr_, ptrauth_key_process_independent_data, ptrauth_blend_discriminator(selfPtr_,27361));
+#else
+void **vtable_ = *selfPtr_;
+#endif
+struct FTypeAddress {
+decltype(_impl::$s10AlpacaCore9AssetInfoC6m_pathSSvs) * func;
+};
+FTypeAddress *fptrptr_ = reinterpret_cast<FTypeAddress *>(vtable_ + 104 / sizeof(void *));
+  alignas(alignof(swift::String)) char copyBuffer_consumedParamCopy_value[sizeof(swift::String)];
+  auto &consumedParamCopy_value = *(new(copyBuffer_consumedParamCopy_value) swift::String(value));
+  swift::_impl::ConsumedValueStorageDestroyer<swift::String> storageGuard_consumedParamCopy_value(consumedParamCopy_value);
+  (* fptrptr_->func)(_impl::swift_interop_passDirect_AlpacaCore_uint64_t_0_8_void_ptr_8_16(swift::_impl::_impl_String::getOpaquePointer(consumedParamCopy_value)), ::swift::_impl::_impl_RefCountedClass::getOpaquePointer(*this));
+  }
+  SWIFT_INLINE_THUNK swift::String AssetInfo::getM_tag() {
+void ***selfPtr_ = reinterpret_cast<void ***>( ::swift::_impl::_impl_RefCountedClass::getOpaquePointer(*this));
+#ifdef __arm64e__
+void **vtable_ = ptrauth_auth_data(*selfPtr_, ptrauth_key_process_independent_data, ptrauth_blend_discriminator(selfPtr_,27361));
+#else
+void **vtable_ = *selfPtr_;
+#endif
+struct FTypeAddress {
+decltype(_impl::$s10AlpacaCore9AssetInfoC5m_tagSSvg) * func;
+};
+FTypeAddress *fptrptr_ = reinterpret_cast<FTypeAddress *>(vtable_ + 120 / sizeof(void *));
+  return swift::_impl::_impl_String::returnNewValue([&](char * _Nonnull result) SWIFT_INLINE_THUNK_ATTRIBUTES {
+    _impl::swift_interop_returnDirect_AlpacaCore_uint64_t_0_8_void_ptr_8_16(result, (* fptrptr_->func)(::swift::_impl::_impl_RefCountedClass::getOpaquePointer(*this)));
+  });
+  }
+  SWIFT_INLINE_THUNK void AssetInfo::setM_tag(const swift::String& value) {
+void ***selfPtr_ = reinterpret_cast<void ***>( ::swift::_impl::_impl_RefCountedClass::getOpaquePointer(*this));
+#ifdef __arm64e__
+void **vtable_ = ptrauth_auth_data(*selfPtr_, ptrauth_key_process_independent_data, ptrauth_blend_discriminator(selfPtr_,27361));
+#else
+void **vtable_ = *selfPtr_;
+#endif
+struct FTypeAddress {
+decltype(_impl::$s10AlpacaCore9AssetInfoC5m_tagSSvs) * func;
+};
+FTypeAddress *fptrptr_ = reinterpret_cast<FTypeAddress *>(vtable_ + 128 / sizeof(void *));
+  alignas(alignof(swift::String)) char copyBuffer_consumedParamCopy_value[sizeof(swift::String)];
+  auto &consumedParamCopy_value = *(new(copyBuffer_consumedParamCopy_value) swift::String(value));
+  swift::_impl::ConsumedValueStorageDestroyer<swift::String> storageGuard_consumedParamCopy_value(consumedParamCopy_value);
+  (* fptrptr_->func)(_impl::swift_interop_passDirect_AlpacaCore_uint64_t_0_8_void_ptr_8_16(swift::_impl::_impl_String::getOpaquePointer(consumedParamCopy_value)), ::swift::_impl::_impl_RefCountedClass::getOpaquePointer(*this));
+  }
+  SWIFT_INLINE_THUNK AssetInfo AssetInfo::init() {
+  return _impl::_impl_AssetInfo::makeRetained(_impl::$s10AlpacaCore9AssetInfoCACycfC(swift::TypeMetadataTrait<AssetInfo>::getTypeMetadata()));
+  }
+  SWIFT_INLINE_THUNK AssetInfo AssetInfo::init(const swift::String& _path, const swift::String& _tag) {
+  alignas(alignof(swift::String)) char copyBuffer_consumedParamCopy__path[sizeof(swift::String)];
+  auto &consumedParamCopy__path = *(new(copyBuffer_consumedParamCopy__path) swift::String(_path));
+  swift::_impl::ConsumedValueStorageDestroyer<swift::String> storageGuard_consumedParamCopy__path(consumedParamCopy__path);
+  alignas(alignof(swift::String)) char copyBuffer_consumedParamCopy__tag[sizeof(swift::String)];
+  auto &consumedParamCopy__tag = *(new(copyBuffer_consumedParamCopy__tag) swift::String(_tag));
+  swift::_impl::ConsumedValueStorageDestroyer<swift::String> storageGuard_consumedParamCopy__tag(consumedParamCopy__tag);
+  return _impl::_impl_AssetInfo::makeRetained(_impl::$s10AlpacaCore9AssetInfoC5_path4_tagACSS_SStcfC(_impl::swift_interop_passDirect_AlpacaCore_uint64_t_0_8_void_ptr_8_16(swift::_impl::_impl_String::getOpaquePointer(consumedParamCopy__path)), _impl::swift_interop_passDirect_AlpacaCore_uint64_t_0_8_void_ptr_8_16(swift::_impl::_impl_String::getOpaquePointer(consumedParamCopy__tag)), swift::TypeMetadataTrait<AssetInfo>::getTypeMetadata()));
+  }
+  SWIFT_INLINE_THUNK Dict Dict::init() {
+  return _impl::_impl_Dict::makeRetained(_impl::$s10AlpacaCore4DictCACycfC(swift::TypeMetadataTrait<Dict>::getTypeMetadata()));
+  }
+  SWIFT_INLINE_THUNK swift::String ModelDesc::getM_inferenceType() {
+void ***selfPtr_ = reinterpret_cast<void ***>( ::swift::_impl::_impl_RefCountedClass::getOpaquePointer(*this));
+#ifdef __arm64e__
+void **vtable_ = ptrauth_auth_data(*selfPtr_, ptrauth_key_process_independent_data, ptrauth_blend_discriminator(selfPtr_,27361));
+#else
+void **vtable_ = *selfPtr_;
+#endif
+struct FTypeAddress {
+decltype(_impl::$s10AlpacaCore9ModelDescC15m_inferenceTypeSSvg) * func;
+};
+FTypeAddress *fptrptr_ = reinterpret_cast<FTypeAddress *>(vtable_ + 104 / sizeof(void *));
+  return swift::_impl::_impl_String::returnNewValue([&](char * _Nonnull result) SWIFT_INLINE_THUNK_ATTRIBUTES {
+    _impl::swift_interop_returnDirect_AlpacaCore_uint64_t_0_8_void_ptr_8_16(result, (* fptrptr_->func)(::swift::_impl::_impl_RefCountedClass::getOpaquePointer(*this)));
+  });
+  }
+  SWIFT_INLINE_THUNK void ModelDesc::setM_inferenceType(const swift::String& value) {
+void ***selfPtr_ = reinterpret_cast<void ***>( ::swift::_impl::_impl_RefCountedClass::getOpaquePointer(*this));
+#ifdef __arm64e__
+void **vtable_ = ptrauth_auth_data(*selfPtr_, ptrauth_key_process_independent_data, ptrauth_blend_discriminator(selfPtr_,27361));
+#else
+void **vtable_ = *selfPtr_;
+#endif
+struct FTypeAddress {
+decltype(_impl::$s10AlpacaCore9ModelDescC15m_inferenceTypeSSvs) * func;
+};
+FTypeAddress *fptrptr_ = reinterpret_cast<FTypeAddress *>(vtable_ + 112 / sizeof(void *));
+  alignas(alignof(swift::String)) char copyBuffer_consumedParamCopy_value[sizeof(swift::String)];
+  auto &consumedParamCopy_value = *(new(copyBuffer_consumedParamCopy_value) swift::String(value));
+  swift::_impl::ConsumedValueStorageDestroyer<swift::String> storageGuard_consumedParamCopy_value(consumedParamCopy_value);
+  (* fptrptr_->func)(_impl::swift_interop_passDirect_AlpacaCore_uint64_t_0_8_void_ptr_8_16(swift::_impl::_impl_String::getOpaquePointer(consumedParamCopy_value)), ::swift::_impl::_impl_RefCountedClass::getOpaquePointer(*this));
+  }
+  SWIFT_INLINE_THUNK swift::String ModelDesc::getM_name() {
+void ***selfPtr_ = reinterpret_cast<void ***>( ::swift::_impl::_impl_RefCountedClass::getOpaquePointer(*this));
+#ifdef __arm64e__
+void **vtable_ = ptrauth_auth_data(*selfPtr_, ptrauth_key_process_independent_data, ptrauth_blend_discriminator(selfPtr_,27361));
+#else
+void **vtable_ = *selfPtr_;
+#endif
+struct FTypeAddress {
+decltype(_impl::$s10AlpacaCore9ModelDescC6m_nameSSvg) * func;
+};
+FTypeAddress *fptrptr_ = reinterpret_cast<FTypeAddress *>(vtable_ + 128 / sizeof(void *));
+  return swift::_impl::_impl_String::returnNewValue([&](char * _Nonnull result) SWIFT_INLINE_THUNK_ATTRIBUTES {
+    _impl::swift_interop_returnDirect_AlpacaCore_uint64_t_0_8_void_ptr_8_16(result, (* fptrptr_->func)(::swift::_impl::_impl_RefCountedClass::getOpaquePointer(*this)));
+  });
+  }
+  SWIFT_INLINE_THUNK void ModelDesc::setM_name(const swift::String& value) {
+void ***selfPtr_ = reinterpret_cast<void ***>( ::swift::_impl::_impl_RefCountedClass::getOpaquePointer(*this));
+#ifdef __arm64e__
+void **vtable_ = ptrauth_auth_data(*selfPtr_, ptrauth_key_process_independent_data, ptrauth_blend_discriminator(selfPtr_,27361));
+#else
+void **vtable_ = *selfPtr_;
+#endif
+struct FTypeAddress {
+decltype(_impl::$s10AlpacaCore9ModelDescC6m_nameSSvs) * func;
+};
+FTypeAddress *fptrptr_ = reinterpret_cast<FTypeAddress *>(vtable_ + 136 / sizeof(void *));
+  alignas(alignof(swift::String)) char copyBuffer_consumedParamCopy_value[sizeof(swift::String)];
+  auto &consumedParamCopy_value = *(new(copyBuffer_consumedParamCopy_value) swift::String(value));
+  swift::_impl::ConsumedValueStorageDestroyer<swift::String> storageGuard_consumedParamCopy_value(consumedParamCopy_value);
+  (* fptrptr_->func)(_impl::swift_interop_passDirect_AlpacaCore_uint64_t_0_8_void_ptr_8_16(swift::_impl::_impl_String::getOpaquePointer(consumedParamCopy_value)), ::swift::_impl::_impl_RefCountedClass::getOpaquePointer(*this));
+  }
+  SWIFT_INLINE_THUNK swift::Array<AssetInfo> ModelDesc::getM_assets() {
+void ***selfPtr_ = reinterpret_cast<void ***>( ::swift::_impl::_impl_RefCountedClass::getOpaquePointer(*this));
+#ifdef __arm64e__
+void **vtable_ = ptrauth_auth_data(*selfPtr_, ptrauth_key_process_independent_data, ptrauth_blend_discriminator(selfPtr_,27361));
+#else
+void **vtable_ = *selfPtr_;
+#endif
+struct FTypeAddress {
+decltype(_impl::$s10AlpacaCore9ModelDescC8m_assetsSayAA9AssetInfoCGvg) * func;
+};
+FTypeAddress *fptrptr_ = reinterpret_cast<FTypeAddress *>(vtable_ + 152 / sizeof(void *));
+  return swift::_impl::_impl_Array<AssetInfo>::returnNewValue([&](char * _Nonnull result) SWIFT_INLINE_THUNK_ATTRIBUTES {
+    _impl::swift_interop_returnDirect_AlpacaCore_void_ptr_0_8(result, (* fptrptr_->func)(::swift::_impl::_impl_RefCountedClass::getOpaquePointer(*this)));
+  });
+  }
+  SWIFT_INLINE_THUNK void ModelDesc::setM_assets(const swift::Array<AssetInfo>& value) {
+void ***selfPtr_ = reinterpret_cast<void ***>( ::swift::_impl::_impl_RefCountedClass::getOpaquePointer(*this));
+#ifdef __arm64e__
+void **vtable_ = ptrauth_auth_data(*selfPtr_, ptrauth_key_process_independent_data, ptrauth_blend_discriminator(selfPtr_,27361));
+#else
+void **vtable_ = *selfPtr_;
+#endif
+struct FTypeAddress {
+decltype(_impl::$s10AlpacaCore9ModelDescC8m_assetsSayAA9AssetInfoCGvs) * func;
+};
+FTypeAddress *fptrptr_ = reinterpret_cast<FTypeAddress *>(vtable_ + 160 / sizeof(void *));
+  alignas(alignof(swift::Array<AssetInfo>)) char copyBuffer_consumedParamCopy_value[sizeof(swift::Array<AssetInfo>)];
+  auto &consumedParamCopy_value = *(new(copyBuffer_consumedParamCopy_value) swift::Array<AssetInfo>(value));
+  swift::_impl::ConsumedValueStorageDestroyer<swift::Array<AssetInfo>> storageGuard_consumedParamCopy_value(consumedParamCopy_value);
+  (* fptrptr_->func)(_impl::swift_interop_passDirect_AlpacaCore_void_ptr_0_8(swift::_impl::_impl_Array<AssetInfo>::getOpaquePointer(consumedParamCopy_value)), ::swift::_impl::_impl_RefCountedClass::getOpaquePointer(*this));
+  }
+  SWIFT_INLINE_THUNK ModelDesc ModelDesc::init() {
+  return _impl::_impl_ModelDesc::makeRetained(_impl::$s10AlpacaCore9ModelDescCACycfC(swift::TypeMetadataTrait<ModelDesc>::getTypeMetadata()));
+  }
+  SWIFT_INLINE_THUNK ModelDesc ModelDesc::init(const swift::String& _inferenceType, const swift::String& _name, const swift::Array<AssetInfo>& _assets) {
+  alignas(alignof(swift::String)) char copyBuffer_consumedParamCopy__inferenceType[sizeof(swift::String)];
+  auto &consumedParamCopy__inferenceType = *(new(copyBuffer_consumedParamCopy__inferenceType) swift::String(_inferenceType));
+  swift::_impl::ConsumedValueStorageDestroyer<swift::String> storageGuard_consumedParamCopy__inferenceType(consumedParamCopy__inferenceType);
+  alignas(alignof(swift::String)) char copyBuffer_consumedParamCopy__name[sizeof(swift::String)];
+  auto &consumedParamCopy__name = *(new(copyBuffer_consumedParamCopy__name) swift::String(_name));
+  swift::_impl::ConsumedValueStorageDestroyer<swift::String> storageGuard_consumedParamCopy__name(consumedParamCopy__name);
+  alignas(alignof(swift::Array<AssetInfo>)) char copyBuffer_consumedParamCopy__assets[sizeof(swift::Array<AssetInfo>)];
+  auto &consumedParamCopy__assets = *(new(copyBuffer_consumedParamCopy__assets) swift::Array<AssetInfo>(_assets));
+  swift::_impl::ConsumedValueStorageDestroyer<swift::Array<AssetInfo>> storageGuard_consumedParamCopy__assets(consumedParamCopy__assets);
+  return _impl::_impl_ModelDesc::makeRetained(_impl::$s10AlpacaCore9ModelDescC14_inferenceType5_name7_assetsACSS_SSSayAA9AssetInfoCGtcfC(_impl::swift_interop_passDirect_AlpacaCore_uint64_t_0_8_void_ptr_8_16(swift::_impl::_impl_String::getOpaquePointer(consumedParamCopy__inferenceType)), _impl::swift_interop_passDirect_AlpacaCore_uint64_t_0_8_void_ptr_8_16(swift::_impl::_impl_String::getOpaquePointer(consumedParamCopy__name)), _impl::swift_interop_passDirect_AlpacaCore_void_ptr_0_8(swift::_impl::_impl_Array<AssetInfo>::getOpaquePointer(consumedParamCopy__assets)), swift::TypeMetadataTrait<ModelDesc>::getTypeMetadata()));
   }
 
 } // namespace AlpacaCore

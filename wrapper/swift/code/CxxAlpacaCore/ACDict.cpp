@@ -215,17 +215,13 @@ std::string getDictTypeAsString(const SwiftACDict& dict) {
     return dictTypeStrings[static_cast<int>(dict.getType())];
 }
 
-std::shared_ptr<local::ModelDesc> getModelDesc() {
-    return std::make_shared<local::ModelDesc>();
-}
+// swift::String getSwiftString(const swift::String& json) {
+//     auto cppStr = (std::string)json;
+//     // AlpacaCore::SwiftStr s = AlpacaCore::SwiftStr::init();
+//     // s.parseJson(json);
+//     // auto str = s.dump();
 
-swift::String getSwiftString(const swift::String& json) {
-    auto cppStr = (std::string)json;
-    AlpacaCore::SwiftStr s = AlpacaCore::SwiftStr::init();
-    // s.parseJson(json);
-    // auto str = s.dump();
-
-    return s.dump();
-}
+//     return swift::String("");
+// }
 
 }

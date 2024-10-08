@@ -5,6 +5,7 @@ import Foundation
 import CxxACLocal
 import CxxDummyInference
 import AlpacaCore
+import CxxAlpacaCoreDict
 
 func progress(tag: Optional<String>, progress: Float) -> Bool {
     print("[\(tag!)] progress: \(progress)\n")
@@ -25,7 +26,7 @@ struct CxxDummyExample {
         var arr =  ["1", "2"]
         arr.append("3")
 
-        // var acDict = ac.SwiftACDict()
+        var acDict = ac.SwiftACDict()
         let jsonString: String = """
             {
                 "name": "Alice",
@@ -40,8 +41,8 @@ struct CxxDummyExample {
             }
         """
 
-        // acDict.parseJson(jsonString, UInt32(jsonString.lengthOfBytes(using: .utf8)))
-        // print("Dict as string: \n\t \(acDict.dump())")
+        acDict.parseJson(jsonString, UInt32(jsonString.lengthOfBytes(using: .utf8)))
+        print("Dict as string: \n\t \(acDict.dump())")
 
         // Since ModelFactory has deleted it's cpy-ctor, we can't use it in Swift
         // let modelFactory = CxxACLocal.ac.local.ModelFactory()

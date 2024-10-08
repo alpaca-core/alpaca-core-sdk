@@ -6,8 +6,9 @@
 #include <ac/Dict.hpp>
 
 #include <swift/bridging>
-
 #include "AlpacaCore-Swift.h"
+
+#include "IntrusiveRefCounted.hpp"
 
 #include <memory>
 #include <vector>
@@ -70,10 +71,39 @@ private:
     bool m_owned;
 };
 
+
+class DictRoot : public IntrusiveRefCounted<DictRoot> {
+public:
+    DictRoot() = default;
+    DictRoot(const swift::String& jsonStr);
+    DictRoot(const DictRoot&) = delete;
+
+    static DictRoot* _Nonnull create();
+
+private:
+    Dict m_dict;
+} SWIFT_SHARED_REFERENCE(retainDictRoot, releaseDictRoot);
+
+void retainDictRoot(DictRoot* _Nullable);
+void releaseDictRoot(DictRoot* _Nullable);
+
+class DictRef : public IntrusiveRefCounted<DictRoot> {
+public:
+    DictRef() = delete;
+    DictRef(DictRoot* _Nonnull dict);
+    DictRef(const DictRef&) = delete;
+
+    static DictRef* _Nonnull create(DictRoot* _Nonnull dictRoot);
+
+private:
+    Dict* m_dictRef;
+} SWIFT_SHARED_REFERENCE(retainDictRef, releaseDictRoot);
+
+void retainDictRef(DictRef* _Nullable);
+void releaseDictRef(DictRef* _Nullable);
+
 std::string getDictTypeAsString(const SwiftACDict& dict);
 
-std::shared_ptr<local::ModelDesc> getModelDesc();
-
-swift::String getSwiftString();
+// swift::String getSwiftString();
 
 }
