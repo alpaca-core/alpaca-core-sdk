@@ -2,11 +2,18 @@
 // SPDX-License-Identifier: MIT
 //
 import Foundation
-import CxxAlpacaCore
+import AlpacaCore
+import CxxAlpacaCoreDict
+
 
 @main
 struct CxxAlpacaCoreExample {
     static func main() {
+        // Create a string object from Swift's Alpaca library
+        let acd = AlpacaCore.SwiftStr()
+        acd.parseJson("Hello, World!")
+        print("AC String: \(acd.dump())")
+
         var acDict = ac.SwiftACDict()
         let jsonString: String = """
             {

@@ -7,6 +7,8 @@
 
 #include <swift/bridging>
 
+#include "AlpacaCore-Swift.h"
+
 #include <memory>
 #include <vector>
 
@@ -69,5 +71,9 @@ private:
 };
 
 std::string getDictTypeAsString(const SwiftACDict& dict);
+
+std::shared_ptr<local::ModelDesc> getModelDesc();
+
+swift::String getSwiftString();
 
 }

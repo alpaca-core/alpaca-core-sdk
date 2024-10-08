@@ -32,7 +32,7 @@ add_executable(CxxACExample CxxACExample.swift)
 set_target_properties(CxxACExample PROPERTIES COMPILE_OPTIONS "")
 target_link_libraries(CxxACExample
   PRIVATE
-      CxxAlpacaCore
+    AlpacaCore
 )
 
 target_compile_options(CxxACExample
@@ -55,7 +55,7 @@ add_executable(CxxDummyExample CxxDummyExample.swift)
 set_target_properties(CxxDummyExample PROPERTIES COMPILE_OPTIONS "")
 target_link_libraries(CxxDummyExample
   PRIVATE
-      CxxAlpacaCore
+      AlpacaCore
       ac-local
       ac-local-dummy
 )

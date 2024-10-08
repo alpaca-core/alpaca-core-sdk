@@ -1,7 +1,7 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-module CxxAlpacaCore {
+module CxxAlpacaCoreDict {
     header "./ACDict.hpp"
 
     export *

@@ -3,8 +3,8 @@
 //
 import Foundation
 import CxxACLocal
-import CxxAlpacaCore
 import CxxDummyInference
+import AlpacaCore
 
 func progress(tag: Optional<String>, progress: Float) -> Bool {
     print("[\(tag!)] progress: \(progress)\n")
@@ -18,8 +18,14 @@ struct CxxDummyExample {
         var desc = CxxACLocal.ac.local.ModelDesc()
         desc.inferenceType = "dummy"
         desc.name = "synthetic dummy"
+        var asset = CxxACLocal.ac.local.ModelDesc.AssetInfo()
+        asset.path = "dummy"
+        desc.assets.push_back(asset)
 
-        var acDict = ac.SwiftACDict()
+        var arr =  ["1", "2"]
+        arr.append("3")
+
+        // var acDict = ac.SwiftACDict()
         let jsonString: String = """
             {
                 "name": "Alice",
@@ -34,11 +40,13 @@ struct CxxDummyExample {
             }
         """
 
-        acDict.parseJson(jsonString, UInt32(jsonString.lengthOfBytes(using: .utf8)))
-        print("Dict as string: \n\t \(acDict.dump())")
+        // acDict.parseJson(jsonString, UInt32(jsonString.lengthOfBytes(using: .utf8)))
+        // print("Dict as string: \n\t \(acDict.dump())")
 
-        let modelFactory = CxxACLocal.ac.local.ModelFactory()
-        CxxDummyInference.addDummyInference(modelFactory)
+        // Since ModelFactory has deleted it's cpy-ctor, we can't use it in Swift
+        // let modelFactory = CxxACLocal.ac.local.ModelFactory()
+        // CxxDummyInference.addDummyInference(modelFactory)
+
         // let model = AlpacaCore.createModel(desc, dict, progress)
         // let instance = model?.createInstance("general", [:])
 
