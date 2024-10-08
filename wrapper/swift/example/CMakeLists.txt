@@ -72,3 +72,29 @@ target_include_directories(CxxDummyExample
 )
 
 target_compile_options(CxxDummyExample PRIVATE -parse-as-library)
+
+
+# WhisperExample =================
+
+add_executable(WhisperExample e-Whisper.swift)
+# From the Root CMAKE there are C++ compile options which conflict with Swift compiler
+# so we clear them here
+set_target_properties(WhisperExample PROPERTIES COMPILE_OPTIONS "")
+target_link_libraries(WhisperExample
+  PRIVATE
+      AlpacaCore
+      ac-local-whisper
+)
+
+target_compile_options(WhisperExample
+  PUBLIC
+    $<$<COMPILE_LANGUAGE:Swift>:-cxx-interoperability-mode=default -Xcc -std=c++20>
+)
+
+target_include_directories(WhisperExample
+  PUBLIC
+    ${CMAKE_SOURCE_DIR}/wrapper/swift/code/CxxAlpacaCore
+    ${CMAKE_SOURCE_DIR}/wrapper/swift/example
+)
+
+target_compile_options(WhisperExample PRIVATE -parse-as-library)
