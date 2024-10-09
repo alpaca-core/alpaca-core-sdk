@@ -27,6 +27,11 @@ enum class DictValueType {
     DVT_Binary,       /**< Binary data */
 };
 
+struct BinaryBuffer {
+    const uint8_t* _Nonnull data;
+    swift::Int size;
+};
+
 class DictRoot;
 
 class DictRef {
@@ -47,14 +52,14 @@ public:
     unsigned getUnsigned() const;
     double getDouble() const;
     std::string getString() const;
-    std::vector<uint8_t>& getBinary() const;
+    BinaryBuffer getBinary() const SWIFT_RETURNS_INDEPENDENT_VALUE;
 
     void setBool(bool value);
     void setInt(int value);
     void setUnsigned(unsigned value);
     void setDouble(double value);
     void setString(std::string value);
-    void setBinary(uint8_t* _Nonnull data, uint32_t size);
+    void setBinary(const void* _Nonnull data, swift::Int size);
 
     void parse(const std::string& jsonStr);
     std::string dump() const;

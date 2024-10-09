@@ -69,8 +69,10 @@ std::string DictRef::getString() const {
     return std::string(m_dictRef->get<std::string>());
 }
 
-std::vector<uint8_t>& DictRef::getBinary() const{
-    return m_dictRef->get_binary();
+BinaryBuffer DictRef::getBinary() const SWIFT_RETURNS_INDEPENDENT_VALUE {
+    auto blob = m_dictRef->get_binary();
+    return {blob.data(), swift::Int(blob.size())};
+
 }
 
 void DictRef::setBool(bool value) {
@@ -93,8 +95,8 @@ void DictRef::setString(std::string value) {
     *m_dictRef = value;
 }
 
-void DictRef::setBinary(uint8_t* data, uint32_t size) {
-    *m_dictRef = Dict::binary(ac::Blob(data, data + size));
+void DictRef::setBinary(const void* data, swift::Int size) {
+    *m_dictRef = Dict::binary(ac::Blob((uint8_t*)data, (uint8_t*)data + size));
 }
 
 void DictRef::parse(const std::string& jsonStr) {

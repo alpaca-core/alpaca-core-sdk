@@ -29,7 +29,7 @@ struct CxxAlpacaCoreExample {
 
         let scoresRef = dictRef.atKey("scores")
         print("Name: \(ac.getDictTypeAsString(scoresRef.getType()))")
-        var scoresRef2 = dictRef["scores"]
+        let scoresRef2 = dictRef["scores"]
         print("Name: \(ac.getDictTypeAsString(scoresRef2.getType()))")
 
         let firstScore = scoresRef2[0]
@@ -43,5 +43,25 @@ struct CxxAlpacaCoreExample {
         var newElem = scoresRef2.addElement()
         newElem.setString("100")
         print("Values of score: \(scoresRef.dump())")
+
+        var child = dictRef.addChild("phoneNumber")
+        child.setString("123-456-7890")
+
+        var binData = dictRef.addChild("binData")
+        let data = "Hello, World!".data(using: .utf8)!
+        data.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) in
+            binData.setBinary(ptr.baseAddress!, data.count)
+        }
+
+        print("Values of binData: \(binData.dump()) - type \(ac.getDictTypeAsString(binData.getType()))")
+
+        let binaryDataRef = dictRef["binData"]
+        print("Values of binData: \(binaryDataRef.dump()) - type \(ac.getDictTypeAsString(binaryDataRef.getType()))")
+
+        let binaryData = binaryDataRef.getBinary()
+        print("bin Data \(binaryData)")
+        let dataFromDict = Data(bytes: binaryData.data, count: binaryData.size)
+        let strFromData = String(data: dataFromDict, encoding: .utf8)!
+        print("Strinf from Binary data: \(strFromData)")
     }
 }
