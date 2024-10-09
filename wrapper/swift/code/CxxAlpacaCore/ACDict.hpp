@@ -33,7 +33,10 @@ class DictRef {
 public:
     DictRef(const DictRef& other) = default;
 
-    DictRef atKey(const swift::String& key) const;
+    DictRef addChild(const std::string& key) const;
+    DictRef addElement() const;
+
+    DictRef atKey(const std::string& key) const;
     DictRef atIndex(int index) const;
 
     unsigned getSize() const;
@@ -43,12 +46,22 @@ public:
     int getInt() const;
     unsigned getUnsigned() const;
     double getDouble() const;
-    swift::String getString() const;
-    DictRef getArray(int index) const;
-    DictRef getObject(const swift::String& key) const;
+    std::string getString() const;
     std::vector<uint8_t>& getBinary() const;
 
-    void parse(const swift::String& jsonStr);
+    void setBool(bool value);
+    void setInt(int value);
+    void setUnsigned(unsigned value);
+    void setDouble(double value);
+    void setString(std::string value);
+    void setBinary(uint8_t* _Nonnull data, uint32_t size);
+
+    void parse(const std::string& jsonStr);
+    std::string dump() const;
+    DictRoot* _Nonnull clone();
+
+    DictRef operator[](const std::string& key) const;
+    DictRef operator[](int index) const;
 
 private:
     friend class DictRoot;
@@ -63,19 +76,15 @@ public:
     DictRoot(const DictRoot&) = delete;
 
     static DictRoot* _Nonnull create();
-    // static DictRoot* _Nonnull parse(const std::string& jsonStr);
-    // static DictRoot* _Nonnull parse();
+    static DictRoot* _Nonnull parse(const std::string& jsonStr);
 
-    void parse(const swift::String& key);
-    DictRef addChild(const swift::String& key);
-    DictRef getDictRef(const swift::String& key = "");
+    DictRef getRef();
 
 private:
     Dict m_dict;
 } SWIFT_SHARED_REFERENCE(retainDictRoot, releaseDictRoot);
 
 std::string getDictTypeAsString(DictValueType type);
-swift::String getSwiftString(const swift::String& json);
 
 }
 

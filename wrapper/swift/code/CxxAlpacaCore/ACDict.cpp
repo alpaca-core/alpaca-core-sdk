@@ -10,7 +10,17 @@ DictRef::DictRef(Dict* _Nonnull root)
     : m_dictRef(root)
 {}
 
-DictRef DictRef::atKey(const swift::String& key) const {
+DictRef DictRef::addChild(const std::string& key) const {
+    Dict& child = (*m_dictRef)[((std::string)key)];
+    return DictRef(&child);
+}
+
+DictRef DictRef::addElement() const {
+    Dict& elem = (*m_dictRef).emplace_back(ac::Dict());
+    return DictRef(&elem);
+}
+
+DictRef DictRef::atKey(const std::string& key) const {
     return DictRef(&m_dictRef->at((std::string)key));
 }
 
@@ -55,57 +65,72 @@ double DictRef::getDouble() const {
     return m_dictRef->get<double>();
 }
 
-swift::String DictRef::getString() const {
-    return swift::String(m_dictRef->get<std::string>());
+std::string DictRef::getString() const {
+    return std::string(m_dictRef->get<std::string>());
 }
 
-DictRef DictRef::getArray(int index) const {
-    // auto arr = m_dictRef->get_array();
-    // return DictRef(&m_dictRef->at(index));
-    return *this;
-}
-
-DictRef DictRef::getObject(const swift::String& key) const {
-    return *this;
-}
-
-std::vector<uint8_t>& DictRef::getBinary() const {
+std::vector<uint8_t>& DictRef::getBinary() const{
     return m_dictRef->get_binary();
 }
 
-void DictRef::parse(const swift::String& jsonStr) {
+void DictRef::setBool(bool value) {
+    *m_dictRef = value;
+}
+
+void DictRef::setInt(int value) {
+    *m_dictRef = value;
+}
+
+void DictRef::setUnsigned(unsigned value) {
+    *m_dictRef = value;
+}
+
+void DictRef::setDouble(double value) {
+    *m_dictRef = value;
+}
+
+void DictRef::setString(std::string value) {
+    *m_dictRef = value;
+}
+
+void DictRef::setBinary(uint8_t* data, uint32_t size) {
+    *m_dictRef = Dict::binary(ac::Blob(data, data + size));
+}
+
+void DictRef::parse(const std::string& jsonStr) {
     *m_dictRef = Dict::parse((std::string)jsonStr);
+}
+
+std::string DictRef::dump() const {
+    return m_dictRef->dump();
+}
+
+DictRef DictRef::operator[](const std::string& key) const{
+    return atKey(key);
+}
+
+DictRef DictRef::operator[](int index) const {
+    return atIndex(index);
+}
+
+DictRoot* _Nonnull DictRef::clone() {
+    DictRoot* root = DictRoot::create();
+    *root->getRef().m_dictRef = *m_dictRef;
+    return root;
 }
 
 DictRoot* _Nonnull DictRoot::create() {
     return new DictRoot();
 }
 
-// DictRoot* _Nonnull DictRoot::parse(const std::string& jsonStr) {
-//     auto root = new DictRoot();
-//     root->parse(jsonStr);
-//     return root;
-// }
-
-// DictRoot* _Nonnull DictRoot::parse() {
-//     return new DictRoot();
-// }
-
-void DictRoot::parse(const swift::String& key) {
-    m_dict = Dict::parse((std::string)key);
+DictRoot* _Nonnull DictRoot::parse(const std::string& jsonStr) {
+    auto root = new DictRoot();
+    root->m_dict = Dict::parse(jsonStr);
+    return root;
 }
 
-DictRef DictRoot::addChild(const swift::String& key) {
-    Dict& child = m_dict[((std::string)key)];
-    return DictRef(&child);
-}
-
-DictRef DictRoot::getDictRef(const swift::String& key){
-    std::string keyStr = (std::string)key;
-    if (keyStr.empty()) {
-        return DictRef(&m_dict);
-    }
-    return DictRef(&m_dict[keyStr]);
+DictRef DictRoot::getRef(){
+    return DictRef(&m_dict);
 }
 
 std::string getDictTypeAsString(DictValueType type) {
@@ -122,11 +147,6 @@ std::string getDictTypeAsString(DictValueType type) {
     };
 
     return dictTypeStrings[static_cast<int>(type)];
-}
-
-swift::String getSwiftString(const swift::String& json)  {
-    auto cppStr = (std::string)json;
-    return swift::String("pesho e ovca");
 }
 
 }

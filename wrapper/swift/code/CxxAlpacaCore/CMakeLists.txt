@@ -13,6 +13,8 @@ include(AddSwift)
 add_library(AlpacaCore STATIC
     ACDict.hpp
     ACDict.cpp
+    Model.hpp
+    Model.cpp
     SwiftAlpacaCore.swift
 )
 
