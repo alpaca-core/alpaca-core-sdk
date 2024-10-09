@@ -3,14 +3,12 @@
 //
 import Foundation
 import AlpacaCore
-import CxxAlpacaCoreDict
+import CAlpacaCore
 
 
 @main
 struct CxxAlpacaCoreExample {
     static func main() {
-
-        var acDict = ac.SwiftACDict()
         let jsonString: String = """
             {
                 "name": "Alice",
@@ -24,75 +22,81 @@ struct CxxAlpacaCoreExample {
                 }
             }
         """
+        var acDict = ac.DictRoot.create()
+        // acDict.parse(jsonString)
 
-        acDict.parseJson(jsonString, UInt32(jsonString.lengthOfBytes(using: .utf8)))
-        print("Dict as string: \n\t \(acDict.dump())")
-        print("Dict type: \n\t \(ac.getDictTypeAsString(acDict))")
+        var p = ac.getSwiftString(jsonString)
+        // var child = acDict.addChild("name")
 
-        // Check how we're going to handle errors
-        let k = acDict.getDictAt("kur")
-        let _ = k.getInt()
-        // end check
 
-        let name = acDict.getDictAt("name")
-        print("Type: \(ac.getDictTypeAsString(name)) - val; \(name.getString())")
+        // acDict.parseJson(jsonString, UInt32(jsonString.lengthOfBytes(using: .utf8)))
+        // print("Dict as string: \n\t \(acDict.dump())")
+        // print("Dict type: \n\t \(ac.getDictTypeAsString(acDict))")
 
-        let age = acDict.getDictAt("age")
-        print("Type: \(ac.getDictTypeAsString(age)) - val; \(age.getInt())")
+        // // Check how we're going to handle errors
+        // let k = acDict.getDictAt("kur")
+        // let _ = k.getInt()
+        // // end check
 
-        let h = acDict.getDictAt("height")
-        print("Type: \(ac.getDictTypeAsString(h)) - val; \(h.getDouble())")
+        // let name = acDict.getDictAt("name")
+        // print("Type: \(ac.getDictTypeAsString(name)) - val; \(name.getString())")
 
-        let m = acDict.getDictAt("isMember")
-        print("Type: \(ac.getDictTypeAsString(m)) - val; \(m.getBool())")
+        // let age = acDict.getDictAt("age")
+        // print("Type: \(ac.getDictTypeAsString(age)) - val; \(age.getInt())")
 
-        let arrDict = acDict.getDictAt("scores")
-        print("Type: \(ac.getDictTypeAsString(arrDict)) - \(type(of: arrDict))")
+        // let h = acDict.getDictAt("height")
+        // print("Type: \(ac.getDictTypeAsString(h)) - val; \(h.getDouble())")
 
-        let arrVec = arrDict.getArray()
-        let arr1 = arrVec[0]
-        print("Type: \(ac.getDictTypeAsString(arr1)) - val \(arr1.getInt()) [\(type(of: arr1.getInt()))]")
+        // let m = acDict.getDictAt("isMember")
+        // print("Type: \(ac.getDictTypeAsString(m)) - val; \(m.getBool())")
 
-        let arr2 = arrVec[1]
-        print("Type: \(ac.getDictTypeAsString(arr2)) - val \(arr2.getInt()) [\(type(of: arr2.getInt()))]")
+        // let arrDict = acDict.getDictAt("scores")
+        // print("Type: \(ac.getDictTypeAsString(arrDict)) - \(type(of: arrDict))")
 
-        let obj = acDict.getDictAt("address")
-        print("Type: \(ac.getDictTypeAsString(obj))")
+        // let arrVec = arrDict.getArray()
+        // let arr1 = arrVec[0]
+        // print("Type: \(ac.getDictTypeAsString(arr1)) - val \(arr1.getInt()) [\(type(of: arr1.getInt()))]")
 
-        let city = obj.getDictAt("city")
-        print("Type: \(ac.getDictTypeAsString(city)) - val; \(city.getString())")
+        // let arr2 = arrVec[1]
+        // print("Type: \(ac.getDictTypeAsString(arr2)) - val \(arr2.getInt()) [\(type(of: arr2.getInt()))]")
 
-        let code = obj.getDictAt("postalCode")
-        print("Type: \(ac.getDictTypeAsString(code)) - val; \(code.getString())")
+        // let obj = acDict.getDictAt("address")
+        // print("Type: \(ac.getDictTypeAsString(obj))")
 
-        var newDict = ac.SwiftACDict()
-        newDict.setString("pesho")
-        var anotherDict = ac.SwiftACDict()
-        anotherDict.setDictAt("name", newDict)
+        // let city = obj.getDictAt("city")
+        // print("Type: \(ac.getDictTypeAsString(city)) - val; \(city.getString())")
 
-        print("Dict as string: \n\t \(anotherDict.dump())")
-        newDict.setInt(33)
-        anotherDict.setDictAt("age", newDict)
+        // let code = obj.getDictAt("postalCode")
+        // print("Type: \(ac.getDictTypeAsString(code)) - val; \(code.getString())")
 
-        newDict.setUnsigned(444444444)
-        anotherDict.setDictAt("weight", newDict)
+        // var newDict = ac.SwiftACDict()
+        // newDict.setString("pesho")
+        // var anotherDict = ac.SwiftACDict()
+        // anotherDict.setDictAt("name", newDict)
 
-        newDict.setDouble(1.89)
-        anotherDict.setDictAt("height", newDict)
+        // print("Dict as string: \n\t \(anotherDict.dump())")
+        // newDict.setInt(33)
+        // anotherDict.setDictAt("age", newDict)
 
-        newDict.setBool(true)
-        anotherDict.setDictAt("isFunny", newDict)
+        // newDict.setUnsigned(444444444)
+        // anotherDict.setDictAt("weight", newDict)
 
-        let data = "pesho".data(using: .utf8)
-        data!.withUnsafeBytes { (rawBufferPointer: UnsafeRawBufferPointer) in
-            let ptr = rawBufferPointer.bindMemory(to: UInt8.self).baseAddress!
-            let size = data?.count
+        // newDict.setDouble(1.89)
+        // anotherDict.setDictAt("height", newDict)
 
-            newDict.setBinary(ptr, UInt32(size!))
-        }
+        // newDict.setBool(true)
+        // anotherDict.setDictAt("isFunny", newDict)
 
-        anotherDict.setDictAt("binary", newDict)
+        // let data = "pesho".data(using: .utf8)
+        // data!.withUnsafeBytes { (rawBufferPointer: UnsafeRawBufferPointer) in
+        //     let ptr = rawBufferPointer.bindMemory(to: UInt8.self).baseAddress!
+        //     let size = data?.count
 
-        print("Dict as string: \n\t \(anotherDict.dump())")
+        //     newDict.setBinary(ptr, UInt32(size!))
+        // }
+
+        // anotherDict.setDictAt("binary", newDict)
+
+        // print("Dict as string: \n\t \(anotherDict.dump())")
     }
 }

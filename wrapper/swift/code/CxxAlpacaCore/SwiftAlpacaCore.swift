@@ -5,9 +5,9 @@ public class AssetInfo {
     public init() {
     }
 
-    public init(_path:String, _tag:String) {
-        m_path = _path
-        m_tag = _tag
+    public init(_ path:String, _ tag:String) {
+        m_path = path
+        m_tag = tag
     }
 }
 
@@ -20,10 +20,10 @@ public class ModelDesc {
         self.m_assets = []
     }
 
-    public init(_inferenceType:String = "", _name:String = "", _assets:[AssetInfo] = []) {
-        m_inferenceType = _inferenceType
-        m_name = _name
-        m_assets = _assets
+    public init(_ inferenceType:String = "", _ name:String = "", _ assets:[AssetInfo] = []) {
+        m_inferenceType = inferenceType
+        m_name = name
+        m_assets = assets
     }
 }
 

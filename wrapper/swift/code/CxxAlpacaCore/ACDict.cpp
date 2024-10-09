@@ -4,202 +4,111 @@
 #include "ACDict.hpp"
 #include <iostream>
 
-namespace {
-
-template <typename F>
-auto dict_try_catch(F&& f) noexcept -> decltype(f()) {
-    try {
-        return f();
-    }
-    catch (const std::exception& e) {
-        std::cout << e.what();
-    }
-    catch (...) {
-        std::cout << "Unknown error" << std::endl;
-    }
-    return {};
-}
-
-}
-
 namespace ac {
 
-SwiftACDict::SwiftACDict()
-    : m_dict(new Dict())
-    , m_owned(true)
+DictRef::DictRef(Dict* _Nonnull root)
+    : m_dictRef(root)
 {}
 
-SwiftACDict::SwiftACDict(const SwiftACDict& dict)
-{
-    if (dict.m_owned) {
-        m_dict.reset(new Dict(*dict.m_dict));
-    } else {
-        m_dict.reset();
-        m_dict.reset(dict.m_dict.get());
-    }
-
-    m_owned = dict.m_owned;
+DictRef DictRef::atKey(const swift::String& key) const {
+    return DictRef(&m_dictRef->at((std::string)key));
 }
 
-SwiftACDict& SwiftACDict::operator=(const SwiftACDict& dict) {
-    if (this != &dict) {
-        *m_dict = *dict.m_dict;
-        m_owned = true;
-    }
-
-    return *this;
+DictRef DictRef::atIndex(int index) const {
+    return DictRef(&m_dictRef->at(index));
 }
 
-SwiftACDict::~SwiftACDict() {
-    if (!m_owned) {
-        m_dict.release();
-    }
+unsigned DictRef::getSize() const {
+    return m_dictRef->size();
 }
 
-void SwiftACDict::parseJson(const char* json, unsigned length) {
-    const char* json_end = json + length;
-    *m_dict = ac::Dict::parse(json, json_end);
-}
-
-SwiftACDict SwiftACDict::getDictAt(KeyType key) const {
-    if (!m_dict->is_object()) {
-        std::cerr << "Dict is not object!" << std::endl;
-        return {};
-    }
-
-    auto f = m_dict->find(key);
-    if (f == m_dict->end()) {
-        return SwiftACDict();
-    }
-    return makeCopy(*f);
-}
-
-bool SwiftACDict::getBool() const {
-    return dict_try_catch([&] {
-        return m_dict->get<bool>();
-    });
-}
-
-int SwiftACDict::getInt() const {
-    return dict_try_catch([&] {
-        return m_dict->get<int>();
-    });
-}
-
-unsigned SwiftACDict::getUnsigned() const {
-    return dict_try_catch([&] {
-        return m_dict->get<unsigned>();
-    });
-}
-
-double SwiftACDict::getDouble() const {
-    return dict_try_catch([&] {
-        return m_dict->get<double>();
-    });
-}
-
-std::string SwiftACDict::getString() const {
-    return dict_try_catch([&] {
-        return m_dict->get<std::string>();
-    });
-}
-
-std::vector<SwiftACDict> SwiftACDict::getArray() const {
-    if (!m_dict->is_array()) {
-        std::cerr << "Dict is not array!" << std::endl;
-        return {};
-    }
-
-    std::vector<SwiftACDict> vec;
-    for (size_t i = 0; i < m_dict->size(); i++)
-    {
-        vec.push_back(makeCopy(m_dict->at(i)));
-    }
-
-    return vec;
-}
-
-Blob SwiftACDict::getBinary() const {
-    if (!m_dict->is_binary()) {
-        std::cerr << "Dict is not binary!" << std::endl;
-        return {};
-    }
-
-    return m_dict->get_binary();
-}
-
-void SwiftACDict::setDictAt(KeyType key, SwiftACDict value) {
-    (*m_dict)[key] = *value.m_dict;
-}
-
-void SwiftACDict::setBool(bool value) {
-    *m_dict = value;
-}
-
-void SwiftACDict::setInt(int value) {
-    *m_dict = value;
-}
-
-void SwiftACDict::setUnsigned(unsigned value) {
-    *m_dict = value;
-}
-
-void SwiftACDict::setDouble(double value) {
-    *m_dict = value;
-}
-
-void SwiftACDict::setString(const std::string& value) {
-    *m_dict = value;
-}
-
-void SwiftACDict::setArray(const std::vector<SwiftACDict>& value) {
-    *m_dict = ac::Dict::array();
-    for (const auto& v : value) {
-        m_dict->push_back(*v.m_dict);
-    }
-}
-
-void SwiftACDict::setBinary(const uint8_t* data, uint32_t size) {
-    *m_dict = ac::Dict::binary(ac::Blob(data, data+size));
-}
-
-std::string SwiftACDict::dump() const {
-    return m_dict->dump();
-}
-
-DictValueType SwiftACDict::getType() const {
-    switch (m_dict->type()) {
-        case Dict::value_t::null: return DictValueType::DVT_Null;
-        case Dict::value_t::boolean: return DictValueType::DVT_Bool;
-        case Dict::value_t::number_integer: return DictValueType::DVT_Int;
-        case Dict::value_t::number_unsigned: return DictValueType::DVT_Unsigned;
-        case Dict::value_t::number_float: return DictValueType::DVT_Double;
-        case Dict::value_t::string: return DictValueType::DVT_String;
-        case Dict::value_t::array: return DictValueType::DVT_Array;
-        case Dict::value_t::object: return DictValueType::DVT_Object;
-        case Dict::value_t::binary: return DictValueType::DVT_Binary;
+DictValueType DictRef::getType() const {
+    switch (m_dictRef->type()) {
+        case ac::Dict::value_t::null: return DictValueType::DVT_Null;
+        case ac::Dict::value_t::boolean: return DictValueType::DVT_Bool;
+        case ac::Dict::value_t::number_integer: return DictValueType::DVT_Int;
+        case ac::Dict::value_t::number_unsigned: return DictValueType::DVT_Unsigned;
+        case ac::Dict::value_t::number_float: return DictValueType::DVT_Double;
+        case ac::Dict::value_t::string: return DictValueType::DVT_String;
+        case ac::Dict::value_t::array: return DictValueType::DVT_Array;
+        case ac::Dict::value_t::object: return DictValueType::DVT_Object;
+        case ac::Dict::value_t::binary: return DictValueType::DVT_Binary;
         default:
+            throw std::runtime_error("Unsupported dict value type!");
             return DictValueType::DVT_Null;
     }
 }
 
-SwiftACDict SwiftACDict::makeCopy(Dict& dict) const {
-    SwiftACDict d;
-    *d.m_dict = dict;
-    d.m_owned = true;
-
-    return d;
+bool DictRef::getBool() const {
+    return m_dictRef->get<bool>();
 }
 
-SwiftACDict SwiftACDict::makeRef(Dict& dictRef) const {
-    SwiftACDict dict;
-    dict.m_dict.reset(&dictRef);
-    dict.m_owned = false;
-
-    return dict;
+int DictRef::getInt() const {
+    return m_dictRef->get<int>();
 }
 
-std::string getDictTypeAsString(const SwiftACDict& dict) {
+unsigned DictRef::getUnsigned() const {
+    return m_dictRef->get<unsigned>();
+}
+
+double DictRef::getDouble() const {
+    return m_dictRef->get<double>();
+}
+
+swift::String DictRef::getString() const {
+    return swift::String(m_dictRef->get<std::string>());
+}
+
+DictRef DictRef::getArray(int index) const {
+    // auto arr = m_dictRef->get_array();
+    // return DictRef(&m_dictRef->at(index));
+    return *this;
+}
+
+DictRef DictRef::getObject(const swift::String& key) const {
+    return *this;
+}
+
+std::vector<uint8_t>& DictRef::getBinary() const {
+    return m_dictRef->get_binary();
+}
+
+void DictRef::parse(const swift::String& jsonStr) {
+    *m_dictRef = Dict::parse((std::string)jsonStr);
+}
+
+DictRoot* _Nonnull DictRoot::create() {
+    return new DictRoot();
+}
+
+// DictRoot* _Nonnull DictRoot::parse(const std::string& jsonStr) {
+//     auto root = new DictRoot();
+//     root->parse(jsonStr);
+//     return root;
+// }
+
+// DictRoot* _Nonnull DictRoot::parse() {
+//     return new DictRoot();
+// }
+
+void DictRoot::parse(const swift::String& key) {
+    m_dict = Dict::parse((std::string)key);
+}
+
+DictRef DictRoot::addChild(const swift::String& key) {
+    Dict& child = m_dict[((std::string)key)];
+    return DictRef(&child);
+}
+
+DictRef DictRoot::getDictRef(const swift::String& key){
+    std::string keyStr = (std::string)key;
+    if (keyStr.empty()) {
+        return DictRef(&m_dict);
+    }
+    return DictRef(&m_dict[keyStr]);
+}
+
+std::string getDictTypeAsString(DictValueType type) {
     static const char* dictTypeStrings[] = {
         "Null",
         "Bool",
@@ -212,16 +121,20 @@ std::string getDictTypeAsString(const SwiftACDict& dict) {
         "Binary"
     };
 
-    return dictTypeStrings[static_cast<int>(dict.getType())];
+    return dictTypeStrings[static_cast<int>(type)];
 }
 
-// swift::String getSwiftString(const swift::String& json) {
-//     auto cppStr = (std::string)json;
-//     // AlpacaCore::SwiftStr s = AlpacaCore::SwiftStr::init();
-//     // s.parseJson(json);
-//     // auto str = s.dump();
+swift::String getSwiftString(const swift::String& json)  {
+    auto cppStr = (std::string)json;
+    return swift::String("pesho e ovca");
+}
 
-//     return swift::String("");
-// }
+}
 
+void retainDictRoot(ac::DictRoot* _Nullable d) {
+    d->retain();
+}
+
+void releaseDictRoot(ac::DictRoot* _Nullable d) {
+    d->release();
 }

@@ -27,83 +27,57 @@ enum class DictValueType {
     DVT_Binary,       /**< Binary data */
 };
 
-class SwiftACDict {
+class DictRoot;
+
+class DictRef {
 public:
+    DictRef(const DictRef& other) = default;
 
-    SwiftACDict();
-    SwiftACDict(const SwiftACDict& dict);
-    SwiftACDict& operator=(const SwiftACDict& dict);
+    DictRef atKey(const swift::String& key) const;
+    DictRef atIndex(int index) const;
 
-    ~SwiftACDict();
+    unsigned getSize() const;
+    DictValueType getType() const;
 
-    void parseJson(const char* json, unsigned length);
-
-    using KeyType = std::string;
-
-    // Getters
-    SwiftACDict getDictAt(KeyType key) const;
     bool getBool() const;
     int getInt() const;
     unsigned getUnsigned() const;
     double getDouble() const;
-    std::string getString() const;
-    std::vector<SwiftACDict> getArray() const;
-    Blob getBinary() const;
+    swift::String getString() const;
+    DictRef getArray(int index) const;
+    DictRef getObject(const swift::String& key) const;
+    std::vector<uint8_t>& getBinary() const;
 
-    // Setters
-    void setDictAt(KeyType key, SwiftACDict value);
-    void setBool(bool value);
-    void setInt(int value);
-    void setUnsigned(unsigned value);
-    void setDouble(double value);
-    void setString(const std::string& value);
-    void setArray(const std::vector<SwiftACDict>& value);
-    void setBinary(const uint8_t* data, uint32_t size);
-
-    std::string dump() const;
-    DictValueType getType() const;
+    void parse(const swift::String& jsonStr);
 
 private:
-    SwiftACDict makeCopy(Dict& dict) const;
-    SwiftACDict makeRef(Dict& dictRef) const;
+    friend class DictRoot;
+    DictRef(Dict* _Nonnull root);
 
-    std::unique_ptr<Dict> m_dict;
-    bool m_owned;
+    Dict* _Nonnull m_dictRef;
 };
-
 
 class DictRoot : public IntrusiveRefCounted<DictRoot> {
 public:
     DictRoot() = default;
-    DictRoot(const swift::String& jsonStr);
     DictRoot(const DictRoot&) = delete;
 
     static DictRoot* _Nonnull create();
+    // static DictRoot* _Nonnull parse(const std::string& jsonStr);
+    // static DictRoot* _Nonnull parse();
+
+    void parse(const swift::String& key);
+    DictRef addChild(const swift::String& key);
+    DictRef getDictRef(const swift::String& key = "");
 
 private:
     Dict m_dict;
 } SWIFT_SHARED_REFERENCE(retainDictRoot, releaseDictRoot);
 
-void retainDictRoot(DictRoot* _Nullable);
-void releaseDictRoot(DictRoot* _Nullable);
-
-class DictRef : public IntrusiveRefCounted<DictRoot> {
-public:
-    DictRef() = delete;
-    DictRef(DictRoot* _Nonnull dict);
-    DictRef(const DictRef&) = delete;
-
-    static DictRef* _Nonnull create(DictRoot* _Nonnull dictRoot);
-
-private:
-    Dict* m_dictRef;
-} SWIFT_SHARED_REFERENCE(retainDictRef, releaseDictRoot);
-
-void retainDictRef(DictRef* _Nullable);
-void releaseDictRef(DictRef* _Nullable);
-
-std::string getDictTypeAsString(const SwiftACDict& dict);
-
-// swift::String getSwiftString();
+std::string getDictTypeAsString(DictValueType type);
+swift::String getSwiftString(const swift::String& json);
 
 }
+
+void retainDictRoot(ac::DictRoot* _Nullable d);
+void releaseDictRoot(ac::DictRoot* _Nullable d);
