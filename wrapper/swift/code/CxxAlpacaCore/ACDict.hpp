@@ -68,8 +68,12 @@ public:
     DictRef operator[](const std::string& key) const;
     DictRef operator[](int index) const;
 
+    Dict& getDict() const { return *m_dictRef; }
+
 private:
     friend class DictRoot;
+    friend class Model;
+    friend class Instance;
     DictRef(Dict* _Nonnull root);
 
     Dict* _Nonnull m_dictRef;

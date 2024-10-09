@@ -3,26 +3,24 @@
 //
 #pragma once
 
-#include <ac/local/Model.hpp>
-#include <ac/local/ModelPtr.hpp>
+#include <ac/local/Instance.hpp>
 
 #include <swift/bridging>
 #include "AlpacaCore-Swift.h"
 
+#include "AlpacaCore.hpp"
 #include "IntrusiveRefCounted.hpp"
 #include "ACDict.hpp"
 
 namespace ac {
-class Instance;
 
-class Model : public IntrusiveRefCounted<Model> {
+class Instance : public IntrusiveRefCounted<Model> {
 public:
-    Model(local::ModelPtr model);
-    static Model* _Nonnull create(local::ModelPtr model);
-
-    Instance* _Nonnull createInstance(const std::string& type, DictRef params);
+    DictRoot* _Nonnull runOp(const std::string& op, DictRef params, ProgressCb _Nullable cb);
 private:
-    local::ModelPtr m_model;
+    friend class Model;
+    Instance(std::unique_ptr<local::Instance> instance);
+    std::unique_ptr<local::Instance> m_instance;
 } SWIFT_SHARED_REFERENCE(retainModel, releaseModel);
 }
 

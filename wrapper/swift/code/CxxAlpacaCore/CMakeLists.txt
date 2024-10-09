@@ -15,7 +15,12 @@ add_library(AlpacaCore STATIC
     ACDict.cpp
     Model.hpp
     Model.cpp
+    Instance.hpp
+    Instance.cpp
+    AlpacaCore.hpp
+    AlpacaCore.cpp
     SwiftAlpacaCore.swift
+    DictHelper.swift
 )
 
 set_target_properties(AlpacaCore PROPERTIES COMPILE_OPTIONS "")
@@ -26,6 +31,9 @@ target_link_libraries(AlpacaCore
     PUBLIC
         ac::dict
         ac::local
+        ac-local-dummy
+        ac-local-whisper
+        ac-local-llama
 )
 
 # Generate a C++ header from Swift sources. This is automatically added to the

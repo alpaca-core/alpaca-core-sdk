@@ -72,7 +72,6 @@ std::string DictRef::getString() const {
 BinaryBuffer DictRef::getBinary() const SWIFT_RETURNS_INDEPENDENT_VALUE {
     auto blob = m_dictRef->get_binary();
     return {blob.data(), swift::Int(blob.size())};
-
 }
 
 void DictRef::setBool(bool value) {

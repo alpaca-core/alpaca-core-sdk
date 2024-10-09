@@ -1,34 +1,28 @@
 public class AssetInfo {
-    public var m_path: String = ""
-    public var m_tag: String = ""
+    public var path: String = ""
+    public var tag: String = ""
 
     public init() {
     }
 
     public init(_ path:String, _ tag:String) {
-        m_path = path
-        m_tag = tag
+        self.path = path
+        self.tag = tag
     }
 }
 
 public class ModelDesc {
-    public var m_inferenceType: String = ""
-    public var m_name: String = ""
-    public var m_assets: [AssetInfo]
+    public var inferenceType: String = ""
+    public var name: String = ""
+    public var assets: [AssetInfo]
 
     public init() {
-        self.m_assets = []
+        self.assets = []
     }
 
     public init(_ inferenceType:String = "", _ name:String = "", _ assets:[AssetInfo] = []) {
-        m_inferenceType = inferenceType
-        m_name = name
-        m_assets = assets
-    }
-}
-
-public class Dict {
-    public var m_dict: [String: Any] = [:]
-    public init() {
+        self.inferenceType = inferenceType
+        self.name = name
+        self.assets = assets
     }
 }

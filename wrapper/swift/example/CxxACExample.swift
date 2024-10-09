@@ -63,5 +63,22 @@ struct CxxAlpacaCoreExample {
         let dataFromDict = Data(bytes: binaryData.data, count: binaryData.size)
         let strFromData = String(data: dataFromDict, encoding: .utf8)!
         print("Strinf from Binary data: \(strFromData)")
+
+        let _ = translateDictToDictionary(5)
+
+        let dictionary: [String: Any] = [
+            "name": "Alice",
+            "age": 28,
+            "height": 1.6,
+            "isMember": true,
+            "scores": [88, 92, 79],
+            "address": [
+                "city": "Wonderland",
+                "postalCode": "12345"
+            ]
+        ]
+
+        let _ = translateDictionaryToDict(dictionary)
+        // print("Translated: \(translated.dump())")
     }
 }

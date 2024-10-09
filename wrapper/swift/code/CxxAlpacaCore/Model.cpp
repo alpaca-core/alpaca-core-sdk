@@ -2,21 +2,28 @@
 // SPDX-License-Identifier: MIT
 //
 #include "Model.hpp"
-#include <iostream>
+
+#include "Instance.hpp"
 
 namespace ac {
 
-void printModelDesc(AlpacaCore::ModelDesc& desc) {
-    std::cout << "ModelDesc:" << std::endl;
-    std::cout << "  InferenceType: " << (std::string)desc.getM_inferenceType() << std::endl;
-    std::cout << "  Name: " << (std::string)desc.getM_name() << std::endl;
-    std::cout << "  Assets:" << std::endl;
-    for (auto asset : desc.getM_assets()) {
-        std::cout << "    Path: " << (std::string)asset.getM_path() << std::endl;
-        std::cout << "    Tag: " << (std::string)asset.getM_tag() << std::endl;
-    }
+Model::Model(local::ModelPtr model)
+    : m_model(model)
+{}
 
-    std::cout << "kur" << std::endl;
+Model* Model::create(local::ModelPtr model) {
+    return new Model(model);
 }
 
+Instance* Model::createInstance(const std::string& type, DictRef params)  {
+        return new Instance(m_model->createInstance(type, *params.m_dictRef));
+    }
+}
+
+void retainModel(ac::Model* _Nullable d) {
+    d->retain();
+}
+
+void releaseModel(ac::Model* _Nullable d) {
+    d->release();
 }
