@@ -20,18 +20,21 @@ struct DummyExample {
         desc.inferenceType = "dummy"
         desc.name = "synthetic dummy"
 
-        let dict = ac.DictRoot.create()
-        let model = AlpacaCore.createModel(&desc, dict.getRef(), progress)!;
-        let instance = model.createInstance("general", dict.getRef());
+        let dict = Dictionary<String, Any>()
+        let model = AlpacaCore.createModel(&desc, dict, progress)!;
+        let instance = model.createInstance("general", dict);
 
-        let dictOp = ac.DictRoot.create()
-        let inputRef = dictOp.getRef().addChild("input")
-        var objRef = inputRef.addElement()
-        objRef.setString("a")
-        var objRef2 = inputRef.addElement()
-        objRef2.setString("b")
+        let params = [
+            "input": ["a", "b"]
+        ]
+        // let dictOp = ac.DictRoot.create()
+        // let inputRef = dictOp.getRef().addChild("input")
+        // var objRef = inputRef.addElement()
+        // objRef.setString("a")
+        // var objRef2 = inputRef.addElement()
+        // objRef2.setString("b")
 
-        let result = instance.runOp("run", dictOp.getRef(), progress);
-        print("Result \(result.getRef().dump())")
+        let result = instance.runOp("run", params, progress);
+        print("Result \(result)")
     }
 }
