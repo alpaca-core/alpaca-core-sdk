@@ -173,7 +173,7 @@ class Primitive : public SchemaItem {
     static std::string_view ptn(float) { return "number"; }
     static std::string_view ptn(std::string) { return "string"; }
     static std::string_view ptn(std::string_view) { return "string"; }
-
+protected:
     void doDescribeSelf(OrderedDict& d) const override {
         d["type"] = ptn(T());
     }
