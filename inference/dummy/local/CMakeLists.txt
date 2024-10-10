@@ -18,5 +18,6 @@ target_link_libraries(ac-local-dummy
         ac::local
 )
 
+ac_add_tools_subdir()
 ac_add_test_subdir()
 ac_add_example_subdir()

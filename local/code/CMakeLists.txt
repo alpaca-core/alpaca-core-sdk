@@ -9,6 +9,7 @@ target_link_libraries(ac-local
         jalog::jalog
     PUBLIC
         ac::dict
+        ac::schema
 )
 target_sources(ac-local PRIVATE
     ac/local/export.h
