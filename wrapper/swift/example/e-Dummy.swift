@@ -14,14 +14,14 @@ struct DummyExample {
     static func main() {
         print("Hello from e-Dummy.swift")
 
-        ac.initSDK();
+        AlpacaCore.initSDK();
 
         var desc = AlpacaCore.ModelDesc()
         desc.inferenceType = "dummy"
         desc.name = "synthetic dummy"
 
         let dict = ac.DictRoot.create()
-        let model = ac.createModel(&desc, dict.getRef(), progress)!;
+        let model = AlpacaCore.createModel(&desc, dict.getRef(), progress)!;
         let instance = model.createInstance("general", dict.getRef());
 
         let dictOp = ac.DictRoot.create()

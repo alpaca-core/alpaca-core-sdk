@@ -44,7 +44,7 @@ public:
     DictRef atKey(const std::string& key) const;
     DictRef atIndex(int index) const;
 
-    unsigned getSize() const;
+    swift::Int getSize() const;
     DictValueType getType() const;
 
     bool getBool() const;
@@ -53,9 +53,10 @@ public:
     double getDouble() const;
     std::string getString() const;
     BinaryBuffer getBinary() const SWIFT_RETURNS_INDEPENDENT_VALUE;
+    std::vector<std::string> getKeys() const;
 
     void setBool(bool value);
-    void setInt(int value);
+    void setInt(swift::Int value);
     void setUnsigned(unsigned value);
     void setDouble(double value);
     void setString(std::string value);
@@ -69,6 +70,7 @@ public:
     DictRef operator[](int index) const;
 
     Dict& getDict() const { return *m_dictRef; }
+
 
 private:
     friend class DictRoot;

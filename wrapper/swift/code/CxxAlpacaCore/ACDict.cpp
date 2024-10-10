@@ -28,7 +28,7 @@ DictRef DictRef::atIndex(int index) const {
     return DictRef(&m_dictRef->at(index));
 }
 
-unsigned DictRef::getSize() const {
+swift::Int DictRef::getSize() const {
     return m_dictRef->size();
 }
 
@@ -74,11 +74,19 @@ BinaryBuffer DictRef::getBinary() const SWIFT_RETURNS_INDEPENDENT_VALUE {
     return {blob.data(), swift::Int(blob.size())};
 }
 
+std::vector<std::string> DictRef::getKeys() const {
+    std::vector<std::string> keys;
+    for (auto it = m_dictRef->begin(); it != m_dictRef->end(); ++it) {
+        keys.push_back(it.key());
+    }
+    return keys;
+}
+
 void DictRef::setBool(bool value) {
     *m_dictRef = value;
 }
 
-void DictRef::setInt(int value) {
+void DictRef::setInt(swift::Int value) {
     *m_dictRef = value;
 }
 

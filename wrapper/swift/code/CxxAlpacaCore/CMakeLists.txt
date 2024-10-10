@@ -21,6 +21,7 @@ add_library(AlpacaCore STATIC
     AlpacaCore.cpp
     SwiftAlpacaCore.swift
     DictHelper.swift
+    Model.swift
 )
 
 # If we don't clear compiler options -Wall is passed which is not recognized by Swift compiler
