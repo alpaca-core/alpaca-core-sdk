@@ -4,6 +4,12 @@
 
 # macros which optionally add subdirs according to the project options
 
+macro(ac_add_tools_subdir)
+    if(AC_BUILD_TOOLS)
+        add_subdirectory(tools)
+    endif()
+endmacro()
+
 macro(ac_add_test_subdir)
     if(AC_BUILD_TESTS)
         add_subdirectory(test)

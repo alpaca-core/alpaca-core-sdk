@@ -55,6 +55,8 @@ option(AC_BUILD_LOCAL "${CMAKE_PROJECT_NAME}: build local inference api" ON)
 
 set(AC_INFERENCE_LIBS "all" CACHE STRING "${CMAKE_PROJECT_NAME}: inference libraries to build")
 
+option(AC_BUILD_TOOLS "${CMAKE_PROJECT_NAME}: build tools" ${alpacaCoreIsRoot})
+
 option(AC_BUILD_TESTS "${CMAKE_PROJECT_NAME}: build tests" ${alpacaCoreIsRoot})
 option(AC_BUILD_EXAMPLES "${CMAKE_PROJECT_NAME}: build examples" ${alpacaCoreIsRoot})
 option(AC_BUILD_POC "${CMAKE_PROJECT_NAME}: build proof of concept targets" ${alpacaCoreIsRoot})
