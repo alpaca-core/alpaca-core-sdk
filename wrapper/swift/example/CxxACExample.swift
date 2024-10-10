@@ -47,38 +47,42 @@ struct CxxAlpacaCoreExample {
         var child = dictRef.addChild("phoneNumber")
         child.setString("123-456-7890")
 
-        var binData = dictRef.addChild("binData")
-        let data = "Hello, World!".data(using: .utf8)!
-        data.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) in
-            binData.setBinary(ptr.baseAddress!, data.count)
-        }
+        // var binData = dictRef.addChild("binData")
+        // let data = "Hello, World!".data(using: .utf8)!
+        // data.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) in
+        //     binData.setBinary(ptr.baseAddress!, data.count)
+        // }
 
-        print("Values of binData: \(binData.dump()) - type \(ac.getDictTypeAsString(binData.getType()))")
+        // print("Values of binData: \(binData.dump()) - type \(ac.getDictTypeAsString(binData.getType()))")
 
-        let binaryDataRef = dictRef["binData"]
-        print("Values of binData: \(binaryDataRef.dump()) - type \(ac.getDictTypeAsString(binaryDataRef.getType()))")
+        // let binaryDataRef = dictRef["binData"]
+        // print("Values of binData: \(binaryDataRef.dump()) - type \(ac.getDictTypeAsString(binaryDataRef.getType()))")
 
-        let binaryData = binaryDataRef.getBinary()
-        print("bin Data \(binaryData)")
-        let dataFromDict = Data(bytes: binaryData.data, count: binaryData.size)
-        let strFromData = String(data: dataFromDict, encoding: .utf8)!
-        print("Strinf from Binary data: \(strFromData)")
+        // let binaryData = binaryDataRef.getBinary()
+        // print("bin Data \(binaryData)")
+        // let dataFromDict = Data(bytes: binaryData.data, count: binaryData.size)
+        // let strFromData = String(data: dataFromDict, encoding: .utf8)!
+        // print("Strinf from Binary data: \(strFromData)")
 
-        let _ = translateDictToDictionary(5)
+        let swiftDict = translateDictToDictionary(dictRef)
+        print("Swift Dict: \(swiftDict)")
 
         let dictionary: [String: Any] = [
             "name": "Alice",
             "age": 28,
             "height": 1.6,
             "isMember": true,
-            "scores": [88, 92, 79],
+            "scores": [88, 92, 79, "100"],
             "address": [
                 "city": "Wonderland",
                 "postalCode": "12345"
-            ]
+            ],
+            "phoneNumber": "123-456-7890"
         ]
 
-        let _ = translateDictionaryToDict(dictionary)
-        // print("Translated: \(translated.dump())")
+        print("Swift Orig Dict: \(dictionary)")
+
+        let translated = translateDictionaryToDict(dictionary)
+        print("Translated: \(translated.getRef().dump())")
     }
 }
