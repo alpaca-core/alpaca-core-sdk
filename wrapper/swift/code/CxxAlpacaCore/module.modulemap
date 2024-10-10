@@ -2,25 +2,10 @@
 // SPDX-License-Identifier: MIT
 //
 module CAlpacaCore {
-    //header "./../../../../.cpm/json/798e0374658476027d9723eeb67a262d0f3c8308/include/nlohmann/detail/abi_macros.hpp"
-    //header "./../../../../.cpm/json/798e0374658476027d9723eeb67a262d0f3c8308/include/nlohmann/adl_serializer.hpp"
-    //header "./../../../../.cpm/json/798e0374658476027d9723eeb67a262d0f3c8308/include/nlohmann/byte_container_with_subtype.hpp"
-    //header "./../../../../.cpm/json/798e0374658476027d9723eeb67a262d0f3c8308/include/nlohmann/json.hpp"
-    //header "./../../../../dict/code/ac/Dict.hpp"
     header "./ACDict.hpp"
     header "./AlpacaCore.hpp"
     header "./Model.hpp"
     header "./Instance.hpp"
-
-    export *
-}
-
-module CxxACLocal {
-    header "./../../../../local/code/ac/local/ModelFactory.hpp"
-    header "./../../../../local/code/ac/local/ModelDesc.hpp"
-    header "./../../../../local/code/ac/local/Model.hpp"
-    header "./../../../../local/code/ac/local/ModelPtr.hpp"
-    header "./../../../../local/code/ac/local/Instance.hpp"
 
     export *
 }

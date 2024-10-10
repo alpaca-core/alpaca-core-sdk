@@ -23,7 +23,7 @@ function(_swift_generate_cxx_header target header)
     return()
   endif()
 
-  cmake_parse_arguments(ARG "" "" "SEARCH_PATHS;MODULE_NAME" ${ARGN})
+  cmake_parse_arguments(ARG "" "" "SEARCH_PATHS;MODULE_NAME;SWIFT_EXPOSABLE_FILES" ${ARGN})
 
   if(NOT ARG_MODULE_NAME)
     set(target_module_name $<TARGET_PROPERTY:${target},Swift_MODULE_NAME>)
@@ -48,15 +48,13 @@ function(_swift_generate_cxx_header target header)
   cmake_path(APPEND base_path ${header}
     OUTPUT_VARIABLE header_path)
 
-  set(_AllSources $<TARGET_PROPERTY:${target},SOURCES>)
-  set(_SwiftSources $<FILTER:${_AllSources},INCLUDE,\\.swift$>)
   add_custom_command(OUTPUT ${header_path}
     DEPENDS ${_SwiftSources}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMAND
       ${CMAKE_Swift_COMPILER} -frontend -typecheck
       ${ARG_SEARCH_PATHS}
-      ${_SwiftSources}
+      ${ARG_SWIFT_EXPOSABLE_FILES}
       ${SDK_FLAGS}
       -module-name "${ARG_MODULE_NAME}"
       -cxx-interoperability-mode=default

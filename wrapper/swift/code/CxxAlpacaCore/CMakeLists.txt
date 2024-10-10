@@ -23,9 +23,15 @@ add_library(AlpacaCore STATIC
     DictHelper.swift
 )
 
+# If we don't clear compiler options -Wall is passed which is not recognized by Swift compiler
 set_target_properties(AlpacaCore PROPERTIES COMPILE_OPTIONS "")
 
-target_include_directories(AlpacaCore INTERFACE .)
+target_compile_options(AlpacaCore
+  PUBLIC
+    $<$<COMPILE_LANGUAGE:Swift>:-cxx-interoperability-mode=default -Xcc -std=c++20>
+)
+
+target_include_directories(AlpacaCore PUBLIC .)
 
 target_link_libraries(AlpacaCore
     PUBLIC
@@ -36,12 +42,15 @@ target_link_libraries(AlpacaCore
         ac-local-llama
 )
 
-# Generate a C++ header from Swift sources. This is automatically added to the
-# fibonacci target. The target will regenerate the header file when any of the
+# Generate a C++ header from selected Swift sources. This is automatically added to the
+# AlpacaCore target. The target will regenerate the header file when any of the
 # Swift sources change. Clang detects that the C++ file depends on the header,
 # and tells Ninja about this dependency in the depfile.
-# This function is implemented in cmake/modules/AddSwift.cmake.
+# This function is implemented in cmake_modules/AddSwift.cmake.
 _swift_generate_cxx_header(AlpacaCore
   ${CMAKE_CURRENT_SOURCE_DIR}/AlpacaCore-Swift.h
-  SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}"
+  SEARCH_PATHS
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+  SWIFT_EXPOSABLE_FILES
+    SwiftAlpacaCore.swift
 )

@@ -1,10 +1,11 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
+import CAlpacaCore
 
-// When we try to import CAlpacaCore which should expose C++ headers
-// it tries to compile the module and starts with missing headers
-// import CAlpacaCore
+func test() -> ac.DictRoot {
+    return ac.DictRoot.create()
+}
 
 public func translateDictionaryToDict(_ dictionary: Dictionary<String, Any>) -> Int {
     print("translateDictionaryToDict")
