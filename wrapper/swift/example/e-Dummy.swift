@@ -27,12 +27,6 @@ struct DummyExample {
         let params = [
             "input": ["a", "b"]
         ]
-        // let dictOp = ac.DictRoot.create()
-        // let inputRef = dictOp.getRef().addChild("input")
-        // var objRef = inputRef.addElement()
-        // objRef.setString("a")
-        // var objRef2 = inputRef.addElement()
-        // objRef2.setString("b")
 
         let result = instance.runOp("run", params, progress);
         print("Result \(result)")
