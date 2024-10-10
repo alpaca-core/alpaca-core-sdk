@@ -16,6 +16,7 @@ astl_test(coro_lock)
 astl_test(cow)
 astl_test(safe_func)
 astl_test(eager_coro_helper)
+astl_test(tuple_util)
 
 icm_add_multiple_build_failure_tests(
     SOURCES
