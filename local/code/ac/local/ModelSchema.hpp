@@ -6,6 +6,19 @@
 #include <ac/schema/SchemaItem.hpp>
 #include <astl/tuple_util.hpp>
 
+// here we use tuples to define instances within a model and operations within an instance
+// an arguably better implementation would have been to define an enum and specialize an empty template
+// for each value of the enum, as in:
+/*
+class ModelSchema {
+    enum class Instances { A, B, Count };
+    template <> class Instance;
+    template <> struct Instance<Instances::A> { ... };
+};*/
+// then we could switch by the enum and... you know the drill
+// however gcc does not allow us to specialize inside a class https://gcc.gnu.org/bugzilla/show_bug.cgi?id=85282
+// so, tuples it is
+
 namespace ac::local::schema {
 
 using namespace ac::schema;
