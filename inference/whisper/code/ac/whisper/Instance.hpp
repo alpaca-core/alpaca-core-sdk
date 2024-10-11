@@ -28,10 +28,10 @@ public:
     Instance(Model& model, InitParams params);
     ~Instance();
 
-    std::string transcribe(std::span<float> pcmf32);
+    std::string transcribe(std::span<const float> pcmf32);
 
 private:
-    std::string runInference(std::span<float> pcmf32);
+    std::string runInference(std::span<const float> pcmf32);
 
     Model& m_model;
     InitParams m_params;
