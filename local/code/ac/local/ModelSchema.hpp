@@ -18,7 +18,7 @@ public:
     using SchemaItem::SchemaItem;
 
     Blob* getValue() const {
-        if (!m_self) return nullptr;
+        if (!m_self || m_self->is_null()) return nullptr;
         return &m_self->get_binary();
     }
 

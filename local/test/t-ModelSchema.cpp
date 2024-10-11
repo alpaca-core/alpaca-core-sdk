@@ -6,6 +6,25 @@
 
 using namespace ac::local::schema;
 
+TEST_CASE("test binary null") {
+    Binary b;
+    CHECK_FALSE(b.getValue());
+}
+
+TEST_CASE("test binary val") {
+    std::vector<uint8_t> v = {1, 2, 3};
+    auto data = v.data();
+    Dict d;
+    Binary b(d);
+    CHECK_FALSE(b.getValue());
+
+    b.setValue(std::move(v));
+
+    auto ptr = b.getValue();
+    REQUIRE(ptr);
+    CHECK(ptr->data() == data); // same vec
+}
+
 struct TestSchema : public ModelHelper<TestSchema> {
     static constexpr std::string_view id = "test-model";
 
