@@ -25,3 +25,5 @@ icm_add_multiple_build_failure_tests(
     PREFIX astl
     FOLDER bf-test
 )
+
+add_subdirectory(workarounds)

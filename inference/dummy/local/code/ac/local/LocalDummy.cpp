@@ -15,6 +15,7 @@
 #include <astl/move.hpp>
 #include <astl/iile.h>
 #include <astl/throw_ex.hpp>
+#include <astl/workarounds.h>
 
 namespace ac::local {
 
@@ -80,7 +81,7 @@ public:
             return run(params);
         default:
             throw_ex{} << "dummy: unknown op: " << op;
-            return {}; // msvc workaround
+            MSVC_WO_10766806();
         }
     }
 };
@@ -108,7 +109,7 @@ public:
             return std::make_unique<DummyInstance>(m_model, params);
         default:
             throw_ex{} << "dummy: unknown instance type: " << type;
-            return {}; // msvc workaround
+            MSVC_WO_10766806();
         }
     }
 };
