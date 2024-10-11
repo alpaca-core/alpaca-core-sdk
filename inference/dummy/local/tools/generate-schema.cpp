@@ -2,11 +2,9 @@
 // SPDX-License-Identifier: MIT
 //
 #include <ac/local/DummyModelSchema.hpp>
+#include <ac/local/ModelSchemaGenHelper.hpp>
 #include <iostream>
 
-int main() {
-    ac::schema::OrderedDict out;
-    ac::local::schema::Dummy::describe(out);
-    std::cout << out.dump(2) << "\n";
-    return 0;
+int main(int argc, char** argv) {
+    return ac::local::schema::generatorMain<ac::local::schema::Dummy>(argc, argv);
 }

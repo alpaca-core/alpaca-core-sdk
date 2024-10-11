@@ -6,6 +6,7 @@
 namespace ac::local::schema {
 
 struct Dummy : public ModelHelper<Dummy> {
+    static inline constexpr std::string_view id = "dummy";
     static inline constexpr std::string_view description = "Dummy inference for tests, examples, and experiments.";
 
     struct Params : public Object {
