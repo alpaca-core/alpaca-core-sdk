@@ -181,7 +181,7 @@ public:
     using SchemaItem::SchemaItem;
 
     std::optional<T> getValue() const {
-        if (!m_self) {
+        if (!m_self || m_self->is_null()) {
             if (required()) {
                 throw std::runtime_error("Required value is missing");
             }

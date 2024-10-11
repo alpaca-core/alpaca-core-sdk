@@ -6,6 +6,20 @@
 
 using namespace ac::schema;
 
+TEST_CASE("trivial null") {
+    Int i;
+    CHECK_FALSE(i.getValue());
+}
+
+TEST_CASE("trivial val") {
+    Dict d;
+    Uint u(d);
+    CHECK_FALSE(u.getValue());
+
+    u.setValue(42);
+    CHECK(u.getValue() == 42);
+}
+
 struct Human : public Object {
     using Object::Object;
     String name{*this, "name", "The name of the human"};
