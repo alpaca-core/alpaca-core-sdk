@@ -30,9 +30,17 @@ class Binary : public SchemaItem {
 public:
     using SchemaItem::SchemaItem;
 
-    Blob* getValue() const {
+    Blob* optGetValue() const {
         if (!m_self || m_self->is_null()) return nullptr;
         return &m_self->get_binary();
+    }
+
+    Blob& getValue() const {
+        auto opt = optGetValue();
+        if (!opt) {
+            throw std::runtime_error("Value is missing");
+        }
+        return *opt;
     }
 
     void setValue(Blob value) {

@@ -8,7 +8,7 @@ using namespace ac::local::schema;
 
 TEST_CASE("test binary null") {
     Binary b;
-    CHECK_FALSE(b.getValue());
+    CHECK_FALSE(b.optGetValue());
 }
 
 TEST_CASE("test binary val") {
@@ -16,13 +16,12 @@ TEST_CASE("test binary val") {
     auto data = v.data();
     Dict d;
     Binary b(d);
-    CHECK_FALSE(b.getValue());
+    CHECK_FALSE(b.optGetValue());
 
     b.setValue(std::move(v));
 
-    auto ptr = b.getValue();
-    REQUIRE(ptr);
-    CHECK(ptr->data() == data); // same vec
+    auto& blob = b.getValue();
+    CHECK(blob.data() == data); // same vec
 }
 
 struct TestSchema : public ModelHelper<TestSchema> {
