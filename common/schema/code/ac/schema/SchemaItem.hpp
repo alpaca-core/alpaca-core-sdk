@@ -168,6 +168,14 @@ public:
     }
 };
 
+class Null : public SchemaItem {
+    void doDescribeSelf(OrderedDict& d) const override {
+        d["type"] = "null";
+    }
+public:
+    using SchemaItem::SchemaItem;
+};
+
 template <typename T>
 class Primitive : public SchemaItem {
     static std::string_view ptn(bool) { return "boolean"; }

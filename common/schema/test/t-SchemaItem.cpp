@@ -6,7 +6,14 @@
 
 using namespace ac::schema;
 
-TEST_CASE("trivial null") {
+TEST_CASE("null") {
+    Null n;
+    OrderedDict d;
+    n.describeSelf(d);
+    CHECK(d.dump() == R"({"type":"null"})");
+}
+
+TEST_CASE("trivial no val") {
     Int i;
     CHECK_FALSE(i.getValue());
 }

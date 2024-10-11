@@ -18,4 +18,5 @@ target_link_libraries(ac-local-llama
         ac::local
 )
 
+ac_add_tools_subdir()
 ac_add_example_subdir()

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #include "LocalLlama.hpp"
+#include "LlamaModelSchema.hpp"
 
 #include <ac/llama/Session.hpp>
 #include <ac/llama/Instance.hpp>
@@ -18,15 +19,11 @@
 #include <astl/move_capture.hpp>
 #include <astl/iile.h>
 #include <astl/throw_ex.hpp>
+#include <astl/workarounds.h>
 
 namespace ac::local {
 
 namespace {
-llama::Instance::SessionParams SessionParams_fromDict(const Dict&) {
-    llama::Instance::SessionParams ret;
-    return ret;
-}
-
 class ChatSession {
     llama::Session m_session;
     const llama::Vocab& m_vocab;
@@ -38,24 +35,28 @@ class ChatSession {
     bool m_addUserPrefix = true;
     bool m_addAssistantPrefix = true;
 public:
+    using Schema = ac::local::schema::Llama::InstanceGeneral;
+
     ChatSession(llama::Instance& instance, Dict& params)
-        : m_session(instance.newSession(SessionParams_fromDict(params)))
+        : m_session(instance.newSession({}))
         , m_vocab(instance.model().vocab())
     {
-        auto setup = Dict_optValueAt(params, "setup", std::string_view{});
+        Schema::OpChatBegin::Params schemaParams(params);
+        auto setup = *schemaParams.setup.getValue();
         m_promptTokens = instance.model().vocab().tokenize(setup, true, true);
         m_session.setInitialPrompt(m_promptTokens);
 
         m_userPrefix = "\n";
-        m_userPrefix += Dict_optValueAt(params, "role_user", std::string_view("User"));
+        m_userPrefix += *schemaParams.roleUser.getValue();
         m_userPrefix += ":";
         m_assistantPrefix = "\n";
-        m_assistantPrefix += Dict_optValueAt(params, "role_assistant", std::string_view("Assistant"));
+        m_assistantPrefix += *schemaParams.roleAssistant.getValue();;
         m_assistantPrefix += ":";
     }
 
     void pushPrompt(Dict& params) {
-        auto prompt = Dict_optValueAt(params, "prompt", std::string{});
+        Schema::OpChatAddPrompt::Params schemaParams(params);
+        auto prompt = std::string(*schemaParams.prompt.getValue());
 
         // prefix with space as the generated content doesn't include it
         prompt = ' ' + prompt;
@@ -117,7 +118,10 @@ public:
             response.erase(0, 1);
         }
 
-        return {{"response", astl::move(response)}};
+        Dict ret;
+        Schema::OpChatGetResponse::Return result(ret);
+        result.response.setValue(astl::move(response));
+        return ret;
     }
 };
 
@@ -129,25 +133,29 @@ class LlamaInstance final : public Instance {
     std::optional<ChatSession> m_chatSession;
 
 public:
+    using Schema = ac::local::schema::Llama::InstanceGeneral;
+
     LlamaInstance(std::shared_ptr<llama::Model> model)
         : m_model(astl::move(model))
         , m_instance(*m_model, {})
     {}
 
     Dict run(Dict& params) {
-        auto prompt = Dict_optValueAt(params, "prompt", std::string_view{});
-        auto antiprompts = Dict_optValueAt(params, "antiprompts", std::vector<std::string_view>{});
-        const auto maxTokens = Dict_optValueAt(params, "max_tokens", uint32_t(0));
+        Schema::OpRun::Params schemaParams(params);
+        auto prompt = *schemaParams.prompt.getValue();
+        const auto maxTokens = *schemaParams.maxTokens.getValue();
 
-        auto s = m_instance.newSession(SessionParams_fromDict(params));
+        auto s = m_instance.newSession({});
 
         auto promptTokens = m_instance.model().vocab().tokenize(prompt, true, true);
         s.setInitialPrompt(promptTokens);
 
         auto& model = m_instance.model();
         ac::llama::AntipromptManager antiprompt;
-        for (const auto& ap : antiprompts) {
-            antiprompt.addAntiprompt(ap);
+
+        auto& antiprompts = schemaParams.antiprompts;
+        for (size_t i = 0; i < antiprompts.size(); ++i) {
+            antiprompt.addAntiprompt(*antiprompts[i].getValue());
         }
 
         std::string result;
@@ -169,31 +177,26 @@ public:
     }
 
     virtual Dict runOp(std::string_view op, Dict params, ProgressCb) override {
-        if (op == "run") {
-            if (m_chatSession) {
-                m_chatSession.reset();
-            }
+        switch (Schema::getOpIndexById(op)) {
+        case Schema::opIndex<Schema::OpRun>:
             return run(params);
-        }
-        if (op == "begin-chat") {
+        case Schema::opIndex<Schema::OpChatBegin>:
             m_chatSession.emplace(m_instance, params);
             return {};
-        }
-        if (op == "add-chat-prompt") {
+        case Schema::opIndex<Schema::OpChatAddPrompt>:
             if (!m_chatSession) {
                 throw_ex{} << "llama: chat not started";
             }
             m_chatSession->pushPrompt(params);
             return {};
-        }
-        if (op == "get-chat-response") {
+        case Schema::opIndex<Schema::OpChatGetResponse>:
             if (!m_chatSession) {
                 throw_ex{} << "llama: chat not started";
             }
             return m_chatSession->getResponse();
-        }
-        else {
+        default:
             throw_ex{} << "llama: unknown op: " << op;
+            MSVC_WO_10766806();
         }
     }
 };
@@ -201,15 +204,20 @@ public:
 class LlamaModel final : public Model {
     std::shared_ptr<llama::Model> m_model;
 public:
+    using Schema = ac::local::schema::Llama;
+
     LlamaModel(const std::string& gguf, llama::ModelLoadProgressCb pcb, llama::Model::Params params)
         : m_model(std::make_shared<llama::Model>(gguf.c_str(), astl::move(pcb), astl::move(params)))
     {}
 
     virtual std::unique_ptr<Instance> createInstance(std::string_view type, Dict) override {
-        if (type != "general") {
+        switch (Schema::getInstanceById(type)) {
+        case Schema::instanceIndex<Schema::InstanceGeneral>:
+            return std::make_unique<LlamaInstance>(m_model);
+        default:
             throw_ex{} << "llama: unknown instance type: " << type;
+            MSVC_WO_10766806();
         }
-        return std::make_unique<LlamaInstance>(m_model);
     }
 };
 
