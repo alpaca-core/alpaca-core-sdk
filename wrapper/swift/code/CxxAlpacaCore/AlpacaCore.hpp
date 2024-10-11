@@ -8,12 +8,13 @@
 #include "AlpacaCore-Swift.h"
 #include "ACDict.hpp"
 
-typedef void (*ProgressCb)(float progress);
 
 namespace ac {
+typedef void (*SwiftProgressCb)(void* _Nonnull context, float progress);
+
 static std::unique_ptr<local::ModelFactory> factorySingleton;
 
 void initSDK();
-class Model* createModel(AlpacaCore::ModelDesc& desc, DictRef params, ProgressCb pcb);
+class Model* _Nullable createModel(AlpacaCore::ModelDesc& desc, DictRef params, SwiftProgressCb _Nonnull cb, void* _Nonnull context);
 
 }

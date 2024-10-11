@@ -16,7 +16,7 @@ namespace ac {
 
 class Instance : public IntrusiveRefCounted<Model> {
 public:
-    DictRoot* _Nonnull runOp(const std::string& op, DictRef params, ProgressCb _Nullable cb);
+    DictRoot* _Nonnull runOp(const std::string& op, DictRef params, SwiftProgressCb _Nonnull cb, void* _Nonnull context);
 private:
     friend class Model;
     Instance(std::unique_ptr<local::Instance> instance);

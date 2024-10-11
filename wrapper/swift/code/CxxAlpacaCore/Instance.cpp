@@ -17,10 +17,13 @@ Instance::Instance(std::unique_ptr<local::Instance> instance)
     : m_instance(std::move(instance))
 {}
 
-DictRoot* Instance::runOp(const std::string& op, DictRef params, ProgressCb cb) {
+DictRoot* Instance::runOp(const std::string& op, DictRef params, SwiftProgressCb _Nonnull cb, void* _Nonnull context) {
     DictRoot* root = DictRoot::create();
     DictRef ref = root->getRef();
-    ref.getDict() = m_instance->runOp(op, params.getDict(), nullptr);
+    ref.getDict() = m_instance->runOp(op, params.getDict(), [&](std::string_view tag, float progress) {
+        cb(context, progress);
+        return true;
+    });
     return root;
 }
 

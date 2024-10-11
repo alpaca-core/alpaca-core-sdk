@@ -19,7 +19,7 @@ void initSDK() {
     local::addWhisperInference(*factorySingleton);
 }
 
-class Model* createModel(AlpacaCore::ModelDesc& desc, DictRef params, ProgressCb pcb) {
+class Model* createModel(AlpacaCore::ModelDesc& desc, DictRef params, SwiftProgressCb cb, void* _Nonnull context) {
     ac::local::ModelDesc modelDesc;
     modelDesc.inferenceType = desc.getInferenceType();
     modelDesc.name = desc.getName();
@@ -32,7 +32,10 @@ class Model* createModel(AlpacaCore::ModelDesc& desc, DictRef params, ProgressCb
         modelDesc.assets.push_back(assetInfo);
     }
 
-    return new Model(factorySingleton->createModel(modelDesc, params.getDict(), nullptr));
+    return new Model(factorySingleton->createModel(modelDesc, params.getDict(), [&](std::string_view tag, float progress) {
+        cb(context, progress);
+        return true;
+    }));
 }
 
 }

@@ -7,13 +7,24 @@ public func initSDK() {
     ac.initSDK()
 }
 
-func progress(_ progress: Float) {
-    print("Progress: \(progress)")
+class CallbackWrapper {
+    let completion: (Float) -> Void
+    init(completion: @escaping (Float) -> Void) {
+        self.completion = completion
+    }
 }
 
-public func createModel(_ desc: inout ModelDesc, _ params: Dictionary<String, Any>, _ _progress: (Float) -> Void) -> Model? {
+func callObserver(observer: UnsafeMutableRawPointer, progress: Float) {
+    let wrapper = Unmanaged<CallbackWrapper>.fromOpaque(observer).takeUnretainedValue()
+    wrapper.completion(progress)
+}
+
+public func createModel(_ desc: inout ModelDesc, _ params: Dictionary<String, Any>, _ _progress: @escaping (Float) -> Void) -> Model? {
     let paramsAsDict = translateDictionaryToDict(params)
-    if let model = ac.createModel(&desc, paramsAsDict.getRef(), progress)
+    let wrapper = CallbackWrapper(completion: _progress)
+    let observer = UnsafeMutableRawPointer(Unmanaged.passRetained(wrapper).toOpaque())
+
+    if let model = ac.createModel(&desc, paramsAsDict.getRef(), callObserver, observer)
     {
         return Model(model)
     }
@@ -31,7 +42,6 @@ public class Model {
         let paramsAsDict = translateDictionaryToDict(params)
         return Instance(model.createInstance(std.string(name), paramsAsDict.getRef()))
     }
-
 }
 
 public class Instance {
@@ -41,9 +51,15 @@ public class Instance {
         self.instance = instance
     }
 
-    public func runOp(_ op: String, _ params: Dictionary<String, Any>, _ _progress: (Float) -> Void) -> Dictionary<String, Any> {
+    public func runOp(_ op: String, _ params: Dictionary<String, Any>, _ _progress: @escaping (Float) -> Void) -> Dictionary<String, Any> {
+        let wrapper = CallbackWrapper(completion: _progress)
+        let observer = UnsafeMutableRawPointer(Unmanaged.passRetained(wrapper).toOpaque())
+
         let paramsAsDict = translateDictionaryToDict(params)
-        let resultDict = instance.runOp(std.string(op), paramsAsDict.getRef(), progress)
+        let resultDict = instance.runOp(std.string(op), paramsAsDict.getRef(), { (observer: UnsafeMutableRawPointer, progress: Float) in
+            let wrapper = Unmanaged<CallbackWrapper>.fromOpaque(observer).takeUnretainedValue()
+            wrapper.completion(progress)
+        }, observer)
         return translateDictToDictionary(resultDict.getRef())
     }
 }
