@@ -186,7 +186,7 @@ public:
                 throw std::runtime_error("Required value is missing");
             }
             if (!defaultVal().is_null()) {
-                return defaultVal().get<T>();
+                return defaultVal().template get<T>();
             }
             return std::nullopt;
         }
