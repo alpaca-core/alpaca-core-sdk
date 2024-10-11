@@ -60,11 +60,13 @@ struct InstanceHelper {
     template <typename Op>
     static void describeOp(OrderedDict& d, Op) {
         auto& body = d[Op::id];
+        body["description"] = Op::description;
         typename Op::Params{}.describeSelf(body["params"]);
         typename Op::Return{}.describeSelf(body["return"]);
     }
 
     static void describe(OrderedDict& d) {
+        d["description"] = Instance::description;
         typename Instance::Params{}.describeSelf(d["params"]);
         auto& opsBody = d["ops"];
         typename Instance::Ops ops;
@@ -90,6 +92,7 @@ struct ModelHelper {
     }
 
     static void describe(OrderedDict& d) {
+        d["description"] = Model::description;
         typename Model::Params{}.describeSelf(d["params"]);
         auto& instancesBody = d["instances"];
         typename Model::Instances instances;

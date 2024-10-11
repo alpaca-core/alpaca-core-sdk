@@ -6,6 +6,7 @@
 namespace ac::local::schema {
 
 struct Dummy : public ModelHelper<Dummy> {
+    static inline constexpr std::string_view description = "Dummy inference for tests, examples, and experiments.";
 
     struct Params : public Object {
         using Object::Object;
@@ -14,6 +15,7 @@ struct Dummy : public ModelHelper<Dummy> {
 
     struct InstanceGeneral : public InstanceHelper<InstanceGeneral> {
         static inline constexpr std::string_view id = "general";
+        static inline constexpr std::string_view description = "General instance";
 
         struct Params : public Object {
             using Object::Object;
@@ -22,6 +24,7 @@ struct Dummy : public ModelHelper<Dummy> {
 
         struct OpRun {
             static inline constexpr std::string_view id = "run";
+            static inline constexpr std::string_view description = "Run the dummy inference and produce some output";
 
             struct Params : public Object {
                 using Object::Object;

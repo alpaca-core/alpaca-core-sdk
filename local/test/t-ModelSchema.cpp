@@ -27,6 +27,7 @@ TEST_CASE("test binary val") {
 
 struct TestSchema : public ModelHelper<TestSchema> {
     static constexpr std::string_view id = "test-model";
+    static constexpr std::string_view description = "Test model";
 
     struct Params : public Object {
         using Object::Object;
@@ -36,6 +37,7 @@ struct TestSchema : public ModelHelper<TestSchema> {
 
     struct InstanceAthlete : public InstanceHelper<InstanceAthlete> {
         static constexpr std::string_view id = "athlete";
+        static constexpr std::string_view description = "An athlete";
 
         struct Params : public Object {
             using Object::Object;
@@ -45,6 +47,7 @@ struct TestSchema : public ModelHelper<TestSchema> {
 
         struct OpJump {
             static constexpr std::string_view id = "jump";
+            static constexpr std::string_view description = "make them jump";
 
             struct Params : public Object {
                 using Object::Object;
@@ -60,6 +63,7 @@ struct TestSchema : public ModelHelper<TestSchema> {
 
         struct OpRun {
             static constexpr std::string_view id = "run";
+            static constexpr std::string_view description = "make them run";
 
             struct Params : public Object {
                 using Object::Object;
@@ -79,6 +83,7 @@ struct TestSchema : public ModelHelper<TestSchema> {
 
     struct InstanceMusician : public InstanceHelper<InstanceMusician> {
         static constexpr std::string_view id = "musician";
+        static constexpr std::string_view description = "A musician";
 
         struct Params : public Object {
             using Object::Object;
@@ -88,6 +93,7 @@ struct TestSchema : public ModelHelper<TestSchema> {
 
         struct OpPlay {
             static constexpr std::string_view id = "play";
+            static constexpr std::string_view description = "play an instrument";
 
             struct Params : public Object {
                 using Object::Object;
@@ -103,6 +109,7 @@ struct TestSchema : public ModelHelper<TestSchema> {
 
         struct OpSing {
             static constexpr std::string_view id = "sing";
+            static constexpr std::string_view description = "sing a song";
 
             struct Params : public Object {
                 using Object::Object;
@@ -263,6 +270,7 @@ TEST_CASE("schema") {
 }
 
 const std::string_view expectedSchema = R"({
+    "description": "Test model",
     "params": {
         "type": "object",
         "properties": {
@@ -280,6 +288,7 @@ const std::string_view expectedSchema = R"({
     },
     "instances": {
         "athlete": {
+            "description": "An athlete",
             "params": {
                 "type": "object",
                 "properties": {
@@ -298,6 +307,7 @@ const std::string_view expectedSchema = R"({
             },
             "ops": {
                 "jump": {
+                    "description": "make them jump",
                     "params": {
                         "type": "object",
                         "properties": {
@@ -329,6 +339,7 @@ const std::string_view expectedSchema = R"({
                     }
                 },
                 "run": {
+                    "description": "make them run",
                     "params": {
                         "type": "object",
                         "properties": {
@@ -367,6 +378,7 @@ const std::string_view expectedSchema = R"({
             }
         },
         "musician": {
+            "description": "A musician",
             "params": {
                 "type": "object",
                 "properties": {
@@ -382,6 +394,7 @@ const std::string_view expectedSchema = R"({
             },
             "ops": {
                 "play": {
+                    "description": "play an instrument",
                     "params": {
                         "type": "object",
                         "properties": {
@@ -409,6 +422,7 @@ const std::string_view expectedSchema = R"({
                     }
                 },
                 "sing": {
+                    "description": "sing a song",
                     "params": {
                         "type": "object",
                         "properties": {
