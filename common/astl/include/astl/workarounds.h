@@ -13,4 +13,8 @@
 // we add this macro after the noreturning dtor until we can remove it
 #define MSVC_WO_10766806() __assume(0)
 
+#else
+
+#define MSVC_WO_10766806()
+
 #endif
