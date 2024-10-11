@@ -149,8 +149,12 @@ class Array : public SchemaItem {
 public:
     using SchemaItem::SchemaItem;
 
+    bool hasValue() const {
+        return m_self && !m_self->is_null();
+    }
+
     size_t size() const {
-        if (!m_self) return 0;
+        if (!hasValue()) return 0;
         return m_self->size();
     }
 
@@ -195,7 +199,7 @@ public:
 
     void setValue(T n) {
         materializeSelf();
-        *m_self = n;
+        *m_self = std::move(n);
     }
 };
 

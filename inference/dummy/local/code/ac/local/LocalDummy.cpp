@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #include "LocalDummy.hpp"
+#include "DummyModelSchema.hpp"
 
 #include <ac/dummy/Instance.hpp>
 #include <ac/dummy/Model.hpp>
@@ -18,40 +19,46 @@
 namespace ac::local {
 
 namespace {
-dummy::Model::Params ModelParams_fromDict(const Dict& d) {
-    dummy::Model::Params ret;
-    Dict_optApplyValueAt(d, "splice", ret.splice);
-    return ret;
-}
-
-dummy::Instance::InitParams InitParams_fromDict(const Dict& d) {
-    dummy::Instance::InitParams ret;
-    Dict_optApplyValueAt(d, "cutoff", ret.cutoff);
-    return ret;
-}
-
-dummy::Instance::SessionParams SessionParams_fromDict(const Dict& d) {
-    dummy::Instance::SessionParams ret;
-    Dict_optApplyValueAt(d, "splice", ret.splice);
-    Dict_optApplyValueAt(d, "throw_on", ret.throwOn);
-
-    return ret;
-}
 
 class DummyInstance final : public Instance {
     std::shared_ptr<dummy::Model> m_model;
     dummy::Instance m_instance;
 public:
-    DummyInstance(std::shared_ptr<dummy::Model> model, dummy::Instance::InitParams params)
+    using Schema = ac::local::schema::Dummy::InstanceGeneral;
+
+    static dummy::Instance::InitParams InitParams_fromDict(Dict& d) {
+        Schema::Params schemaParams(d);
+        dummy::Instance::InitParams ret;
+        ret.cutoff = schemaParams.cutoff.getValue().value();
+        return ret;
+    }
+
+    DummyInstance(std::shared_ptr<dummy::Model> model, Dict& params)
         : m_model(astl::move(model))
-        , m_instance(*m_model, params)
+        , m_instance(*m_model, InitParams_fromDict(params))
     {}
 
-    Dict run(Dict params) {
-        auto input = params.at("input").get<std::vector<std::string>>();
-        auto sparams = SessionParams_fromDict(params);
+    Dict run(Dict& params) {
+        const Schema::OpRun::Params schemaParams(params);
 
-        auto s = m_instance.newSession(astl::move(input), sparams);
+        if (!schemaParams.input.hasValue()) {
+            throw_ex{} << "Missing input";
+        }
+
+        std::vector<std::string> input;
+        input.reserve(schemaParams.input.size());
+        for (size_t i = 0; i < schemaParams.input.size(); ++i) {
+            input.push_back(std::string(schemaParams.input[i].getValue().value()));
+        }
+
+        dummy::Instance::SessionParams sparams;
+        sparams.splice = schemaParams.splice.getValue().value();
+        sparams.throwOn = schemaParams.throwOn.getValue().value();
+
+        auto s = m_instance.newSession(std::move(input), sparams);
+
+        Dict ret;
+        Schema::OpRun::Return schemaRet(ret);
 
         std::string result;
         for (auto& w : s) {
@@ -62,15 +69,18 @@ public:
             // remove last space
             result.pop_back();
         }
-        return {{"result", astl::move(result)}};
+
+        schemaRet.result.setValue(std::move(result));
+        return ret;
     }
 
     virtual Dict runOp(std::string_view op, Dict params, ProgressCb) override {
-        if (op == "run") {
-            return run(astl::move(params));
-        }
-        else {
+        switch (Schema::getOpIndexById(op)) {
+        case Schema::opIndex<Schema::OpRun>:
+            return run(params);
+        default:
             throw_ex{} << "dummy: unknown op: " << op;
+            return {}; // msvc workaround
         }
     }
 };
@@ -78,16 +88,28 @@ public:
 class DummyModel final : public Model {
     std::shared_ptr<dummy::Model> m_model;
 public:
-    DummyModel(const std::string& fname, dummy::Model::Params params)
-        : m_model(std::make_shared<dummy::Model>(fname.c_str(), astl::move(params)))
+    using Schema = ac::local::schema::Dummy;
+
+    static dummy::Model::Params ModelParams_fromDict(Dict& d) {
+        Schema::Params schemaParams(d);
+        dummy::Model::Params ret;
+        ret.splice = std::string(schemaParams.spliceString.getValue().value_or(""));
+        return ret;
+    }
+
+    DummyModel(const std::string& fname, Dict& params)
+        : m_model(std::make_shared<dummy::Model>(fname.c_str(), ModelParams_fromDict(params)))
     {}
-    explicit DummyModel(dummy::Model::Params params) : m_model(std::make_shared<dummy::Model>(params)) {}
+    explicit DummyModel(Dict& params) : m_model(std::make_shared<dummy::Model>(ModelParams_fromDict(params))) {}
 
     virtual std::unique_ptr<Instance> createInstance(std::string_view type, Dict params) override {
-        if (type != "general") {
+        switch (Schema::getInstanceById(type)) {
+        case Schema::instanceIndex<Schema::InstanceGeneral>:
+            return std::make_unique<DummyInstance>(m_model, params);
+        default:
             throw_ex{} << "dummy: unknown instance type: " << type;
+            return {}; // msvc workaround
         }
-        return std::make_unique<DummyInstance>(m_model, InitParams_fromDict(params));
     }
 };
 
@@ -96,8 +118,6 @@ public:
     virtual ModelPtr loadModel(ModelDesc desc, Dict params, ProgressCb pcb) override {
         if (desc.assets.size() > 1) throw_ex{} << "dummy: expected one or zero assets";
 
-        auto modelParams = ModelParams_fromDict(params);
-
         if (desc.assets.empty()) {
             // synthetic model
             if (pcb) {
@@ -105,7 +125,7 @@ public:
                     throw_ex{} << "dummy: loading model aborted";
                 }
             }
-            return std::make_shared<DummyModel>(std::move(modelParams));
+            return std::make_shared<DummyModel>(params);
         }
         else {
             auto& fname = desc.assets.front().path;
@@ -114,7 +134,7 @@ public:
                     throw_ex{} << "dummy: loading model aborted";
                 }
             }
-            return std::make_shared<DummyModel>(fname, std::move(modelParams));
+            return std::make_shared<DummyModel>(fname, params);
         }
     }
 };

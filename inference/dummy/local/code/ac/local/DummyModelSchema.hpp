@@ -20,7 +20,7 @@ struct Dummy : public ModelHelper<Dummy> {
 
         struct Params : public Object {
             using Object::Object;
-            String cutoff{*this, "cutoff", "Cut off model data to n-th element (or don't cut if -1)", -1};
+            Int cutoff{*this, "cutoff", "Cut off model data to n-th element (or don't cut if -1)", -1};
         };
 
         struct OpRun {
@@ -36,7 +36,7 @@ struct Dummy : public ModelHelper<Dummy> {
 
             struct Return : public Object {
                 using Object::Object;
-                String result{*this, "output", "Output text (tokens joined with space)", {}, true};
+                String result{*this, "result", "Output text (tokens joined with space)", {}, true};
             };
         };
 
