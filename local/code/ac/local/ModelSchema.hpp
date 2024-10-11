@@ -93,8 +93,8 @@ struct ModelHelper {
         typename Model::Params{}.describeSelf(d["params"]);
         auto& instancesBody = d["instances"];
         typename Model::Instances instances;
-        std::apply([&](auto&& instance) {
-            describeInstance(instancesBody, instance);
+        std::apply([&](auto&&... instance) {
+            (describeInstance(instancesBody, instance), ...);
         }, instances);
     }
 };
