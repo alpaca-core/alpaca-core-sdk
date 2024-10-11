@@ -12,4 +12,5 @@ if(MSVC)
         SOURCES PARSE t-msvc_wo_10766806.cpp
         FOLDER test
     )
+    target_compile_options(astl-bf-msvc_wo_10766806-test PRIVATE -WX)
 endif()

@@ -15,16 +15,28 @@ TEST_CASE("null") {
 
 TEST_CASE("trivial no val") {
     Int i;
-    CHECK_FALSE(i.getValue());
+    CHECK_FALSE(i.optGetValue());
 }
 
 TEST_CASE("trivial val") {
     Dict d;
     Uint u(d);
-    CHECK_FALSE(u.getValue());
+    CHECK_FALSE(u.optGetValue());
 
     u.setValue(42);
     CHECK(u.getValue() == 42);
+}
+
+TEST_CASE("string preserve") {
+    std::string str = "something really long that would skip the small string optimization";
+    auto data = str.data();
+
+    Dict d;
+    String s(d);
+    s.setValue(std::move(str));
+
+    REQUIRE(s.optGetValue());
+    CHECK(s.getValue().data() == data);
 }
 
 struct Human : public Object {
@@ -44,7 +56,7 @@ TEST_CASE("simple get") {
     CHECK(h.name.getValue() == "John");
     CHECK(h.age.getValue() == 42);
     CHECK(h.weight.getValue() == 0);
-    CHECK(h.member.getValue() == std::nullopt);
+    CHECK(h.member.optGetValue() == std::nullopt);
 }
 
 TEST_CASE("simple set") {
@@ -150,7 +162,7 @@ TEST_CASE("complex get") {
     CHECK(alice.name.getValue() == "Alice");
     CHECK(alice.age.getValue() == 35);
     CHECK(alice.weight.getValue() == 0);
-    CHECK(alice.member.getValue() == std::nullopt);
+    CHECK(alice.member.optGetValue() == std::nullopt);
     auto bob = members[1];
     CHECK(bob.name.getValue() == "Bob");
     CHECK(bob.age.getValue() == 42);

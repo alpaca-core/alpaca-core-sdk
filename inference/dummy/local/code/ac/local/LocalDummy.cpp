@@ -30,7 +30,7 @@ public:
     static dummy::Instance::InitParams InitParams_fromDict(Dict& d) {
         Schema::Params schemaParams(d);
         dummy::Instance::InitParams ret;
-        ret.cutoff = schemaParams.cutoff.getValue().value();
+        ret.cutoff = schemaParams.cutoff.getValue();
         return ret;
     }
 
@@ -49,12 +49,12 @@ public:
         std::vector<std::string> input;
         input.reserve(schemaParams.input.size());
         for (size_t i = 0; i < schemaParams.input.size(); ++i) {
-            input.push_back(std::string(schemaParams.input[i].getValue().value()));
+            input.push_back(std::string(schemaParams.input[i].getValue()));
         }
 
         dummy::Instance::SessionParams sparams;
-        sparams.splice = schemaParams.splice.getValue().value();
-        sparams.throwOn = schemaParams.throwOn.getValue().value();
+        sparams.splice = schemaParams.splice.getValue();
+        sparams.throwOn = schemaParams.throwOn.getValue();
 
         auto s = m_instance.newSession(std::move(input), sparams);
 
@@ -94,7 +94,7 @@ public:
     static dummy::Model::Params ModelParams_fromDict(Dict& d) {
         Schema::Params schemaParams(d);
         dummy::Model::Params ret;
-        ret.splice = std::string(schemaParams.spliceString.getValue().value_or(""));
+        ret.splice = std::string(schemaParams.spliceString.optGetValue().value_or(""));
         return ret;
     }
 

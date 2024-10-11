@@ -18,13 +18,21 @@ class Enum : public String {
 public:
     using String::String;
 
-    std::optional<EnumType> getValue() const {
-        auto strVal = String::getValue();
+    std::optional<EnumType> optGetValue() const {
+        auto strVal = String::optGetValue();
         if (!strVal) return {};
 
         auto opt = magic_enum::enum_cast<EnumType>(*strVal);
-        if (!opt.has_value()) {
+        if (!opt) {
             throw std::invalid_argument("Invalid enum value");
+        }
+        return *opt;
+    }
+
+    EnumType getValue() const {
+        auto opt = optGetValue();
+        if (!opt) {
+            throw std::runtime_error("Value is missing");
         }
         return *opt;
     }

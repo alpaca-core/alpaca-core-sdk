@@ -42,21 +42,21 @@ public:
         , m_vocab(instance.model().vocab())
     {
         Schema::OpChatBegin::Params schemaParams(params);
-        auto setup = *schemaParams.setup.getValue();
+        auto setup = schemaParams.setup.getValue();
         m_promptTokens = instance.model().vocab().tokenize(setup, true, true);
         m_session.setInitialPrompt(m_promptTokens);
 
         m_userPrefix = "\n";
-        m_userPrefix += *schemaParams.roleUser.getValue();
+        m_userPrefix += schemaParams.roleUser.getValue();
         m_userPrefix += ":";
         m_assistantPrefix = "\n";
-        m_assistantPrefix += *schemaParams.roleAssistant.getValue();;
+        m_assistantPrefix += schemaParams.roleAssistant.getValue();;
         m_assistantPrefix += ":";
     }
 
     void pushPrompt(Dict& params) {
         Schema::OpChatAddPrompt::Params schemaParams(params);
-        auto prompt = std::string(*schemaParams.prompt.getValue());
+        auto prompt = std::string(schemaParams.prompt.getValue());
 
         // prefix with space as the generated content doesn't include it
         prompt = ' ' + prompt;
@@ -142,8 +142,8 @@ public:
 
     Dict run(Dict& params) {
         Schema::OpRun::Params schemaParams(params);
-        auto prompt = *schemaParams.prompt.getValue();
-        const auto maxTokens = *schemaParams.maxTokens.getValue();
+        auto prompt = schemaParams.prompt.getValue();
+        const auto maxTokens = schemaParams.maxTokens.getValue();
 
         auto s = m_instance.newSession({});
 
@@ -155,7 +155,7 @@ public:
 
         auto& antiprompts = schemaParams.antiprompts;
         for (size_t i = 0; i < antiprompts.size(); ++i) {
-            antiprompt.addAntiprompt(*antiprompts[i].getValue());
+            antiprompt.addAntiprompt(antiprompts[i].getValue());
         }
 
         std::string result;

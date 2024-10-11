@@ -183,7 +183,6 @@ class Primitive : public SchemaItem {
     static std::string_view ptn(unsigned) { return "integer"; }
     static std::string_view ptn(double) { return "number"; }
     static std::string_view ptn(float) { return "number"; }
-    static std::string_view ptn(std::string) { return "string"; }
     static std::string_view ptn(std::string_view) { return "string"; }
 protected:
     void doDescribeSelf(OrderedDict& d) const override {
@@ -192,7 +191,7 @@ protected:
 public:
     using SchemaItem::SchemaItem;
 
-    std::optional<T> getValue() const {
+    std::optional<T> optGetValue() const {
         if (!m_self || m_self->is_null()) {
             if (required()) {
                 throw std::runtime_error("Required value is missing");
@@ -205,16 +204,48 @@ public:
         return m_self->get<T>();
     }
 
+    T getValue() const {
+        auto v = optGetValue();
+        if (!v) {
+            throw std::runtime_error("Value is missing");
+        }
+        return *v;
+    }
+
     void setValue(T n) {
         materializeSelf();
-        *m_self = std::move(n);
+        *m_self = n;
     }
 };
 
 using Bool = Primitive<bool>;
-using String = Primitive<std::string_view>;
 using Int = Primitive<int>;
 using Uint = Primitive<unsigned>;
 using Double = Primitive<double>;
+
+class String : public Primitive<std::string_view> {
+protected:
+    void doDescribeSelf(OrderedDict& d) const override {
+        d["type"] = "string";
+    }
+public:
+    using Super = Primitive<std::string_view>;
+
+    using Super::Primitive;
+    using Super::getValue;
+    using Super::optGetValue;
+
+    using Super::setValue;
+
+    void setValue(std::string str) {
+        materializeSelf();
+        *m_self = std::move(str);
+    }
+
+    template <size_t N>
+    void setValue(const char(&buf)[N]) {
+        return setValue(std::string(buf, N - 1));
+    }
+};
 
 } // namespace ac::schema

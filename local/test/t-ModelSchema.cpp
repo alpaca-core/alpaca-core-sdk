@@ -147,14 +147,14 @@ public:
 
     explicit Athlete(Dict& params) {
         Schema::Params p(params);
-        initParams.name = *p.name.getValue();
-        initParams.age = p.age.getValue();
+        initParams.name = p.name.getValue();
+        initParams.age = p.age.optGetValue();
     }
 
     Dict run(Dict& params) {
         Schema::OpRun::Params p(params);
 
-        auto speed = *p.howFast.getValue();
+        auto speed = p.howFast.getValue();
 
         Dict retDict;
         Schema::OpRun::Return ret(retDict);
@@ -180,8 +180,8 @@ public:
     Dict jump(Dict& params) {
         Schema::OpJump::Params p(params);
 
-        auto height = *p.howHigh.getValue();
-        auto dest = *p.whereTo.getValue();
+        auto height = p.howHigh.getValue();
+        auto dest = p.whereTo.getValue();
 
         Dict retDict;
         Schema::OpJump::Return ret(retDict);
@@ -216,8 +216,8 @@ public:
 
     explicit Model(Dict dparams) {
         TestSchema::Params p(dparams);
-        modelParams.name = *p.name.getValue();
-        modelParams.gpu = *p.gpu.getValue();
+        modelParams.name = p.name.getValue();
+        modelParams.gpu = p.gpu.getValue();
     }
 
     std::unique_ptr<Instance> createInstance(std::string_view instanceId, Dict params) {

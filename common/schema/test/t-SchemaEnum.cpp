@@ -29,6 +29,7 @@ TEST_CASE("get") {
 TEST_CASE("set") {
     Dict d;
     Enum<Week> e(d);
+    CHECK(e.optGetValue() == std::nullopt);
 
     e.setValue(Week::Wednesday);
     CHECK(d == "Wednesday");
