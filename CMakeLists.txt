@@ -55,6 +55,10 @@ option(AC_BUILD_LOCAL "${CMAKE_PROJECT_NAME}: build local inference api" ON)
 
 set(AC_INFERENCE_LIBS "all" CACHE STRING "${CMAKE_PROJECT_NAME}: inference libraries to build")
 
+cmake_dependent_option(AC_BUILD_ACORD "${CMAKE_PROJECT_NAME}: build Alpaca Core Daemon (acord)" ${alpacaCoreIsRoot}
+    AC_BUILD_LOCAL OFF
+)
+
 option(AC_BUILD_TOOLS "${CMAKE_PROJECT_NAME}: build tools" ${alpacaCoreIsRoot})
 
 option(AC_BUILD_TESTS "${CMAKE_PROJECT_NAME}: build tests" ${alpacaCoreIsRoot})
@@ -86,6 +90,10 @@ ac_add_local_subdir()
 
 if(NOT AC_INFERENCE_LIBS STREQUAL "none")
     add_subdirectory(inference)
+endif()
+
+if(AC_BUILD_ACORD)
+    add_subdirectory(acord)
 endif()
 
 if(AC_BUILD_LOCAL)
