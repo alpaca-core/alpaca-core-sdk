@@ -6,7 +6,7 @@
 
 using namespace ac::local::schema;
 
-struct TestModel : public ModelHelper<TestModel> {
+struct TestSchema : public ModelHelper<TestSchema> {
     static constexpr std::string_view id = "test-model";
 
     struct Params : public Object {
@@ -104,14 +104,144 @@ struct TestModel : public ModelHelper<TestModel> {
     using Instances = std::tuple<InstanceAthlete, InstanceMusician>;
 };
 
+class Instance {
+public:
+    virtual ~Instance() = default;
+    virtual Dict runOp(std::string_view op, Dict params) = 0;
+};
+
+class Athlete final : public Instance {
+public:
+    using Schema = TestSchema::InstanceAthlete;
+
+    struct Params {
+        std::string name;
+        std::optional<int> age;
+    } initParams;
+
+    explicit Athlete(Dict& params) {
+        Schema::Params p(params);
+        initParams.name = *p.name.getValue();
+        initParams.age = p.age.getValue();
+    }
+
+    Dict run(Dict& params) {
+        Schema::OpRun::Params p(params);
+
+        auto speed = *p.howFast.getValue();
+
+        Dict retDict;
+        Schema::OpRun::Return ret(retDict);
+
+        if (speed == 10) {
+            ret.distance.setValue(100);
+            ret.success.setValue(true);
+        }
+        else if (speed > 20) {
+            ret.distance.setValue(speed * initParams.age.value_or(10));
+            ret.success.setValue(true);
+            ret.places.emplace_back().setValue(initParams.name);
+            ret.places.emplace_back().setValue("a");
+            ret.places.emplace_back().setValue("b");
+        }
+        else {
+            ret.distance.setValue(0);
+            ret.success.setValue(false);
+        }
+        return retDict;
+    }
+
+    Dict jump(Dict& params) {
+        Schema::OpJump::Params p(params);
+
+        auto height = *p.howHigh.getValue();
+        auto dest = *p.whereTo.getValue();
+
+        Dict retDict;
+        Schema::OpJump::Return ret(retDict);
+        if (height < 5 && dest == "home") {
+            ret.success.setValue(true);
+        }
+        else {
+            ret.success.setValue(false);
+        }
+        return retDict;
+    }
+
+    Dict runOp(std::string_view opId, Dict params) override {
+        switch (TestSchema::InstanceAthlete::getOpIndexById(opId)) {
+        case Schema::opIndex<Schema::OpJump>:
+            return jump(params);
+        case Schema::opIndex<Schema::OpRun>:
+            return run(params);
+        default:
+            throw std::runtime_error("unknown op");
+        }
+    }
+};
+
+class Model {
+public:
+    struct ModelParams {
+        std::string name;
+        bool gpu = false;
+    } modelParams;
+
+
+    explicit Model(Dict dparams) {
+        TestSchema::Params p(dparams);
+        modelParams.name = *p.name.getValue();
+        modelParams.gpu = *p.gpu.getValue();
+    }
+
+    std::unique_ptr<Instance> createInstance(std::string_view instanceId, Dict params) {
+        switch (TestSchema::getInstanceById(instanceId)) {
+        case TestSchema::instanceIndex<TestSchema::InstanceAthlete>:
+            return std::make_unique<Athlete>(params);
+        case TestSchema::instanceIndex<TestSchema::InstanceMusician>:
+            throw std::runtime_error("not available");
+        default:
+            throw std::runtime_error("unknown instance");
+        }
+    }
+};
+
+TEST_CASE("workflow") {
+    Model m({{"gpu", true}});
+    CHECK(m.modelParams.name == "Test");
+    CHECK(m.modelParams.gpu == true);
+
+    CHECK_THROWS_WITH(m.createInstance("musician", {}), "not available");
+    CHECK_THROWS_WITH(m.createInstance("nope", {}), "unknown instance");
+
+    auto alice = m.createInstance("athlete", {{"name", "Alice"}});
+
+    auto res = alice->runOp("run", {{"how_fast", 10}});
+    CHECK(res.dump() == R"({"distance":100,"success":true})");
+
+    res = alice->runOp("run", {{"how_fast", 30}});
+    CHECK(res.dump() == R"({"distance":300,"places":["Alice","a","b"],"success":true})");
+
+    res = alice->runOp("run", {{"how_fast", 5}});
+    CHECK(res.dump() == R"({"distance":0,"success":false})");
+
+    res = alice->runOp("jump", {{"how_high", 4}, {"where_to", "home"}});
+    CHECK(res.dump() == R"({"success":true})");
+
+    res = alice->runOp("jump", {{"where_to", "home"}}); // how_high default is 5
+    CHECK(res.dump() == R"({"success":false})");
+
+    res = alice->runOp("jump", {{"how_high", 3}, {"where_to", "work"}});
+    CHECK(res.dump() == R"({"success":false})");
+}
+
 extern const std::string_view expectedSchema;
 
 TEST_CASE("schema") {
     OrderedDict d;
-    TestModel::describe(d);
+    TestSchema::describe(d);
     CHECK(d.dump(4) == expectedSchema);
 }
-
 
 const std::string_view expectedSchema = R"({
     "params": {
