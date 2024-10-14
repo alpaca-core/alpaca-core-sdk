@@ -53,5 +53,5 @@ _swift_generate_cxx_header(AlpacaCore
   SEARCH_PATHS
     "${CMAKE_CURRENT_SOURCE_DIR}"
   SWIFT_EXPOSABLE_FILES
-    SwiftApi.swift
+    ModelDesc.swift
 )
