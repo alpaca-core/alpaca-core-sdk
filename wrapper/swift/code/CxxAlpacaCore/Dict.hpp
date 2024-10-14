@@ -48,8 +48,8 @@ public:
     DictValueType getType() const;
 
     bool getBool() const;
-    int getInt() const;
-    unsigned getUnsigned() const;
+    swift::Int getInt() const;
+    swift::UInt getUnsigned() const;
     double getDouble() const;
     std::string getString() const;
     BinaryBuffer getBinary() const SWIFT_RETURNS_INDEPENDENT_VALUE;
@@ -57,7 +57,7 @@ public:
 
     void setBool(bool value);
     void setInt(swift::Int value);
-    void setUnsigned(unsigned value);
+    void setUnsigned(swift::UInt value);
     void setDouble(double value);
     void setString(std::string value);
     void setBinary(const void* _Nonnull data, swift::Int size);

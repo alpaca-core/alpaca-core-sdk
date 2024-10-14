@@ -14,12 +14,18 @@ public func translateDictionaryToDict(_ dictionary: Dictionary<String, Any>) -> 
 
             if let intValue = value as? Int {
                 child.setInt(intValue)
+            } else if let unsignedValue = value as? UInt {
+                child.setUnsigned(Int(unsignedValue))
             } else if let boolValue = value as? Bool {
                 child.setBool(boolValue)
             } else if let doubleValue = value as? Double {
                 child.setDouble(doubleValue)
             } else if let stringValue = value as? String {
                 child.setString(std.string(stringValue))
+            } else if let dataValue = value as? Data {
+                dataValue.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) in
+                    child.setBinary(ptr.baseAddress!, dataValue.count)
+                }
             } else if let dictValue = value as? Dictionary<String, Any> {
                 // If it's a nested dictionary, recursively convert
                 convertDictionary(dictValue, into: child)
@@ -29,6 +35,8 @@ public func translateDictionaryToDict(_ dictionary: Dictionary<String, Any>) -> 
                     var arrayElement = child.addElement()
                     if let intElement = element as? Int {
                         arrayElement.setInt(intElement)
+                    } else if let unsignedValue = value as? UInt {
+                        arrayElement.setUnsigned(Int(unsignedValue))
                     } else if let boolElement = element as? Bool {
                         arrayElement.setBool(boolElement)
                     } else if let doubleElement = element as? Double {
@@ -75,7 +83,8 @@ public func translateDictToDictionary(_ dict: ac.DictRef) -> Dictionary<String, 
             case .DVT_String:
                 target[key] = String(child.getString())
             case .DVT_Binary:
-                target[key] = child.getBinary() // Adjust as necessary for your binary type
+                let binaryData = child.getBinary()
+                target[key] = Data(bytes: binaryData.data, count: binaryData.size)
             case .DVT_Array:
                 var array: [Any] = []
                 for index in 0..<Int32(child.getSize()) {
@@ -94,8 +103,8 @@ public func translateDictToDictionary(_ dict: ac.DictRef) -> Dictionary<String, 
                     case .DVT_String:
                         array.append(String(value.getString()))
                     case .DVT_Binary:
-                        //TODO: Handle binary data properly with Data object
-                        array.append(value.getBinary())
+                        let binaryData = child.getBinary()
+                        array.append(Data(bytes: binaryData.data, count: binaryData.size))
                     case .DVT_Object:
                         // Handle nested object (DictRef)
                         var nestedDictionary: [String: Any] = [:]

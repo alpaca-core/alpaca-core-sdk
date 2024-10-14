@@ -53,11 +53,11 @@ bool DictRef::getBool() const {
     return m_dictRef->get<bool>();
 }
 
-int DictRef::getInt() const {
+swift::Int DictRef::getInt() const {
     return m_dictRef->get<int>();
 }
 
-unsigned DictRef::getUnsigned() const {
+swift::UInt DictRef::getUnsigned() const {
     return m_dictRef->get<unsigned>();
 }
 
@@ -70,7 +70,7 @@ std::string DictRef::getString() const {
 }
 
 BinaryBuffer DictRef::getBinary() const SWIFT_RETURNS_INDEPENDENT_VALUE {
-    auto blob = m_dictRef->get_binary();
+    auto& blob = m_dictRef->get_binary();
     return {blob.data(), swift::Int(blob.size())};
 }
 
@@ -90,7 +90,7 @@ void DictRef::setInt(swift::Int value) {
     *m_dictRef = value;
 }
 
-void DictRef::setUnsigned(unsigned value) {
+void DictRef::setUnsigned(swift::UInt value) {
     *m_dictRef = value;
 }
 
