@@ -1,8 +1,0 @@
-// Copyright (c) Alpaca Core
-// SPDX-License-Identifier: MIT
-//
-module NativeAlpacaCore {
-    header "../../../../local/code/ac/local/ModelDesc.hpp"
-
-    export *
-}
