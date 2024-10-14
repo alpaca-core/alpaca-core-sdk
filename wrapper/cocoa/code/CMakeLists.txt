@@ -1,13 +1,11 @@
 # Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
-
 add_library(cocoa-wrapper STATIC)
 
 target_sources(cocoa-wrapper PRIVATE
     ac/Dict.h
     ac/Dict.mm
-
 )
 
 target_link_libraries(cocoa-wrapper

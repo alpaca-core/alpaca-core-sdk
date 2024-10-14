@@ -14,7 +14,7 @@ set(AC_TEST_SOURCE
     ./TestDict.mm
 )
 
-xctest_add_bundle(test-ac-objc CAlpacaCore
+xctest_add_bundle(test-ac-objc cocoa-wrapper
     ${AC_TEST_SOURCE}
 )
 
@@ -23,5 +23,5 @@ set_target_properties(test-ac-objc PROPERTIES
 )
 
 target_include_directories(test-ac-objc PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../code/ac
 )
