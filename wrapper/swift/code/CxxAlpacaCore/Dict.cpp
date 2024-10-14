@@ -1,7 +1,7 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include "ACDict.hpp"
+#include "Dict.hpp"
 #include <iostream>
 
 namespace ac {

@@ -10,7 +10,7 @@
 #include "AlpacaCore-Swift.h"
 
 #include "IntrusiveRefCounted.hpp"
-#include "ACDict.hpp"
+#include "Dict.hpp"
 
 namespace ac {
 class Instance;

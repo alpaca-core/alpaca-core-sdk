@@ -11,8 +11,8 @@ include(InitializeSwift)
 include(AddSwift)
 
 add_library(AlpacaCore STATIC
-    ACDict.hpp
-    ACDict.cpp
+    Dict.hpp
+    Dict.cpp
     Model.hpp
     Model.cpp
     Instance.hpp

@@ -6,7 +6,7 @@
 #include <ac/local/ModelFactory.hpp>
 
 #include "AlpacaCore-Swift.h"
-#include "ACDict.hpp"
+#include "Dict.hpp"
 
 
 namespace ac {

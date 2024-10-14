@@ -3,7 +3,7 @@
 //
 #include "Instance.hpp"
 #include "IntrusiveRefCounted.hpp"
-#include "ACDict.hpp"
+#include "Dict.hpp"
 #include "AlpacaCore.hpp"
 
 #include <ac/local/Instance.hpp>

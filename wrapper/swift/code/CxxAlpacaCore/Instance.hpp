@@ -10,7 +10,7 @@
 
 #include "AlpacaCore.hpp"
 #include "IntrusiveRefCounted.hpp"
-#include "ACDict.hpp"
+#include "Dict.hpp"
 
 namespace ac {
 
