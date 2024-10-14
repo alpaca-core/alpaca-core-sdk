@@ -19,7 +19,7 @@ add_library(AlpacaCore STATIC
     Instance.cpp
     AlpacaCore.hpp
     AlpacaCore.cpp
-    SwiftAlpacaCore.swift
+    SwiftApi.swift
     DictHelper.swift
     Model.swift
 )
@@ -53,5 +53,5 @@ _swift_generate_cxx_header(AlpacaCore
   SEARCH_PATHS
     "${CMAKE_CURRENT_SOURCE_DIR}"
   SWIFT_EXPOSABLE_FILES
-    SwiftAlpacaCore.swift
+    SwiftApi.swift
 )
