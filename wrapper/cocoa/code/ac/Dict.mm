@@ -115,10 +115,3 @@
 }
 
 @end
-
-void convertAndPrintDictionary(NSDictionary<NSString *, id> *dictionary) {
-    ac::Dict dict = [DictionaryWrapper convertToACDict:dictionary];
-
-    std::string jsonString = dict.dump();
-    NSLog(@"%s", jsonString.c_str());
-}

@@ -14,7 +14,7 @@ set(AC_TEST_SOURCE
     ./TestDict.mm
 )
 
-xctest_add_bundle(test-ac-objc cocoa-wrapper
+xctest_add_bundle(test-ac-objc ac-cocoa
     ${AC_TEST_SOURCE}
 )
 

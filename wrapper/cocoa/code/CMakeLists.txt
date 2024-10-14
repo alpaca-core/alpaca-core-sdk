@@ -1,19 +1,14 @@
 # Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
-add_library(cocoa-wrapper STATIC)
+add_library(ac-cocoa STATIC)
 
-target_sources(cocoa-wrapper PRIVATE
+target_sources(ac-cocoa PRIVATE
     ac/Dict.h
     ac/Dict.mm
 )
 
-target_link_libraries(cocoa-wrapper
+target_link_libraries(ac-cocoa
     PUBLIC
         ac::dict
-)
-
-target_include_directories(cocoa-wrapper
-    PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}
 )

@@ -15,5 +15,3 @@
     NS_SWIFT_UNAVAILABLE("This method is unavailable in Swift");
 
 @end
-
-void convertAndPrintDictionary(NSDictionary<NSString *, id> *dictionary);
