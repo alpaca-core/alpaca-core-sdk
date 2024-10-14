@@ -16,6 +16,10 @@ class CallbackWrapper {
     public func getRawPointer() -> UnsafeMutableRawPointer {
         return UnsafeMutableRawPointer(Unmanaged.passRetained(self).toOpaque())
     }
+
+    public func getProgressData() -> ac.ProgressCallbackData {
+        return ac.ProgressCallbackData(m_cb: callObserver, m_context: getRawPointer())
+    }
 }
 
 func callObserver(observer: UnsafeMutableRawPointer, progress: Float) {
@@ -27,7 +31,7 @@ public func createModel(_ desc: inout ModelDesc, _ params: Dictionary<String, An
     let paramsAsDict = translateDictionaryToDict(params)
     let wrapper = CallbackWrapper(completion: _progress)
 
-    if let model = ac.createModel(&desc, paramsAsDict.getRef(), callObserver, wrapper.getRawPointer())
+    if let model = ac.createModel(&desc, paramsAsDict.getRef(), wrapper.getProgressData())
     {
         return Model(model)
     }
@@ -58,7 +62,7 @@ public class Instance {
         let paramsAsDict = translateDictionaryToDict(params)
         let wrapper = CallbackWrapper(completion: _progress)
 
-        let resultDict = instance.runOp(std.string(op), paramsAsDict.getRef(), callObserver, wrapper.getRawPointer())
+        let resultDict = instance.runOp(std.string(op), paramsAsDict.getRef(), wrapper.getProgressData())
         return translateDictToDictionary(resultDict.getRef())
     }
 }
