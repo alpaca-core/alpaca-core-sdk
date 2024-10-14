@@ -19,6 +19,6 @@ struct ProgressCallbackData {
 static std::unique_ptr<local::ModelFactory> factorySingleton;
 
 void initSDK();
-class Model* _Nullable createModel(AlpacaCore::ModelDesc& desc, DictRef params, ProgressCallbackData progressCbData);
+class Model* _Nullable createModel(AlpacaCoreSwift::ModelDesc& desc, DictRef params, ProgressCallbackData progressCbData);
 
 }

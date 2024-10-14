@@ -19,7 +19,7 @@ void initSDK() {
     local::addWhisperInference(*factorySingleton);
 }
 
-class Model* createModel(AlpacaCore::ModelDesc& desc, DictRef params, ProgressCallbackData progressCbData) {
+class Model* createModel(AlpacaCoreSwift::ModelDesc& desc, DictRef params, ProgressCallbackData progressCbData) {
     ac::local::ModelDesc modelDesc;
     modelDesc.inferenceType = desc.getInferenceType();
     modelDesc.name = desc.getName();

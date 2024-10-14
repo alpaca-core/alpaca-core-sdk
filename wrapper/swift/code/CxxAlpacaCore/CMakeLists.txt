@@ -10,7 +10,7 @@ include(InitializeSwift)
 # C++ bridging header
 include(AddSwift)
 
-add_library(AlpacaCore STATIC
+add_library(AlpacaCoreSwift STATIC
     Dict.hpp
     Dict.cpp
     Model.hpp
@@ -25,16 +25,16 @@ add_library(AlpacaCore STATIC
 )
 
 # If we don't clear compiler options -Wall is passed which is not recognized by Swift compiler
-set_target_properties(AlpacaCore PROPERTIES COMPILE_OPTIONS "")
+set_target_properties(AlpacaCoreSwift PROPERTIES COMPILE_OPTIONS "")
 
-target_compile_options(AlpacaCore
+target_compile_options(AlpacaCoreSwift
   PUBLIC
     $<$<COMPILE_LANGUAGE:Swift>:-cxx-interoperability-mode=default -Xcc -std=c++20>
 )
 
-target_include_directories(AlpacaCore PUBLIC .)
+target_include_directories(AlpacaCoreSwift PUBLIC .)
 
-target_link_libraries(AlpacaCore
+target_link_libraries(AlpacaCoreSwift
     PUBLIC
         ac::dict
         ac::local
@@ -48,10 +48,10 @@ target_link_libraries(AlpacaCore
 # Swift sources change. Clang detects that the C++ file depends on the header,
 # and tells Ninja about this dependency in the depfile.
 # This function is implemented in cmake_modules/AddSwift.cmake.
-_swift_generate_cxx_header(AlpacaCore
+_swift_generate_cxx_header(AlpacaCoreSwift
   ${CMAKE_CURRENT_SOURCE_DIR}/AlpacaCore-Swift.h
   SEARCH_PATHS
-    "${CMAKE_CURRENT_SOURCE_DIR}"
+    ${CMAKE_CURRENT_SOURCE_DIR}
   SWIFT_EXPOSABLE_FILES
     ModelDesc.swift
 )

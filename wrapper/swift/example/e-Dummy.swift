@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 import Foundation
-import CAlpacaCore
-import AlpacaCore
+import AlpacaCoreSwift
 
 func progress(_ progress: Float) {
     print("Progress: \(progress)")
@@ -14,14 +13,14 @@ struct DummyExample {
     static func main() {
         print("Hello from e-Dummy.swift")
 
-        AlpacaCore.initSDK();
+        AlpacaCoreSwift.initSDK();
 
-        var desc = AlpacaCore.ModelDesc()
+        var desc = AlpacaCoreSwift.ModelDesc()
         desc.inferenceType = "dummy"
         desc.name = "synthetic dummy"
 
         let dict = Dictionary<String, Any>()
-        let model = AlpacaCore.createModel(&desc, dict, progress)!;
+        let model = AlpacaCoreSwift.createModel(&desc, dict, progress)!;
         let instance = model.createInstance("general", dict);
 
         let params = [

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 import Foundation
-import AlpacaCore
+import AlpacaCoreSwift
 
 func progress(_ progress: Float) {
     print("Progress: \(progress)")
@@ -15,12 +15,12 @@ struct WhisperExample {
 
         initSDK();
 
-        var desc = AlpacaCore.ModelDesc()
+        var desc = ModelDesc()
         desc.inferenceType = "whisper.cpp"
         desc.name = "synthetic whisper"
         // // AC_TEST_DATA_WHISPER_DIR "/whisper-base.en-f16.bin"
         let whisperDir = "/Users/pacominev/repos/ac/alpaca-core/.cpm/ac-test-data-whisper/70a55b9fcc626b9333fb3f54efc7118a2ce230bd"
-        desc.assets.append(AlpacaCore.AssetInfo(whisperDir + "/whisper-base.en-f16.bin", "whisper-base.en-f16.bin"))
+        desc.assets.append(AssetInfo(whisperDir + "/whisper-base.en-f16.bin", "whisper-base.en-f16.bin"))
 
         let params = Dictionary<String, Any>()
         let model = createModel(&desc, params, progress)!;

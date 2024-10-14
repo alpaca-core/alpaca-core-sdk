@@ -10,7 +10,7 @@ add_executable(CxxACExample CxxACExample.swift)
 set_target_properties(CxxACExample PROPERTIES COMPILE_OPTIONS "")
 target_link_libraries(CxxACExample
   PRIVATE
-    AlpacaCore
+    AlpacaCoreSwift
 )
 
 target_compile_options(CxxACExample
@@ -34,7 +34,7 @@ add_executable(WhisperExample e-Whisper.swift)
 set_target_properties(WhisperExample PROPERTIES COMPILE_OPTIONS "")
 target_link_libraries(WhisperExample
   PRIVATE
-      AlpacaCore
+      AlpacaCoreSwift
 )
 
 target_compile_options(WhisperExample
@@ -58,7 +58,7 @@ add_executable(DummyExample e-Dummy.swift)
 set_target_properties(DummyExample PROPERTIES COMPILE_OPTIONS "")
 target_link_libraries(DummyExample
   PRIVATE
-      AlpacaCore
+      AlpacaCoreSwift
 )
 
 target_compile_options(DummyExample

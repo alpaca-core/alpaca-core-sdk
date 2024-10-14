@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 import Foundation
-import AlpacaCore
+import AlpacaCoreSwift
 import CAlpacaCore
 
 
