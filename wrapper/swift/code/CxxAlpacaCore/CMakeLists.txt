@@ -29,12 +29,8 @@ set_target_properties(AlpacaCoreSwift PROPERTIES COMPILE_OPTIONS "")
 
 target_compile_options(AlpacaCoreSwift
   PUBLIC
-    $<$<COMPILE_LANGUAGE:Swift>:-cxx-interoperability-mode=default -Xcc -std=c++20 -enable-testing>
+    $<$<COMPILE_LANGUAGE:Swift>:-cxx-interoperability-mode=default -Xcc -std=c++20>
 )
-
-# if(BUILD_TESTING)
-  # add_compile_options($<$<COMPILE_LANGUAGE:Swift>:-enable-testing>)
-# endif()
 
 target_include_directories(AlpacaCoreSwift PUBLIC .)
 
