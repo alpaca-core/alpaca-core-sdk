@@ -8,6 +8,8 @@
 #include "AlpacaCore-Swift.h"
 #include "Dict.hpp"
 
+#include "ac-test-data-whisper-dir.h"
+
 
 namespace ac {
 typedef void (*SwiftProgressCb)(void* _Nonnull context, float progress);
@@ -17,8 +19,10 @@ struct ProgressCallbackData {
 };
 
 static std::unique_ptr<local::ModelFactory> factorySingleton;
+static const char* _Nonnull WHISPER_DIR = AC_TEST_DATA_WHISPER_DIR;
 
 void initSDK();
 class Model* _Nullable createModel(AlpacaCoreSwift::ModelDesc& desc, DictRef params, ProgressCallbackData progressCbData);
+std::vector<float> loadWavF32Mono(const std::string& path);
 
 }

@@ -7,6 +7,8 @@
 #include <ac/local/LocalLlama.hpp>
 #include <ac/local/LocalWhisper.hpp>
 
+#include <ac-audio.hpp>
+
 #include "Model.hpp"
 
 namespace ac {
@@ -36,6 +38,10 @@ class Model* createModel(AlpacaCoreSwift::ModelDesc& desc, DictRef params, Progr
         progressCbData.m_cb(progressCbData.m_context, progress);
         return true;
     }));
+}
+
+std::vector<float> loadWavF32Mono(const std::string& path) {
+    return ac::audio::loadWavF32Mono(path);
 }
 
 }
