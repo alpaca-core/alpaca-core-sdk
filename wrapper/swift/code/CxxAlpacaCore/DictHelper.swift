@@ -43,6 +43,10 @@ public func translateDictionaryToDict(_ dictionary: Dictionary<String, Any>) -> 
                         arrayElement.setDouble(doubleElement)
                     } else if let stringElement = element as? String {
                         arrayElement.setString(std.string(stringElement))
+                    } else if let dataValue = element as? Data {
+                        dataValue.withUnsafeBytes { (ptr: UnsafeRawBufferPointer) in
+                            arrayElement.setBinary(ptr.baseAddress!, dataValue.count)
+                        }
                     } else if let dictElement = element as? Dictionary<String, Any> {
                         // Handle nested dictionaries inside the array
                         convertDictionary(dictElement, into: arrayElement)
@@ -103,7 +107,7 @@ public func translateDictToDictionary(_ dict: ac.DictRef) -> Dictionary<String, 
                     case .DVT_String:
                         array.append(String(value.getString()))
                     case .DVT_Binary:
-                        let binaryData = child.getBinary()
+                        let binaryData = value.getBinary()
                         array.append(Data(bytes: binaryData.data, count: binaryData.size))
                     case .DVT_Object:
                         // Handle nested object (DictRef)
