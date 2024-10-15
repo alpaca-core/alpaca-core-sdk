@@ -103,9 +103,10 @@ struct CxxAlpacaCoreExample {
             "binData": "Hello, World!".data(using: .utf8)!
         ]
 
-    let translated22 = AlpacaCoreSwift.translateDictionaryToDict(dictionary22)
-    let newDictionary = AlpacaCoreSwift.translateDictToDictionary(translated22.getRef())
+        let translated22 = AlpacaCoreSwift.translateDictionaryToDict(dictionary22)
+        let newDictionary = AlpacaCoreSwift.translateDictToDictionary(translated22.getRef())
 
-    let translated2 = AlpacaCoreSwift.translateDictionaryToDict(newDictionary)
+        let translated2 = AlpacaCoreSwift.translateDictionaryToDict(newDictionary)
+        print("Translated: \(translated2.getRef().dump())")
     }
 }
