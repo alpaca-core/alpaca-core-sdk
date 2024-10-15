@@ -5,7 +5,6 @@ import Foundation
 import AlpacaCoreSwift
 import CAlpacaCore
 
-
 @main
 struct CxxAlpacaCoreExample {
     static func main() {
@@ -85,7 +84,28 @@ struct CxxAlpacaCoreExample {
 
         print("Swift Orig Dict: \(dictionary)")
 
+        let n = (dictionary["name"])!
+        print("\(n) = \(type(of: n))")
+
         let translated = translateDictionaryToDict(dictionary)
         print("Translated: \(translated.getRef().dump())")
+
+        let dictionary22: [String: Any] = [
+            "name": "Alice",
+            "age": 28,
+            "height": 1.6,
+            "isMember": true,
+            "scores": [88, true, 1.8, "100", "Hello, World!".data(using: .utf8)!],
+            "address": [
+                "city": "Wonderland",
+                "postalCode": 12345
+            ],
+            "binData": "Hello, World!".data(using: .utf8)!
+        ]
+
+    let translated22 = AlpacaCoreSwift.translateDictionaryToDict(dictionary22)
+    let newDictionary = AlpacaCoreSwift.translateDictToDictionary(translated22.getRef())
+
+    let translated2 = AlpacaCoreSwift.translateDictionaryToDict(newDictionary)
     }
 }
