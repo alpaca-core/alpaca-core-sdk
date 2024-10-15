@@ -80,43 +80,43 @@ final class DictTests: XCTestCase {
             "binData": "Hello, World!".data(using: .utf8)!
         ]
 
-    let translated = AlpacaCoreSwift.translateDictionaryToDict(dictionary)
-    let newDictionary = AlpacaCoreSwift.translateDictToDictionary(translated.getRef())
+        let translated = AlpacaCoreSwift.translateDictionaryToDict(dictionary)
+        let newDictionary = AlpacaCoreSwift.translateDictToDictionary(translated.getRef())
 
-    XCTAssertEqual(newDictionary["name"] as? String, dictionary["name"] as? String, "Couldn't convert String properly!")
-    XCTAssertEqual(newDictionary["age"] as? Int, dictionary["age"] as? Int, "Couldn't convert Int properly!")
-    XCTAssertEqual(newDictionary["height"] as? Double, dictionary["height"] as? Double, "Couldn't convert Double properly!")
-    XCTAssertEqual(newDictionary["isMember"] as? Bool, dictionary["isMember"] as? Bool, "Couldn't convert Bool properly!")
+        XCTAssertEqual(newDictionary["name"] as? String, dictionary["name"] as? String, "Couldn't convert String properly!")
+        XCTAssertEqual(newDictionary["age"] as? Int, dictionary["age"] as? Int, "Couldn't convert Int properly!")
+        XCTAssertEqual(newDictionary["height"] as? Double, dictionary["height"] as? Double, "Couldn't convert Double properly!")
+        XCTAssertEqual(newDictionary["isMember"] as? Bool, dictionary["isMember"] as? Bool, "Couldn't convert Bool properly!")
 
-    let scoresArray = newDictionary["scores"] as? [Any]
-    let originalScores = dictionary["scores"] as! [Any]
+        let scoresArray = newDictionary["scores"] as? [Any]
+        let originalScores = dictionary["scores"] as! [Any]
 
-    XCTAssertNotNil(scoresArray, "Array 'scores' is nil!")
-    XCTAssertEqual(scoresArray?.count, originalScores.count, "Arrays have different count!")
+        XCTAssertNotNil(scoresArray, "Array 'scores' is nil!")
+        XCTAssertEqual(scoresArray?.count, originalScores.count, "Arrays have different count!")
 
-    XCTAssertEqual(scoresArray?[0] as? Int, originalScores[0] as? Int, "Couldn't convert Int in Array properly!")
-    XCTAssertEqual(scoresArray?[1] as? Bool, originalScores[1] as? Bool, "Couldn't convert Bool in Array properly!")
-    XCTAssertEqual(scoresArray?[2] as? Double, originalScores[2] as? Double, "Couldn't convert Double in Array properly!")
-    XCTAssertEqual(scoresArray?[3] as? String, originalScores[3] as? String, "Couldn't convert String in Array properly!")
+        XCTAssertEqual(scoresArray?[0] as? Int, originalScores[0] as? Int, "Couldn't convert Int in Array properly!")
+        XCTAssertEqual(scoresArray?[1] as? Bool, originalScores[1] as? Bool, "Couldn't convert Bool in Array properly!")
+        XCTAssertEqual(scoresArray?[2] as? Double, originalScores[2] as? Double, "Couldn't convert Double in Array properly!")
+        XCTAssertEqual(scoresArray?[3] as? String, originalScores[3] as? String, "Couldn't convert String in Array properly!")
 
-    let dataFromArray = scoresArray?[4] as? Data
-    let originalData = originalScores[4] as! Data
-    XCTAssertNotNil(dataFromArray, "Binary data in Array is nil!")
-    XCTAssertEqual(dataFromArray, originalData, "Couldn't convert binary data in Array properly!")
+        let dataFromArray = scoresArray?[4] as? Data
+        let originalData = originalScores[4] as! Data
+        XCTAssertNotNil(dataFromArray, "Binary data in Array is nil!")
+        XCTAssertEqual(dataFromArray, originalData, "Couldn't convert binary data in Array properly!")
 
-    let addressDict = newDictionary["address"] as? [String: Any]
-    let originalAddress = dictionary["address"] as! [String: Any]
+        let addressDict = newDictionary["address"] as? [String: Any]
+        let originalAddress = dictionary["address"] as! [String: Any]
 
-    XCTAssertNotNil(addressDict, "Address dictionary is nil!")
-    XCTAssertEqual(addressDict?["city"] as? String, originalAddress["city"] as? String,
-        "Couldn't convert String from nested dictionary properly!")
-    XCTAssertEqual(addressDict?["postalCode"] as? Int, originalAddress["postalCode"] as? Int,
-        "Couldn't convert Int from nested dictionary properly!")
+        XCTAssertNotNil(addressDict, "Address dictionary is nil!")
+        XCTAssertEqual(addressDict?["city"] as? String, originalAddress["city"] as? String,
+            "Couldn't convert String from nested dictionary properly!")
+        XCTAssertEqual(addressDict?["postalCode"] as? Int, originalAddress["postalCode"] as? Int,
+            "Couldn't convert Int from nested dictionary properly!")
 
-    let binaryData = newDictionary["binData"] as? Data
-    let originalBinData = dictionary["binData"] as! Data
+        let binaryData = newDictionary["binData"] as? Data
+        let originalBinData = dictionary["binData"] as! Data
 
-    XCTAssertNotNil(binaryData, "Binary data is nil!")
-    XCTAssertEqual(binaryData, originalBinData, "Couldn't convert binary data properly!")
+        XCTAssertNotNil(binaryData, "Binary data is nil!")
+        XCTAssertEqual(binaryData, originalBinData, "Couldn't convert binary data properly!")
     }
 }
