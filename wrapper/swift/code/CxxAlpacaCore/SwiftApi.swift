@@ -9,8 +9,6 @@ public func initSDK() {
 
 public func loadWavF32Mono(_ filePath: String) -> [Float] {
     let pcmf32 = ac.loadWavF32Mono(std.string(filePath))
-        // Convert to Swift array
-    // let floatArr = Array(UnsafeBufferPointer(start: pcmf32.data(), count: Int(pcmf32.size())))
     return Array<Float>(pcmf32)
 }
 
