@@ -1,7 +1,7 @@
 import AlpacaCoreSwift
 import XCTest
 
-final class SwiftApi: XCTestCase {
+final class SwiftApiTests: XCTestCase {
     func testModelCreation() throws {
         print("Hello from e-Dummy.swift")
 
