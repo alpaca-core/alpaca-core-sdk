@@ -13,5 +13,5 @@ list(APPEND CMAKE_MODULE_PATH
 include(FindSwiftXCTest)
 
 find_package(SwiftXCTest REQUIRED)
-add_swift_xctest(acSwiftTests AlpacaCoreSwift t-Dict.swift)
+add_swift_xctest(acSwiftTests AlpacaCoreSwift t-Dict.swift t-SwiftApi.swift)
 set_target_properties(acSwiftTests PROPERTIES COMPILE_OPTIONS "")
