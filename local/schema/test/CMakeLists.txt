@@ -7,3 +7,4 @@ endmacro()
 
 schema_test(SchemaItem)
 schema_test(SchemaEnum)
+schema_test(ModelSchema)

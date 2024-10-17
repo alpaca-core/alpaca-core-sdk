@@ -7,4 +7,3 @@ endmacro()
 
 add_local_test(ProgressCb)
 add_local_test(ModelFactory)
-add_local_test(ModelSchema)

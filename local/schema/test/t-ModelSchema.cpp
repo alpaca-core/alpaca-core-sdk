@@ -1,7 +1,7 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include <ac/local/ModelSchema.hpp>
+#include <ac/schema/ModelSchema.hpp>
 #include <doctest/doctest.h>
 
 using namespace ac::local::schema;

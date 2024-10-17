@@ -3,7 +3,7 @@
 //
 #pragma once
 #include <ac/Dict.hpp>
-#include <ac/schema/SchemaItem.hpp>
+#include "SchemaItem.hpp"
 #include <astl/tuple_util.hpp>
 
 // here we use tuples to define instances within a model and operations within an instance
