@@ -25,10 +25,13 @@
 extern "C" {
 #endif
 
+/// \defgroup c-dict C Dictionary API
+/// @{
+
 /**
  * @brief Get the last error message.
  *
- * @return const char* Null if no error, otherwise a thread-local error string.
+ * @return const char* `NULL` if no error, otherwise a thread-local error string.
  * @note Every dict function invalidates the previous error.
  * @warning Every dict function expecting a dict_ref will likely crash on invalid refs.
  */
@@ -392,6 +395,8 @@ AC_C_DICT_EXPORT char* ac_dict_dump(ac_dict_ref d, int indent);
  * @note This function uses exception handling internally. Check ac_dict_get_last_error() for error details.
  */
 AC_C_DICT_EXPORT int ac_dict_dump_to(ac_dict_ref d, int indent, char* buf, int buf_size);
+
+/// @}
 
 #if defined(__cplusplus)
 }

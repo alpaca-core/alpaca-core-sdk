@@ -6,6 +6,9 @@
 #include <ac/inline.h>
 #include <stdbool.h>
 
+/// \ingroup c-dict
+// @{
+
 typedef struct ac_dict_arg {
     ac_dict_ref ref;
     bool copy; // or take (move) if false
@@ -25,3 +28,5 @@ AC_INLINE ac_dict_arg ac_dict_arg_null() {
     ac_dict_arg ret = {0};
     return ret;
 }
+
+// @}
