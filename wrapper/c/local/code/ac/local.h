@@ -13,9 +13,9 @@ extern "C" {
 #endif
 
 /**
- * @brief Get the last error message.
+ * Get the last error message.
  *
- * @return const char* NULL if no error, otherwise a thread-local error string.
+ * @return NULL if no error, otherwise a thread-local error string.
  * @note Every function invalidates the previous error.
  */
 AC_C_LOCAL_EXPORT const char* ac_local_get_last_error();

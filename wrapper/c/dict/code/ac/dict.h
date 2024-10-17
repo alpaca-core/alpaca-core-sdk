@@ -25,7 +25,11 @@
 extern "C" {
 #endif
 
-/// \defgroup c-dict C Dictionary API
+/// @defgroup c-dict C Dictionary API
+/// C API for dictionary operations in the Alpaca Core library.
+/// The C dictionary is blah, blah, blah.
+
+/// @addtogroup c-dict
 /// @{
 
 /**

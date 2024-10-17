@@ -6,8 +6,8 @@
 #include <ac/inline.h>
 #include <stdbool.h>
 
-/// \ingroup c-dict
-// @{
+/// @ingroup c-dict
+/// @{
 
 typedef struct ac_dict_arg {
     ac_dict_ref ref;
@@ -29,4 +29,4 @@ AC_INLINE ac_dict_arg ac_dict_arg_null() {
     return ret;
 }
 
-// @}
+/// @}
