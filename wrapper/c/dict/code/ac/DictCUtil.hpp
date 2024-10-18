@@ -8,52 +8,26 @@
 #include "dict_root.h"
 #include "dict_arg.h"
 
-/**
- * @file DictCUtil.hpp
- * @brief Utility functions for converting between C and C++ dictionary representations in the Alpaca Core library.
- *
- * This file provides functions to bridge the gap between the C API's dictionary representations
- * (ac_dict_root and ac_dict_ref) and the C++ Dict type. These utilities are essential for
- * implementing the C API functions that interact with the underlying C++ dictionary implementation.
- */
-
 namespace ac::cutil {
 
-/**
- * @brief Converts a C dictionary reference to a C++ Dict object reference.
- *
- * This function provides access to the underlying Dict object referenced by an ac_dict_ref.
- * It's used internally to implement C API functions that need to operate on the C++ Dict.
- *
- * @param d The dictionary reference to convert.
- * @return Dict& A reference to the converted Dict object.
- */
+/// @defgroup c-cpp-dict C&harr;C++ Dict Helpers
+/// Helpers for using the C @ref ac_dict_ref objects in C++ as ac::Dict.
+/// @{
+
+/// Convert a C dict ref to a C++ Dict object.
+/// The new value is a reference and modifying it will modify the original C dictionary.
 AC_C_DICT_EXPORT Dict& Dict_from_dict_ref(ac_dict_ref d);
 
-/**
- * @brief Converts a C++ Dict object to a C dictionary reference.
- *
- * This function creates an ac_dict_ref that points to the given Dict object.
- * It's used internally to implement C API functions that need to return references
- * to Dict objects.
- *
- * @param d The Dict object to convert.
- * @return ac_dict_ref The resulting dictionary reference.
- */
+/// Convert a C++ Dict object to a C dict ref.
+/// The new value is a reference and modifying in C it will modify the original C++ dictionary.
 AC_C_DICT_EXPORT ac_dict_ref Dict_to_dict_ref(Dict& d);
 
-/**
- * @brief Parses a JSON string into a Dict object.
- *
- * This function uses the nlohmann::json parser to convert a JSON string into a Dict object.
- * It's used internally to implement JSON parsing functionality in the C API.
- *
- * @param json The JSON string to parse.
- * @param jsonEnd Optional pointer to the end of the JSON string. If nullptr, the entire string is parsed.
- * @return Dict The resulting Dict object parsed from the JSON string.
- */
-AC_C_DICT_EXPORT Dict Dict_parse(const char* json, const char* jsonEnd = nullptr);
-
+/// Convert a C dict arg to a C++ Dict object following the arg's intent.
+/// - null args become an empty Dict
+/// - copy args are deep copied
+/// - take args are moved and the original is set to null
 AC_C_DICT_EXPORT Dict Dict_from_dict_arg(ac_dict_arg d);
+
+/// @}
 
 } // namespace ac::cutil
