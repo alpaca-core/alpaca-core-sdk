@@ -18,7 +18,7 @@ module Fixygen
   def fix_doc(doc)
     # doxygen uses tables to layout almost everything
     # tables are messy and hard to style properly, so we'll just convert them to plain divs
-    ['table', 'tr', 'td'].each do |elem|
+    ['table', 'tr', 'th', 'td'].each do |elem|
       doc.css(elem).each do |e|
         new_elem = Nokogiri::XML::Node.new('div', doc)
 
@@ -45,6 +45,11 @@ module Fixygen
     # just nuke them all
     doc.css('body').each do |e|
       e.inner_html = e.inner_html.gsub("\u00A0", '')
+    end
+
+    # also help us idenfitify doxygen content in case we do more shenanigans with the html
+    doc.css('.contents').each do |e|
+      e.add_class('doxygen')
     end
 
     doc
