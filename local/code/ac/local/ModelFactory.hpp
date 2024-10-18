@@ -9,6 +9,13 @@
 #include <ac/Dict.hpp>
 #include <astl/tsumap.hpp>
 
+/// @defgroup cpp-local C++ Local API
+/// C++ API for local infernence.
+/// The general idea is something...
+
+/// @addtogroup cpp-local
+/// @{
+
 namespace ac::local {
 class ModelLoader;
 
@@ -43,3 +50,5 @@ private:
 };
 
 } // namespace ac::local
+
+/// @}

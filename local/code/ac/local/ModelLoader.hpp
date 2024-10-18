@@ -8,6 +8,9 @@
 #include "ProgressCb.hpp"
 #include <ac/Dict.hpp>
 
+/// @addtogroup cpp-local
+/// @{
+
 namespace ac::local {
 
 /// Base class for model loaders.
@@ -25,3 +28,5 @@ public:
 };
 
 } // namespace ac::local
+
+/// @}

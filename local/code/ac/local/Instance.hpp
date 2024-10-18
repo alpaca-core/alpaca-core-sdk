@@ -7,6 +7,9 @@
 #include <ac/Dict.hpp>
 #include <string_view>
 
+/// @addtogroup cpp-local
+/// @{
+
 namespace ac::local {
 /// An inference instance.
 class AC_LOCAL_EXPORT Instance {
@@ -21,3 +24,5 @@ public:
     virtual Dict runOp(std::string_view op, Dict params, ProgressCb cb = {}) = 0;
 };
 } // namespace ac::local
+
+/// @}
