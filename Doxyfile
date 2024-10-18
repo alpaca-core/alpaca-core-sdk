@@ -140,6 +140,7 @@ USE_MATHJAX            = NO
 MATHJAX_RELPATH        = http://cdn.mathjax.org/mathjax/latest
 SEARCHENGINE           = YES
 SERVER_BASED_SEARCH    = NO
+HTML_EXTRA_STYLESHEET  = doc/fixygen.css
 
 #---------------------------------------------------------------------------
 # Configuration options related to the LaTeX output
