@@ -183,107 +183,62 @@ AC_C_DICT_EXPORT const char* ac_dict_iter_get_key(ac_dict_iter* d);
 /// Get value from an iterator.
 AC_C_DICT_EXPORT ac_dict_ref ac_dict_iter_get_value(ac_dict_iter* d);
 
-/**
- * @brief Set dictionary value to null.
- *
- * @param parent Dictionary reference.
- */
+/// Set dictionary value to null.
+/// Any previous value is overwritten and lost.
 AC_C_DICT_EXPORT void ac_dict_set_null(ac_dict_ref d);
 
-/**
- * @brief Set dictionary value to boolean.
- *
- * @param parent Dictionary reference.
- * @param value Boolean value.
- */
+/// Set dictionary value to a boolean value.
+/// Any previous value is overwritten and lost.
 AC_C_DICT_EXPORT void ac_dict_set_bool(ac_dict_ref d, bool value);
 
-/**
- * @brief Set dictionary value to integer.
- *
- * @param parent Dictionary reference.
- * @param value Integer value.
- */
+/// Set dictionary value to an integer.
+/// Any previous value is overwritten and lost.
 AC_C_DICT_EXPORT void ac_dict_set_int(ac_dict_ref d, int value);
 
-/**
- * @brief Set dictionary value to unsigned integer.
- *
- * @param parent Dictionary reference.
- * @param value Unsigned integer value.
- */
+/// Set dictionary value to an unsigned integer.
+/// Any previous value is overwritten and lost.
 AC_C_DICT_EXPORT void ac_dict_set_unsigned(ac_dict_ref d, unsigned value);
 
-/**
- * @brief Set dictionary value to double.
- *
- * @param parent Dictionary reference.
- * @param value Double value.
- */
+/// Set dictionary value to a double.
+/// Any previous value is overwritten and lost.
 AC_C_DICT_EXPORT void ac_dict_set_double(ac_dict_ref d, double value);
 
-/**
- * @brief Set dictionary value to string.
- *
- * @param parent Dictionary reference.
- * @param value String value.
- * @param end End of string (null for zero-terminated).
- */
+/// Set dictionary value to a string.
+/// Any previous value is overwritten and lost.
+///
+/// The `end` parameter is optional and can be used to specify the end of the string.
+/// If `end` is `NULL`, the string is assumed to be zero-terminated.
 AC_C_DICT_EXPORT void ac_dict_set_string(ac_dict_ref d, const char* value, const char* end);
 
-/**
- * @brief Set dictionary value to empty array.
- *
- * @param parent Dictionary reference.
- */
+/// Set dictionary value to an empty array.
+/// Any previous value is overwritten and lost.
 AC_C_DICT_EXPORT void ac_dict_set_array(ac_dict_ref d);
 
-/**
- * @brief Set dictionary value to empty object.
- *
- * @param parent Dictionary reference.
- */
+/// Set dictionary value to an empty object.
+/// Any previous value is overwritten and lost.
 AC_C_DICT_EXPORT void ac_dict_set_object(ac_dict_ref d);
 
-/**
- * @brief Set dictionary value to binary data.
- *
- * @param parent Dictionary reference.
- * @param data Binary data.
- * @param size Size of binary data.
- */
+/// Set dictionary value to binary data.
+/// Any previous value is overwritten and lost.
 AC_C_DICT_EXPORT void ac_dict_set_binary(ac_dict_ref d, const uint8_t* data, uint32_t size);
 
-/**
- * @brief Add a child to a dictionary.
- *
- * @param parent Dictionary reference.
- * @param key Key for the child (null for array elements).
- * @return ac_dict_ref Reference to the new child (null on error).
- * @note This function uses exception handling internally. Check ac_dict_get_last_error() for error details.
- */
+/// Add a child to an array.
+/// Returns the newly created child or `NULL` if the input is not compound.
+/// For arrays, the child is appended to the end and `key` is ignored.
 AC_C_DICT_EXPORT ac_dict_ref ac_dict_add_child(ac_dict_ref parent, const char* key);
 
-/**
- * @brief Dump dictionary to string.
- *
- * @param d Dictionary reference.
- * @param indent Indentation (-1 for compact, 0 for pretty, 1+ for pretty with indent).
- * @return char* Dumped string (null on error, caller must free).
- * @note This function uses exception handling internally. Check ac_dict_get_last_error() for error details.
- */
+/// Dump dict to string.
+/// The `indent` parameter specifies the indentation level: -1 for compact, &ge; 0 for pretty.
+///
+/// The returned value is a newly allocated string that must be `free`-d by the caller.
+/// The function returns `NULL` on error.
 AC_C_DICT_EXPORT char* ac_dict_dump(ac_dict_ref d, int indent);
 
-/**
- * @brief Dump dictionary to buffer.
- *
- * @param d Dictionary reference.
- * @param indent Indentation (-1 for compact, 0 for pretty, 1+ for pretty with indent).
- * @param buf Buffer to write to.
- * @param buf_size Size of buffer.
- * @return int Number of characters that would have been written (ignoring buf_size), or -1 on error.
- * @note This function uses exception handling internally. Check ac_dict_get_last_error() for error details.
- */
+/// Dump dict to buffer.
+/// The `indent` parameter specifies the indentation level: -1 for compact, 0 for pretty, 1+ for pretty with indent.
+///
+/// The function follows `snprintf` semantics and returns the number of characters that would have been written
+/// (ignoring `buf_size`) or -1 on error. It only writes to the buffer if the return value is less than `buf_size`.
 AC_C_DICT_EXPORT int ac_dict_dump_to(ac_dict_ref d, int indent, char* buf, int buf_size);
 
 /// @}
