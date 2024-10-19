@@ -188,7 +188,7 @@ AC_C_DICT_EXPORT ac_dict_ref ac_dict_iter_get_value(ac_dict_iter* d);
  *
  * @param parent Dictionary reference.
  */
-AC_C_DICT_EXPORT void ac_dict_set_null(ac_dict_ref parent);
+AC_C_DICT_EXPORT void ac_dict_set_null(ac_dict_ref d);
 
 /**
  * @brief Set dictionary value to boolean.
@@ -196,7 +196,7 @@ AC_C_DICT_EXPORT void ac_dict_set_null(ac_dict_ref parent);
  * @param parent Dictionary reference.
  * @param value Boolean value.
  */
-AC_C_DICT_EXPORT void ac_dict_set_bool(ac_dict_ref parent, bool value);
+AC_C_DICT_EXPORT void ac_dict_set_bool(ac_dict_ref d, bool value);
 
 /**
  * @brief Set dictionary value to integer.
@@ -204,7 +204,7 @@ AC_C_DICT_EXPORT void ac_dict_set_bool(ac_dict_ref parent, bool value);
  * @param parent Dictionary reference.
  * @param value Integer value.
  */
-AC_C_DICT_EXPORT void ac_dict_set_int(ac_dict_ref parent, int value);
+AC_C_DICT_EXPORT void ac_dict_set_int(ac_dict_ref d, int value);
 
 /**
  * @brief Set dictionary value to unsigned integer.
@@ -212,7 +212,7 @@ AC_C_DICT_EXPORT void ac_dict_set_int(ac_dict_ref parent, int value);
  * @param parent Dictionary reference.
  * @param value Unsigned integer value.
  */
-AC_C_DICT_EXPORT void ac_dict_set_unsigned(ac_dict_ref parent, unsigned value);
+AC_C_DICT_EXPORT void ac_dict_set_unsigned(ac_dict_ref d, unsigned value);
 
 /**
  * @brief Set dictionary value to double.
@@ -220,7 +220,7 @@ AC_C_DICT_EXPORT void ac_dict_set_unsigned(ac_dict_ref parent, unsigned value);
  * @param parent Dictionary reference.
  * @param value Double value.
  */
-AC_C_DICT_EXPORT void ac_dict_set_double(ac_dict_ref parent, double value);
+AC_C_DICT_EXPORT void ac_dict_set_double(ac_dict_ref d, double value);
 
 /**
  * @brief Set dictionary value to string.
@@ -229,21 +229,21 @@ AC_C_DICT_EXPORT void ac_dict_set_double(ac_dict_ref parent, double value);
  * @param value String value.
  * @param end End of string (null for zero-terminated).
  */
-AC_C_DICT_EXPORT void ac_dict_set_string(ac_dict_ref parent, const char* value, const char* end);
+AC_C_DICT_EXPORT void ac_dict_set_string(ac_dict_ref d, const char* value, const char* end);
 
 /**
  * @brief Set dictionary value to empty array.
  *
  * @param parent Dictionary reference.
  */
-AC_C_DICT_EXPORT void ac_dict_set_array(ac_dict_ref parent);
+AC_C_DICT_EXPORT void ac_dict_set_array(ac_dict_ref d);
 
 /**
  * @brief Set dictionary value to empty object.
  *
  * @param parent Dictionary reference.
  */
-AC_C_DICT_EXPORT void ac_dict_set_object(ac_dict_ref parent);
+AC_C_DICT_EXPORT void ac_dict_set_object(ac_dict_ref d);
 
 /**
  * @brief Set dictionary value to binary data.
@@ -252,7 +252,7 @@ AC_C_DICT_EXPORT void ac_dict_set_object(ac_dict_ref parent);
  * @param data Binary data.
  * @param size Size of binary data.
  */
-AC_C_DICT_EXPORT void ac_dict_set_binary(ac_dict_ref parent, const uint8_t* data, uint32_t size);
+AC_C_DICT_EXPORT void ac_dict_set_binary(ac_dict_ref d, const uint8_t* data, uint32_t size);
 
 /**
  * @brief Add a child to a dictionary.

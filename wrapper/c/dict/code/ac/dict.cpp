@@ -204,43 +204,43 @@ ac_dict_ref ac_dict_iter_get_value(ac_dict_iter* it) {
     return Dict_to_dict_ref(it->it.value());
 }
 
-void ac_dict_set_null(ac_dict_ref parent) {
-    Dict_from_dict_ref(parent) = nullptr;
+void ac_dict_set_null(ac_dict_ref d) {
+    Dict_from_dict_ref(d) = nullptr;
 }
 
-void ac_dict_set_bool(ac_dict_ref parent, bool value) {
-    Dict_from_dict_ref(parent) = value;
+void ac_dict_set_bool(ac_dict_ref d, bool value) {
+    Dict_from_dict_ref(d) = value;
 }
 
-void ac_dict_set_int(ac_dict_ref parent, int value) {
-    Dict_from_dict_ref(parent) = value;
+void ac_dict_set_int(ac_dict_ref d, int value) {
+    Dict_from_dict_ref(d) = value;
 }
 
-void ac_dict_set_unsigned(ac_dict_ref parent, unsigned value) {
-    Dict_from_dict_ref(parent) = value;
+void ac_dict_set_unsigned(ac_dict_ref d, unsigned value) {
+    Dict_from_dict_ref(d) = value;
 }
 
-void ac_dict_set_double(ac_dict_ref parent, double value) {
-    Dict_from_dict_ref(parent) = value;
+void ac_dict_set_double(ac_dict_ref d, double value) {
+    Dict_from_dict_ref(d) = value;
 }
 
-void ac_dict_set_string(ac_dict_ref parent, const char* value, const char* end) {
+void ac_dict_set_string(ac_dict_ref d, const char* value, const char* end) {
     if (!end) {
         end = value + strlen(value);
     }
-    Dict_from_dict_ref(parent) = std::string(value, end);
+    Dict_from_dict_ref(d) = std::string(value, end);
 }
 
-void ac_dict_set_array(ac_dict_ref parent) {
-    Dict_from_dict_ref(parent) = ac::Dict::array();
+void ac_dict_set_array(ac_dict_ref d) {
+    Dict_from_dict_ref(d) = ac::Dict::array();
 }
 
-void ac_dict_set_object(ac_dict_ref parent) {
-    Dict_from_dict_ref(parent) = ac::Dict::object();
+void ac_dict_set_object(ac_dict_ref d) {
+    Dict_from_dict_ref(d) = ac::Dict::object();
 }
 
-void ac_dict_set_binary(ac_dict_ref parent, const uint8_t* data, uint32_t size) {
-    Dict_from_dict_ref(parent) = ac::Dict::binary(ac::Blob(data, data + size));
+void ac_dict_set_binary(ac_dict_ref d, const uint8_t* data, uint32_t size) {
+    Dict_from_dict_ref(d) = ac::Dict::binary(ac::Blob(data, data + size));
 }
 
 ac_dict_ref ac_dict_add_child(ac_dict_ref parent, const char* key) {
