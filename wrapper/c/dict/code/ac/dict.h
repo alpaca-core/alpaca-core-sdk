@@ -32,7 +32,7 @@ extern "C" {
 /// @addtogroup c-dict
 /// @{
 
-/// Get the last error message or `NULL` if no error.
+/// Get the last dict-related error message or `NULL` if no error.
 /// The function returns a thread-local string. Ownership of the string is not transferred.
 /// @note Every dict function invalidates the last error.
 /// @warning Invalid dict ref arguments are not checked and will lead to crashes.

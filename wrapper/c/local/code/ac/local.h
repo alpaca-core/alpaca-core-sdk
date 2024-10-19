@@ -12,41 +12,21 @@
 extern "C" {
 #endif
 
-/**
- * Get the last error message.
- *
- * @return NULL if no error, otherwise a thread-local error string.
- * @note Every function invalidates the previous error.
- */
+/// Get the last local inference error message or `NULL` if no error.
+/// The function returns a thread-local string. Ownership of the string is not transferred.
+/// @note Every `local_` function invalidates the last error.
 AC_C_LOCAL_EXPORT const char* ac_local_get_last_error();
 
-/**
- * @brief Opaque structure representing an instance
- */
+/// Opaque structure representing an instance.
 typedef struct ac_local_instance ac_local_instance;
 
-/**
- * @brief Free an instance
- *
- * This function should be called to clean up the instance object when it's no longer needed.
- *
- * @param i Pointer to the instance to be freed
- */
+/// Free a local instance.
+/// `NULL` is a no-op.
 AC_C_LOCAL_EXPORT void ac_free_local_instance(ac_local_instance* i);
 
-/**
- * @brief Run an operation on an instance
- *
- * This function initiates an operation on the given instance.
- * The result and intermediate updates are returned via the provided callback functions.
- *
- * @param i Pointer to the instance
- * @param op Name of the operation to run (e.g., "run")
- * @param params_root Dictionary containing operation parameters
- * @param progress_cb Optional callback function for non-result-related progress
- * @param cb_user_data User data to be passed to the callbacks
- * @return Dictionary containing the result of the operation
- */
+/// Run an op on a local instance
+/// `target` is where the result of the operation is stored.
+/// @return `target` or `NULL` on error.
 AC_C_LOCAL_EXPORT ac_dict_ref ac_run_local_op(
     ac_dict_ref target,
     ac_local_instance* i,
@@ -56,40 +36,39 @@ AC_C_LOCAL_EXPORT ac_dict_ref ac_run_local_op(
     void* cb_user_data
 );
 
-/**
- * @brief Opaque structure representing a model
- */
+/// Opaque structure representing a model.
 typedef struct ac_local_model ac_local_model;
 
+/// Free a local model.
+/// `NULL` is a no-op.
 AC_C_LOCAL_EXPORT void ac_free_local_model(ac_local_model* m);
 
-/**
- * @brief Create an instance asynchronously
- *
- * This function initiates the asynchronous creation of an instance from a model.
- * The result is returned via the provided callback function.
- *
- * @param m Pointer to the model
- * @param instance_type Type of instance to be created (e.g., "general")
- * @param params_root Dictionary containing instance parameters (can be NULL for default parameters)
- * @param result_cb Callback function to be called with the result
- * @param cb_user_data User data to be passed to the callback
- */
+/// Create a local instance of a model.
+/// Returns `NULL` on error.
 AC_C_LOCAL_EXPORT ac_local_instance* ac_create_local_instance(
     ac_local_model* m,
     const char* instance_type,
     ac_dict_arg params
 );
 
+/// Opaque structure representing a model factory.
 typedef struct ac_local_model_factory ac_local_model_factory;
+
+/// Create a new local model factory.
 AC_C_LOCAL_EXPORT ac_local_model_factory* ac_new_local_model_factory();
+
+/// Free a local model factory.
+/// `NULL` is a no-op.
 AC_C_LOCAL_EXPORT void ac_free_local_model_factory(ac_local_model_factory* f);
 
+/// Asset info for creating a local model.
 typedef struct ac_local_model_desc_asset {
-    const char* path;
-    const char* tag;
+    const char* path; ///< Path to the asset.
+    const char* tag;  ///< Tag of the asset (may be `NULL`).
 } ac_local_model_desc_asset;
 
+/// Create a local model.
+/// Returns `NULL` on error.
 AC_C_LOCAL_EXPORT ac_local_model* ac_create_local_model(
     ac_local_model_factory* f,
     const char* inference_type,
