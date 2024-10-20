@@ -109,12 +109,9 @@ GENERATE_SQLITE3    = NO
 ENABLE_PREPROCESSING   = YES
 MACRO_EXPANSION        = YES
 EXPAND_ONLY_PREDEF     = YES
-INCLUDE_PATH           =
-INCLUDE_FILE_PATTERNS  =
-PREDEFINED             = DOXYGEN=1 \
-                         AC_C_DICT_EXPORT \
-                         AC_INLINE \
-                         AC_C_LOCAL_EXPORT
+# INCLUDE_PATH           =
+# INCLUDE_FILE_PATTERNS  =
+PREDEFINED             = DOXYGEN=1
 EXPAND_AS_DEFINED      =
 SKIP_FUNCTION_MACROS   = YES
 
