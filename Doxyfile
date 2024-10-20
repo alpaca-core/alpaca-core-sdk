@@ -1,65 +1,31 @@
 # Doxyfile 1.12.0
+@INCLUDE = common/doc-util/Doxyfile.common
 
-DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "Alpaca Core Local SDK"
-PROJECT_NUMBER         = "0.1.0"
 PROJECT_BRIEF          = "AI Inference SDK"
 PROJECT_LOGO           =
 PROJECT_ICON           =
 OUTPUT_DIRECTORY       = out/doc
-ABBREVIATE_BRIEF       =
 STRIP_FROM_PATH        = local/code \
                          dict/code \
                          wrapper/c/cutil/include \
                          wrapper/c/local/code \
                          wrapper/c/dict/code \
                          wrapper/java/src/main/java
-JAVADOC_AUTOBRIEF      = YES
-JAVADOC_BANNER         = YES
-QT_AUTOBRIEF           = YES
-ALIASES                =
+ALIASES                +=
 OPTIMIZE_OUTPUT_FOR_C  = NO
 OPTIMIZE_OUTPUT_JAVA   = NO
-BUILTIN_STL_SUPPORT    = YES
-GROUP_NESTED_COMPOUNDS = YES
-INLINE_GROUPED_CLASSES = YES
-INLINE_SIMPLE_STRUCTS  = YES
-NUM_PROC_THREADS       = 0
-TIMESTAMP              = NO
 
-#---------------------------------------------------------------------------
-# Build related configuration options
-#---------------------------------------------------------------------------
-EXTRACT_ALL            = YES
-EXTRACT_LOCAL_CLASSES  = NO
-EXTRACT_PRIV_VIRTUAL   = YES
-HIDE_FRIEND_COMPOUNDS  = YES
-HIDE_IN_BODY_DOCS      = YES
-CASE_SENSE_NAMES       = YES
-HIDE_SCOPE_NAMES       = NO
-SHOW_INCLUDE_FILES     = NO
-SHOW_GROUPED_MEMB_INC  = YES
-INLINE_INFO            = YES
-SORT_MEMBER_DOCS       = NO
-MAX_INITIALIZER_LINES  = 10
-SHOW_USED_FILES        = NO
+# QUIET                  = NO
+# WARNINGS               = YES
 
-#---------------------------------------------------------------------------
-# Configuration options related to warning and progress messages
-#---------------------------------------------------------------------------
-QUIET                  = NO
-WARNINGS               = YES
 
-#---------------------------------------------------------------------------
-# Configuration options related to the input files
-#---------------------------------------------------------------------------
 INPUT                  = local/code/ac/local \
                          dict/code/ac \
                          wrapper/c/cutil/include \
                          wrapper/c/dict/code \
                          wrapper/c/local/code \
                          wrapper/java/src/main/java
-INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.h \
                          *.hh \
                          *.hpp \
@@ -72,79 +38,14 @@ EXAMPLE_PATH           =
 EXAMPLE_PATTERNS       =
 IMAGE_PATH             =
 
-#---------------------------------------------------------------------------
-# Configuration options related to source browsing
-#---------------------------------------------------------------------------
-
 VERBATIM_HEADERS       = NO
 CLANG_ASSISTED_PARSING = NO
 CLANG_OPTIONS          = -std=C++20
 
-#---------------------------------------------------------------------------
-# Configuration options related to the alphabetical class index
-#---------------------------------------------------------------------------
-ALPHABETICAL_INDEX = NO
-
-#---------------------------------------------------------------------------
-# Configuration options related to the HTML output
-#---------------------------------------------------------------------------
-GENERATE_HTML          = YES
-HTML_OUTPUT            = html
-HTML_FILE_EXTENSION    = .html
-HTML_EXTRA_STYLESHEET  = doc/fixygen.css
-ENUM_VALUES_PER_LINE   = 0
-GENERATE_TREEVIEW      = YES
-USE_MATHJAX            = NO
-MATHJAX_RELPATH        = http://cdn.mathjax.org/mathjax/latest
-SEARCHENGINE           = YES
-
-#---------------------------------------------------------------------------
-# Configuration options related to the LaTeX output
-#---------------------------------------------------------------------------
-GENERATE_LATEX         = NO
-
-#---------------------------------------------------------------------------
-# Configuration options related to the RTF output
-#---------------------------------------------------------------------------
-GENERATE_RTF           = NO
-
-#---------------------------------------------------------------------------
-# Configuration options related to the man page output
-#---------------------------------------------------------------------------
-GENERATE_MAN           = NO
-
-#---------------------------------------------------------------------------
-# Configuration options related to the XML output
-#---------------------------------------------------------------------------
-GENERATE_XML           = YES
-XML_PROGRAMLISTING     = NO
-
-#---------------------------------------------------------------------------
-# Configuration options related to Sqlite3 output
-
-#---------------------------------------------------------------------------
-GENERATE_SQLITE3    = NO
-
-#---------------------------------------------------------------------------
-# Configuration options related to the preprocessor
-#---------------------------------------------------------------------------
-ENABLE_PREPROCESSING   = YES
-MACRO_EXPANSION        = YES
-EXPAND_ONLY_PREDEF     = YES
 INCLUDE_PATH           =
 INCLUDE_FILE_PATTERNS  =
-PREDEFINED             = DOXYGEN=1 \
-                         AC_C_DICT_EXPORT \
-                         AC_INLINE \
-                         AC_C_LOCAL_EXPORT
-EXPAND_AS_DEFINED      =
-SKIP_FUNCTION_MACROS   = YES
+PREDEFINED             += AC_C_DICT_EXPORT \
+                          AC_INLINE \
+                          AC_C_LOCAL_EXPORT
 
-#---------------------------------------------------------------------------
-# Configuration options related to external references
-#---------------------------------------------------------------------------
 
-#---------------------------------------------------------------------------
-# Configuration options related to diagram generator tools
-#---------------------------------------------------------------------------
-HAVE_DOT               = NO
