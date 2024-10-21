@@ -36,11 +36,8 @@ public func createModel(_ desc: inout ModelDesc, _ params: Dictionary<String, An
     let paramsAsDict = translateDictionaryToDict(params)
     let wrapper = CallbackWrapper(completion: _progress)
 
-    if let model = ac.swift.createModel(&desc, paramsAsDict.getRef(), wrapper.getProgressData())
-    {
-        return Model(model)
-    }
-    return nil
+    let model = ac.swift.createModel(&desc, paramsAsDict.getRef(), wrapper.getProgressData())
+    return Model(model)
 }
 
 public class Model {

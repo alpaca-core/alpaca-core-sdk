@@ -2,14 +2,13 @@
 // SPDX-License-Identifier: MIT
 //
 #include "AlpacaCore.hpp"
+#include "Model.hpp"
 
 #include <ac/local/LocalDummy.hpp>
 #include <ac/local/LocalLlama.hpp>
 #include <ac/local/LocalWhisper.hpp>
 
 #include <ac-audio.hpp>
-
-#include "Model.hpp"
 
 namespace ac::swift {
 
@@ -23,7 +22,7 @@ void initSDK() {
     local::addWhisperInference(*factorySingleton);
 }
 
-Model* createModel(AlpacaCoreSwift::ModelDesc& desc, DictRef params, ProgressCallbackData progressCbData) {
+Model createModel(AlpacaCoreSwift::ModelDesc& desc, DictRef params, ProgressCallbackData progressCbData) {
     ac::local::ModelDesc modelDesc;
     modelDesc.inferenceType = desc.getInferenceType();
     modelDesc.name = desc.getName();
@@ -36,7 +35,7 @@ Model* createModel(AlpacaCoreSwift::ModelDesc& desc, DictRef params, ProgressCal
         modelDesc.assets.push_back(assetInfo);
     }
 
-    return new Model(factorySingleton->createModel(modelDesc, params.getDict(), [&](std::string_view tag, float progress) {
+    return Model(factorySingleton->createModel(modelDesc, params.getDict(), [&](std::string_view tag, float progress) {
         progressCbData.m_cb(progressCbData.m_context, tag.data(), progress);
         return true;
     }));

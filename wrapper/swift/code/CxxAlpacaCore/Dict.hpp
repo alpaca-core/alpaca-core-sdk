@@ -8,8 +8,6 @@
 #include <swift/bridging>
 #include "AlpacaCore-Swift.h"
 
-#include "IntrusiveRefCounted.hpp"
-
 namespace ac::swift {
 
 namespace sw = ::swift;
@@ -63,13 +61,12 @@ public:
 
     void parse(const std::string& jsonStr);
     std::string dump() const;
-    DictRoot* _Nonnull clone();
+    DictRoot clone();
 
     DictRef operator[](const std::string& key) const;
     DictRef operator[](int index) const;
 
     Dict& getDict() const { return *m_dictRef; }
-
 
 private:
     friend class DictRoot;
@@ -80,23 +77,23 @@ private:
     Dict* _Nonnull m_dictRef;
 };
 
-class DictRoot : public IntrusiveRefCounted<DictRoot> {
+class DictRoot {
 public:
-    DictRoot() = default;
-    DictRoot(const DictRoot&) = delete;
+    DictRoot() {
+        m_dict = std::make_shared<Dict>();
+    }
+    DictRoot(const DictRoot& other) {
+        m_dict = other.m_dict;
+    };
 
-    static DictRoot* _Nonnull create();
-    static DictRoot* _Nonnull parse(const std::string& jsonStr);
+    static DictRoot parse(const std::string& jsonStr);
 
-    DictRef getRef();
+    DictRef getRef() const;
 
 private:
-    Dict m_dict;
-} SWIFT_SHARED_REFERENCE(retainDictRoot, releaseDictRoot);
+    std::shared_ptr<Dict> m_dict;
+};
 
 std::string getDictTypeAsString(DictValueType type);
 
 }
-
-void retainDictRoot(ac::swift::DictRoot* _Nullable d);
-void releaseDictRoot(ac::swift::DictRoot* _Nullable d);

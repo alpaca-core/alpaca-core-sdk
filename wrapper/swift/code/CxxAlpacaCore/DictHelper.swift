@@ -9,7 +9,8 @@ public enum DictConvertError: Error {
 
 public func translateDictionaryToDict(_ dictionary: Dictionary<String, Any>) -> ac.swift.DictRoot {
     // Create the root dictionary object
-    let dictRoot = ac.swift.DictRoot.create()
+    // var dictRoot = ac.swift.DictRoot.create()
+    let dictRoot = ac.swift.DictRoot()
 
     func convertValue(sourceValue: Any, target: inout ac.swift.DictRef) throws(DictConvertError) {
         if let intValue = sourceValue as? Int {

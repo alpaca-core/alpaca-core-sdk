@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 //
 #include "Dict.hpp"
-#include <iostream>
 
 namespace ac::swift {
 
@@ -122,24 +121,20 @@ DictRef DictRef::operator[](int index) const {
     return atIndex(index);
 }
 
-DictRoot* _Nonnull DictRef::clone() {
-    DictRoot* root = DictRoot::create();
-    *root->getRef().m_dictRef = *m_dictRef;
+DictRoot DictRef::clone() {
+    DictRoot root;
+    *root.getRef().m_dictRef = *m_dictRef;
     return root;
 }
 
-DictRoot* _Nonnull DictRoot::create() {
-    return new DictRoot();
-}
-
-DictRoot* _Nonnull DictRoot::parse(const std::string& jsonStr) {
-    auto root = new DictRoot();
-    root->m_dict = Dict::parse(jsonStr);
+DictRoot DictRoot::parse(const std::string& jsonStr) {
+    DictRoot root;
+    *root.m_dict = Dict::parse(jsonStr);
     return root;
 }
 
-DictRef DictRoot::getRef(){
-    return DictRef(&m_dict);
+DictRef DictRoot::getRef() const {
+    return DictRef(m_dict.get());
 }
 
 std::string getDictTypeAsString(DictValueType type) {
@@ -158,12 +153,4 @@ std::string getDictTypeAsString(DictValueType type) {
     return dictTypeStrings[static_cast<int>(type)];
 }
 
-}
-
-void retainDictRoot(ac::swift::DictRoot* _Nullable d) {
-    d->retain();
-}
-
-void releaseDictRoot(ac::swift::DictRoot* _Nullable d) {
-    d->release();
 }

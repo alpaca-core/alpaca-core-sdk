@@ -11,19 +11,8 @@ Model::Model(local::ModelPtr model)
     : m_model(model)
 {}
 
-Model* Model::create(local::ModelPtr model) {
-    return new Model(model);
+Instance Model::createInstance(const std::string& type, DictRef params)  {
+    return Instance(m_model->createInstance(type, *params.m_dictRef));
 }
 
-Instance* Model::createInstance(const std::string& type, DictRef params)  {
-        return new Instance(m_model->createInstance(type, *params.m_dictRef));
-    }
-}
-
-void retainModel(ac::swift::Model* _Nullable d) {
-    d->retain();
-}
-
-void releaseModel(ac::swift::Model* _Nullable d) {
-    d->release();
 }
