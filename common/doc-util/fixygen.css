@@ -4,3 +4,23 @@
     margin: 0;
     padding: 0;
 }
+
+.memtitle {
+    font-family: monospace;
+}
+
+.memproto {
+    font-family: monospace;
+}
+
+.fieldname {
+    font-family: monospace;
+}
+
+.memItemLeft {
+    font-family: monospace;
+}
+
+.memItemRight {
+    font-family: monospace;
+}

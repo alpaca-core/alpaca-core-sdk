@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: MIT
 #
 require 'nokogiri'
+require_relative 'fixygen'
 
-XML_DIR = File.expand_path(Dir.pwd + '/../out/doc/xml')
+XML_DIR = File.expand_path(Dir.pwd + '/../../out/doc/c-api/xml')
 
 # find groups in index.xml
 groups = Nokogiri::XML(File.open(XML_DIR + '/index.xml')).root.elements.select {

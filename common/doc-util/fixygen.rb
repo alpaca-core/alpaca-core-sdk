@@ -66,8 +66,8 @@ module Fixygen
 end
 
 if $0 == __FILE__
-  INPUT = ARGV[0] || 'C:/prj/alpaca-core/ac-local/out/doc/html/group__c-dict.html'
-  OUTPUT = ARGV[1] || 'C:/prj/alpaca-core/ac-local/out/doc/html/group__c-dict-fixed.html'
+  INPUT = ARGV[0] || 'C:/prj/alpaca-core/ac-local/out/doc/c-api/html/group__c-dict.html'
+  OUTPUT = ARGV[1] || 'C:/prj/alpaca-core/ac-local/out/doc/c-api/html/group__c-dict-fixed.html'
 
   Fixygen.fix_file(INPUT, OUTPUT)
 end
