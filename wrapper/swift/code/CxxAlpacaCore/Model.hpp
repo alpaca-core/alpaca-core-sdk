@@ -12,7 +12,7 @@
 #include "IntrusiveRefCounted.hpp"
 #include "Dict.hpp"
 
-namespace ac {
+namespace ac::swift {
 class Instance;
 
 class Model : public IntrusiveRefCounted<Model> {
@@ -26,5 +26,5 @@ private:
 } SWIFT_SHARED_REFERENCE(retainModel, releaseModel);
 }
 
-void retainModel(ac::Model* _Nullable d);
-void releaseModel(ac::Model* _Nullable d);
+void retainModel(ac::swift::Model* _Nullable d);
+void releaseModel(ac::swift::Model* _Nullable d);

@@ -11,7 +11,7 @@
 #include <swift/bridging>
 #include "AlpacaCore-Swift.h"
 
-namespace ac {
+namespace ac::swift {
 
 Instance::Instance(std::unique_ptr<local::Instance> instance)
     : m_instance(std::move(instance))
@@ -29,5 +29,9 @@ DictRoot* Instance::runOp(const std::string& op, DictRef params, ProgressCallbac
 
 }
 
-void retainModel(ac::Model* _Nullable d);
-void releaseModel(ac::Model* _Nullable d);
+void retainInstance(ac::swift::Instance* _Nullable d) {
+    d->retain();
+}
+void releaseInstance(ac::swift::Instance* _Nullable d) {
+    d->release();
+}

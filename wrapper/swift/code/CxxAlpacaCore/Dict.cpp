@@ -4,7 +4,7 @@
 #include "Dict.hpp"
 #include <iostream>
 
-namespace ac {
+namespace ac::swift {
 
 DictRef::DictRef(Dict* _Nonnull root)
     : m_dictRef(root)
@@ -28,24 +28,24 @@ DictRef DictRef::atIndex(int index) const {
     return DictRef(&m_dictRef->at(index));
 }
 
-swift::Int DictRef::getSize() const {
+sw::Int DictRef::getSize() const {
     return m_dictRef->size();
 }
 
 DictValueType DictRef::getType() const {
     switch (m_dictRef->type()) {
-        case ac::Dict::value_t::null: return DictValueType::DVT_Null;
-        case ac::Dict::value_t::boolean: return DictValueType::DVT_Bool;
-        case ac::Dict::value_t::number_integer: return DictValueType::DVT_Int;
-        case ac::Dict::value_t::number_unsigned: return DictValueType::DVT_Unsigned;
-        case ac::Dict::value_t::number_float: return DictValueType::DVT_Double;
-        case ac::Dict::value_t::string: return DictValueType::DVT_String;
-        case ac::Dict::value_t::array: return DictValueType::DVT_Array;
-        case ac::Dict::value_t::object: return DictValueType::DVT_Object;
-        case ac::Dict::value_t::binary: return DictValueType::DVT_Binary;
+        case ac::Dict::value_t::null: return DictValueType::Null;
+        case ac::Dict::value_t::boolean: return DictValueType::Bool;
+        case ac::Dict::value_t::number_integer: return DictValueType::Int;
+        case ac::Dict::value_t::number_unsigned: return DictValueType::Unsigned;
+        case ac::Dict::value_t::number_float: return DictValueType::Double;
+        case ac::Dict::value_t::string: return DictValueType::String;
+        case ac::Dict::value_t::array: return DictValueType::Array;
+        case ac::Dict::value_t::object: return DictValueType::Object;
+        case ac::Dict::value_t::binary: return DictValueType::Binary;
         default:
             throw std::runtime_error("Unsupported dict value type!");
-            return DictValueType::DVT_Null;
+            return DictValueType::Null;
     }
 }
 
@@ -53,11 +53,11 @@ bool DictRef::getBool() const {
     return m_dictRef->get<bool>();
 }
 
-swift::Int DictRef::getInt() const {
+sw::Int DictRef::getInt() const {
     return m_dictRef->get<int>();
 }
 
-swift::UInt DictRef::getUnsigned() const {
+sw::UInt DictRef::getUnsigned() const {
     return m_dictRef->get<unsigned>();
 }
 
@@ -71,7 +71,7 @@ std::string DictRef::getString() const {
 
 BinaryBuffer DictRef::getBinary() const SWIFT_RETURNS_INDEPENDENT_VALUE {
     auto& blob = m_dictRef->get_binary();
-    return {blob.data(), swift::Int(blob.size())};
+    return {blob.data(), sw::Int(blob.size())};
 }
 
 std::vector<std::string> DictRef::getKeys() const {
@@ -86,11 +86,11 @@ void DictRef::setBool(bool value) {
     *m_dictRef = value;
 }
 
-void DictRef::setInt(swift::Int value) {
+void DictRef::setInt(sw::Int value) {
     *m_dictRef = value;
 }
 
-void DictRef::setUnsigned(swift::UInt value) {
+void DictRef::setUnsigned(sw::UInt value) {
     *m_dictRef = value;
 }
 
@@ -102,7 +102,7 @@ void DictRef::setString(std::string value) {
     *m_dictRef = value;
 }
 
-void DictRef::setBinary(const void* data, swift::Int size) {
+void DictRef::setBinary(const void* data, sw::Int size) {
     *m_dictRef = Dict::binary(ac::Blob((uint8_t*)data, (uint8_t*)data + size));
 }
 
@@ -160,10 +160,10 @@ std::string getDictTypeAsString(DictValueType type) {
 
 }
 
-void retainDictRoot(ac::DictRoot* _Nullable d) {
+void retainDictRoot(ac::swift::DictRoot* _Nullable d) {
     d->retain();
 }
 
-void releaseDictRoot(ac::DictRoot* _Nullable d) {
+void releaseDictRoot(ac::swift::DictRoot* _Nullable d) {
     d->release();
 }

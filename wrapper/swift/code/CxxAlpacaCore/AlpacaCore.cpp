@@ -11,7 +11,7 @@
 
 #include "Model.hpp"
 
-namespace ac {
+namespace ac::swift {
 
 static std::unique_ptr<local::ModelFactory> factorySingleton;
 

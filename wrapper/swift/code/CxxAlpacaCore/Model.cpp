@@ -5,7 +5,7 @@
 
 #include "Instance.hpp"
 
-namespace ac {
+namespace ac::swift {
 
 Model::Model(local::ModelPtr model)
     : m_model(model)
@@ -20,10 +20,10 @@ Instance* Model::createInstance(const std::string& type, DictRef params)  {
     }
 }
 
-void retainModel(ac::Model* _Nullable d) {
+void retainModel(ac::swift::Model* _Nullable d) {
     d->retain();
 }
 
-void releaseModel(ac::Model* _Nullable d) {
+void releaseModel(ac::swift::Model* _Nullable d) {
     d->release();
 }

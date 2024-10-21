@@ -12,17 +12,17 @@
 #include "IntrusiveRefCounted.hpp"
 #include "Dict.hpp"
 
-namespace ac {
+namespace ac::swift {
 
-class Instance : public IntrusiveRefCounted<Model> {
+class Instance : public IntrusiveRefCounted<Instance> {
 public:
     DictRoot* _Nonnull runOp(const std::string& op, DictRef params, ProgressCallbackData progressCbData);
 private:
     friend class Model;
     Instance(std::unique_ptr<local::Instance> instance);
     std::unique_ptr<local::Instance> m_instance;
-} SWIFT_SHARED_REFERENCE(retainModel, releaseModel);
+} SWIFT_SHARED_REFERENCE(retainInstance, releaseInstance);
 }
 
-void retainModel(ac::Model* _Nullable d);
-void releaseModel(ac::Model* _Nullable d);
+void retainInstance(ac::swift::Instance* _Nullable d);
+void releaseInstance(ac::swift::Instance* _Nullable d);

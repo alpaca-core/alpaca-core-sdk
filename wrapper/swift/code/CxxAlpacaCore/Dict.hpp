@@ -10,26 +10,25 @@
 
 #include "IntrusiveRefCounted.hpp"
 
-#include <memory>
-#include <vector>
+namespace ac::swift {
 
-namespace ac{
+namespace sw = ::swift;
 
 enum class DictValueType {
-    DVT_Null,         /**< Null value */
-    DVT_Bool,         /**< Boolean value */
-    DVT_Int,          /**< Integer number */
-    DVT_Unsigned,     /**< Unsigned integer number */
-    DVT_Double,       /**< Floating-point number */
-    DVT_String,       /**< String value */
-    DVT_Array,        /**< Array of values */
-    DVT_Object,       /**< Object (key-value pairs) */
-    DVT_Binary,       /**< Binary data */
+    Null,         /**< Null value */
+    Bool,         /**< Boolean value */
+    Int,          /**< Integer number */
+    Unsigned,     /**< Unsigned integer number */
+    Double,       /**< Floating-point number */
+    String,       /**< String value */
+    Array,        /**< Array of values */
+    Object,       /**< Object (key-value pairs) */
+    Binary,       /**< Binary data */
 };
 
 struct BinaryBuffer {
     const uint8_t* _Nonnull data;
-    swift::Int size;
+    sw::Int size;
 };
 
 class DictRoot;
@@ -44,23 +43,23 @@ public:
     DictRef atKey(const std::string& key) const;
     DictRef atIndex(int index) const;
 
-    swift::Int getSize() const;
+    sw::Int getSize() const;
     DictValueType getType() const;
 
     bool getBool() const;
-    swift::Int getInt() const;
-    swift::UInt getUnsigned() const;
+    sw::Int getInt() const;
+    sw::UInt getUnsigned() const;
     double getDouble() const;
     std::string getString() const;
     BinaryBuffer getBinary() const SWIFT_RETURNS_INDEPENDENT_VALUE;
     std::vector<std::string> getKeys() const;
 
     void setBool(bool value);
-    void setInt(swift::Int value);
-    void setUnsigned(swift::UInt value);
+    void setInt(sw::Int value);
+    void setUnsigned(sw::UInt value);
     void setDouble(double value);
     void setString(std::string value);
-    void setBinary(const void* _Nonnull data, swift::Int size);
+    void setBinary(const void* _Nonnull data, sw::Int size);
 
     void parse(const std::string& jsonStr);
     std::string dump() const;
@@ -99,5 +98,5 @@ std::string getDictTypeAsString(DictValueType type);
 
 }
 
-void retainDictRoot(ac::DictRoot* _Nullable d);
-void releaseDictRoot(ac::DictRoot* _Nullable d);
+void retainDictRoot(ac::swift::DictRoot* _Nullable d);
+void releaseDictRoot(ac::swift::DictRoot* _Nullable d);

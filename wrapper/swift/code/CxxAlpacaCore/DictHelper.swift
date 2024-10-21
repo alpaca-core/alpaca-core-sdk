@@ -3,12 +3,12 @@
 //
 import CAlpacaCore
 
-public func translateDictionaryToDict(_ dictionary: Dictionary<String, Any>) -> ac.DictRoot {
+public func translateDictionaryToDict(_ dictionary: Dictionary<String, Any>) -> ac.swift.DictRoot {
     // Create the root dictionary object
-    let dictRoot = ac.DictRoot.create()
+    let dictRoot = ac.swift.DictRoot.create()
 
     // Recursive function to convert the dictionary
-    func convertDictionary(_ sourceDict: Dictionary<String, Any>, into targetDict: ac.DictRef) {
+    func convertDictionary(_ sourceDict: Dictionary<String, Any>, into targetDict: ac.swift.DictRef) {
         for (key, value) in sourceDict {
             var child = targetDict.addChild(std.string(key))
 
@@ -64,11 +64,11 @@ public func translateDictionaryToDict(_ dictionary: Dictionary<String, Any>) -> 
     return dictRoot
 }
 
-public func translateDictToDictionary(_ dict: ac.DictRef) -> Dictionary<String, Any> {
+public func translateDictToDictionary(_ dict: ac.swift.DictRef) -> Dictionary<String, Any> {
     var dictionary: Dictionary<String, Any> = Dictionary<String, Any>()
 
     // Recursive function to convert DictRef to Dictionary
-    func convertDictRefToDictionary(_ source: ac.DictRef, into target: inout Dictionary<String, Any>) {
+    func convertDictRefToDictionary(_ source: ac.swift.DictRef, into target: inout Dictionary<String, Any>) {
         // Additionally, handle dictionary keys and their values
         for keyStr in source.getKeys() { // Assuming getDict() returns a dictionary-like object
             let child = source.atKey(keyStr)
@@ -76,40 +76,40 @@ public func translateDictToDictionary(_ dict: ac.DictRef) -> Dictionary<String, 
             let key = String(keyStr)
 
             switch childType {
-            case .DVT_Bool:
+            case .Bool:
                 target[key] = child.getBool()
-            case .DVT_Int:
+            case .Int:
                 target[key] = child.getInt()
-            case .DVT_Unsigned:
+            case .Unsigned:
                 target[key] = child.getUnsigned()
-            case .DVT_Double:
+            case .Double:
                 target[key] = child.getDouble()
-            case .DVT_String:
+            case .String:
                 target[key] = String(child.getString())
-            case .DVT_Binary:
+            case .Binary:
                 let binaryData = child.getBinary()
                 target[key] = Data(bytes: binaryData.data, count: binaryData.size)
-            case .DVT_Array:
+            case .Array:
                 var array: [Any] = []
                 for index in 0..<Int32(child.getSize()) {
                     let valueType = child.atIndex(index).getType()
                     let value = child.atIndex(index)
 
                     switch valueType {
-                    case .DVT_Bool:
+                    case .Bool:
                         array.append(value.getBool())
-                    case .DVT_Int:
+                    case .Int:
                         array.append(value.getInt())
-                    case .DVT_Unsigned:
+                    case .Unsigned:
                         array.append(value.getUnsigned())
-                    case .DVT_Double:
+                    case .Double:
                         array.append(value.getDouble())
-                    case .DVT_String:
+                    case .String:
                         array.append(String(value.getString()))
-                    case .DVT_Binary:
+                    case .Binary:
                         let binaryData = value.getBinary()
                         array.append(Data(bytes: binaryData.data, count: binaryData.size))
-                    case .DVT_Object:
+                    case .Object:
                         // Handle nested object (DictRef)
                         var nestedDictionary: [String: Any] = [:]
                         convertDictRefToDictionary(value, into: &nestedDictionary)
@@ -119,7 +119,7 @@ public func translateDictToDictionary(_ dict: ac.DictRef) -> Dictionary<String, 
                     }
                 }
                 target[key] = array
-            case .DVT_Object:
+            case .Object:
                 var nestedDictionary: Dictionary<String, Any> = Dictionary<String, Any>()
                 convertDictRefToDictionary(child, into: &nestedDictionary)
                 target[key] = nestedDictionary
