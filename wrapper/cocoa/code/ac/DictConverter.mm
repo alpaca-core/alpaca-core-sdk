@@ -78,7 +78,7 @@
         for (const auto &element : json) {
             [array addObject:[self convertJSONValue:element]];
         }
-        return [array copy];
+        return array;
     } else if (json.is_binary()) {
         auto& buf = json.get_binary();
         return [NSData dataWithBytes:buf.data() length:buf.size()];
