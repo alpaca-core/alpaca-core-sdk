@@ -1,7 +1,7 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#import "Dict.h"
+#import "DictConverter.hpp"
 
 #include <ac/Dict.hpp>
 
