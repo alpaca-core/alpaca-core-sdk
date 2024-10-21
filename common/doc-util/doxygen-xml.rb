@@ -16,3 +16,7 @@ groups = Nokogiri::XML(File.open(XML_DIR + '/index.xml')).root.elements.select {
 
 p groups
 
+## TODO: find corresponding htmls
+## run fixygen
+## extract "header" and "contents"
+

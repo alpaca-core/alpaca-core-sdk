@@ -47,9 +47,11 @@ module Fixygen
       e.inner_html = e.inner_html.gsub("\u00A0", '')
     end
 
-    # also help us idenfitify doxygen content in case we do more shenanigans with the html
-    doc.css('.contents').each do |e|
-      e.add_class('doxygen')
+    # also help us idenfitify doxygen content wihch is relevant to us in case we do more shenanigans with the html
+    ['header', 'contents'].each do |cls|
+      doc.css(".#{cls}").each do |e|
+        e.add_class('doxygen')
+      end
     end
 
     doc
