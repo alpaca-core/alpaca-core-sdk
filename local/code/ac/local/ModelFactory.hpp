@@ -13,15 +13,13 @@
 /// C++ API for local infernence.
 /// The general idea is something...
 
-/// @addtogroup cpp-local
-/// @{
-
 namespace ac::local {
 class ModelLoader;
 
 /// Factory class for creating models.
 /// Facilitates the creation (or loading) of models based on `ModelDesc::inferenceType`.
 /// The factory uses registered instances of `ModelLoader` to create models.
+/// @ingroup cpp-local
 class AC_LOCAL_EXPORT ModelFactory {
 public:
     ModelFactory() = default;
@@ -50,5 +48,3 @@ private:
 };
 
 } // namespace ac::local
-
-/// @}

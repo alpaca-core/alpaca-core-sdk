@@ -10,6 +10,7 @@ namespace ac::local {
 class Instance;
 
 /// An inference model.
+/// @ingroup cpp-local
 class AC_LOCAL_EXPORT Model {
 public:
     virtual ~Model();

@@ -8,15 +8,13 @@
 #include "ProgressCb.hpp"
 #include <ac/Dict.hpp>
 
-/// @addtogroup cpp-local
-/// @{
-
 namespace ac::local {
 
 /// Base class for model loaders.
 /// Model loaders are responsible for loading models based on the provided description and parameters. They are typically
 /// facades for an underlying inference library. While model loaders can be used on their own, they are typically used
 /// via the `ModelFactory` class.
+/// @ingroup cpp-local
 class AC_LOCAL_EXPORT ModelLoader {
 public:
     virtual ~ModelLoader();
@@ -28,5 +26,3 @@ public:
 };
 
 } // namespace ac::local
-
-/// @}

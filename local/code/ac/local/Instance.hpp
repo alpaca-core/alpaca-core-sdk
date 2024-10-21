@@ -7,11 +7,10 @@
 #include <ac/Dict.hpp>
 #include <string_view>
 
-/// @addtogroup cpp-local
-/// @{
-
 namespace ac::local {
+
 /// An inference instance.
+/// @ingroup cpp-local
 class AC_LOCAL_EXPORT Instance {
 public:
     virtual ~Instance();
@@ -23,6 +22,5 @@ public:
     /// The returned dictionary contains the result of the operation as per the operation's API.
     virtual Dict runOp(std::string_view op, Dict params, ProgressCb cb = {}) = 0;
 };
-} // namespace ac::local
 
-/// @}
+} // namespace ac::local

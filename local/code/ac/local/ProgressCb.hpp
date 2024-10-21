@@ -18,6 +18,7 @@ namespace ac::local {
 ///            multiple unrelated sub-tasks, each with its own progress, the tag can be used to differentiate them.
 /// @param progress A float between 0 and 1.
 /// @return A boolean value indicating whether the operation should continue. Return false to cancel the operation.
+/// @ingroup cpp-local
 using ProgressCb = itlib::ufunction<bool(std::string_view tag, float progress)>;
 
 } // namespace ac::local
