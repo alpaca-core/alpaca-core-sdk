@@ -11,7 +11,6 @@
 
 /// @defgroup cpp-local C++ Local API
 /// C++ API for local infernence.
-/// The general idea is something...
 
 namespace ac::local {
 class ModelLoader;
