@@ -5,9 +5,8 @@
 
 #include <ac/Dict.hpp>
 
-@implementation DictionaryWrapper
+@implementation DictConverter
 
-// Helper method to convert NSDictionary to ac::Dict
 + (ac::Dict)convertToACDict:(NSDictionary<NSString *, id> *)dictionary {
     ac::Dict jsonObj;
 

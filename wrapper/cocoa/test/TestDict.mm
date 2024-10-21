@@ -52,7 +52,7 @@ ac::Dict getDictWithBinary() {
     XCTAssertEqual(std::string(ac::Dict_optValueAt(dict, "str", std::string())), std::string("hello"));
     XCTAssertEqualWithAccuracy(ac::Dict_optValueAt(dict, "float", 0.0f), 3.14f, 0.0001);
 
-    NSDictionary* nsDict = [DictionaryWrapper convertToDictionary:dict];
+    NSDictionary* nsDict = [DictConverter convertToDictionary:dict];
     XCTAssertEqual(int(nsDict.count), 4);
     XCTAssertEqualObjects(nsDict[@"bool"], @YES);
     XCTAssertEqualObjects(nsDict[@"int"], @42);
@@ -62,7 +62,7 @@ ac::Dict getDictWithBinary() {
 - (void)testDictWithBinary {
     ac::Dict dict = getDictWithBinary();
 
-    NSDictionary* nsDict = [DictionaryWrapper convertToDictionary:dict];
+    NSDictionary* nsDict = [DictConverter convertToDictionary:dict];
     XCTAssertEqual(int(nsDict.count), 3);
     XCTAssertEqualObjects(nsDict[@"int"], @3);
     XCTAssertEqualObjects(nsDict[@"str"], @"hello");
@@ -96,7 +96,7 @@ ac::Dict getDictWithBinary() {
                                         \"empty_dict\": {}                                                          \
                                     }                                                                               \
                                     ");
-    NSDictionary* nsDict = [DictionaryWrapper convertToDictionary:dict];
+    NSDictionary* nsDict = [DictConverter convertToDictionary:dict];
     XCTAssertNotNil(nsDict);
     XCTAssertEqual(int(nsDict.count), 6);
 
@@ -181,7 +181,7 @@ ac::Dict getDictWithBinary() {
         @"empty_object": @{}
     };
 
-    ac::Dict dict = [DictionaryWrapper convertToACDict:dictionary];
+    ac::Dict dict = [DictConverter convertToACDict:dictionary];
     // Begin assertions to verify the dict structure matches the NSDictionary
     XCTAssertEqual(int(dict.size()), 10, @"Dictionary size should be 11");
 
@@ -259,8 +259,8 @@ ac::Dict getDictWithBinary() {
         @"empty_object": @{}
     };
 
-    ac::Dict dict = [DictionaryWrapper convertToACDict:dictionary];
-    NSDictionary* converted = [DictionaryWrapper convertToDictionary:dict];
+    ac::Dict dict = [DictConverter convertToACDict:dictionary];
+    NSDictionary* converted = [DictConverter convertToDictionary:dict];
 
     // Assertions to check if the converted dictionary matches the original dictionary
     XCTAssertNotNil(converted, @"Converted dictionary should not be nil.");
