@@ -15,24 +15,11 @@ SDK for local AI Inference.
 
 ## Build
 
-Use CMake. Some useful presets are provided in the repo.
+*The repo has submodules. Don't forget to fetch them.*
 
-### CMake Options
+Use CMake. Works as a root or as a subdirectory. Some useful presets are provided in the repo.
 
-* `AC_BUILD_LOCAL` - build the local inference api and integrations of inference libraries
-* `AC_INFERENCE_LIBS` - `all` or `none` or semicolon separated list. Which inference libraries to build. The supported ones are:
-    * `dummy`: a dummy inference library for testing and experimenting
-    * `llama.cpp`: wrapping our fork of [ggerganov/llama.cpp](https://github.com/ggerganov/llama.cpp)
-    * `whisper`: wrapping our fork of [ggerganov/whisper.cpp](https://github.com/ggerganov/whisper.cpp)
-* `AC_BUILD_ACORD`: build the Alpaca Core daemon. This is `OFF` by default if the project is a subdir. Only available if `AC_BUILD_LOCAL` is `ON`.
-* Advanced and `OFF` by default if the project is a subdir:
-    * `AC_BUILD_TOOLS` - build tools. This means all tools for all active components. No finer-grain options are available yet
-    * `AC_BUILD_TESTS` - build tests. This means all tests for all active components. No finer-grain options are available yet
-    * `AC_BUILD_EXAMPLES` - build examples. This means all examples for all active components. No finer-grain options are available yet
-    * `AC_BUILD_POC` - build proof of concept, sandbox, and experimental projects
-* Wrapper config:
-    * `AC_C_WRAPPER`: build C wrapper. `ON` by default
-    * `AC_JAVA_WRAPPER`: build Java wrapper. `Auto` by default, which means only build if JNI is available
+Detailed build instructions can be found in the [documentation](doc/dev/build.md).
 
 ## License
 
