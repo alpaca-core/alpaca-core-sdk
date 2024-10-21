@@ -1,4 +1,4 @@
-# Alpaca Core SDK Java Wrapper
+# Alpaca Core Local SDK Java Wrapper
 
 Since we want to be good open source citizens, we conform to Java and gradle's ridiculous directory structure conventions.
 
