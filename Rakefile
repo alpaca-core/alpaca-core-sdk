@@ -4,19 +4,18 @@
 
 # on Windows doxygen refuses to generate multiple subdirectories (as mkdir -p)
 # so we need to prepare the root doc directory manually
-task :prepare_doc_subdir do
-  FileUtils.mkdir_p 'out/doc'
-end
+OUT_DOC_DIR = 'out/doc'
+directory OUT_DOC_DIR
 
-task generate_cpp_doc: :prepare_doc_subdir do
+task generate_cpp_doc: OUT_DOC_DIR do
   sh 'doxygen'
 end
 
-task generate_c_doc: :prepare_doc_subdir do
+task generate_c_doc: OUT_DOC_DIR do
   sh 'doxygen wrapper/c/Doxyfile.c-api'
 end
 
-task generate_java_doc: :prepare_doc_subdir do
+task generate_java_doc: OUT_DOC_DIR do
   sh 'doxygen wrapper/java/Doxyfile.java-api'
 end
 
