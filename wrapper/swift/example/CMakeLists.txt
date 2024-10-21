@@ -21,6 +21,6 @@ macro(ac_add_swift_executable target)
     target_compile_options(${target} PRIVATE -parse-as-library)
 endmacro()
 
-ac_add_swift_executable(CxxACExample CxxACExample.swift)
+ac_add_swift_executable(SandboxExample e-Sandbox.swift)
 ac_add_swift_executable(WhisperExample e-Whisper.swift)
 ac_add_swift_executable(DummyExample e-Dummy.swift)
