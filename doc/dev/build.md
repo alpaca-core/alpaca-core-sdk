@@ -19,16 +19,14 @@ If you're not only interested in building the project but also setting up a deve
     * GCC 11 or later
     * Clang 14 or later
 * [CMake](https://cmake.org/) 3.22 or later
-    * Most of the included CMake presets all also require [ninja](https://ninja-build.org/)
 * For some build flavors and optional components:
     * Android: CMake 3.24 is needed to properly find JNI
-    * GUI Demos: 
-        * [SDL2](https://wiki.libsdl.org/SDL2/FrontPage)
+    * GUI Demos: [SDL2](https://wiki.libsdl.org/SDL2/FrontPage)
     * Different computational backends require their respective SDKs and dependencies
 
 ## Configure
 
-Some useful presets are provided in `CMakePresets.json`. As a convention each presets writes the configured files in `<repo-root>/out/build/<preset-name>`.
+Some useful presets are provided in `CMakePresets.json`. As a convention each presets writes the configured files in `<repo-root>/out/build/<preset-name>`. Note that most of the included CMake presets all also require [ninja](https://ninja-build.org/).
 
 Example: 
 
@@ -62,4 +60,12 @@ You likely have to add the path to the SDL2 installation to the `CMAKE_PREFIX_PA
 
 ## Build
 
-`$ cmake --build <path-to-build-dir>`
+`$ cmake --build <path-to-build-dir>` (for example `$ cmake --build out/build/release`)
+
+After this the produced binaries will be in `<path-to-build-dir>/bin`.
+
+You can run the tests with `ctest` from the build directory.
+
+## Install
+
+*TBD*
