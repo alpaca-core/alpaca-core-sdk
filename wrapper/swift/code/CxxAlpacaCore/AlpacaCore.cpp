@@ -13,6 +13,8 @@
 
 namespace ac {
 
+static std::unique_ptr<local::ModelFactory> factorySingleton;
+
 void initSDK() {
     factorySingleton = std::make_unique<local::ModelFactory>();
 

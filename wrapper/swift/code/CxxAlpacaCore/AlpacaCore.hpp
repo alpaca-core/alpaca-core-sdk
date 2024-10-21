@@ -18,7 +18,6 @@ struct ProgressCallbackData {
     void* _Nonnull m_context;
 };
 
-static std::unique_ptr<local::ModelFactory> factorySingleton;
 static const char* _Nonnull WHISPER_DIR = AC_TEST_DATA_WHISPER_DIR;
 
 void initSDK();
