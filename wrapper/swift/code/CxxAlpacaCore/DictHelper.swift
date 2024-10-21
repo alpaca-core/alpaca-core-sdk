@@ -45,7 +45,7 @@ public func translateDictionaryToDict(_ dictionary: Dictionary<String, Any>) -> 
             do {
                 try convertValue(sourceValue: value, target: &child)
             } catch {
-                print("Error: \(error)")
+                print("Error while converting key \(key): \(error)")
             }
         }
     }
@@ -101,7 +101,7 @@ public func translateDictToDictionary(_ dict: ac.swift.DictRef) -> Dictionary<St
             do {
                 try target[key] = convertValue(sourceValue: child)
             } catch {
-                print("Error: \(error)")
+                print("Error while converting key \(key): \(error)")
             }
         }
     }
