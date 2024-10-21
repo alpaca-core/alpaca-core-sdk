@@ -4,20 +4,12 @@ tmp/
 # common build artefact dirs
 out/
 build/
-bin/
 
 # configure artefacts
 gen/
 
 # optional cpm source cache (if not otherwise set)
 .cpm/
-_deps
-
-# cmake artefacts
-cmake_install.cmake
-CTestTestfile.cmake
-CmakeFiles/
-CPM_modules/
 
 # ides and editors
 .vs/
@@ -26,7 +18,3 @@ CPM_modules/
 /CMakeUserPresets.json
 .~*
 .aider*
-*.xcodeproj
-*.xcworkspace
-*.xcsettings
-*.xcuserstate
