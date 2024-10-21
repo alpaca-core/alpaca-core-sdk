@@ -12,10 +12,6 @@ public func loadWavF32Mono(_ filePath: String) -> [Float] {
     return Array<Float>(pcmf32)
 }
 
-public func getWhisperDataDir() -> String {
-    return String(cString: ac.WHISPER_DIR)
-}
-
 class CallbackWrapper {
     let completion: (String, Float) -> Void
     init(completion: @escaping (String, Float) -> Void) {

@@ -38,11 +38,11 @@ target_link_libraries(AlpacaCoreSwift
     PUBLIC
         ac::dict
         ac::local
-        ac-dev::audio
+        ac-dev::audio # audio is temporary for easier whisper integration
+    PRIVATE
         ac-local-dummy
         ac-local-whisper
         ac-local-llama
-        ac-test-data::whisper
 )
 
 # Generate a C++ header from selected Swift sources. This is automatically added to the

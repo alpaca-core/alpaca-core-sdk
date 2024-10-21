@@ -3,6 +3,7 @@
 //
 import Foundation
 import AlpacaCoreSwift
+import ACTestData
 
 func progress(_ tag: String, _ progress: Float) {
     print("[\(tag)]Progress: \(progress)")
@@ -18,7 +19,7 @@ struct WhisperExample {
         var desc = ModelDesc()
         desc.inferenceType = "whisper.cpp"
         desc.name = "synthetic whisper"
-        let whisperDir = getWhisperDataDir()
+        let whisperDir = String(cString: ACTestData.ac.swift.getWhisperDir())
         desc.assets.append(AssetInfo(whisperDir + "/whisper-base.en-f16.bin", "whisper-base.en-f16.bin"))
 
         let params = Dictionary<String, Any>()
