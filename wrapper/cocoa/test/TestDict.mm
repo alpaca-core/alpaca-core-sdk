@@ -38,14 +38,14 @@ ac::Dict getDictWithBinary() {
 }
 
 - (void)testBasicJSONDict {
-    ac::Dict dict = getDictFromJSON("                       \
-                                    {                       \
-                                        \"bool\": true,     \
-                                        \"int\": 42,        \
-                                        \"str\": \"hello\", \
-                                        \"float\": 3.14     \
-                                    }                       \
-                                    ");
+    ac::Dict dict = getDictFromJSON(R"(
+                                    {
+                                        "bool": true,
+                                        "int": 42,
+                                        "str": "hello",
+                                        "float": 3.14
+                                    }
+                                    )");
     XCTAssertEqual(int(dict.size()), 4);
     XCTAssertEqual(ac::Dict_optValueAt(dict, "bool", false), true);
     XCTAssertEqual(ac::Dict_optValueAt(dict, "int", 0), 42);
@@ -77,25 +77,25 @@ ac::Dict getDictWithBinary() {
 }
 
 - (void) testComplexDict {
-    ac::Dict dict = getDictFromJSON("                                                                               \
-                                    {                                                                               \
-                                        \"bool\": true,                                                             \
-                                        \"int\": 42,                                                                \
-                                        \"inner\": {                                                                \
-                                            \"str\": \"hello\",                                                     \
-                                            \"float\": 3.14,                                                        \
-                                            \"neg\": -100,                                                          \
-                                            \"big\": 3000000000                                                     \
-                                        },                                                                          \
-                                        \"inner2\": {                                                               \
-                                            \"str\": \"world\",                                                     \
-                                            \"ilist\": [1, \"two\", null, false, {\"key\": 1, \"key2\": \"val\"}],  \
-                                            \"null\": null                                                          \
-                                        },                                                                          \
-                                        \"empty_list\": [],                                                         \
-                                        \"empty_dict\": {}                                                          \
-                                    }                                                                               \
-                                    ");
+    ac::Dict dict = getDictFromJSON(R"(
+                                    {
+                                        "bool": true,
+                                        "int": 42,
+                                        "inner": {
+                                            "str": "hello",
+                                            "float": 3.14,
+                                            "neg": -100,
+                                            "big": 3000000000
+                                        },
+                                        "inner2": {
+                                            "str": "world",
+                                            "ilist": [1, "two", null, false, {"key": 1, "key2": "val"}],
+                                            "null": null
+                                        },
+                                        "empty_list": [],
+                                        "empty_dict": {}
+                                    }
+                                    )");
     NSDictionary* nsDict = [DictConverter convertToDictionary:dict];
     XCTAssertNotNil(nsDict);
     XCTAssertEqual(int(nsDict.count), 6);

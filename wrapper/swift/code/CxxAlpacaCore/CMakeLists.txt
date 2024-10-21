@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 #
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # Set up swiftrt.o and runtime library search paths
 include(InitializeSwift)
