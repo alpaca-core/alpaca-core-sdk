@@ -1,3 +1,6 @@
+# Copyright (c) Alpaca Core
+# SPDX-License-Identifier: MIT
+#
 require 'nokogiri'
 
 XML_DIR = File.expand_path(Dir.pwd + '/../out/doc/xml')
