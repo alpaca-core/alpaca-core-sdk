@@ -4,8 +4,8 @@
 import Foundation
 import AlpacaCoreSwift
 
-func progress(_ progress: Float) {
-    print("Progress: \(progress)")
+func progress(_ tag: String, _ progress: Float) {
+    print("[\(tag)] Progress: \(progress)")
 }
 
 @main

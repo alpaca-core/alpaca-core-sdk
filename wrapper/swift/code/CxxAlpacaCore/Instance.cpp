@@ -21,7 +21,7 @@ DictRoot* Instance::runOp(const std::string& op, DictRef params, ProgressCallbac
     DictRoot* root = DictRoot::create();
     DictRef ref = root->getRef();
     ref.getDict() = m_instance->runOp(op, params.getDict(), [&](std::string_view tag, float progress) {
-        progressCbData.m_cb(progressCbData.m_context, progress);
+        progressCbData.m_cb(progressCbData.m_context, tag.data(), progress);
         return true;
     });
     return root;

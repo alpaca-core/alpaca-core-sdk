@@ -13,8 +13,8 @@ final class SwiftApiTests: XCTestCase {
 
         let dict = Dictionary<String, Any>()
         let model = AlpacaCoreSwift.createModel(&desc, dict, {
-            (progress: Float) in
-            print("Progress: \(progress)")
+            (tag: String, progress: Float) in
+            print("[\(tag)]Progress: \(progress)")
         });
         XCTAssertNotNil(model)
 
@@ -26,8 +26,8 @@ final class SwiftApiTests: XCTestCase {
         ]
 
         let result = instance.runOp("run", params, {
-            (progress: Float) in
-            print("Progress: \(progress)")
+            (tag: String, progress: Float) in
+            print("[\(tag)]Progress: \(progress)")
         });
 
         XCTAssertEqual(result["result"] as! String, "a one b two", "Incorrect result!")

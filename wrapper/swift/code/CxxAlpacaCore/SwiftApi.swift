@@ -17,8 +17,8 @@ public func getWhisperDataDir() -> String {
 }
 
 class CallbackWrapper {
-    let completion: (Float) -> Void
-    init(completion: @escaping (Float) -> Void) {
+    let completion: (String, Float) -> Void
+    init(completion: @escaping (String, Float) -> Void) {
         self.completion = completion
     }
 
@@ -31,12 +31,12 @@ class CallbackWrapper {
     }
 }
 
-func callObserver(observer: UnsafeMutableRawPointer, progress: Float) {
+func callObserver(observer: UnsafeMutableRawPointer, tag: UnsafePointer<Int8>, progress: Float) {
     let wrapper = Unmanaged<CallbackWrapper>.fromOpaque(observer).takeUnretainedValue()
-    wrapper.completion(progress)
+    wrapper.completion(String(cString: tag), progress)
 }
 
-public func createModel(_ desc: inout ModelDesc, _ params: Dictionary<String, Any>, _ _progress: @escaping (Float) -> Void) -> Model? {
+public func createModel(_ desc: inout ModelDesc, _ params: Dictionary<String, Any>, _ _progress: @escaping (String, Float) -> Void) -> Model? {
     let paramsAsDict = translateDictionaryToDict(params)
     let wrapper = CallbackWrapper(completion: _progress)
 
@@ -67,7 +67,7 @@ public class Instance {
         self.instance = instance
     }
 
-    public func runOp(_ op: String, _ params: Dictionary<String, Any>, _ _progress: @escaping (Float) -> Void) -> Dictionary<String, Any> {
+    public func runOp(_ op: String, _ params: Dictionary<String, Any>, _ _progress: @escaping (String, Float) -> Void) -> Dictionary<String, Any> {
         let paramsAsDict = translateDictionaryToDict(params)
         let wrapper = CallbackWrapper(completion: _progress)
 
