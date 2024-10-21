@@ -16,8 +16,8 @@
 /// - @ref ac_dict_arg_take
 /// - @ref ac_dict_arg_null
 typedef struct ac_dict_arg {
-    ac_dict_ref ref;
-    bool copy; // or take (move) if false
+    ac_dict_ref ref; ///< The dictionary reference
+    bool copy; ///< ... or take (move) if false
 } ac_dict_arg;
 
 /// Deep copies the ref.

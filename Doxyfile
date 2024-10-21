@@ -1,35 +1,32 @@
 # Doxyfile 1.12.0
+
+# This file builds the C++ API documentation.
+# There C and Java API Doxyfile-s are in their respective subdirectories.
+
 @INCLUDE = common/doc-util/Doxyfile.common
 
 PROJECT_NAME           = "Alpaca Core Local SDK"
 PROJECT_BRIEF          = "AI Inference SDK"
 PROJECT_LOGO           =
 PROJECT_ICON           =
-OUTPUT_DIRECTORY       = out/doc
-STRIP_FROM_PATH        = local/code \
-                         dict/code \
-                         wrapper/c/cutil/include \
-                         wrapper/c/local/code \
-                         wrapper/c/dict/code \
-                         wrapper/java/src/main/java
+OUTPUT_DIRECTORY       = out/doc/cpp
 ALIASES                +=
 OPTIMIZE_OUTPUT_FOR_C  = NO
 OPTIMIZE_OUTPUT_JAVA   = NO
+BUILTIN_STL_SUPPORT    = YES
+
 
 # QUIET                  = NO
 # WARNINGS               = YES
 
 
 INPUT                  = local/code/ac/local \
-                         dict/code/ac \
-                         wrapper/c/cutil/include \
-                         wrapper/c/dict/code \
-                         wrapper/c/local/code \
-                         wrapper/java/src/main/java
+                         dict/code/ac
+STRIP_FROM_PATH        = local/code \
+                         dict/code
+
 FILE_PATTERNS          = *.h \
-                         *.hh \
-                         *.hpp \
-                         *.java
+                         *.hpp
 RECURSIVE              = YES
 EXCLUDE                =
 EXCLUDE_PATTERNS       = export.h
@@ -44,8 +41,4 @@ CLANG_OPTIONS          = -std=C++20
 
 INCLUDE_PATH           =
 INCLUDE_FILE_PATTERNS  =
-PREDEFINED             += AC_C_DICT_EXPORT \
-                          AC_INLINE \
-                          AC_C_LOCAL_EXPORT
-
-
+PREDEFINED             +=

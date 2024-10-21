@@ -12,6 +12,12 @@ ABBREVIATE_BRIEF       =
 ALIASES                =
 OPTIMIZE_OUTPUT_FOR_C  = NO
 OPTIMIZE_OUTPUT_JAVA   = NO
+JAVADOC_AUTOBRIEF      = YES
+JAVADOC_BANNER         = YES
+GROUP_NESTED_COMPOUNDS = YES
+INLINE_GROUPED_CLASSES = YES
+INLINE_SIMPLE_STRUCTS  = YES
+TIMESTAMP              = NO
 
 #---------------------------------------------------------------------------
 # Build related configuration options

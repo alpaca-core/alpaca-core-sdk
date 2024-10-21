@@ -1,0 +1,39 @@
+# Doxyfile 1.12.0
+
+# NOTE: this file is designed to be executed from the repo root directory
+# $ doxygen wrapper/c/Doxyfile.java-api
+
+@INCLUDE = common/doc-util/Doxyfile.common
+
+PROJECT_NAME           = "Alpaca Core Local Java SDK"
+PROJECT_BRIEF          = "Java Wrapper of the Alpaca Core AI Inference SDK"
+PROJECT_LOGO           =
+PROJECT_ICON           =
+OUTPUT_DIRECTORY       = out/doc/java-api
+
+ALIASES                +=
+OPTIMIZE_OUTPUT_FOR_C  = NO
+OPTIMIZE_OUTPUT_JAVA   = YES
+
+# QUIET                  = NO
+# WARNINGS               = YES
+
+INPUT                  = wrapper/java/src/main/java
+STRIP_FROM_PATH        = wrapper/java/src/main/java
+
+FILE_PATTERNS          = *.java
+
+RECURSIVE              = YES
+EXCLUDE                =
+EXCLUDE_PATTERNS       = export.h
+EXCLUDE_SYMBOLS        =
+EXAMPLE_PATH           =
+EXAMPLE_PATTERNS       =
+IMAGE_PATH             =
+
+VERBATIM_HEADERS       = NO
+CLANG_ASSISTED_PARSING = NO
+
+INCLUDE_PATH           =
+INCLUDE_FILE_PATTERNS  =
+PREDEFINED             +=
