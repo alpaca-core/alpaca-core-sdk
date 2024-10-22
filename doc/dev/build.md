@@ -17,7 +17,7 @@ If you're not only interested in building the project but also setting up a deve
 The minimum requirements are:
 
 * C++ compiler with C++20 support such as:
-    * MSVC 19.30 (Visual Studio 2022 v17.00) or later 
+    * MSVC 19.30 (Visual Studio 2022 v17.00) or later
     * GCC 11 or later
     * Clang 14 or later
 * [CMake](https://cmake.org/) 3.22 or later
@@ -32,7 +32,7 @@ If you want practical steps on for specific environments, check the [developer e
 
 Some useful presets are provided in `CMakePresets.json`. As a convention each presets writes the configured files in `<repo-root>/out/build/<preset-name>`. Note that most of the included CMake presets all also require [ninja](https://ninja-build.org/).
 
-Example: 
+Example:
 
 * `$ cmake --preset=release`
 * Configuration files are written in `<repo-root>/out/build/release`
@@ -55,6 +55,8 @@ For finer grain control or if you're using the repo as a subdirectory:
 * Wrapper config:
     * `AC_C_WRAPPER`: build C wrapper. `ON` by default
     * `AC_JAVA_WRAPPER`: build Java wrapper. `Auto` by default, which means only build if JNI is available
+    * `AC_COCOA_WRAPPER`: build Cocoa wrapper. `Auto` by default, which means only build if it's Apple platform
+    * `AC_SWIFT_WRAPPER`: build Swift wrapper. `Auto` by default, which means only build if Swift is available
 
 ### Troubleshooting
 
