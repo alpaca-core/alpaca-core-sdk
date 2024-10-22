@@ -1,14 +1,43 @@
 # Developer Environments
 
+On the various systems below have recommended IDEs and text editors. However, as long as you have a C++ and CMake workflow set up, you should be fine with whatever is most comfortable for you.
+
 ## Linux
+
+VS Code is the recommended IDE here.
 
 ### Ubuntu
 
 We use Ubuntu 24.04, but the setup will likely work for other versions as well.
 
+* `$ sudo apt install git`
+* `$ sudo apt install git-lfs`
+* `$ git lfs install` - do not forget this!
+* `$ sudo apt install cmake`
+* `$ sudo apt install ninja-build`
+* `$ sudo apt install libssl-dev` (optional for HTTPS downloads)
+* `$ sudo apt install libsdl2-dev` (optional for GUI demos)
+* Optionally for the java wrapper: `$ sudo apt install openjdk-17-jdk`
+* Compute backends (may or may not be applicable to your system):
+    * Cuda: `$ sudo apt install nvidia-cuda-toolkit`
+    * Vulkan: `$ sudo apt install libvulkan-dev`
+
 ### Arch Linux
 
 We use Manjaro so some packages might have different names in pure AUR Arch Linux.
+
+* `$ sudo pacman -S git`
+* `$ sudo pacman -S git-lfs`
+* `$ git lfs install` - do not forget this!
+* `$ sudo pacman -S cmake`
+* `$ sudo pacman -S gcc`
+* `$ sudo pacman -S ninja`
+* `$ sudo pacman -S openssl` (optional for HTTPS downloads)
+* `$ sudo pacman -S sdl2` (optional for GUI demos)
+* Optionally for the java wrapper: `$ sudo pacman -S jdk-openjdk`
+* Compute backends (may or may not be applicable to your system):
+    * Cuda: `$ sudo pacman -S cuda`
+    * Vulkan: `$ sudo pacman -Sg vulkan-devel`
 
 ### Visual Studio Code Setup
 
@@ -16,7 +45,7 @@ We use Manjaro so some packages might have different names in pure AUR Arch Linu
 
 We use Windows 11, but the setup will likely work for Windows 10 as well.
 
-We support to development environments on Windows: Visual Studio and VS Code.
+On Windows we recommend using Visual Studio or VS Code.
 
 Install the following software (we recommend using Chocolatey, Scoop, or WinGet, but manually is also fine):
 
@@ -79,6 +108,8 @@ Enable git LFS: `> git lfs install`
 We use macOS Sequoia, but the setup will likely work for earlier versions as well.
 
 Note, however, that we do not support x86 macOS. We only support Apple Silicon.
+
+On macOS we recommend using VS Code or Xcode.
 
 Technically you can setup the requirements manually, but, please, just use [Homebrew](https://brew.sh/).
 
