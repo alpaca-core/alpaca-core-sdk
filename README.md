@@ -28,3 +28,7 @@ Detailed build instructions can be found in the [documentation](doc/dev/build.md
 This software is distributed under the MIT Software License. See accompanying file LICENSE or copy [here](https://opensource.org/licenses/MIT).
 
 Copyright &copy; 2024 [Alpaca Core, Inc](https://github.com/alpaca-core)
+
+## Third Party Libraries
+
+[List](third-party.md). Please consider supporting them.
