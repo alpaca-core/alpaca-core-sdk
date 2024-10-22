@@ -15,16 +15,28 @@ struct WhisperExample {
         print("Hello from e-Whisper.swift")
 
         initSDK();
-
-        var desc = ModelDesc()
-        desc.inferenceType = "whisper.cpp"
-        desc.name = "synthetic whisper"
+        let model: Model
+        let instance: Instance
         let whisperDir = String(cString: ACTestData.AC.getWhisperDir())
-        desc.assets.append(AssetInfo(whisperDir + "/whisper-base.en-f16.bin", "whisper-base.en-f16.bin"))
+        do {
+            var desc = ModelDesc()
+            desc.inferenceType = "whisper.cpp"
+            desc.name = "synthetic whisper"
+            desc.assets.append(AssetInfo(whisperDir + "/whisper-base.en-f16.bin", "whisper-base.en-f16.bin"))
 
-        let params = Dictionary<String, Any>()
-        let model = createModel(&desc, params, progress)!;
-        let instance = model.createInstance("general", params);
+            let params = Dictionary<String, Any>()
+            model = try createModel(&desc, params, progress);
+            instance = try model.createInstance("general", params);
+        } catch ACError.invalidModelCreation(let error) {
+            print("Error creating model: \(error)")
+            return
+        } catch ACError.invalidInstanceCreation(let error) {
+            print("Error creating instance: \(error)")
+            return
+        } catch {
+            print("Unexpected error: \(error)")
+            return
+        }
 
         let audioFile = "/as-she-sat.wav"
 
@@ -38,7 +50,11 @@ struct WhisperExample {
         inferenceParams["audioBinaryMono"] = audioData
 
         print("Local-whisper: Transcribing the audio [\(audioFile)]: \n\n")
-        let result = instance.runOp("transcribe", inferenceParams, progress);
-        print("Result: \(result)")
+        do {
+            let result = try instance.runOp("transcribe", inferenceParams, progress);
+            print("Result: \(result)")
+        } catch {
+            print("Error running operation: \(error)")
+        }
     }
 }

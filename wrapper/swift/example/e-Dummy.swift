@@ -15,19 +15,37 @@ struct DummyExample {
 
         AlpacaCoreSwift.initSDK();
 
-        var desc = AlpacaCoreSwift.ModelDesc()
-        desc.inferenceType = "dummy"
-        desc.name = "synthetic dummy"
+        let model: AlpacaCoreSwift.Model
+        let instance: AlpacaCoreSwift.Instance
 
-        let dict = Dictionary<String, Any>()
-        let model = AlpacaCoreSwift.createModel(&desc, dict, progress)!;
-        let instance = model.createInstance("general", dict);
+        do {
+            var desc = AlpacaCoreSwift.ModelDesc()
+            desc.inferenceType = "dummy"
+            desc.name = "synthetic dummy"
+
+            let dict = Dictionary<String, Any>()
+            model = try AlpacaCoreSwift.createModel(&desc, dict, progress);
+            instance = try model.createInstance("general", dict);
+        } catch ACError.invalidModelCreation(let error) {
+            print("Error creating model: \(error)")
+            return
+        } catch ACError.invalidInstanceCreation(let error) {
+            print("Error creating instance: \(error)")
+            return
+        } catch {
+            print("Unexpected error: \(error)")
+            return
+        }
 
         let params = [
             "input": ["a", "b"]
         ]
 
-        let result = instance.runOp("run", params, progress);
-        print("Result \(result)")
+        do {
+            let result = try instance.runOp("run", params, progress);
+            print("Result \(result)")
+        } catch {
+            print("Error running operation: \(error)")
+        }
     }
 }

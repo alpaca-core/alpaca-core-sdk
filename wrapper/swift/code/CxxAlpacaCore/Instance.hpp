@@ -13,7 +13,7 @@ namespace AC {
 class Instance {
 public:
     Instance(const Instance& other);
-    DictRoot runOp(const std::string& op, DictRef params, ProgressCallbackData progressCbData);
+    Expected<DictRoot, std::string> runOp(const std::string& op, DictRef params, ProgressCallbackData progressCbData);
 private:
     friend class Model;
     Instance(std::unique_ptr<local::Instance> instance);

@@ -3,6 +3,13 @@
 //
 import CAlpacaCore
 
+public enum ACError: Error {
+    case invalidModelCreation(String)
+    case invalidInstanceCreation(String)
+    case invalidRunOp(String)
+}
+
+
 public func initSDK() {
     AC.initSDK()
 }
@@ -32,12 +39,16 @@ func callObserver(observer: UnsafeMutableRawPointer, tag: UnsafePointer<Int8>, p
     wrapper.completion(String(cString: tag), progress)
 }
 
-public func createModel(_ desc: inout ModelDesc, _ params: Dictionary<String, Any>, _ _progress: @escaping (String, Float) -> Void) -> Model? {
+public func createModel(_ desc: inout ModelDesc, _ params: Dictionary<String, Any>,
+    _ progress: @escaping (String, Float) -> Void) throws -> Model {
     let paramsAsDict = translateDictionaryToDict(params)
-    let wrapper = CallbackWrapper(completion: _progress)
+    let wrapper = CallbackWrapper(completion: progress)
 
-    let model = AC.createModel(&desc, paramsAsDict.getRef(), wrapper.getProgressData())
-    return Model(model)
+    let result = AC.createModel(&desc, paramsAsDict.getRef(), wrapper.getProgressData())
+    if result.hasError() {
+        throw ACError.invalidModelCreation(String(result.error()))
+    }
+    return Model(result.value())
 }
 
 public class Model {
@@ -47,9 +58,13 @@ public class Model {
         self.model = model
     }
 
-    public func createInstance(_ name: String, _ params: Dictionary<String, Any>) -> Instance {
+    public func createInstance(_ name: String, _ params: Dictionary<String, Any>) throws -> Instance {
         let paramsAsDict = translateDictionaryToDict(params)
-        return Instance(model.createInstance(std.string(name), paramsAsDict.getRef()))
+        let result = model.createInstance(std.string(name), paramsAsDict.getRef())
+        if result.hasError() {
+            throw ACError.invalidInstanceCreation(String(result.error()))
+        }
+        return Instance(result.value())
     }
 }
 
@@ -60,11 +75,15 @@ public class Instance {
         self.instance = instance
     }
 
-    public func runOp(_ op: String, _ params: Dictionary<String, Any>, _ _progress: @escaping (String, Float) -> Void) -> Dictionary<String, Any> {
+    public func runOp(_ op: String, _ params: Dictionary<String, Any>,
+            _ progress: @escaping (String, Float) -> Void) throws -> Dictionary<String, Any> {
         let paramsAsDict = translateDictionaryToDict(params)
-        let wrapper = CallbackWrapper(completion: _progress)
+        let wrapper = CallbackWrapper(completion: progress)
 
-        let resultDict = instance.runOp(std.string(op), paramsAsDict.getRef(), wrapper.getProgressData())
-        return translateDictToDictionary(resultDict.getRef())
+        let result = instance.runOp(std.string(op), paramsAsDict.getRef(), wrapper.getProgressData())
+        if result.hasError() {
+            throw ACError.invalidRunOp(String(result.error()))
+        }
+        return translateDictToDictionary(result.value().getRef())
     }
 }

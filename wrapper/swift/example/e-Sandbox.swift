@@ -21,6 +21,7 @@ struct CxxAlpacaCoreExample {
                 }
             }
         """
+
         let acDict = AC.DictRoot.parse(std.string(jsonString))
         let dictRef = acDict.getRef()
         let nameRef = dictRef.atKey("name")

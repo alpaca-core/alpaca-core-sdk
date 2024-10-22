@@ -22,7 +22,7 @@ void initSDK() {
     local::addWhisperInference(*factorySingleton);
 }
 
-Model createModel(AlpacaCoreSwift::ModelDesc& desc, DictRef params, ProgressCallbackData progressCbData) {
+Expected<Model, std::string> createModel(AlpacaCoreSwift::ModelDesc& desc, DictRef params, ProgressCallbackData progressCbData) {
     ac::local::ModelDesc modelDesc;
     modelDesc.inferenceType = desc.getInferenceType();
     modelDesc.name = desc.getName();
@@ -35,10 +35,17 @@ Model createModel(AlpacaCoreSwift::ModelDesc& desc, DictRef params, ProgressCall
         modelDesc.assets.push_back(assetInfo);
     }
 
-    return Model(factorySingleton->createModel(modelDesc, params.getDict(), [&](std::string_view tag, float progress) {
-        progressCbData.m_cb(progressCbData.m_context, tag.data(), progress);
-        return true;
-    }));
+    try
+    {
+        return Model(factorySingleton->createModel(modelDesc, params.getDict(), [&](std::string_view tag, float progress) {
+            progressCbData.m_cb(progressCbData.m_context, tag.data(), progress);
+            return true;
+        }));
+    }
+    catch(const std::exception& e)
+    {
+        return itlib::unexpected<std::string>(e.what());
+    }
 }
 
 std::vector<float> loadWavF32Mono(const std::string& path) {

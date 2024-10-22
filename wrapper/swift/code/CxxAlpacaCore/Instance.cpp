@@ -20,14 +20,19 @@ Instance::Instance(const Instance& other) {
     m_instance = other.m_instance;
 }
 
-DictRoot Instance::runOp(const std::string& op, DictRef params, ProgressCallbackData progressCbData) {
+Expected<DictRoot, std::string> Instance::runOp(const std::string& op, DictRef params, ProgressCallbackData progressCbData) {
     DictRoot root;
     DictRef ref = root.getRef();
-    ref.getDict() = m_instance->runOp(op, params.getDict(), [&](std::string_view tag, float progress) {
-        progressCbData.m_cb(progressCbData.m_context, tag.data(), progress);
-        return true;
-    });
-    return root;
+
+    try {
+        ref.getDict() = m_instance->runOp(op, params.getDict(), [&](std::string_view tag, float progress) {
+            progressCbData.m_cb(progressCbData.m_context, tag.data(), progress);
+            return true;
+        });
+        return root;
+    } catch(const std::exception& e) {
+        return itlib::unexpected<std::string>(e.what());
+    }
 }
 
 }

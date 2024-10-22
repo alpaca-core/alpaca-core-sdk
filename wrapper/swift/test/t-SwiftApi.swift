@@ -12,20 +12,20 @@ final class SwiftApiTests: XCTestCase {
         desc.name = "synthetic dummy"
 
         let dict = Dictionary<String, Any>()
-        let model = AlpacaCoreSwift.createModel(&desc, dict, {
+        let model = try AlpacaCoreSwift.createModel(&desc, dict, {
             (tag: String, progress: Float) in
             print("[\(tag)]Progress: \(progress)")
         });
         XCTAssertNotNil(model)
 
-        let instance = model!.createInstance("general", dict);
+        let instance = try model.createInstance("general", dict);
         XCTAssertNotNil(instance)
 
         let params = [
             "input": ["a", "b"]
         ]
 
-        let result = instance.runOp("run", params, {
+        let result = try instance.runOp("run", params, {
             (tag: String, progress: Float) in
             print("[\(tag)]Progress: \(progress)")
         });

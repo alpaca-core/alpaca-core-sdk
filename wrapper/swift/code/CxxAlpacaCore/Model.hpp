@@ -3,19 +3,20 @@
 //
 #pragma once
 
+#include "AlpacaCore.hpp"
 #include "Dict.hpp"
 
 #include <ac/local/Model.hpp>
 #include <ac/local/ModelPtr.hpp>
 
 namespace AC {
-class Instance;
+// class Instance;
 
 class Model{
 public:
     Model(local::ModelPtr model);
 
-    Instance createInstance(const std::string& type, DictRef params);
+    Expected<class Instance, std::string> createInstance(const std::string& type, DictRef params);
 private:
     local::ModelPtr m_model;
 };

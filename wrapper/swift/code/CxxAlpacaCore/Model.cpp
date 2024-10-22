@@ -11,7 +11,13 @@ Model::Model(local::ModelPtr model)
     : m_model(model)
 {}
 
-Instance Model::createInstance(const std::string& type, DictRef params)  {
+Expected<Instance, std::string> Model::createInstance(const std::string& type, DictRef params)  {
+    try {
+        return Instance(m_model->createInstance(type, *params.m_dictRef));
+    }
+    catch(const std::exception& e) {
+        return itlib::unexpected<std::string>(e.what());
+    }
     return Instance(m_model->createInstance(type, *params.m_dictRef));
 }
 
