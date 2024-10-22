@@ -22,7 +22,7 @@ Install the following software (we recommend using Chocolatey, Scoop, or WinGet,
 
 * [git](https://git-scm.com/downloads/win)
 * [CMake](https://cmake.org/download/) 3.24 or later
-* OpenSSL (Optional for HTTPS downloads). Windows binary builds available [here](https://slproweb.com/products/Win32OpenSSL.html) (Install the Win64 non-light version))
+* OpenSSL 3 (Optional for HTTPS downloads). Windows binary builds available [here](https://slproweb.com/products/Win32OpenSSL.html) (Install the Win64 non-light version))
     * set the `OPEN_SSL_ROOT_DIR` environment variable to the OpenSSL installation directory
 * SDL2 (Optional, for GUI demos and tools). If you also install the Vulkan SDK, follow the steps for it below. They also provide SDL2. Alternatively:
     * Binary builds available [here](https://github.com/libsdl-org/SDL/releases) (note that first entries there will be for SDL3, scroll to find the latest SDL2 release).         
@@ -43,6 +43,8 @@ Install the following software (we recommend using Chocolatey, Scoop, or WinGet,
         * [LunarG Vulkan SDK](https://vulkan.lunarg.com/sdk/home)
         * The installer will set most environment variables for you, but you need to add `%VULKAN_SDK%\cmake` to `CMAKE_PREFIX_PATH`
         * The step above also provides SDL2
+
+Enable git LFS: `> git lfs install`
 
 ### Visual Studio Setup
 
@@ -76,6 +78,33 @@ Install the following software (we recommend using Chocolatey, Scoop, or WinGet,
 
 We use macOS Sequoia, but the setup will likely work for earlier versions as well.
 
-### Xcode Setup
+Note, however, that we do not support x86 macOS. We only support Apple Silicon.
+
+Technically you can setup the requirements manually, but, please, just use [Homebrew](https://brew.sh/).
+
+* `$ brew install git`
+* `$ brew install git-lfs`
+* `$ git lfs install` - do not forget this!
+* `$ brew install cmake`
+* `$ brew install ninja`
+* Install Xcode and developer tools
+    * `$ xcode-select --install`
+    * Optionally for iOS development: install the iOS SDK and tools
+* `$ brew install openssl@3` (optional for HTTPS downloads)    
+* Optionally for GUI demos: `$ brew install sdl2`
+* Optionally for Android development:
+    * Install Android Studio
+    * Install SDK with API Level at least 32 and NDK
+    * Set the `ANDROID_NDK_ROOT` environment variable to the Android NDK installation directory
+* Optionally for the Java wrapper: `$ brew install openjdk` or `$ brew install openjdk@17` (both should work)
 
 ### Visual Studio Code Setup
+
+* Add the following extensions to VS Code:
+    * CMake
+    * CMake Tools
+    * CMake Language Support
+    * C/C++
+* Open the project directory in VS Code, configure, and build.
+
+### Xcode Setup
