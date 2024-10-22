@@ -4,6 +4,7 @@
 #pragma once
 
 #include "AlpacaCore.hpp"
+#include "Expected.hpp"
 #include "Dict.hpp"
 
 #include <ac/local/Model.hpp>

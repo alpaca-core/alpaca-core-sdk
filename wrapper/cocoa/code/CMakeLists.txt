@@ -8,10 +8,7 @@ target_sources(ac-cocoa PRIVATE
     ac/DictConverter.mm
 )
 
-target_include_directories(ac-cocoa
-    PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}
-)
+target_include_directories(ac-cocoa PUBLIC .)
 
 target_link_libraries(ac-cocoa
     PUBLIC

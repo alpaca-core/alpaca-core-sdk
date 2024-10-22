@@ -82,6 +82,7 @@ public func translateDictToDictionary(_ dict: AC.DictRef) throws -> Dictionary<S
             try convertDictRefToDictionary(sourceValue, into: &nestedDictionary)
             return nestedDictionary
         default:
+        // case .Null:
             throw DictConvertError.invalidType("Invalid type for dictionary value")
         }
     }

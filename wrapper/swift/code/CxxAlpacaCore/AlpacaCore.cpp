@@ -4,6 +4,7 @@
 #include "AlpacaCore.hpp"
 #include "Model.hpp"
 
+#include <ac/local/ModelFactory.hpp>
 #include <ac/local/LocalDummy.hpp>
 #include <ac/local/LocalLlama.hpp>
 #include <ac/local/LocalWhisper.hpp>
@@ -27,16 +28,14 @@ Expected<Model, std::string> createModel(AlpacaCoreSwift::ModelDesc& desc, DictR
     modelDesc.inferenceType = desc.getInferenceType();
     modelDesc.name = desc.getName();
 
-    for (auto asset : desc.getAssets())
-    {
+    for (auto asset : desc.getAssets()) {
         ac::local::ModelDesc::AssetInfo assetInfo;
         assetInfo.path = asset.getPath();
         assetInfo.tag = asset.getTag();
         modelDesc.assets.push_back(assetInfo);
     }
 
-    try
-    {
+    try {
         return Model(factorySingleton->createModel(modelDesc, params.getDict(), [&](std::string_view tag, float progress) {
             progressCbData.m_cb(progressCbData.m_context, tag.data(), progress);
             return true;

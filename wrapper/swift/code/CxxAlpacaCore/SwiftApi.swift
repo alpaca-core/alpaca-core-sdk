@@ -44,11 +44,11 @@ public func createModel(_ desc: inout ModelDesc, _ params: Dictionary<String, An
     let paramsAsDict = try translateDictionaryToDict(params)
     let wrapper = CallbackWrapper(completion: progress)
 
-    let result = AC.createModel(&desc, paramsAsDict.getRef(), wrapper.getProgressData())
+    var result = AC.createModel(&desc, paramsAsDict.getRef(), wrapper.getProgressData())
     if result.hasError() {
         throw ACError.invalidModelCreation(String(result.error()))
     }
-    return Model(result.value())
+    return Model(result.consumeValue())
 }
 
 public class Model {
@@ -60,11 +60,11 @@ public class Model {
 
     public func createInstance(_ name: String, _ params: Dictionary<String, Any>) throws -> Instance {
         let paramsAsDict = try translateDictionaryToDict(params)
-        let result = model.createInstance(std.string(name), paramsAsDict.getRef())
+        var result = model.createInstance(std.string(name), paramsAsDict.getRef())
         if result.hasError() {
             throw ACError.invalidInstanceCreation(String(result.error()))
         }
-        return Instance(result.value())
+        return Instance(result.consumeValue())
     }
 }
 
@@ -80,10 +80,10 @@ public class Instance {
         let paramsAsDict = try translateDictionaryToDict(params)
         let wrapper = CallbackWrapper(completion: progress)
 
-        let result = instance.runOp(std.string(op), paramsAsDict.getRef(), wrapper.getProgressData())
+        var result = instance.runOp(std.string(op), paramsAsDict.getRef(), wrapper.getProgressData())
         if result.hasError() {
             throw ACError.invalidRunOp(String(result.error()))
         }
-        return try translateDictToDictionary(result.value().getRef())
+        return try translateDictToDictionary(result.consumeValue().getRef())
     }
 }

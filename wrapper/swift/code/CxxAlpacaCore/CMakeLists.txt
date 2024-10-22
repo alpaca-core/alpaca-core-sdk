@@ -2,15 +2,14 @@
 # SPDX-License-Identifier: MIT
 #
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-
 # Set up swiftrt.o and runtime library search paths
-include(InitializeSwift)
+include(./cmake/InitializeSwift.cmake)
 # cmake/modules/AddSwift.cmake provides the function for creating the Swift to
 # C++ bridging header
-include(AddSwift)
+include(./cmake/AddSwift.cmake)
 
 add_library(AlpacaCoreSwift STATIC
+    Expected.hpp
     Dict.hpp
     Dict.cpp
     Model.hpp
@@ -51,9 +50,9 @@ target_link_libraries(AlpacaCoreSwift
 # and tells Ninja about this dependency in the depfile.
 # This function is implemented in cmake/AddSwift.cmake.
 _swift_generate_cxx_header(AlpacaCoreSwift
-  ${CMAKE_CURRENT_SOURCE_DIR}/AlpacaCore-Swift.h
+    ./AlpacaCore-Swift.h
   SEARCH_PATHS
-    ${CMAKE_CURRENT_SOURCE_DIR}
+    .
   SWIFT_EXPOSABLE_FILES
     ModelDesc.swift
 )
