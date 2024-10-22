@@ -10,7 +10,7 @@
 #include <swift/bridging>
 #include "AlpacaCore-Swift.h"
 
-namespace ac::swift {
+namespace AC {
 
 Instance::Instance(std::unique_ptr<local::Instance> instance)
     : m_instance(std::move(instance))

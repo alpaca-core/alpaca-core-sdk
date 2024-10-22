@@ -10,7 +10,7 @@
 
 #include <ac-audio.hpp>
 
-namespace ac::swift {
+namespace AC {
 
 static std::unique_ptr<local::ModelFactory> factorySingleton;
 

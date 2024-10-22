@@ -5,7 +5,7 @@
 
 #include "Instance.hpp"
 
-namespace ac::swift {
+namespace AC {
 
 Model::Model(local::ModelPtr model)
     : m_model(model)

@@ -8,7 +8,7 @@
 #include <ac/local/Model.hpp>
 #include <ac/local/ModelPtr.hpp>
 
-namespace ac::swift {
+namespace AC {
 class Instance;
 
 class Model{

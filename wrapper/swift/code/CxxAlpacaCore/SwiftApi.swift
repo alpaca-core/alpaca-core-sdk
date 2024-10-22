@@ -4,11 +4,11 @@
 import CAlpacaCore
 
 public func initSDK() {
-    ac.swift.initSDK()
+    AC.initSDK()
 }
 
 public func loadWavF32Mono(_ filePath: String) -> [Float] {
-    let pcmf32 = ac.swift.loadWavF32Mono(std.string(filePath))
+    let pcmf32 = AC.loadWavF32Mono(std.string(filePath))
     return Array<Float>(pcmf32)
 }
 
@@ -22,8 +22,8 @@ class CallbackWrapper {
         return UnsafeMutableRawPointer(Unmanaged.passRetained(self).toOpaque())
     }
 
-    public func getProgressData() -> ac.swift.ProgressCallbackData {
-        return ac.swift.ProgressCallbackData(m_cb: callObserver, m_context: getRawPointer())
+    public func getProgressData() -> AC.ProgressCallbackData {
+        return AC.ProgressCallbackData(m_cb: callObserver, m_context: getRawPointer())
     }
 }
 
@@ -36,14 +36,14 @@ public func createModel(_ desc: inout ModelDesc, _ params: Dictionary<String, An
     let paramsAsDict = translateDictionaryToDict(params)
     let wrapper = CallbackWrapper(completion: _progress)
 
-    let model = ac.swift.createModel(&desc, paramsAsDict.getRef(), wrapper.getProgressData())
+    let model = AC.createModel(&desc, paramsAsDict.getRef(), wrapper.getProgressData())
     return Model(model)
 }
 
 public class Model {
-    var model: ac.swift.Model
+    var model: AC.Model
 
-    init(_ model: ac.swift.Model) {
+    init(_ model: AC.Model) {
         self.model = model
     }
 
@@ -54,9 +54,9 @@ public class Model {
 }
 
 public class Instance {
-    var instance: ac.swift.Instance
+    var instance: AC.Instance
 
-    init(_ instance: ac.swift.Instance) {
+    init(_ instance: AC.Instance) {
         self.instance = instance
     }
 

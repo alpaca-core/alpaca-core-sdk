@@ -10,7 +10,7 @@
 
 #include "AlpacaCore-Swift.h"
 
-namespace ac::swift {
+namespace AC {
 
 typedef void (*SwiftProgressCb)(void* _Nonnull context, const char* _Nonnull tag, float progress);
 

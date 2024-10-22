@@ -19,7 +19,7 @@ struct WhisperExample {
         var desc = ModelDesc()
         desc.inferenceType = "whisper.cpp"
         desc.name = "synthetic whisper"
-        let whisperDir = String(cString: ACTestData.ac.swift.getWhisperDir())
+        let whisperDir = String(cString: ACTestData.AC.getWhisperDir())
         desc.assets.append(AssetInfo(whisperDir + "/whisper-base.en-f16.bin", "whisper-base.en-f16.bin"))
 
         let params = Dictionary<String, Any>()

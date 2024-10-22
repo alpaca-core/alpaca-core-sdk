@@ -8,9 +8,10 @@
 #include <swift/bridging>
 #include "AlpacaCore-Swift.h"
 
-namespace ac::swift {
+namespace AC {
 
 namespace sw = ::swift;
+using namespace ac;
 
 enum class DictValueType {
     Null,         /**< Null value */

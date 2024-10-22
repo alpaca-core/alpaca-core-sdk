@@ -21,18 +21,18 @@ struct CxxAlpacaCoreExample {
                 }
             }
         """
-        let acDict = ac.swift.DictRoot.parse(std.string(jsonString))
+        let acDict = AC.DictRoot.parse(std.string(jsonString))
         let dictRef = acDict.getRef()
         let nameRef = dictRef.atKey("name")
         print("Name: \(nameRef.getString())")
 
         let scoresRef = dictRef.atKey("scores")
-        print("Name: \(ac.swift.getDictTypeAsString(scoresRef.getType()))")
+        print("Name: \(AC.getDictTypeAsString(scoresRef.getType()))")
         let scoresRef2 = dictRef["scores"]
-        print("Name: \(ac.swift.getDictTypeAsString(scoresRef2.getType()))")
+        print("Name: \(AC.getDictTypeAsString(scoresRef2.getType()))")
 
         let firstScore = scoresRef2[0]
-        print("Name: \(ac.swift.getDictTypeAsString(firstScore.getType()))")
+        print("Name: \(AC.getDictTypeAsString(firstScore.getType()))")
 
         print("Value of score: \(firstScore.getUnsigned())")
         print("Value of score: \(dictRef["scores"][0].getUnsigned())")
@@ -52,10 +52,10 @@ struct CxxAlpacaCoreExample {
             binData.setBinary(ptr.baseAddress!, data.count)
         }
 
-        print("Values of binData: \(binData.dump()) - type \(ac.swift.getDictTypeAsString(binData.getType()))")
+        print("Values of binData: \(binData.dump()) - type \(AC.getDictTypeAsString(binData.getType()))")
 
         let binaryDataRef = dictRef["binData"]
-        print("Values of binData: \(binaryDataRef.dump()) - type \(ac.swift.getDictTypeAsString(binaryDataRef.getType()))")
+        print("Values of binData: \(binaryDataRef.dump()) - type \(AC.getDictTypeAsString(binaryDataRef.getType()))")
 
         let binaryData = binaryDataRef.getBinary()
         print("bin Data \(binaryData)")

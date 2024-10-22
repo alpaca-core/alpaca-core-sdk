@@ -4,7 +4,7 @@
 #include "../../../gen/ac-test-data-llama-dir.h"
 #include "../../../gen/ac-test-data-dummy-dir.h"
 
-namespace ac::swift {
+namespace AC {
 
 const char* getWhisperDir() {
     return AC_TEST_DATA_WHISPER_DIR;

@@ -7,12 +7,12 @@ public enum DictConvertError: Error {
     case invalidType(String)
 }
 
-public func translateDictionaryToDict(_ dictionary: Dictionary<String, Any>) -> ac.swift.DictRoot {
+public func translateDictionaryToDict(_ dictionary: Dictionary<String, Any>) -> AC.DictRoot {
     // Create the root dictionary object
-    // var dictRoot = ac.swift.DictRoot.create()
-    let dictRoot = ac.swift.DictRoot()
+    // var dictRoot = AC.DictRoot.create()
+    let dictRoot = AC.DictRoot()
 
-    func convertValue(sourceValue: Any, target: inout ac.swift.DictRef) throws(DictConvertError) {
+    func convertValue(sourceValue: Any, target: inout AC.DictRef) throws(DictConvertError) {
         if let intValue = sourceValue as? Int {
             target.setInt(intValue)
         } else if let unsignedValue = sourceValue as? UInt {
@@ -40,7 +40,7 @@ public func translateDictionaryToDict(_ dictionary: Dictionary<String, Any>) -> 
     }
 
     // Recursive function to convert the dictionary
-    func convertDictionary(_ sourceDict: Dictionary<String, Any>, into targetDict: ac.swift.DictRef) {
+    func convertDictionary(_ sourceDict: Dictionary<String, Any>, into targetDict: AC.DictRef) {
         for (key, value) in sourceDict {
             var child = targetDict.addChild(std.string(key))
             do {
@@ -57,10 +57,10 @@ public func translateDictionaryToDict(_ dictionary: Dictionary<String, Any>) -> 
     return dictRoot
 }
 
-public func translateDictToDictionary(_ dict: ac.swift.DictRef) -> Dictionary<String, Any> {
+public func translateDictToDictionary(_ dict: AC.DictRef) -> Dictionary<String, Any> {
     var dictionary: Dictionary<String, Any> = Dictionary<String, Any>()
 
-    func convertValue(sourceValue: ac.swift.DictRef) throws(DictConvertError) -> Any {
+    func convertValue(sourceValue: AC.DictRef) throws(DictConvertError) -> Any {
         let childType = sourceValue.getType()
 
         switch childType {
@@ -93,7 +93,7 @@ public func translateDictToDictionary(_ dict: ac.swift.DictRef) -> Dictionary<St
     }
 
     // Recursive function to convert DictRef to Dictionary
-    func convertDictRefToDictionary(_ source: ac.swift.DictRef, into target: inout Dictionary<String, Any>) {
+    func convertDictRefToDictionary(_ source: AC.DictRef, into target: inout Dictionary<String, Any>) {
         // Additionally, handle dictionary keys and their values
         for keyStr in source.getKeys() { // Assuming getDict() returns a dictionary-like object
             let child = source.atKey(keyStr)

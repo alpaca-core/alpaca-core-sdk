@@ -8,7 +8,7 @@
 
 #include <ac/local/Instance.hpp>
 
-namespace ac::swift {
+namespace AC {
 
 class Instance {
 public:

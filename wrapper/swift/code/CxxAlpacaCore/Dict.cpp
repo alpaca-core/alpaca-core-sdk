@@ -3,7 +3,7 @@
 //
 #include "Dict.hpp"
 
-namespace ac::swift {
+namespace AC {
 
 DictRef::DictRef(Dict* _Nonnull root)
     : m_dictRef(root)
