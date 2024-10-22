@@ -4,14 +4,55 @@
 
 SDK for local AI Inference.
 
+## Overview
+
+AC Local is a library for local AI inference. "Local" as running on the device which executes the binaries. It provides a unified API for multiple inference models.
+
+The API itself can be split into two layers:
+
+* Programming-language specific: The API which one calls writing code in a specific programming language. It's just a means to call the:
+* Inference API: A JSON/CBOR/POJO-like API which is used to communicate with the underlying inference engines following their specific API schema.
+
+## Supported models
+
+This is the list of currently supported models. It will be updated as new models are added.
+
+* Multiple LLM-s through [llama.cpp](https://github.com/ggerganov/llama.cpp)
+* Whisper through [whisper.cpp](https://github.com/ggerganov/whisper.cpp)
+
+## Minimal Example
+
+```cpp
+ac::local::ModelFactory factory;
+ac::local::addLlamaInference(factory);
+
+auto model = factory.createModel(
+    {
+        .inferenceType = "llama.cpp",
+        .assets = {
+            {.path = "/path/to/model.gguf"}
+        }
+    }, {}, {}    
+);
+
+auto instance = model->createInstance("general", {});
+
+auto result = instance->runOp("run", 
+    {{"prompt", "If you could travel faster than light,"}}, {});
+
+
+std::cout << result << "\n";
+```
+
 ## Bindings, Wrappers, and Integrations
 
-* Internal
-    * [C wrapper](wrapper/c)
-    * [Java wrapper](wrapper/java)
-    * Swift wrapper
+* [C wrapper](wrapper/c)
+* [Java wrapper](wrapper/java)
+* Swift wrapper
 
 ## Demos
+
+## Documentation
 
 ## Build
 
