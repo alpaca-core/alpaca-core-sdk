@@ -47,9 +47,9 @@ target_link_libraries(AlpacaCoreSwift
 
 # Generate a C++ header from selected Swift sources. This is automatically added to the
 # AlpacaCore target. The target will regenerate the header file when any of the
-# Swift sources change. Clang detects that the C++ file depends on the header,
+# Swift sources change. The compiler detects that the C++ file depends on the header,
 # and tells Ninja about this dependency in the depfile.
-# This function is implemented in cmake_modules/AddSwift.cmake.
+# This function is implemented in cmake/AddSwift.cmake.
 _swift_generate_cxx_header(AlpacaCoreSwift
   ${CMAKE_CURRENT_SOURCE_DIR}/AlpacaCore-Swift.h
   SEARCH_PATHS
