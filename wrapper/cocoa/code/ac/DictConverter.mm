@@ -8,10 +8,11 @@
 
 @implementation DictConverter
 
-// Helper function for determine the type of the value
+// Helper function to determine the type of the value
 + (ac::Dict)convertDictValue:(id)value {
     if ([value isKindOfClass:[NSDictionary class]]) {
-        return [self convertToACDict:(NSDictionary *)value];
+        ac::Dict dict = [self convertToACDict:(NSDictionary *)value];
+        return dict.is_null() ?  ac::Dict::object() : dict;
     }
     else if ([value isKindOfClass:[NSArray class]]) {
         ac::Dict arrayJson = ac::Dict::array();
@@ -47,6 +48,8 @@
     else if ([value isKindOfClass:[NSData class]]) {
         const uint8_t* bytes = (const uint8_t*)[value bytes];
         return ac::Dict::binary(ac::Blob(bytes, bytes + [value length]));
+    } else if ([value isKindOfClass:[NSNull class]]) {
+        return ac::Dict();
     }
 
     NSException *exception = [NSException exceptionWithName: @"DictConverterException"
@@ -68,38 +71,39 @@
     return jsonObj;
 }
 
-// Helper function for determine the type of the value
+// Helper function to determine the type of the value
 + (id)convertJSONValue:(const ac::Dict&)json {
     // Handle different JSON types
     if (json.is_object()) {
         return [self convertToDictionary:json];
-    } else if (json.is_array()) {
+    }
+    else if (json.is_array()) {
         NSMutableArray *array = [NSMutableArray array];
         for (const auto &element : json) {
             [array addObject:[self convertJSONValue:element]];
         }
         return array;
-    } else if (json.is_binary()) {
+    }
+    else if (json.is_binary()) {
         auto& buf = json.get_binary();
         return [NSData dataWithBytes:buf.data() length:buf.size()];
-    } else if (json.is_string()) {
-        return [NSString stringWithUTF8String:json.get<std::string>().c_str()];
-    } else if (json.is_number_integer()) {
-        return [NSNumber numberWithLongLong:json.get<int64_t>()];
-    } else if (json.is_number_float()) {
-        return [NSNumber numberWithDouble:json.get<double>()];
-    } else if (json.is_boolean()) {
-        return [NSNumber numberWithBool:json.get<bool>()];
-    } else if (json.is_null()) {
-        return @{};
     }
-
-    NSException *exception = [NSException exceptionWithName: @"DictConverterException"
-                                                reason: @"Invalid type for dictionary value"
-                                                userInfo: nil];
-    @throw exception;
-
-    return nil;
+    else if (json.is_string()) {
+        return [NSString stringWithUTF8String:json.get<std::string>().c_str()];
+    }
+    else if (json.is_number_integer()) {
+        return [NSNumber numberWithLongLong:json.get<int64_t>()];
+    }
+    else if (json.is_number_float()) {
+        return [NSNumber numberWithDouble:json.get<double>()];
+    }
+    else if (json.is_boolean()) {
+        return [NSNumber numberWithBool:json.get<bool>()];
+    }
+    else {
+        assert(json.is_null());
+        return [NSNull null];
+    }
 }
 
 + (NSDictionary *)convertToDictionary:(const ac::Dict&)json {

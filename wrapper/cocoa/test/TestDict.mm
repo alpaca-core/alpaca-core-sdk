@@ -127,8 +127,7 @@ ac::Dict getDictWithBinary() {
     XCTAssertEqual(int(ilist.count), 5, @"The 'ilist' array in 'inner2' should have 5 elements.");
     XCTAssertEqualObjects(ilist[0], @1, @"The first element in 'ilist' should be 1.");
     XCTAssertEqualObjects(ilist[1], @"two", @"The second element in 'ilist' should be 'two'.");
-//    XCTAssertEqualObjects(ilist[2], [NSNull null], @"The third element in 'ilist' should be null.");
-    XCTAssertEqualObjects(ilist[2], @{}, @"The third element in 'ilist' should be null, but for now it's handled as empty dict.");
+    XCTAssertEqualObjects(ilist[2], [NSNull null], @"The third element in 'ilist' should be null, but for now it's handled as empty dict.");
     XCTAssertEqualObjects(ilist[3], @NO, @"The fourth element in 'ilist' should be false.");
 
     // Test dictionary inside "ilist"
@@ -139,8 +138,7 @@ ac::Dict getDictWithBinary() {
     XCTAssertEqualObjects(ilistDict[@"key2"], @"val", @"The 'key2' in dictionary of 'ilist' should be 'val'.");
 
     // Test "null" key in "inner2"
-    //XCTAssertEqualObjects(inner2Dict[@"null"], [NSNull null], @"The 'null' key in 'inner2' should be null.");
-    XCTAssertEqualObjects(inner2Dict[@"null"], @{}, @"The third element in 'inner2' should be null, but for now it's handled as empty dict.");
+    XCTAssertEqualObjects(inner2Dict[@"null"], [NSNull null], @"The third element in 'inner2' should be null, but for now it's handled as empty dict.");
 
     // Test "empty_list" key
     NSArray *emptyList = nsDict[@"empty_list"];
@@ -308,9 +306,13 @@ ac::Dict getDictWithBinary() {
     XCTAssertEqualObjects(converted[@"bytes"], data, @"Bytes data should match.");
 
     // Check empty collections
-    XCTAssertEqualObjects(converted[@"empty_list"], @[], @"Empty list should match.");
-    XCTAssertEqualObjects(converted[@"empty_dict"], @{}, @"Empty dict should match.");
-    XCTAssertEqualObjects(converted[@"empty_object"], @{}, @"Empty object should match.");
+    XCTAssert([dictionary[@"empty_list"] isKindOfClass:[NSArray class]], "Empty list should be an NSArray");
+    XCTAssert([dictionary[@"empty_dict"] isKindOfClass:[NSDictionary class]], "Empty doct should be an NSDictionary");
+    XCTAssert([dictionary[@"empty_object"] isKindOfClass:[NSDictionary class]], "Empty list should be an NSDictionary");
+
+    XCTAssertEqualObjects(dictionary[@"empty_list"], converted[@"empty_list"], @"Empty list should match.");
+    XCTAssertEqualObjects(dictionary[@"empty_dict"], converted[@"empty_dict"], @"Empty dict should match.");
+    XCTAssertEqualObjects(dictionary[@"empty_object"], converted[@"empty_object"], @"Empty object should match.");
 }
 
 @end
