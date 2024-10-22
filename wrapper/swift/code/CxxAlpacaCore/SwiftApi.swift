@@ -34,9 +34,9 @@ class CallbackWrapper {
     }
 }
 
-func callObserver(observer: UnsafeMutableRawPointer, tag: UnsafePointer<Int8>, progress: Float) {
+func callObserver(observer: UnsafeMutableRawPointer, tag: std.string, progress: Float) {
     let wrapper = Unmanaged<CallbackWrapper>.fromOpaque(observer).takeUnretainedValue()
-    wrapper.completion(String(cString: tag), progress)
+    wrapper.completion(String(tag), progress)
 }
 
 public func createModel(_ desc: inout ModelDesc, _ params: Dictionary<String, Any>,

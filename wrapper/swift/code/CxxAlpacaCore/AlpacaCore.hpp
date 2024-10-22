@@ -9,7 +9,7 @@
 
 namespace AC {
 
-typedef void (*SwiftProgressCb)(void* _Nonnull context, const char* _Nonnull tag, float progress);
+typedef void (*SwiftProgressCb)(void* _Nonnull context, std::string tag, float progress);
 
 struct ProgressCallbackData {
     SwiftProgressCb _Nonnull m_cb;

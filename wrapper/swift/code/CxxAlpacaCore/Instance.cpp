@@ -25,10 +25,15 @@ Expected<DictRoot, std::string> Instance::runOp(const std::string& op, DictRef p
     DictRef ref = root.getRef();
 
     try {
-        ref.getDict() = m_instance->runOp(op, params.getDict(), [&](std::string_view tag, float progress) {
-            progressCbData.m_cb(progressCbData.m_context, tag.data(), progress);
-            return true;
-        });
+        if (progressCbData.m_cb) {
+            ref.getDict() = m_instance->runOp(op, params.getDict(), [&](std::string_view tag, float progress) {
+                progressCbData.m_cb(progressCbData.m_context, std::string(tag), progress);
+                return true;
+            });
+        }
+        else {
+            ref.getDict() = m_instance->runOp(op, params.getDict());
+        }
         return root;
     } catch(const std::exception& e) {
         return itlib::unexpected<std::string>(e.what());

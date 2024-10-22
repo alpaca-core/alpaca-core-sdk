@@ -36,10 +36,15 @@ Expected<Model, std::string> createModel(AlpacaCoreSwift::ModelDesc& desc, DictR
     }
 
     try {
-        return Model(factorySingleton->createModel(modelDesc, params.getDict(), [&](std::string_view tag, float progress) {
-            progressCbData.m_cb(progressCbData.m_context, tag.data(), progress);
-            return true;
-        }));
+        if (progressCbData.m_cb) {
+            return Model(factorySingleton->createModel(modelDesc, params.getDict(), [&](std::string_view tag, float progress) {
+                progressCbData.m_cb(progressCbData.m_context, std::string(tag), progress);
+                return true;
+            }));
+        }
+        else {
+            return Model(factorySingleton->createModel(modelDesc, params.getDict()));
+        }
     }
     catch(const std::exception& e)
     {
