@@ -5,6 +5,27 @@
 
 namespace AC {
 
+DictIterator::DictIterator(Dict& dict)
+    : m_it(dict.begin())
+    , m_endIt(dict.end())
+{}
+
+bool DictIterator::hasNext() const {
+    return m_it != m_endIt;
+}
+
+std::string DictIterator::getKey() const {
+    return m_it.key();
+}
+
+DictRef DictIterator::getValue() const {
+    return DictRef(*m_it);
+}
+
+DictRef DictIterator::next() {
+    return DictRef(*(m_it++));
+}
+
 DictRef::DictRef(Dict& root)
     : m_dictRef(root)
 {}

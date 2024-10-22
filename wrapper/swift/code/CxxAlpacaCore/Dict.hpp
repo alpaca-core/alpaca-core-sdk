@@ -31,6 +31,24 @@ struct BinaryBuffer {
 };
 
 class DictRoot;
+class DictRef;
+
+class DictIterator {
+public:
+    DictIterator(const DictIterator& other) = default;
+
+    bool hasNext() const;
+
+    std::string getKey() const;
+    DictRef getValue() const;
+    DictRef next();
+private:
+    friend class DictRef;
+    DictIterator(Dict& dict);
+
+    ac::Dict::iterator m_it;
+    ac::Dict::iterator m_endIt;
+};
 
 class DictRef {
 public:
@@ -68,11 +86,13 @@ public:
     DictRef operator[](int index) const;
 
     Dict& getDict() const { return m_dictRef; }
+    DictIterator getIterator() const { return DictIterator(m_dictRef); }
 
 private:
     friend class DictRoot;
     friend class Model;
     friend class Instance;
+    friend class DictIterator;
     DictRef(Dict& root);
 
     Dict& m_dictRef;

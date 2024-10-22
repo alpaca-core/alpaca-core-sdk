@@ -56,7 +56,7 @@ public func translateDictionaryToDict(_ dictionary: Dictionary<String, Any>) thr
 public func translateDictToDictionary(_ dict: AC.DictRef) throws -> Dictionary<String, Any> {
     var dictionary: Dictionary<String, Any> = Dictionary<String, Any>()
 
-    func convertValue(sourceValue: AC.DictRef) throws -> Any {
+    func convertValue(sourceValue: AC.DictRef) throws -> Any? {
         switch sourceValue.getType() {
         case .Bool:
             return sourceValue.getBool()
@@ -72,7 +72,7 @@ public func translateDictToDictionary(_ dict: AC.DictRef) throws -> Dictionary<S
             let binaryData = sourceValue.getBinary()
             return Data(bytes: binaryData.data, count: binaryData.size)
         case .Array:
-            var array: [Any] = []
+            var array: [Any?] = []
             for index in 0..<Int32(sourceValue.getSize()) {
                 array.append(try convertValue(sourceValue:sourceValue.atIndex(index)))
             }
@@ -81,8 +81,9 @@ public func translateDictToDictionary(_ dict: AC.DictRef) throws -> Dictionary<S
             var nestedDictionary: Dictionary<String, Any> = Dictionary<String, Any>()
             try convertDictRefToDictionary(sourceValue, into: &nestedDictionary)
             return nestedDictionary
+        case .Null:
+            return nil
         default:
-        // case .Null:
             throw DictConvertError.invalidType("Invalid type for dictionary value")
         }
     }
@@ -90,10 +91,12 @@ public func translateDictToDictionary(_ dict: AC.DictRef) throws -> Dictionary<S
     // Recursive function to convert DictRef to Dictionary
     func convertDictRefToDictionary(_ source: AC.DictRef, into target: inout Dictionary<String, Any>) throws {
         // Additionally, handle dictionary keys and their values
-        for keyStr in source.getKeys() { // Assuming getDict() returns a dictionary-like object
-            let child = source.atKey(keyStr)
-            let key = String(keyStr)
+        var it = source.getIterator()
+        while it.hasNext() {
+            let key = String(it.getKey())
+            let child = it.getValue()
             try target[key] = convertValue(sourceValue: child)
+            it.next()
         }
     }
 
