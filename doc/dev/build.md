@@ -14,6 +14,8 @@ If you're not only interested in building the project but also setting up a deve
 
 ## Prerequisites
 
+The minimum requirements are:
+
 * C++ compiler with C++20 support such as:
     * MSVC 19.30 (Visual Studio 2022 v17.00) or later 
     * GCC 11 or later
@@ -23,6 +25,8 @@ If you're not only interested in building the project but also setting up a deve
     * Android: CMake 3.24 is needed to properly find JNI
     * GUI Demos: [SDL2](https://wiki.libsdl.org/SDL2/FrontPage)
     * Different computational backends require their respective SDKs and dependencies
+
+If you want practical steps on for specific environments, check the [developer environments documentation](dev-env.md).
 
 ## Configure
 

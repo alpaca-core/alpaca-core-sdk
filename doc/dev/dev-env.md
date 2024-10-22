@@ -16,18 +16,61 @@ We use Manjaro so some packages might have different names in pure AUR Arch Linu
 
 We use Windows 11, but the setup will likely work for Windows 10 as well.
 
+We support to development environments on Windows: Visual Studio and VS Code.
+
 Install the following software (we recommend using Chocolatey, Scoop, or WinGet, but manually is also fine):
 
 * [git](https://git-scm.com/downloads/win)
+* [CMake](https://cmake.org/download/) 3.24 or later
+* OpenSSL (Optional for HTTPS downloads). Windows binary builds available [here](https://slproweb.com/products/Win32OpenSSL.html) (Install the Win64 non-light version))
+    * set the `OPEN_SSL_ROOT_DIR` environment variable to the OpenSSL installation directory
+* SDL2 (Optional, for GUI demos and tools). If you also install the Vulkan SDK, follow the steps for it below. They also provide SDL2. Alternatively:
+    * Binary builds available [here](https://github.com/libsdl-org/SDL/releases) (note that first entries there will be for SDL3, scroll to find the latest SDL2 release).         
+    * Add the SDL2 installation directory to the `CMAKE_PREFIX_PATH` environment variable 
+    * It's a good idea to add it to the system path as well
+* For Android builds (optional):
+    * Android Studio with its SDK manager is recommended, but not required
+    * Install SDK with API Level at least 32 and NDK
+    * [Android gradle plugin](https://developer.android.com/build/releases/gradle-plugin)
+    * Set the `ANDROID_HOME` environment variable to the Android SDK installation directory
+    * Set the `ANDROID_NDK_ROOT` environment variable to the Android NDK installation directory
+* For the Java wrapper (optional):
+    * JDK. [Microsoft OpenJDK 17](https://learn.microsoft.com/en-us/java/openjdk/download#openjdk-17) works, but any other JDK 17 or later should be fine as well
+    * Set the `JAVA_HOME` environment variable to the JDK installation directory 
+* Optional compute backends which may or may not be applicable to your system:
+    * [CUDA 12](https://developer.nvidia.com/cuda-downloads)
+    * Vulkan SDK
+        * [LunarG Vulkan SDK](https://vulkan.lunarg.com/sdk/home)
+        * The installer will set most environment variables for you, but you need to add `%VULKAN_SDK%\cmake` to `CMAKE_PREFIX_PATH`
+        * The step above also provides SDL2
 
 ### Visual Studio Setup
 
-### Visual Studio Code Setup
+* Install Visual Studio 2022 with the following components:
+    * Desktop development with C++
+    * C++ CMake tools for Windows
+* Even if you want to target Android, you do *not* need the Android development components. 
+    * If you already have them, it's fine. You do not need to uninstall them.
+    * We don't support android builds through Visual Studio
+* Use "open folder" in Visual Studio to open the project directory, configure, and build.
+    * Alternatively configuring with a Visual Studio generator will likely work, but it's not supported
 
-Install:
+### VS Code Setup
 
-* [VS code](https://code.visualstudio.com/docs/setup/windows)
-* [CMake](https://cmake.org/download/)
+* Install [ninja](https://ninja-build.org/)
+    * Add the installation directory to your system path
+* Install a C++20 compiler
+    * If you also have Visual Studio 2022 installed, you can use the MSVC compiler that comes with it
+    * Portable versions of MSVC are also available in many places. For example, [here](https://github.com/Data-Oriented-House/PortableBuildTools)
+    * [MSYS2](https://www.msys2.org/) with MinGW-w64 11 or later is also supported
+    * [Clang](https://github.com/llvm/llvm-project/releases) 14 or later is also supported
+* If you have not installed Visual Studio 2022, you'll need to add the compiler binaries to your system path
+* Add the following extensions to VS Code:
+    * CMake
+    * CMake Tools
+    * CMake Language Support
+    * C/C++
+* Open the project directory in VS Code, configure, and build.
 
 ## macOS
 
