@@ -6,6 +6,10 @@
 
 namespace ac {
 
+/// @defgroup cpp-dict ac::Dict
+/// Dictionary type and utils.
+/// @{
+
 /// Dictionary type. A type alias for [nlohmann::json](https://github.com/nlohmann/json).
 using Dict = nlohmann::json;
 
@@ -30,5 +34,7 @@ bool Dict_optApplyValueAt(const Dict& dict, std::string_view key, T& value) {
     value = f->get<T>();
     return true;
 }
+
+/// @}
 
 } // namespace ac

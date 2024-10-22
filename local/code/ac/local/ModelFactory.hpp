@@ -10,7 +10,7 @@
 #include <astl/tsumap.hpp>
 
 /// @defgroup cpp-local C++ Local API
-/// C++ API for local infernence.
+/// C++ API for local inference.
 
 namespace ac::local {
 class ModelLoader;
