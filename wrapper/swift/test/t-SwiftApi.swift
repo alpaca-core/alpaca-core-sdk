@@ -2,7 +2,7 @@ import AlpacaCoreSwift
 import XCTest
 
 final class SwiftApiTests: XCTestCase {
-    func testModelCreation() throws {
+    func testDummyInference() throws {
         print("Hello from e-Dummy.swift")
 
         AlpacaCoreSwift.initSDK();
