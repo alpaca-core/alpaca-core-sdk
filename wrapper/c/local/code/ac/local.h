@@ -12,6 +12,12 @@
 extern "C" {
 #endif
 
+/// @defgroup c-local Local inference API
+/// C API for local inference.
+
+/// @addtogroup c-local
+/// @{
+
 /// Get the last local inference error message or `NULL` if no error.
 /// The function returns a thread-local string. Ownership of the string is not transferred.
 /// @note Every `local_` function invalidates the last error.
@@ -78,6 +84,8 @@ AC_C_LOCAL_EXPORT ac_local_model* ac_create_local_model(
     bool (*progress_cb)(ac_sv tag, float progress, void* user_data),
     void* cb_user_data
 );
+
+/// @}
 
 #if defined(__cplusplus)
 } // extern "C"

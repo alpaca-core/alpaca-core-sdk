@@ -25,7 +25,7 @@
 extern "C" {
 #endif
 
-/// @defgroup c-dict C Dictionary API
+/// @defgroup c-dict Dictionary API
 /// C API for dictionary operations in the Alpaca Core library.
 
 /// @addtogroup c-dict
@@ -102,15 +102,15 @@ AC_C_DICT_EXPORT ac_dict_ref ac_dict_at_index(ac_dict_ref d, int index);
 
 /// Dictionary value types.
 typedef enum ac_dict_value_type {
-    ac_dict_value_type_null,         /**< Null */
-    ac_dict_value_type_bool,         /**< Boolean */
-    ac_dict_value_type_number_int,   /**< 32-bit signed integer */
-    ac_dict_value_type_number_unsigned, /**< 32-bit unsigned integer */
-    ac_dict_value_type_number_double,/**< Double */
-    ac_dict_value_type_string,       /**< String*/
-    ac_dict_value_type_array,        /**< Array (posibly heterogeneous) values */
-    ac_dict_value_type_object,       /**< Object (key-value pairs) */
-    ac_dict_value_type_binary,       /**< Binary data */
+    ac_dict_value_type_null,            ///< Null
+    ac_dict_value_type_bool,            ///< Boolean
+    ac_dict_value_type_number_int,      ///< 32-bit signed integer
+    ac_dict_value_type_number_unsigned, ///< 32-bit unsigned integer
+    ac_dict_value_type_number_double,   ///< Double
+    ac_dict_value_type_string,          ///< String
+    ac_dict_value_type_array,           ///< Array (posibly heterogeneous) values
+    ac_dict_value_type_object,          ///< Object (key-value pairs)
+    ac_dict_value_type_binary,          ///< Binary data
 } ac_dict_value_type;
 
 /// Get the type of a dict ref.
@@ -149,8 +149,8 @@ AC_C_DICT_EXPORT const char* ac_dict_get_string_value(ac_dict_ref d);
 
 /// Binary buffer structure.
 typedef struct ac_dict_binary_buf {
-    uint8_t* data; /**< Pointer to binary data. */
-    uint32_t size; /**< Size of binary data in bytes. */
+    uint8_t* data; ///< Pointer to binary data.
+    uint32_t size; ///< Size of binary data in bytes.
 } ac_dict_binary_buf;
 
 /// Get a binary value.
