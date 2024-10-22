@@ -14,7 +14,7 @@ endif()
 
 find_package(JNI ${AC_JAVA_WRAPPER_REQUIRED})
 if(NOT JNI_FOUND)
-    message(STATUS "Could not find JNI. Skpping Java wrapper library")
+    message(STATUS "Skpping Java wrapper library")
     return()
 endif()
 
