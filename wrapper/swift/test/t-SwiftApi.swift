@@ -1,6 +1,10 @@
 import AlpacaCoreSwift
 import XCTest
 
+func progress(tag: String, progress: Float) {
+    print("[\(tag)]Progress: \(progress)")
+}
+
 final class SwiftApiTests: XCTestCase {
     func testDummyInference() throws {
         print("Hello from e-Dummy.swift")
@@ -12,10 +16,7 @@ final class SwiftApiTests: XCTestCase {
         desc.name = "synthetic dummy"
 
         let dict = Dictionary<String, Any>()
-        let model = try AlpacaCoreSwift.createModel(&desc, dict, {
-            (tag: String, progress: Float) in
-            print("[\(tag)]Progress: \(progress)")
-        });
+        let model = try AlpacaCoreSwift.createModel(&desc, dict, progress);
         XCTAssertNotNil(model)
 
         let instance = try model.createInstance("general", dict);
@@ -31,5 +32,29 @@ final class SwiftApiTests: XCTestCase {
         });
 
         XCTAssertEqual(result["result"] as! String, "a one b two", "Incorrect result!")
+    }
+
+    func testExpectedErrors() throws {
+        AlpacaCoreSwift.initSDK();
+
+        var desc = AlpacaCoreSwift.ModelDesc()
+        desc.inferenceType = "nope"
+        desc.name = "synthetic dummy"
+        let dict = Dictionary<String, Any>()
+
+        XCTAssertThrowsError(try createModel(&desc, dict, progress)) { error in
+            XCTAssertEqual(error as! ACError, ACError.invalidModelCreation("Unknown inference type: nope"))
+        }
+
+        desc.inferenceType = "dummy"
+        let model = try createModel(&desc, dict, progress)
+        XCTAssertThrowsError(try model.createInstance("nope", dict)) { error in
+            XCTAssertEqual(error as! ACError, ACError.invalidInstanceCreation("dummy: unknown instance type: nope"))
+        }
+
+        let instance = try model.createInstance("general", dict)
+        XCTAssertThrowsError(try instance.runOp("nope", dict, progress)) { error in
+            XCTAssertEqual(error as! ACError, ACError.invalidRunOp("dummy: unknown op: nope"))
+        }
     }
 }

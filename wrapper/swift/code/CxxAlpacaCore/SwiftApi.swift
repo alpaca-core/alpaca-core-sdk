@@ -3,7 +3,7 @@
 //
 import CAlpacaCore
 
-public enum ACError: Error {
+public enum ACError: Error, Equatable {
     case invalidModelCreation(String)
     case invalidInstanceCreation(String)
     case invalidRunOp(String)
@@ -41,7 +41,7 @@ func callObserver(observer: UnsafeMutableRawPointer, tag: UnsafePointer<Int8>, p
 
 public func createModel(_ desc: inout ModelDesc, _ params: Dictionary<String, Any>,
     _ progress: @escaping (String, Float) -> Void) throws -> Model {
-    let paramsAsDict = translateDictionaryToDict(params)
+    let paramsAsDict = try translateDictionaryToDict(params)
     let wrapper = CallbackWrapper(completion: progress)
 
     let result = AC.createModel(&desc, paramsAsDict.getRef(), wrapper.getProgressData())
@@ -59,7 +59,7 @@ public class Model {
     }
 
     public func createInstance(_ name: String, _ params: Dictionary<String, Any>) throws -> Instance {
-        let paramsAsDict = translateDictionaryToDict(params)
+        let paramsAsDict = try translateDictionaryToDict(params)
         let result = model.createInstance(std.string(name), paramsAsDict.getRef())
         if result.hasError() {
             throw ACError.invalidInstanceCreation(String(result.error()))
@@ -77,13 +77,13 @@ public class Instance {
 
     public func runOp(_ op: String, _ params: Dictionary<String, Any>,
             _ progress: @escaping (String, Float) -> Void) throws -> Dictionary<String, Any> {
-        let paramsAsDict = translateDictionaryToDict(params)
+        let paramsAsDict = try translateDictionaryToDict(params)
         let wrapper = CallbackWrapper(completion: progress)
 
         let result = instance.runOp(std.string(op), paramsAsDict.getRef(), wrapper.getProgressData())
         if result.hasError() {
             throw ACError.invalidRunOp(String(result.error()))
         }
-        return translateDictToDictionary(result.value().getRef())
+        return try translateDictToDictionary(result.value().getRef())
     }
 }

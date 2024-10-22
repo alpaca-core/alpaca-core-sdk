@@ -3,16 +3,16 @@
 //
 import CAlpacaCore
 
-public enum DictConvertError: Error {
+public enum DictConvertError: Error, Equatable {
     case invalidType(String)
 }
 
-public func translateDictionaryToDict(_ dictionary: Dictionary<String, Any>) -> AC.DictRoot {
+public func translateDictionaryToDict(_ dictionary: Dictionary<String, Any>) throws -> AC.DictRoot {
     // Create the root dictionary object
     // var dictRoot = AC.DictRoot.create()
     let dictRoot = AC.DictRoot()
 
-    func convertValue(sourceValue: Any, target: inout AC.DictRef) throws(DictConvertError) {
+    func convertValue(sourceValue: Any, target: inout AC.DictRef) throws {
         if let intValue = sourceValue as? Int {
             target.setInt(intValue)
         } else if let unsignedValue = sourceValue as? UInt {
@@ -28,42 +28,36 @@ public func translateDictionaryToDict(_ dictionary: Dictionary<String, Any>) -> 
                 target.setBinary(ptr.baseAddress!, dataValue.count)
             }
         } else if let dictValue = sourceValue as? Dictionary<String, Any> {
-            convertDictionary(dictValue, into: target)
+            try convertDictionary(dictValue, into: target)
         } else if let arrayValue = sourceValue as? [Any] {
             for element in arrayValue {
                 var arrayElement = target.addElement()
                 try convertValue(sourceValue: element, target: &arrayElement)
             }
         } else {
-            throw DictConvertError.invalidType("Invalid type for dictionary value")
+            throw DictConvertError.invalidType("Invalid type (\(type(of: sourceValue))) for dictionary value")
         }
     }
 
     // Recursive function to convert the dictionary
-    func convertDictionary(_ sourceDict: Dictionary<String, Any>, into targetDict: AC.DictRef) {
+    func convertDictionary(_ sourceDict: Dictionary<String, Any>, into targetDict: AC.DictRef) throws {
         for (key, value) in sourceDict {
             var child = targetDict.addChild(std.string(key))
-            do {
-                try convertValue(sourceValue: value, target: &child)
-            } catch {
-                print("Error while converting key \(key): \(error)")
-            }
+            try convertValue(sourceValue: value, target: &child)
         }
     }
 
     // Convert the top-level dictionary
-    convertDictionary(dictionary, into: dictRoot.getRef())
+    try convertDictionary(dictionary, into: dictRoot.getRef())
 
     return dictRoot
 }
 
-public func translateDictToDictionary(_ dict: AC.DictRef) -> Dictionary<String, Any> {
+public func translateDictToDictionary(_ dict: AC.DictRef) throws -> Dictionary<String, Any> {
     var dictionary: Dictionary<String, Any> = Dictionary<String, Any>()
 
-    func convertValue(sourceValue: AC.DictRef) throws(DictConvertError) -> Any {
-        let childType = sourceValue.getType()
-
-        switch childType {
+    func convertValue(sourceValue: AC.DictRef) throws -> Any {
+        switch sourceValue.getType() {
         case .Bool:
             return sourceValue.getBool()
         case .Int:
@@ -85,7 +79,7 @@ public func translateDictToDictionary(_ dict: AC.DictRef) -> Dictionary<String, 
             return array
         case .Object:
             var nestedDictionary: Dictionary<String, Any> = Dictionary<String, Any>()
-            convertDictRefToDictionary(sourceValue, into: &nestedDictionary)
+            try convertDictRefToDictionary(sourceValue, into: &nestedDictionary)
             return nestedDictionary
         default:
             throw DictConvertError.invalidType("Invalid type for dictionary value")
@@ -93,22 +87,17 @@ public func translateDictToDictionary(_ dict: AC.DictRef) -> Dictionary<String, 
     }
 
     // Recursive function to convert DictRef to Dictionary
-    func convertDictRefToDictionary(_ source: AC.DictRef, into target: inout Dictionary<String, Any>) {
+    func convertDictRefToDictionary(_ source: AC.DictRef, into target: inout Dictionary<String, Any>) throws {
         // Additionally, handle dictionary keys and their values
         for keyStr in source.getKeys() { // Assuming getDict() returns a dictionary-like object
             let child = source.atKey(keyStr)
             let key = String(keyStr)
-
-            do {
-                try target[key] = convertValue(sourceValue: child)
-            } catch {
-                print("Error while converting key \(key): \(error)")
-            }
+            try target[key] = convertValue(sourceValue: child)
         }
     }
 
     // Start converting the DictRef
-    convertDictRefToDictionary(dict, into: &dictionary)
+    try convertDictRefToDictionary(dict, into: &dictionary)
 
     return dictionary
 }

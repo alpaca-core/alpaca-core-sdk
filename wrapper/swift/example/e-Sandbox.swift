@@ -7,7 +7,7 @@ import CAlpacaCore
 
 @main
 struct CxxAlpacaCoreExample {
-    static func main() {
+    static func main() throws {
         let jsonString: String = """
             {
                 "name": "Alice",
@@ -64,10 +64,10 @@ struct CxxAlpacaCoreExample {
         let strFromData = String(data: dataFromDict, encoding: .utf8)!
         print("Strinf from Binary data: \(strFromData)")
 
-        let swiftDict = translateDictToDictionary(dictRef)
+        let swiftDict = try translateDictToDictionary(dictRef)
         print("Swift Dict: \(swiftDict)")
 
-        let swiftDictTranslated = translateDictionaryToDict(swiftDict)
+        let swiftDictTranslated = try translateDictionaryToDict(swiftDict)
         print("Translated: \(swiftDictTranslated.getRef().dump())")
 
         let dictionary: [String: Any] = [
@@ -88,7 +88,7 @@ struct CxxAlpacaCoreExample {
         let n = (dictionary["name"])!
         print("\(n) = \(type(of: n))")
 
-        let translated = translateDictionaryToDict(dictionary)
+        let translated = try translateDictionaryToDict(dictionary)
         print("Translated: \(translated.getRef().dump())")
 
         let dictionary22: [String: Any] = [
@@ -104,10 +104,10 @@ struct CxxAlpacaCoreExample {
             "binData": "Hello, World!".data(using: .utf8)!
         ]
 
-        let translated22 = AlpacaCoreSwift.translateDictionaryToDict(dictionary22)
-        let newDictionary = AlpacaCoreSwift.translateDictToDictionary(translated22.getRef())
+        let translated22 = try translateDictionaryToDict(dictionary22)
+        let newDictionary = try translateDictToDictionary(translated22.getRef())
 
-        let translated2 = AlpacaCoreSwift.translateDictionaryToDict(newDictionary)
+        let translated2 = try translateDictionaryToDict(newDictionary)
         print("Translated: \(translated2.getRef().dump())")
     }
 }

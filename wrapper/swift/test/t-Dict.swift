@@ -16,7 +16,7 @@ final class DictTests: XCTestCase {
             "binData": "Hello, World!".data(using: .utf8)!
         ]
 
-        let translated = AlpacaCoreSwift.translateDictionaryToDict(dictionary)
+        let translated = try AlpacaCoreSwift.translateDictionaryToDict(dictionary)
         let translatedRef = translated.getRef()
 
         XCTAssertEqual(String(translatedRef.atKey("name").getString()),
@@ -80,8 +80,8 @@ final class DictTests: XCTestCase {
             "binData": "Hello, World!".data(using: .utf8)!
         ]
 
-        let translated = AlpacaCoreSwift.translateDictionaryToDict(dictionary)
-        let newDictionary = AlpacaCoreSwift.translateDictToDictionary(translated.getRef())
+        let translated = try AlpacaCoreSwift.translateDictionaryToDict(dictionary)
+        let newDictionary = try AlpacaCoreSwift.translateDictToDictionary(translated.getRef())
 
         XCTAssertEqual(newDictionary["name"] as? String, dictionary["name"] as? String, "Couldn't convert String properly!")
         XCTAssertEqual(newDictionary["age"] as? Int, dictionary["age"] as? Int, "Couldn't convert Int properly!")
@@ -118,5 +118,26 @@ final class DictTests: XCTestCase {
 
         XCTAssertNotNil(binaryData, "Binary data is nil!")
         XCTAssertEqual(binaryData, originalBinData, "Couldn't convert binary data properly!")
+    }
+
+    func testExpectedErrors() throws {
+        class Point {
+            var x: Int
+            var y: Int
+
+            init(x: Int, y: Int) {
+                self.x = x
+                self.y = y
+            }
+        }
+        let dictionary: [String: Any] = [
+            "name": "Alice",
+            "age": 28,
+            "height": 1.6,
+            "point": Point(x: 1, y: 2)
+        ]
+        XCTAssertThrowsError(try AlpacaCoreSwift.translateDictionaryToDict(dictionary)) { error in
+            XCTAssertEqual(error as! DictConvertError, DictConvertError.invalidType("Invalid type (Point) for dictionary value"))
+        }
     }
 }
