@@ -110,6 +110,18 @@
     {
       "name": "release-android",
       "inherits": ["release", "android"]
+    },
+
+    {
+      "name": "tooling",
+      "description": "suitable for tooling: no tests, no examples, and no demos",
+      "inherits": ["base-debug"],
+      "cacheVariables": {
+        "AC_BUILD_ACORD": false,
+        "AC_BUILD_TESTS": false,
+        "AC_BUILD_EXAMPLES": false,
+        "AC_BUILD_POC": false
+      }
     }
   ]
 }
