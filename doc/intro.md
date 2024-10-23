@@ -4,7 +4,7 @@ The Alpaca Core Local SDK, or *AC Local* for short, is a multi-platform SDK for 
 
 "Local" in this context means running on the device which executes the code. This could be a server, a desktop, or a mobile device.
 
-AC Local provides a unified API for doing inference with multiple models.
+AC Local provides a unified API for doing inference with [multiple models](supported-models.md).
 
 ## API Elements
 
@@ -27,7 +27,7 @@ The `Instance` is an object associated with a `Model` which can do inference bas
 Now, this is all pretty abstract, so let's give an example. In pseudo-code:
 
 ```python
-model = LlamaModel("llama-2-7b")   # create a model
+model = LargeLanguageModel("llama-2-7b")   # create a model
 instance = model.create_instance() # create an instance
 result = instance.complete("A recipe for rice cakes:") # run op and get result
 print(result) # consume the result
@@ -35,7 +35,7 @@ print(result) # consume the result
 
 ## API Layers
 
-The example above is pretty neat, but our goal is to have a *unified* API for multiple models. There's nothing unified in calling `.complete("text)"` for an instance. Such an operation simply makes no sence for many types of models.
+The example above is pretty neat, but our goal is to have a *unified* API for multiple models. There's nothing unified in calling `.complete("text")` for an instance. Such an operation simply makes no sence for many types of models.
 
 To facilitate the goal the API is split into two layers:
 
@@ -45,15 +45,15 @@ This is what's different for each model type.
 
 Some close (but not quite complete) descriptions of it could be duck-typed, or "stringly"-typed, or JSON-typed.
 
-Every model type defines a schema for the inference API. The schema describes things like what types of instances can be created for the model and what ops each instance provides, then what input each op gets and what it retuns as a result. A more detauled description of schemas (or the schema schema) is available [here](model-schema.md).
+Every model type defines a schema for the inference API. The schema describes things like what types of instances can be created for the model, what ops each instance provides, then what input each op gets and what it returns as a result. A more detauled description of schemas (or the schema schema) is available [here](model-schema.md).
 
 The main carrier of data for this API is an object called `Dict`. This stands for dictionary. A more formal description if `Dict` is available [here](dict.md). In short it's basically a POJO (where J stands for JavaScript), so a JSON object, but with the notable addition of the data type `binary` - which is contiguous memory buffer. So... not a JSON, but a [CBOR](https://cbor.io/) object, at least in terms of data types.
 
-With all this we can transform our example from above to someting like (still pseudo-code):
+With all this we can transform our example from above to someting like *(still pseudo-code)*:
 
 ```python
 # create a model
-model = LlamaModel("llama-2-7b")
+model = LargeLanguageModel("llama-2-7b")
 
 # create a general instance with a small context size
 instance = model.create_instance("general", dict(context_size = 1024))
@@ -66,6 +66,58 @@ recipe = result["text"]
 print(recipe)
 ```
 
+...but now we can also do:
+
+```python
+# create a model
+model = ImageModel("stable-diffusion-3")
+
+# create an instance with a specific resolution
+instance = model.create_instance("general", dict(resolution = 512))
+
+# run the op "generate" with a prompt
+result = instance.run_op("generate", dict(prompt = "A 17th century oil on canvas portrait of Darth Vader"))
+
+# consume the result
+image_bytes = result["image"]
+img = Image.open(io.BytesIO(image_bytes))
+img.show()
+```
+
 To make this pseudo-code not-so-pseudo, we need the...
 
 ### Programming-language API
+
+This is the code one writes to call the Inference API from a given programming language. 
+
+Here's a quip:
+
+> The Inference API is different for each model type and the same for all programming languages. The Programming-language API is the same for all model types and different for each programming language.
+
+It's what gives you the concrete representations of `Model`, `Instance`, `op`-s, and `Dict`, and most importantly a way to create models.
+
+The base implementation is in C++, but wrappers for other languages are provided. Find the documentation [here](pl-api.md).
+
+And with it we can have actual working code like:
+
+```cpp
+ac::local::ModelFactory factory;
+ac::local::addLlamaInference(factory);
+
+auto model = factory.createModel(
+    {
+        .inferenceType = "llama.cpp",
+        .assets = {
+            {.path = "/my/path/to/llama3-q6k.gguf"}
+        }
+    }, {}, {}
+);
+
+auto instance = model->createInstance("general", {});
+
+auto result = instance->runOp("run",
+    {{"prompt", "A recipe for rice cakes:,"}}, {});
+
+
+std::cout << result << "\n";
+```
