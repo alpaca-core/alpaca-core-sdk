@@ -57,6 +57,11 @@ For finer grain control or if you're using the repo as a subdirectory:
     * `AC_JAVA_WRAPPER`: build Java wrapper. `AUTO` by default, which means only build if JNI is available
     * `AC_COCOA_WRAPPER`: build Cocoa wrapper. `AUTO` by default, which means only build if targeting an Apple platform
     * `AC_SWIFT_WRAPPER`: build Swift wrapper. `AUTO` by default, which means only build if Swift is available
+* Only available when ac-local is the root project and `OFF` by default:
+    * `SAN_ADDR`: enable address sanitizer.
+    * `SAN_UB`: enable undefined behavior sanitizer. Not supported on Windows.
+    * `SAN_LEAK`: enable leak sanitizer. Only supported on Linux.
+    * `SAN_THREAD`: enable thread sanitizer. Not supported on Windows.
 
 ### Troubleshooting
 
