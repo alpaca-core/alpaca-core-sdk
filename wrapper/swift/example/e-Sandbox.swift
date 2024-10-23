@@ -3,7 +3,7 @@
 //
 import Foundation
 import AlpacaCoreSwift
-import CAlpacaCore
+import CxxAlpacaCore
 
 @main
 struct CxxAlpacaCoreExample {

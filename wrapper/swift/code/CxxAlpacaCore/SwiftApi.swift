@@ -1,7 +1,7 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-import CAlpacaCore
+import CxxAlpacaCore
 
 public enum ACError: Error, Equatable {
     case invalidModelCreation(String)
