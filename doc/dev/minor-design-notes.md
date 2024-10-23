@@ -25,3 +25,14 @@ Streaming inference will definitely be a requirement (if it isn't already). Coro
 ## Seemingly excessive subdirs
 
 This is to restrict access to headers of targets which are not link-libraries of a given target. You won't be able to accidentally include `ac/local/Model.hpp` if you don't link against `ac::local`.
+
+## Synchronous API
+
+It can be argued that an async API would be better. For example it would allow to abastract away the actual inference runner (local, or multiple local, or remote). It would be easier to integrate in a GUI or a Web application.
+
+Initially we did go with an async API. Here's the thought process which led to the current design:
+
+* On edge devices the inference usually takes up almost all system resources. Running multiple inferences in parallel is not a good idea. Thus load balancing and multiple local workers are practically not an option. If you only have only one worker plugging the sync API into an async implementation is trivial. Moreover, it would allow the wrapping async interface to be tailored to the specific needs of the application. 
+* Wrapping the local inference API for multiple languages and platforms has always been the plan. Since different langauages have different async paradigms or standards, creating an async API that would suit them all would enforce tradeoffs in usability. Our initial implementation used callbacks, as callbacks are the only C++ construct that can be translated to anything. But turning callbacks into coroutines, for example, is pretty unpleasant. Turning them into futures would require a lot of boilerplate. So again the syncrhonous API makes more sense here as it would allow users to wrap it in a way that best suits their language or platform.
+* An inference server would almost certainly provide a different API than AC Local. AC Local's API is low level. It requires manual management of models, instances, and sessions. It makes no sense to use this low level interface for a remote inference server. So while abstracting away locality is certainly a goal for the future, it would be a separare project with a different, higher level API
+* Writing the server itself would make use of AC Local. The usage there would be asynchronous. It would potentially have multiple workers and load balancing. These features and their configuration simply make no sense for edge devices. So again, they will just be a separate project. A project which does not have to conform to potential wrappers in other languages, edge use cases, and the like.
