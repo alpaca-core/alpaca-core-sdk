@@ -8,12 +8,12 @@
 
 @interface DictConverter : NSObject
 
-// Helper method to convert NSDictionary to ac::Dict
+// Convert NSDictionary to ac::Dict
 + (ac::Dict)convertToACDict:(NSDictionary<NSString *, id> *)dictionary
     NS_SWIFT_UNAVAILABLE("This method is unavailable in Swift");
 
-// Helper method to convert ac::Dict to NSDictionary
-+ (NSDictionary<NSString *, id> *)convertToDictionary:(const ac::Dict&)json
+// Convert ac::Dict to NSDictionary
++ (NSDictionary<NSString *, id> *)convertToDictionary:(const ac::Dict&)dict
     NS_SWIFT_UNAVAILABLE("This method is unavailable in Swift");
 
 @end

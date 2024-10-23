@@ -47,6 +47,7 @@ std::cout << result << "\n";
 * [C wrapper](wrapper/c)
 * [Java wrapper](wrapper/java)
 * [Swift wrapper](wrapper/swift)
+* [Cocoa DictConverter](wrapper/cocoa) - Convert `NSDictionary` to `ac::Dict` and back in Objective-C++ 
 
 ## Demos
 
