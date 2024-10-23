@@ -9,7 +9,7 @@ endif()
 
 find_program(SWIFT_COMPILER swiftc ${AC_SWIFT_WRAPPER_REQUIRED})
 if(NOT SWIFT_COMPILER)
-    message(STATUS "Swift compiler not found! Skpping Swift wrapper library")
+    message(STATUS "Swift compiler not found. Skipping Swift wrapper library")
     return()
 endif()
 
