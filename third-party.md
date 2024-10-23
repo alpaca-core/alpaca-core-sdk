@@ -10,12 +10,19 @@ Here's the list in no particular order:
 
 ## In Alpaca Core Local itself
 
+### Inference
+
 | Library | Usage |
 | --- | --- |
-| [JSON for Modern C++](https://github.com/nlohmann/json) | `ac::Dict` |
 | [ggml](https://github.com/ggerganov/ggml) | inference runner |
 | [llama.cpp](https://github.com/ggerganov/llama.cpp) | llama inference |
 | [whisper.cpp](https://github.com/ggerganov/wisper.cpp) | whisper inference |
+
+### Other
+
+| Library | Usage |
+| --- | --- |
+| [JSON for Modern C++](https://github.com/nlohmann/json) | `ac::Dict` |
 | [splat](https://github.com/iboB/splat) | C and C++ macros |
 | [itlib](https://github.com/iboB/itlib) | C++ STL extensions library |
 | [jalog](https://github.com/iboB/jalog) | logging |
