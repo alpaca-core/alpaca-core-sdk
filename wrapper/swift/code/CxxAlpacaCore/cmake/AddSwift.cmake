@@ -21,7 +21,19 @@ function(_swift_generate_cxx_header target header)
     cmake_parse_arguments(ARG "" "" "SWIFT_EXPOSABLE_FILES" ${ARGN})
 
     if(APPLE)
+      if(CMAKE_GENERATOR STREQUAL Xcode)
+        # Force MacOSX SDK since it's more difficult to get the correct target for iPhone SDK.
+        # Otherwise when we use iPhone SDK without setting a target, there is an error:
+        # error: unable to load standard library for target 'arm64-apple-macosx15.0'
+        execute_process(
+            COMMAND xcrun --sdk macosx --show-sdk-path
+            OUTPUT_VARIABLE MACOSX_SDK_PATH
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+        set(SDK_FLAGS "-sdk" "${MACOSX_SDK_PATH}")
+      else()
         set(SDK_FLAGS "-sdk" "${CMAKE_OSX_SYSROOT}")
+      endif()
     elseif(WIN32)
         set(SDK_FLAGS "-sdk" "$ENV{SDKROOT}")
     elseif(DEFINED ${CMAKE_SYSROOT})
