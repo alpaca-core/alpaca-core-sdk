@@ -48,15 +48,15 @@ For finer grain control or if you're using the repo as a subdirectory:
     * `whisper`: wrapping our fork of [ggerganov/whisper.cpp](https://github.com/ggerganov/whisper.cpp)
 * `AC_BUILD_ACORD`: build the Alpaca Core daemon. This is `OFF` by default if the project is a subdir. Only available if `AC_BUILD_LOCAL` is `ON`.
 * Advanced and `OFF` by default if the project is a subdir:
-    * `AC_BUILD_TOOLS` - build tools. This means all tools for all active components. No finer-grain options are available yet
-    * `AC_BUILD_TESTS` - build tests. This means all tests for all active components. No finer-grain options are available yet
-    * `AC_BUILD_EXAMPLES` - build examples. This means all examples for all active components. No finer-grain options are available yet
+    * `AC_BUILD_TOOLS` - build all tools for all active components. No finer-grain options are available yet
+    * `AC_BUILD_TESTS` - build all tests for all active components. No finer-grain options are available yet. Git LFS is required for some tests
+    * `AC_BUILD_EXAMPLES` - build all examples for all active components. No finer-grain options are available yet. Git LFS is required for some examples
     * `AC_BUILD_POC` - build proof of concept, sandbox, and experimental projects
 * Wrapper config:
     * `AC_C_WRAPPER`: build C wrapper. `ON` by default
-    * `AC_JAVA_WRAPPER`: build Java wrapper. `Auto` by default, which means only build if JNI is available
-    * `AC_COCOA_WRAPPER`: build Cocoa wrapper. `Auto` by default, which means only build if it's Apple platform
-    * `AC_SWIFT_WRAPPER`: build Swift wrapper. `Auto` by default, which means only build if Swift is available
+    * `AC_JAVA_WRAPPER`: build Java wrapper. `AUTO` by default, which means only build if JNI is available
+    * `AC_COCOA_WRAPPER`: build Cocoa wrapper. `AUTO` by default, which means only build if targeting an Apple platform
+    * `AC_SWIFT_WRAPPER`: build Swift wrapper. `AUTO` by default, which means only build if Swift is available
 
 ### Troubleshooting
 
