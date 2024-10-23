@@ -94,7 +94,7 @@ Here's a quip:
 
 > The Inference API is different for each model type and the same for all programming languages. The Programming-language API is the same for all model types and different for each programming language.
 
-It's what gives you the concrete representations of `Model`, `Instance`, `op`-s, and `Dict`, and most importantly a way to create models.
+It's what gives you the concrete representations of `Model`, `Instance`, `op`-s, and `Dict`, and most importantly a way to create models. 
 
 The base implementation is in C++, but wrappers for other languages are provided. Find the documentation [here](pl-api.md).
 
@@ -116,8 +116,15 @@ auto model = factory.createModel(
 auto instance = model->createInstance("general", {});
 
 auto result = instance->runOp("run",
-    {{"prompt", "A recipe for rice cakes:,"}}, {});
-
+    {{"prompt", "A recipe for rice cakes:"}}, {});
 
 std::cout << result << "\n";
 ```
+
+As you can see, the Programming-language API is synchronous. All calls block until they complete. In some cases optional callbacks may be provided, but they're always executed in the caller's call stack. 
+
+It's also low-level. It's meant to be wrapped in higher-level application-specific abstractions, which normally would not expose the Inference API directly (or at least not completely).
+
+## More
+
+This introduction is more or less language agnostic. You can check out the C++-centric documentation on structure and internals [here](doc/internals.md).
