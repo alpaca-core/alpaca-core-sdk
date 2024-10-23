@@ -30,12 +30,12 @@ auto model = factory.createModel(
         .assets = {
             {.path = "/path/to/model.gguf"}
         }
-    }, {}, {}    
+    }, {}, {}
 );
 
 auto instance = model->createInstance("general", {});
 
-auto result = instance->runOp("run", 
+auto result = instance->runOp("run",
     {{"prompt", "If you could travel faster than light,"}}, {});
 
 
@@ -46,7 +46,7 @@ std::cout << result << "\n";
 
 * [C wrapper](wrapper/c)
 * [Java wrapper](wrapper/java)
-* Swift wrapper
+* [Swift wrapper](wrapper/swift)
 
 ## Demos
 
