@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 //
 module ACTestData {
-    header "./ac-test-data-dirs-swift.h"
+    header "./ac-test-data-dirs-swift.hpp"
 
     export *
 }
 
 module ACAudio {
-    header "./ac-audio-swift.h"
+    header "./ac-audio-swift.hpp"
 
     export *
 }
