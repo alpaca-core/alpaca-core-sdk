@@ -9,37 +9,40 @@ public enum ACError: Error, Equatable {
     case invalidRunOp(String)
 }
 
-
 public func initSDK() {
     AC.initSDK()
 }
 
-class CallbackWrapper {
-    let completion: (String, Float) -> Void
-    init(completion: @escaping (String, Float) -> Void) {
-        self.completion = completion
+class ProgressCallbackWrapper {
+    let cb: (String, Float) -> Void
+
+    init(_ cb: @escaping (String, Float) -> Void) {
+        self.cb = cb
     }
 
     public func getRawPointer() -> UnsafeMutableRawPointer {
         return UnsafeMutableRawPointer(Unmanaged.passRetained(self).toOpaque())
     }
 
-    public func getProgressData() -> AC.ProgressCallbackData {
-        return AC.ProgressCallbackData(m_cb: callObserver, m_context: getRawPointer())
+    public func releaseRawPointer(_ pointer: UnsafeMutableRawPointer) {
+        let unmanaged = Unmanaged<ProgressCallbackWrapper>.fromOpaque(pointer)
+        unmanaged.release()
     }
 }
 
 func callObserver(observer: UnsafeMutableRawPointer, tag: std.string, progress: Float) {
-    let wrapper = Unmanaged<CallbackWrapper>.fromOpaque(observer).takeUnretainedValue()
-    wrapper.completion(String(tag), progress)
+    let wrapper = Unmanaged<ProgressCallbackWrapper>.fromOpaque(observer).takeUnretainedValue()
+    wrapper.cb(String(tag), progress)
 }
 
 public func createModel(_ desc: inout ModelDesc, _ params: Dictionary<String, Any>,
     _ progress: @escaping (String, Float) -> Void) throws -> Model {
     let paramsAsDict = try translateDictionaryToDict(params)
-    let wrapper = CallbackWrapper(completion: progress)
+    let wrapper = ProgressCallbackWrapper(progress)
+    let cbData = AC.ProgressCallbackData(m_cb: callObserver, m_context: wrapper.getRawPointer())
 
-    var result = AC.createModel(&desc, paramsAsDict.getRef(), wrapper.getProgressData())
+    var result = AC.createModel(&desc, paramsAsDict.getRef(), cbData)
+    wrapper.releaseRawPointer(cbData.m_context)
     if result.hasError() {
         throw ACError.invalidModelCreation(String(result.error()))
     }
@@ -73,9 +76,12 @@ public class Instance {
     public func runOp(_ op: String, _ params: Dictionary<String, Any>,
             _ progress: @escaping (String, Float) -> Void) throws -> Dictionary<String, Any> {
         let paramsAsDict = try translateDictionaryToDict(params)
-        let wrapper = CallbackWrapper(completion: progress)
+        let wrapper = ProgressCallbackWrapper(progress)
+        let cbData = AC.ProgressCallbackData(m_cb: callObserver, m_context: wrapper.getRawPointer())
 
-        var result = instance.runOp(std.string(op), paramsAsDict.getRef(), wrapper.getProgressData())
+        var result = instance.runOp(std.string(op), paramsAsDict.getRef(), cbData)
+        wrapper.releaseRawPointer(cbData.m_context)
+
         if result.hasError() {
             throw ACError.invalidRunOp(String(result.error()))
         }
