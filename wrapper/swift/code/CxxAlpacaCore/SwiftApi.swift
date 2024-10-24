@@ -14,11 +14,6 @@ public func initSDK() {
     AC.initSDK()
 }
 
-public func loadWavF32Mono(_ filePath: String) -> [Float] {
-    let pcmf32 = AC.loadWavF32Mono(std.string(filePath))
-    return Array<Float>(pcmf32)
-}
-
 class CallbackWrapper {
     let completion: (String, Float) -> Void
     init(completion: @escaping (String, Float) -> Void) {

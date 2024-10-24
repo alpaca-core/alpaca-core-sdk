@@ -6,3 +6,9 @@ module ACTestData {
 
     export *
 }
+
+module ACAudio {
+    header "./ac-audio-swift.h"
+
+    export *
+}

@@ -8,6 +8,7 @@ function(ac_add_swift_executable target)
     target_link_libraries(${target}
       PRIVATE
         AlpacaCoreSwift
+        ac-dev::audio
     )
     target_compile_options(${target}
       PUBLIC
