@@ -58,8 +58,4 @@ Expected<Model, std::string> createModel(AlpacaCoreSwift::ModelDesc& desc, DictR
     }
 }
 
-std::vector<float> loadWavF32Mono(const std::string& path) {
-    return ac::audio::loadWavF32Mono(path);
-}
-
 }

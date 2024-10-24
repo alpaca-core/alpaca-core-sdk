@@ -22,6 +22,4 @@ class Model;
 class DictRef;
 Expected<Model, std::string> createModel(AlpacaCoreSwift::ModelDesc& desc, DictRef params, ProgressCallbackData progressCbData);
 
-std::vector<float> loadWavF32Mono(const std::string& path);
-
 }

@@ -4,6 +4,7 @@
 import Foundation
 import AlpacaCoreSwift
 import ACTestData
+import ACAudio
 
 func progress(_ tag: String, _ progress: Float) {
     print("[\(tag)]Progress: \(progress)")
@@ -41,7 +42,7 @@ struct WhisperExample {
         let audioFile = "/as-she-sat.wav"
 
         let filePath = whisperDir + audioFile
-        let wavAudio = loadWavF32Mono(filePath)
+        let wavAudio = Array<Float>(ACAudio.AC.loadWavF32Mono(std.string(filePath)))
         let audioData = wavAudio.withUnsafeBufferPointer { bufferPointer in
             Data(buffer: bufferPointer)
         }

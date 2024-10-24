@@ -1,3 +1,6 @@
+// Copyright (c) Alpaca Core
+// SPDX-License-Identifier: MIT
+//
 #pragma once
 
 #include "../../../gen/ac-test-data-whisper-dir.h"
