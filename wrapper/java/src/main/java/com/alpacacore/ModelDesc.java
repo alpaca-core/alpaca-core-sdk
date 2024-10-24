@@ -22,6 +22,10 @@ public class ModelDesc {
 
     /// Information for an individual asset.
     public static final class AssetInfo {
+        public AssetInfo(String path, String tag) {
+            this.path = path;
+            this.tag = tag;
+        }
         public String path; ///< Path to the asset.
         public String tag; ///< Asset tag.
     }
