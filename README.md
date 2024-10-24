@@ -53,6 +53,12 @@ std::cout << result << "\n";
 
 ## Demos
 
+There are multiple examples in this repo. Look for the `example` directories throughout the tree. Besides them, there are also are several larger demos in separate repositories:
+
+* LlaMa Chat (LLM-based chatbot)
+    * Android: [alpaca-core/demo-android-llama-chat](https://github.com/alpaca-core/demo-android-llama-chat)
+    * IOS: [alpaca-core/demo-ios-llama-chat](https://github.com/alpaca-core/demo-ios-llama-chat)
+
 ## Documentation
 
 ## Build
