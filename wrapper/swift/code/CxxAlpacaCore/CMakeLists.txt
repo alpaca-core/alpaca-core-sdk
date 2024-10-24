@@ -42,6 +42,8 @@ target_link_libraries(AlpacaCoreSwift
         ac-local-dummy
         ac-local-whisper
         ac-local-llama
+        jalog::jalog
+        jalog::sinklib
 )
 
 # Generate a C++ header from selected Swift sources. This is automatically added to the
