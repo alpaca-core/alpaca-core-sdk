@@ -113,7 +113,7 @@ public:
     using SchemaItem::SchemaItem;
 };
 
-void SchemaItem::materializeSelf() {
+inline void SchemaItem::materializeSelf() {
     if (m_self) return; // already materialized
     if (!m_parent) {
         throw std::runtime_error("Cannot materialize self without parent");
@@ -123,7 +123,7 @@ void SchemaItem::materializeSelf() {
     m_self = &p[m_key];
 }
 
-void SchemaItem::tryAttachSelf() {
+inline void SchemaItem::tryAttachSelf() {
     // add to parent list
     m_parent->m_children.push_back(this);
 
