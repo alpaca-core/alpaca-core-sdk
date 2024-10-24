@@ -120,7 +120,11 @@
         "AC_BUILD_ACORD": false,
         "AC_BUILD_TESTS": false,
         "AC_BUILD_EXAMPLES": false,
-        "AC_BUILD_POC": false
+        "AC_BUILD_POC": false,
+        "AC_SWIFT_WRAPPER": "OFF",
+        "AC_JAVA_WRAPPER": "OFF",
+        "AC_C_WRAPPER": "OFF",
+        "AC_COCOA_WRAPPER": "OFF"
       }
     }
   ]
