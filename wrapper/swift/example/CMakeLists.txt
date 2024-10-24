@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 #
 
-macro(ac_add_swift_executable target)
+function(ac_add_swift_executable target)
     add_executable(${target} ${ARGN})
     set_target_properties(${target} PROPERTIES COMPILE_OPTIONS "")
     target_link_libraries(${target}
@@ -19,8 +19,12 @@ macro(ac_add_swift_executable target)
         ${CMAKE_SOURCE_DIR}/wrapper/swift/example
     )
     target_compile_options(${target} PRIVATE -parse-as-library)
-endmacro()
+endfunction()
 
-ac_add_swift_executable(SandboxExample e-Sandbox.swift)
-ac_add_swift_executable(WhisperExample e-Whisper.swift)
-ac_add_swift_executable(DummyExample e-Dummy.swift)
+function(ac_swift_example name)
+    ac_add_swift_executable(example-ac-swift-${name} ${ARGN})
+endfunction()
+
+ac_swift_example(Sandbox e-Sandbox.swift)
+ac_swift_example(Whisper e-Whisper.swift)
+ac_swift_example(Dummy e-Dummy.swift)
