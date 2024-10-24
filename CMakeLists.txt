@@ -35,6 +35,8 @@ include(ac_auto_option)
 # cfg
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     set(alpacaCoreIsRoot YES)
+else()
+    set(alpacaCoreIsRoot NO)
 endif()
 
 if(alpacaCoreIsRoot)
