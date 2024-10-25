@@ -33,6 +33,13 @@ if(alpacaCoreIsRoot)
     include(UseJava)
 
     add_subdirectory(src)
+
+    if(AC_BUILD_TESTS OR AC_BUILD_EXAMPLES)
+        if(Java_VERSION_MAJOR LESS 17)
+            message(SEND_ERROR "${CMAKE_PROJECT_NAME}: Java 17+ is required to build Java tests and examples")
+        endif()
+    endif()
+
     ac_add_test_subdir()
     ac_add_example_subdir()
 endif()
