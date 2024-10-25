@@ -34,6 +34,11 @@ jobs:
         # vcvars will add them to PATH and allow msvc asan executables to run
         if: matrix.cfg.os == 'windows-latest'
         uses: ilammy/msvc-dev-cmd@v1
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
       - name: Configure
         run: cmake --preset ${{ matrix.cfg.preset }} -DAC_BUILD_POC=0 -B build
       - name: Build
