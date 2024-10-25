@@ -1,7 +1,7 @@
 # Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
-option(AC_C_WRAPPER "${CMAKE_PROJECT_NAME}: biuld c wrapper library" ON)
+icm_auto_option(AC_C_WRAPPER "${CMAKE_PROJECT_NAME}: biuld c wrapper library" ${AC_WRAPPER_DEFAULT_VALUE})
 
 if(NOT AC_C_WRAPPER)
     return()

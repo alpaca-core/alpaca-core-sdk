@@ -1,7 +1,7 @@
 # Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
-icm_auto_option(AC_JAVA_WRAPPER "${CMAKE_PROJECT_NAME}: build java wrapper library" AUTO)
+icm_auto_option(AC_JAVA_WRAPPER "${CMAKE_PROJECT_NAME}: build java wrapper library" ${AC_WRAPPER_DEFAULT_VALUE})
 
 if(NOT AC_JAVA_WRAPPER)
     return()

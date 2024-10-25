@@ -121,10 +121,7 @@
         "AC_BUILD_TESTS": false,
         "AC_BUILD_EXAMPLES": false,
         "AC_BUILD_POC": false,
-        "AC_SWIFT_WRAPPER": false,
-        "AC_JAVA_WRAPPER": false,
-        "AC_C_WRAPPER": false,
-        "AC_COCOA_WRAPPER": false
+        "AC_WRAPPER_DEFAULT_VALUE": "OFF"
       }
     }
   ]

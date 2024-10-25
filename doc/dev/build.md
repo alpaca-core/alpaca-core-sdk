@@ -52,11 +52,13 @@ For finer grain control or if you're using the repo as a subdirectory:
     * `AC_BUILD_TESTS` - build all tests for all active components. No finer-grain options are available yet. Git LFS is required for some tests
     * `AC_BUILD_EXAMPLES` - build all examples for all active components. No finer-grain options are available yet. Git LFS is required for some examples
     * `AC_BUILD_POC` - build proof of concept, sandbox, and experimental projects
-* Wrapper config:
-    * `AC_C_WRAPPER`: build C wrapper. `ON` by default
-    * `AC_JAVA_WRAPPER`: build Java wrapper. `AUTO` by default, which means only build if JNI is available
-    * `AC_COCOA_WRAPPER`: build Cocoa wrapper. `AUTO` by default, which means only build if targeting an Apple platform
-    * `AC_SWIFT_WRAPPER`: build Swift wrapper. `AUTO` by default, which means only build if Swift is available
+* Wrapper config. 
+    * Wrapper options are have three possible values: `ON`, `OFF`, and `AUTO`. `AUTO` will try to detect if the wrapper can be built.
+    * `AC_WRAPPER_DEFAULT_VALUE`: this is not a CMake option, but you can define it for the initial configuration. It determines what the dafault value for wrapper options will be. If it's not defined, it defaults to `OFF` when the project is a subdir, and `AUTO` if it's root.
+    * `AC_C_WRAPPER`: build C wrapper. `AUTO` equals `ON`. C should always be available if you have C++.
+    * `AC_JAVA_WRAPPER`: build Java wrapper. `AUTO` checks if JNI is available
+    * `AC_COCOA_WRAPPER`: build Cocoa wrapper. `AUTO` checks for `APPLE`
+    * `AC_SWIFT_WRAPPER`: build Swift wrapper. `AUTO` checks if `swiftc` is available
 * Only available when ac-local is the root project and `OFF` by default:
     * `SAN_ADDR`: enable address sanitizer.
     * `SAN_UB`: enable undefined behavior sanitizer. Not supported on Windows.
