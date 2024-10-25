@@ -28,24 +28,36 @@
       "hidden": true,
       "cacheVariables": { "BUILD_SHARED_LIBS": "OFF" }
     },
+
+    {
+      "name": "sanitized",
+      "hidden": true,
+      "cacheVariables": {
+        "AC_JAVA_WRAPPER": false
+      }
+    },
     {
       "name": "asan",
       "hidden": true,
+      "inherits": "sanitized",
       "cacheVariables": { "SAN_ADDR": true }
     },
     {
       "name": "ubsan",
       "hidden": true,
+      "inherits": "sanitized",
       "cacheVariables": { "SAN_UB": true }
     },
     {
       "name": "lsan",
       "hidden": true,
+      "inherits": "sanitized",
       "cacheVariables": { "SAN_LEAK": true }
     },
     {
       "name": "tsan",
       "hidden": true,
+      "inherits": "sanitized",
       "cacheVariables": { "SAN_THREAD": true }
     },
 

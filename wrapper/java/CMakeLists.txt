@@ -18,13 +18,17 @@ if(NOT JNI_FOUND)
     return()
 endif()
 
+if(sanitizerFlags)
+    # TODO: #134
+    message(WARNING "${CMAKE_PROJECT_NAME} is configured with '${sanitizerFlags}'. Java will likely fail to load the JNI library")
+endif()
+
 add_subdirectory(jni.hpp)
 add_subdirectory(ac-jni)
 
 # only buld java with CMake if we are the root project
 # otherwise we're a subproject (likely of a gradle build and the java build is handled there)
-# only build them where there are no saniziers as Java doesn't play well with them (TODO: #134)
-if(alpacaCoreIsRoot AND NOT sanitizerFlags)
+if(alpacaCoreIsRoot)
     find_package(Java REQUIRED)
     include(UseJava)
 
