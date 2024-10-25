@@ -89,7 +89,7 @@ public:
 
         m_addUserPrefix = true;
         std::string response;
-        while (true) {
+        for (int i=0; i<1000; ++i) {
             auto t = m_session.getToken();
             if (t == ac::llama::Token_Invalid) {
                 // no more tokens
