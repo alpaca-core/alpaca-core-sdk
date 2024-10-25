@@ -33,7 +33,8 @@
       "name": "sanitized",
       "hidden": true,
       "cacheVariables": {
-        "AC_JAVA_WRAPPER": false
+        "AC_JAVA_WRAPPER": false,
+        "AC_SWIFT_WRAPPER": false
       }
     },
     {

@@ -7,6 +7,12 @@ if(NOT AC_SWIFT_WRAPPER)
     return()
 endif()
 
+if(sanitizerFlags)
+    # TODO: #159
+    message(SEND_ERROR "${CMAKE_PROJECT_NAME} is configured with '${sanitizerFlags}'. swiftc cannot does not understand them")
+endif()
+
+
 find_program(SWIFT_COMPILER swiftc ${AC_SWIFT_WRAPPER_REQUIRED})
 if(NOT SWIFT_COMPILER)
     message(STATUS "Swift compiler not found. Skipping Swift wrapper library")
