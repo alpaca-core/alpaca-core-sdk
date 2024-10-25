@@ -1,7 +1,7 @@
 # Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
-ac_auto_option(AC_SWIFT_WRAPPER "${CMAKE_PROJECT_NAME}: build Swift wrapper library" AUTO)
+icm_auto_option(AC_SWIFT_WRAPPER "${CMAKE_PROJECT_NAME}: build Swift wrapper library" AUTO)
 
 if(NOT AC_SWIFT_WRAPPER)
     return()

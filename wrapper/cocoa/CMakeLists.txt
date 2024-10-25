@@ -1,7 +1,7 @@
 # Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
-ac_auto_option(AC_COCOA_WRAPPER "${CMAKE_PROJECT_NAME}: build Cocoa wrapper library" AUTO)
+icm_auto_option(AC_COCOA_WRAPPER "${CMAKE_PROJECT_NAME}: build Cocoa wrapper library" AUTO)
 
 if(NOT AC_COCOA_WRAPPER)
     return()
