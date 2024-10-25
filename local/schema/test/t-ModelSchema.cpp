@@ -232,7 +232,7 @@ public:
 };
 
 TEST_CASE("workflow") {
-    Model m({{"gpu", true}});
+    Model m(Dict{{"gpu", true}});
     CHECK(m.modelParams.name == "Test");
     CHECK(m.modelParams.gpu == true);
 
