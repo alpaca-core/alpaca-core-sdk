@@ -23,4 +23,5 @@ set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 #################
+set(AC_JAVA_WRAPPER ON)
 add_subdirectory(../../../.. alpaca-core)
