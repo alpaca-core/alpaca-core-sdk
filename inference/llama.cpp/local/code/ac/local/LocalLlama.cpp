@@ -135,9 +135,9 @@ class LlamaInstance final : public Instance {
 public:
     using Schema = ac::local::schema::Llama::InstanceGeneral;
 
-    LlamaInstance(std::shared_ptr<llama::Model> model)
+    LlamaInstance(std::shared_ptr<llama::Model> model, llama::Instance::InitParams params)
         : m_model(astl::move(model))
-        , m_instance(*m_model, {})
+        , m_instance(*m_model, astl::move(params))
     {}
 
     Dict run(Dict& params) {
@@ -203,6 +203,14 @@ public:
 
 class LlamaModel final : public Model {
     std::shared_ptr<llama::Model> m_model;
+
+    llama::Instance::InitParams translateInstanceParams(const Dict& params) {
+        llama::Instance::InitParams initParams;
+        initParams.ctxSize = Dict_optValueAt(params, "ctx_size", 0);
+        initParams.batchSize = Dict_optValueAt(params, "batch_size", 0);
+        initParams.ubatchSize = Dict_optValueAt(params, "ubatch_size", 0);
+        return initParams;
+    }
 public:
     using Schema = ac::local::schema::Llama;
 
@@ -210,10 +218,10 @@ public:
         : m_model(std::make_shared<llama::Model>(gguf.c_str(), astl::move(pcb), astl::move(params)))
     {}
 
-    virtual std::unique_ptr<Instance> createInstance(std::string_view type, Dict) override {
+    virtual std::unique_ptr<Instance> createInstance(std::string_view type, Dict params) override {
         switch (Schema::getInstanceById(type)) {
         case Schema::instanceIndex<Schema::InstanceGeneral>:
-            return std::make_unique<LlamaInstance>(m_model);
+            return std::make_unique<LlamaInstance>(m_model, translateInstanceParams(params));
         default:
             throw_ex{} << "llama: unknown instance type: " << type;
             MSVC_WO_10766806();
