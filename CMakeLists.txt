@@ -3,7 +3,7 @@
 #
 cmake_minimum_required(VERSION 3.22 FATAL_ERROR)
 
-project(alpaca-core
+project(ac-local
     LANGUAGES C CXX
 )
 
