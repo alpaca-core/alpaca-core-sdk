@@ -23,10 +23,28 @@
       "inherits": "base",
       "cacheVariables": { "CMAKE_BUILD_TYPE": "RelWithDebInfo" }
     },
+
+    {
+      "name": "debug",
+      "inherits": "base-debug"
+    },
+    {
+      "name": "release",
+      "inherits": "base-release"
+    },
+
     {
       "name": "static",
       "hidden": true,
       "cacheVariables": { "BUILD_SHARED_LIBS": "OFF" }
+    },
+    {
+      "name": "debug-static",
+      "inherits": ["base-debug", "static"]
+    },
+    {
+      "name": "release-static",
+      "inherits": ["base-release", "static"]
     },
 
     {
@@ -61,25 +79,6 @@
       "inherits": "sanitized",
       "cacheVariables": { "SAN_THREAD": true }
     },
-
-    {
-      "name": "debug",
-      "inherits": "base-debug"
-    },
-    {
-      "name": "release",
-      "inherits": "base-release"
-    },
-
-    {
-      "name": "debug-static",
-      "inherits": ["base-debug", "static"]
-    },
-    {
-      "name": "release-static",
-      "inherits": ["base-release", "static"]
-    },
-
     {
       "name": "debug-asan",
       "inherits": ["base-debug", "asan"]
@@ -100,6 +99,33 @@
       "name": "debug-aublsan",
       "description": "combining addr, ub and leak sanitizers is widely supported on many platforms",
       "inherits": ["base-debug", "asan", "ubsan", "lsan"]
+    },
+
+    {
+      "name": "gcc",
+      "hidden": true,
+      "cacheVariables": { "CMAKE_C_COMPILER": "gcc", "CMAKE_CXX_COMPILER": "g++" }
+    },
+    {
+      "name": "debug-gcc",
+      "inherits": ["base-debug", "gcc"]
+    },
+    {
+      "name": "release-gcc",
+      "inherits": ["base-release", "gcc"]
+    },
+    {
+      "name": "clang",
+      "hidden": true,
+      "cacheVariables": { "CMAKE_C_COMPILER": "clang", "CMAKE_CXX_COMPILER": "clang++" }
+    },
+    {
+      "name": "debug-clang",
+      "inherits": ["base-debug", "clang"]
+    },
+    {
+      "name": "release-clang",
+      "inherits": ["base-release", "clang"]
     },
 
     {
