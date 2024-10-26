@@ -17,7 +17,7 @@ include(./get_cpm.cmake)
 
 #################
 # cmake lib
-CPMAddPackage(gh:iboB/icm@1.5.3)
+CPMAddPackage(gh:iboB/icm@1.5.4)
 list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake"
     "${icm_SOURCE_DIR}"

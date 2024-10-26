@@ -9,13 +9,21 @@ endif()
 
 if(sanitizerFlags)
     # TODO: #159
-    message(SEND_ERROR "${CMAKE_PROJECT_NAME} is configured with '${sanitizerFlags}'. swiftc cannot does not understand them")
+    message(${AC_SWIFT_WRAPPER_MSG_STATUS} "${CMAKE_PROJECT_NAME}: Can't configure Swift wrapper. \
+        The project is configured with '${sanitizerFlags}'. swiftc cannot does not understand them. ")
+    return()
 endif()
 
+if(NOT ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
+    # https://www.swift.org/documentation/cxx-interop/status/#compiler-support
+    message(${AC_SWIFT_WRAPPER_MSG_STATUS} "${CMAKE_PROJECT_NAME}: Can't configure Swift wrapper. "
+        "C++ compiler is not clang and Swift/C++ interop only works with clang.")
+    return()
+endif()
 
 find_program(SWIFT_COMPILER swiftc ${AC_SWIFT_WRAPPER_REQUIRED})
 if(NOT SWIFT_COMPILER)
-    message(STATUS "Swift compiler not found. Skipping Swift wrapper library")
+    message(STATUS "${CMAKE_PROJECT_NAME}: Can't configure Swift wrapper. Swift compiler not found.")
     return()
 endif()
 
