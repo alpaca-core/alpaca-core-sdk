@@ -2,6 +2,9 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT) [![Standard](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](https://en.cppreference.com/w/cpp/20) [![Build](https://github.com/alpaca-core/alpaca-core/actions/workflows/build.yml/badge.svg)](https://github.com/alpaca-core/alpaca-core/actions/workflows/build.yml)
 
+> [!NOTE]
+> This project is still in in an alpha stage of development. Significant changes are very likely and backwards compatibility is disregarded.
+
 The Alpaca Core Local SDK, or *AC Local* for short, is a multi-platform SDK for local AI Inference.
 
 "Local" here means running on the device which executes the code. This could be a server, a desktop, or a mobile device.
