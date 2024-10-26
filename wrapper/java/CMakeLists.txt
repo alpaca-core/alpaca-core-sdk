@@ -14,7 +14,7 @@ endif()
 
 find_package(JNI ${AC_JAVA_WRAPPER_REQUIRED})
 if(NOT JNI_FOUND)
-    message(STATUS "Skpping Java wrapper library")
+    message(STATUS "${CMAKE_PROJECT_NAME}: Can't configure Java wrapper. JNI was not found")
     return()
 endif()
 
