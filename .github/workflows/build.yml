@@ -40,7 +40,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - name: Configure
-        run: cmake --preset ${{ matrix.cfg.preset }} -DAC_BUILD_POC=0 -B build
+        run: cmake --preset ${{ matrix.cfg.preset }} -DAC_BUILD_POC=0 -DAC_SWIFT_WRAPPER=OFF -B build
       - name: Build
         run: cmake --build build
       - name: Test
