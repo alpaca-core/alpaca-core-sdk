@@ -9,7 +9,7 @@ final class SwiftApiTests: XCTestCase {
     override class func setUp() {
         AlpacaCoreSwift.initSDK();
     }
-    
+
     func testDummyInference() throws {
         print("Hello from e-Dummy.swift")
 
