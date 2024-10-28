@@ -2,10 +2,6 @@
 # SPDX-License-Identifier: MIT
 #
 
-# Set up swiftrt.o and runtime library search paths
-include(./cmake/InitializeSwift.cmake)
-# cmake/modules/AddSwift.cmake provides the function for creating the Swift to
-# C++ bridging header
 include(./cmake/AddSwift.cmake)
 
 add_library(AlpacaCoreSwift STATIC
