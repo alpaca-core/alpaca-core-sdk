@@ -35,6 +35,8 @@ We use Manjaro so some packages might have different names in pure AUR Arch Linu
 * `$ sudo pacman -S openssl` (optional for HTTPS downloads)
 * `$ sudo pacman -S sdl2` (optional for GUI demos)
 * Optionally for the java wrapper: `$ sudo pacman -S jdk-openjdk`
+* Optionally for the swift wrapper: `$ pamac build swift-bin`
+    * Note that to build the swift wrapper, you will have to configure with `-DCMAKE_CXX_COMPILER=/usr/lib/swift/bin/clang++ -DCMAKE_C_COMPILER=/usr/lib/swift/bin/clang`
 * Compute backends (may or may not be applicable to your system):
     * Cuda: `$ sudo pacman -S cuda`
     * Vulkan: `$ sudo pacman -Sg vulkan-devel`
@@ -66,6 +68,10 @@ Install the following software (we recommend using Chocolatey, Scoop, or WinGet,
 * For the Java wrapper (optional):
     * JDK. [Microsoft OpenJDK 17](https://learn.microsoft.com/en-us/java/openjdk/download#openjdk-17) works, but any other JDK 17 or later should be fine as well
     * Set the `JAVA_HOME` environment variable to the JDK installation directory 
+* For the Swift wrapper (optional): 
+    * Install Swift in any of the ways described [here](https://www.swift.org/install/windows)
+    * Note that on you need to use the clang compiler shipped with your swift installation
+    * Also note that installing the Swift will add clang++ to your system path. If you also use other clang compilers, you will have to juggle the system path around accorting to what you currently need.
 * Optional compute backends which may or may not be applicable to your system:
     * [CUDA 12](https://developer.nvidia.com/cuda-downloads)
     * Vulkan SDK

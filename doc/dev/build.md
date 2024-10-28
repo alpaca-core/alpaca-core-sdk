@@ -24,6 +24,7 @@ The minimum requirements are:
 * For some build flavors and optional components:
     * Android: CMake 3.24 is needed to properly find JNI
     * The Java wrapper should work with Java 8+, but Java 17+ is needed to build the Java tests and examples
+    * To build the Swift wrapper, you need Swift 6.0.0 or later. Moreover, on non-macOS systems you need to use the clang compiler shipped with your swift installation.
     * GUI Demos: [SDL2](https://wiki.libsdl.org/SDL2/FrontPage)
     * Different computational backends require their respective SDKs and dependencies
 
