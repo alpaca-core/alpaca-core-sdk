@@ -6,10 +6,12 @@ func progress(tag: String, progress: Float) {
 }
 
 final class SwiftApiTests: XCTestCase {
+    override class func setUp() {
+        AlpacaCoreSwift.initSDK();
+    }
+    
     func testDummyInference() throws {
         print("Hello from e-Dummy.swift")
-
-        AlpacaCoreSwift.initSDK();
 
         var desc = AlpacaCoreSwift.ModelDesc()
         desc.inferenceType = "dummy"
@@ -35,8 +37,6 @@ final class SwiftApiTests: XCTestCase {
     }
 
     func testExpectedErrors() throws {
-        AlpacaCoreSwift.initSDK();
-
         var desc = AlpacaCoreSwift.ModelDesc()
         desc.inferenceType = "nope"
         desc.name = "synthetic dummy"
