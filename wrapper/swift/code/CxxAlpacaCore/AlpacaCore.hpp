@@ -12,8 +12,8 @@ namespace AC {
 typedef void (*SwiftProgressCb)(void* _Nonnull context, std::string tag, float progress);
 
 struct ProgressCallbackData {
-    SwiftProgressCb _Nonnull m_cb;
-    void* _Nonnull m_context;
+    SwiftProgressCb _Nullable m_cb = nullptr;
+    void* _Nullable m_context = nullptr;
 };
 
 void initSDK();
