@@ -41,6 +41,12 @@ target_link_libraries(AlpacaCoreSwift
         jalog::sinklib
 )
 
+if(CMAKE_GENERATOR STREQUAL Xcode)
+  set_target_properties(AlpacaCoreSwift PROPERTIES
+      XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "16.6"
+  )
+endif()
+
 _swift_generate_cxx_header(AlpacaCoreSwift
     AlpacaCore-Swift.h
     SWIFT_EXPOSABLE_FILES ModelDesc.swift
