@@ -51,15 +51,9 @@ Sampler::Sampler(Model& model, const Params& params)
         )
     );
 
-    const auto temp = params.temp;
     const auto& miro = params.mirostat;
 
-    if (temp <= 0) {
-        // greedy sampling with probs
-        llama_sampler_chain_add(chain, llama_sampler_init_softmax());
-        llama_sampler_chain_add(chain, llama_sampler_init_greedy());
-    }
-    else if (miro.ver == 1) {
+    if (miro.ver == 1) {
         llama_sampler_chain_add(chain, llama_sampler_init_temp(params.temp));
         llama_sampler_chain_add(chain,
             llama_sampler_init_mirostat(
@@ -102,7 +96,6 @@ Sampler::Sampler(Model& model, const Params& params)
             llama_sampler_chain_add(chain, sampler);
         }
 
-        llama_sampler_chain_add(chain, llama_sampler_init_softmax());
         llama_sampler_chain_add(chain, llama_sampler_init_dist(params.rngSeed));
     }
 }
