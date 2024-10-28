@@ -89,6 +89,10 @@ Sampler::Sampler(Model& model, const Params& params)
                 case SamplingType::Min_P: return llama_sampler_init_min_p(params.minP, minKeep);
                 case SamplingType::Temperature:
                     return llama_sampler_init_temp_ext(params.temp, params.tempRange, params.tempExp);
+                case SamplingType::XTC:
+                    return llama_sampler_init_xtc(params.xtc.probability, params.xtc.threshold, minKeep, params.rngSeed);
+                case SamplingType::Infill:
+                    return llama_sampler_init_infill(lmodel);
                 default:
                     throw std::runtime_error("Unsupported sampler type");
                 }

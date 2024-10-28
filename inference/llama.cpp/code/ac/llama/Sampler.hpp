@@ -26,7 +26,9 @@ public:
         Min_P,
         Tfs_Z,
         Typical_P,
-        Temperature
+        Temperature,
+        XTC,
+        Infill,
     };
 
     struct Params {
@@ -55,6 +57,11 @@ public:
             float tau = 5.00f; // target entropy
             float eta = 0.10f; // learning rate
         } mirostat;
+
+        struct XTC {
+            float probability = 0.00f; // 0.0 = disabled
+            float threshold = 0.10f;   // > 0.5 disables XTC
+        } xtc;
 
         bool penalizeNewline = false; // consider newlines as a repeatable token
         bool ignoreEos = false;
