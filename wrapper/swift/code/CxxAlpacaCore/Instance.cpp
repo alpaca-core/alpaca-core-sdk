@@ -7,7 +7,6 @@
 
 #include <ac/local/Instance.hpp>
 
-#include <swift/bridging>
 #include "AlpacaCore-Swift.h"
 
 namespace AC {
