@@ -4,7 +4,14 @@
 
 function(ac_add_swift_executable target)
     add_executable(${target} ${ARGN})
-    set_target_properties(${target} PROPERTIES COMPILE_OPTIONS "")
+
+    # generate a valid swift module name
+    string(REPLACE - _ moduleName ${target})
+    
+    set_target_properties(${target} PROPERTIES 
+    	COMPILE_OPTIONS ""
+    	Swift_MODULE_NAME ${moduleName}
+   	)
     target_link_libraries(${target}
       PRIVATE
         AlpacaCoreSwift

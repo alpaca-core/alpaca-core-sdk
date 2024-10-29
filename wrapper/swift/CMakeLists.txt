@@ -27,6 +27,11 @@ if(NOT SWIFT_COMPILER)
     return()
 endif()
 
+if(POLICY CMP0157)
+	# enable proper Swift incremental building with ninja
+	# this is the default for cmake 3.29, but the issue doesn't warrant bumping min required
+	cmake_policy(SET CMP0157 NEW)
+endif()
 enable_language(Swift)
 
 add_subdirectory(code)
