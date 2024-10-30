@@ -23,8 +23,8 @@ add_library(AlpacaCoreSwift STATIC
 set_target_properties(AlpacaCoreSwift PROPERTIES COMPILE_OPTIONS "")
 
 target_compile_options(AlpacaCoreSwift
-  PUBLIC
-    $<$<COMPILE_LANGUAGE:Swift>:-cxx-interoperability-mode=default -Xcc -std=c++20>
+    PUBLIC
+        $<$<COMPILE_LANGUAGE:Swift>:-cxx-interoperability-mode=default -Xcc -std=c++20>
 )
 
 target_include_directories(AlpacaCoreSwift PUBLIC .)
@@ -42,9 +42,9 @@ target_link_libraries(AlpacaCoreSwift
 )
 
 if(CMAKE_GENERATOR STREQUAL Xcode)
-  set_target_properties(AlpacaCoreSwift PROPERTIES
-      XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "16.6"
-  )
+    set_target_properties(AlpacaCoreSwift PROPERTIES
+        XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET ${CMAKE_OSX_DEPLOYMENT_TARGET}
+    )
 endif()
 
 _swift_generate_cxx_header(AlpacaCoreSwift
