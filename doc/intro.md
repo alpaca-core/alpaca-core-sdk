@@ -45,7 +45,7 @@ This is what's different for each model type.
 
 Some close (but not quite complete) descriptions of it could be duck-typed, or "stringly"-typed, or JSON-typed.
 
-Every model type defines a schema for the inference API. The schema describes things like what types of instances can be created for the model, what ops each instance provides, then what input each op gets and what it returns as a result. A more detauled description of schemas (or the schema schema) is available [here](model-schema.md).
+Every model type defines a schema for the inference API. The schema describes things like what types of instances can be created for the model, what ops each instance provides, then what input each op gets and what it returns as a result. A more detauled description of schemas (or the schema schema) is available [here](iapi.md).
 
 The main carrier of data for this API is an object called `Dict`. This stands for dictionary. A more formal description if `Dict` is available [here](dict.md). In short it's basically a POJO (where J stands for JavaScript), so a JSON object, but with the notable addition of the data type `binary` - which is contiguous memory buffer. So... not a JSON, but a [CBOR](https://cbor.io/) object, at least in terms of data types.
 
@@ -88,7 +88,7 @@ To make this pseudo-code not-so-pseudo, we need the...
 
 ### Language API
 
-This is the code one writes to call the Inference API from a given programming language. 
+This is the code one writes to call the Inference API from a given programming language.
 
 Here's a quip:
 
@@ -120,10 +120,6 @@ auto result = instance->runOp("run",
 
 std::cout << result << "\n";
 ```
-
-As you can see, the Language API is synchronous. All calls block until they complete. 
-
-It's also low level. It's meant to be wrapped in higher-level application-specific abstractions, which normally would not expose the Inference API directly (or at least not completely).
 
 ## More
 
