@@ -7,8 +7,6 @@
 
 #include <ac/local/Instance.hpp>
 
-#include "AlpacaCore-Swift.h"
-
 namespace AC {
 
 Instance::Instance(std::unique_ptr<local::Instance> instance)

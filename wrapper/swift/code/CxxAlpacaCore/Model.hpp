@@ -11,13 +11,13 @@
 #include <ac/local/ModelPtr.hpp>
 
 namespace AC {
-// class Instance;
+class Instance;
 
 class Model{
 public:
     Model(local::ModelPtr model);
 
-    Expected<class Instance, std::string> createInstance(const std::string& type, DictRef params);
+    Expected<Instance, std::string> createInstance(const std::string& type, DictRef params);
 private:
     local::ModelPtr m_model;
 };
