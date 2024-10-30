@@ -34,6 +34,12 @@ if(POLICY CMP0157)
 endif()
 enable_language(Swift)
 
+if(CMAKE_Swift_COMPILER_VERSION VERSION_LESS "6.0")
+    message(${AC_SWIFT_WRAPPER_MSG_STATUS} "Swift version must be at least 6.0. Found: ${CMAKE_Swift_COMPILER_VERSION}")
+else()
+    message(VERBOSE "Swift version is sufficient: ${CMAKE_Swift_COMPILER_VERSION}")
+endif()
+
 add_subdirectory(code)
 ac_add_example_subdir()
 ac_add_test_subdir()
