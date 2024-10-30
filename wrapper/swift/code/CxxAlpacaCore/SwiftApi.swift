@@ -31,10 +31,15 @@ class ProgressCallbackWrapper {
     }
 }
 
-func callObserver(observer: UnsafeMutableRawPointer, tag: std.string, progress: Float) {
+func callObserver(observer: UnsafeMutableRawPointer,
+                  tagBegin: UnsafePointer<Int8>,
+                  tagEnd: UnsafePointer<Int8>,
+                  progress: Float) {
     let wrapper = Unmanaged<ProgressCallbackWrapper>.fromOpaque(observer).takeUnretainedValue()
     if wrapper.cb != nil {
-        wrapper.cb!(String(tag), progress)
+        let length = Int(tagEnd - tagBegin)
+        let tagStr = String(data: Data(bytes: tagBegin, count: length), encoding: .utf8) ?? ""
+        wrapper.cb!(tagStr, progress)
     }
 }
 
