@@ -86,13 +86,13 @@ img.show()
 
 To make this pseudo-code not-so-pseudo, we need the...
 
-### Programming-language API
+### Language API
 
 This is the code one writes to call the Inference API from a given programming language. 
 
 Here's a quip:
 
-> The Inference API is different for each model type and the same for all programming languages. The Programming-language API is the same for all model types and different for each programming language.
+> The Inference API is different for each model type and the same for all programming languages. The Language API is the same for all model types and different for each programming language.
 
 It's what gives you the concrete representations of `Model`, `Instance`, `op`-s, and `Dict`, and most importantly a way to create models. 
 
@@ -121,7 +121,7 @@ auto result = instance->runOp("run",
 std::cout << result << "\n";
 ```
 
-As you can see, the Programming-language API is synchronous. All calls block until they complete. In some cases optional callbacks may be provided, but they're always executed in the caller's call stack. 
+As you can see, the Language API is synchronous. All calls block until they complete. In some cases optional callbacks may be provided, but they're always executed in the caller's call stack. 
 
 It's also low-level. It's meant to be wrapped in higher-level application-specific abstractions, which normally would not expose the Inference API directly (or at least not completely).
 

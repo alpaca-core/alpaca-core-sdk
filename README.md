@@ -11,7 +11,7 @@ The Alpaca Core Local SDK, or *AC Local* for short, is a multi-platform SDK for 
 
 It provides a unified API for doing inference with multiple models. The API itself can be split into two layers:
 
-* Programming-language specific: The API which one calls writing code in a specific programming language. It's just a means to call the:
+* Programming language specific (Language API): The API which one calls writing code in a specific programming language. It's just a means to call the:
 * Inference API: A JSON/CBOR/POJO-like API which is used to communicate with the underlying inference engines following their specific API schema.
 
 Read the [full introduction here](doc/intro.md).
