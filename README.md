@@ -60,7 +60,7 @@ There are multiple examples in this repo. Look for the `example` directories thr
 
 * AI Chat (LLM-based chatbot)
     * Android: [alpaca-core/demo-android-ai-chat](https://github.com/alpaca-core/demo-android-ai-chat)
-    * IOS: [alpaca-core/demo-ios-llama-chat](https://github.com/alpaca-core/demo-ios-llama-chat)
+    * IOS: [alpaca-core/demo-ios-ai-chat](https://github.com/alpaca-core/demo-ios-ai-chat)
 
 ## Documentation
 
