@@ -204,11 +204,22 @@ public:
 class LlamaModel final : public Model {
     std::shared_ptr<llama::Model> m_model;
 
-    llama::Instance::InitParams translateInstanceParams(const Dict& params) {
+    llama::Instance::InitParams translateInstanceParams(Dict& params) {
         llama::Instance::InitParams initParams;
-        initParams.ctxSize = Dict_optValueAt(params, "ctx_size", 0);
-        initParams.batchSize = Dict_optValueAt(params, "batch_size", 0);
-        initParams.ubatchSize = Dict_optValueAt(params, "ubatch_size", 0);
+        Schema::InstanceGeneral::Params schemaParams(params);
+
+        if (auto value = schemaParams.ctxSize.optGetValue()) {
+            initParams.ctxSize = *value;
+        }
+
+        if (auto value = schemaParams.batchSize.optGetValue()) {
+            initParams.batchSize = *value;
+        }
+
+        if (auto value = schemaParams.ubatchSize.optGetValue()) {
+            initParams.ubatchSize = *value;
+        }
+
         return initParams;
     }
 public:

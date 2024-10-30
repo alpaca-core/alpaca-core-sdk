@@ -18,9 +18,9 @@ namespace ac::llama {
 namespace {
 llama_context_params llamaFromInstanceInitParams(Model& model, const Instance::InitParams& params) {
     llama_context_params llamaParams = llama_context_default_params();
-    llamaParams.n_ctx = params.ctxSize ? params.ctxSize : llamaParams.n_ctx;
-    llamaParams.n_batch = params.batchSize ? params.batchSize : llamaParams.n_batch;
-    llamaParams.n_ubatch = params.ubatchSize ? params.ubatchSize : llamaParams.n_ubatch;
+    llamaParams.n_ctx = params.ctxSize;
+    llamaParams.n_batch = params.batchSize;
+    llamaParams.n_ubatch = params.ubatchSize;
     llamaParams.flash_attn = model.params().gpu;
     return llamaParams;
 }

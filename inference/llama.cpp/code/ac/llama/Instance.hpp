@@ -16,9 +16,9 @@ class StringSession;
 class AC_LLAMA_EXPORT Instance {
 public:
     struct InitParams {
-        uint32_t ctxSize = 0; // context size for the model (0 = maximum allowed by model)
+        uint32_t ctxSize = 512; // context size for the model (0 = maximum allowed by model)
         uint32_t batchSize = 2048; // logical batch size for prompt processing (may be silently truncated to ctxSize)
-        uint32_t ubatchSize = 0; // physical batch size for prompt processing (0 = batchSize)
+        uint32_t ubatchSize = 512; // physical batch size for prompt processing (0 = batchSize)
     };
 
     explicit Instance(Model& model, InitParams params);
