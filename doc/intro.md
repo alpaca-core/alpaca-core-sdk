@@ -96,7 +96,7 @@ Here's a quip:
 
 It's what gives you the concrete representations of `Model`, `Instance`, `op`-s, and `Dict`, and most importantly a way to create models. 
 
-The base implementation is in C++, but wrappers for other languages are provided. Find the documentation [here](pl-api.md).
+The base implementation is in C++, but wrappers for other languages are provided. Find the documentation [here](lapi.md).
 
 And with it we can have actual working code like:
 
@@ -121,9 +121,9 @@ auto result = instance->runOp("run",
 std::cout << result << "\n";
 ```
 
-As you can see, the Language API is synchronous. All calls block until they complete. In some cases optional callbacks may be provided, but they're always executed in the caller's call stack. 
+As you can see, the Language API is synchronous. All calls block until they complete. 
 
-It's also low-level. It's meant to be wrapped in higher-level application-specific abstractions, which normally would not expose the Inference API directly (or at least not completely).
+It's also low level. It's meant to be wrapped in higher-level application-specific abstractions, which normally would not expose the Inference API directly (or at least not completely).
 
 ## More
 
