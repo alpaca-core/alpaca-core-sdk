@@ -33,7 +33,6 @@ target_link_libraries(AlpacaCoreSwift
     PUBLIC
         ac::dict
         ac::local
-        ac-dev::audio # audio is temporary for easier whisper integration
     PRIVATE
         ac-local-dummy
         ac-local-whisper
