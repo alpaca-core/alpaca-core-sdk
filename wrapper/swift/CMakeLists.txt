@@ -35,9 +35,9 @@ endif()
 enable_language(Swift)
 
 if(CMAKE_Swift_COMPILER_VERSION VERSION_LESS "6.0")
-    message(FATAL_ERROR "Swift version must be at least 6.0. Found: ${CMAKE_Swift_COMPILER_VERSION}")
+    message(${AC_SWIFT_WRAPPER_MSG_STATUS} "Swift version must be at least 6.0. Found: ${CMAKE_Swift_COMPILER_VERSION}")
 else()
-    message(STATUS "Swift version is sufficient: ${CMAKE_Swift_COMPILER_VERSION}")
+    message(VERBOSE "Swift version is sufficient: ${CMAKE_Swift_COMPILER_VERSION}")
 endif()
 
 add_subdirectory(code)
