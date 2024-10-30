@@ -123,4 +123,4 @@ std::cout << result << "\n";
 
 ## More
 
-This introduction is more or less language agnostic. You can check out the C++-centric documentation on structure and internals [here](doc/internals.md).
+This introduction is more or less language agnostic. You can check out the C++-centric documentation on structure and internals [here](internals.md).
