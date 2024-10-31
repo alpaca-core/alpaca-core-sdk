@@ -15,7 +15,13 @@ struct Llama : public ModelHelper<Llama> {
         static inline constexpr std::string_view id = "general";
         static inline constexpr std::string_view description = "General instance";
 
-        using Params = Null;
+        // using Params = Null;
+        struct Params : public Object {
+            using Object::Object;
+            Uint ctxSize{*this, "ctx_size", "Size of the contex", {}};
+            Uint batchSize{*this, "batch_size", "Size of the single batch", {}};
+            Uint ubatchSize{*this, "ubatch_size", "Size of the contex", {}};
+        };
 
         struct OpRun {
             static inline constexpr std::string_view id = "run";

@@ -24,7 +24,7 @@ Expected<DictRoot, std::string> Instance::runOp(const std::string& op, DictRef p
     try {
         if (progressCbData.m_cb) {
             ref.getDict() = m_instance->runOp(op, params.getDict(), [&](std::string_view tag, float progress) {
-                progressCbData.m_cb(progressCbData.m_context, std::string(tag), progress);
+                progressCbData.m_cb(progressCbData.m_context, tag.data(), tag.data() + tag.size(), progress);
                 return true;
             });
         }

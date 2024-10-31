@@ -14,9 +14,8 @@ public func initSDK() {
 }
 
 class ProgressCallbackWrapper {
-    let cb: (String, Float) -> Void
-
-    init(_ cb: @escaping (String, Float) -> Void) {
+    let cb: Optional<(String, Float) -> Void>
+    init(_ cb: Optional<(String, Float) -> Void>) {
         self.cb = cb
     }
 
@@ -24,22 +23,34 @@ class ProgressCallbackWrapper {
         return UnsafeMutableRawPointer(Unmanaged.passRetained(self).toOpaque())
     }
 
-    public func releaseRawPointer(_ pointer: UnsafeMutableRawPointer) {
-        let unmanaged = Unmanaged<ProgressCallbackWrapper>.fromOpaque(pointer)
-        unmanaged.release()
+    public func releaseRawPointer(_ pointer: Optional<UnsafeMutableRawPointer>) {
+        if pointer != nil {
+            let unmanaged = Unmanaged<ProgressCallbackWrapper>.fromOpaque(pointer!)
+            unmanaged.release()
+        }
     }
 }
 
-func callObserver(observer: UnsafeMutableRawPointer, tag: std.string, progress: Float) {
+func callObserver(observer: UnsafeMutableRawPointer,
+                  tagBegin: UnsafePointer<Int8>,
+                  tagEnd: UnsafePointer<Int8>,
+                  progress: Float) {
     let wrapper = Unmanaged<ProgressCallbackWrapper>.fromOpaque(observer).takeUnretainedValue()
-    wrapper.cb(String(tag), progress)
+    if wrapper.cb != nil {
+        let length = Int(tagEnd - tagBegin)
+        let tagStr = String(data: Data(bytes: tagBegin, count: length), encoding: .utf8) ?? ""
+        wrapper.cb!(tagStr, progress)
+    }
 }
 
 public func createModel(_ desc: inout ModelDesc, _ params: Dictionary<String, Any>,
-    _ progress: @escaping (String, Float) -> Void) throws -> Model {
+                        _ progress: Optional<(String, Float) -> Void> = nil) throws -> Model {
     let paramsAsDict = try translateDictionaryToDict(params)
     let wrapper = ProgressCallbackWrapper(progress)
-    let cbData = AC.ProgressCallbackData(m_cb: callObserver, m_context: wrapper.getRawPointer())
+    var cbData: AC.ProgressCallbackData = AC.ProgressCallbackData()
+    if progress != nil {
+        cbData = AC.ProgressCallbackData(m_cb: callObserver, m_context: wrapper.getRawPointer())
+    }
 
     var result = AC.createModel(&desc, paramsAsDict.getRef(), cbData)
     wrapper.releaseRawPointer(cbData.m_context)
@@ -74,10 +85,14 @@ public class Instance {
     }
 
     public func runOp(_ op: String, _ params: Dictionary<String, Any>,
-            _ progress: @escaping (String, Float) -> Void) throws -> Dictionary<String, Any> {
+                      _ progress: Optional<(String, Float) -> Void> = nil) throws -> Dictionary<String, Any> {
         let paramsAsDict = try translateDictionaryToDict(params)
+
         let wrapper = ProgressCallbackWrapper(progress)
-        let cbData = AC.ProgressCallbackData(m_cb: callObserver, m_context: wrapper.getRawPointer())
+        var cbData: AC.ProgressCallbackData = AC.ProgressCallbackData()
+        if progress != nil {
+            cbData = AC.ProgressCallbackData(m_cb: callObserver, m_context: wrapper.getRawPointer())
+        }
 
         var result = instance.runOp(std.string(op), paramsAsDict.getRef(), cbData)
         wrapper.releaseRawPointer(cbData.m_context)
