@@ -48,11 +48,6 @@ Instance::Instance(Model& model, InitParams params)
 Instance::~Instance() = default;
 
 std::string Instance::transcribe(std::span<const float> pcmf32) {
-    if (pcmf32.empty()) {
-        // TODO: Investigate why whisper.cpp crashes if the input is empty #65
-        return std::string();
-    }
-
     return runInference(pcmf32);
 }
 
