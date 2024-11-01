@@ -1,6 +1,11 @@
 name: Build
 # keep manual for now (or we would run out of minutes while we're private)
-on: [workflow_dispatch]
+on:
+  workflow_dispatch: # manual
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
 jobs:
   build-and-test:
     name: ${{ matrix.cfg.name }}
