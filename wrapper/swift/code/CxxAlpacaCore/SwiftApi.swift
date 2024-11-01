@@ -9,6 +9,7 @@ public enum ACError: Error, Equatable {
     case invalidRunOp(String)
 }
 
+/// Initialize the AlpacaCore SDK
 public func initSDK() {
     AC.initSDK()
 }
@@ -43,6 +44,9 @@ func callObserver(observer: UnsafeMutableRawPointer,
     }
 }
 
+/// Create a model from a model description and parameters
+///
+/// - Throws: `ACError.invalidModelCreation` if the model creation fails
 public func createModel(_ desc: inout ModelDesc, _ params: Dictionary<String, Any>,
                         _ progress: Optional<(String, Float) -> Void> = nil) throws -> Model {
     let paramsAsDict = try translateDictionaryToDict(params)
