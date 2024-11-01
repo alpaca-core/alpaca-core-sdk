@@ -20,19 +20,20 @@ task generate_java_doc: OUT_DOC_DIR do
 end
 
 task generate_swift_doc: OUT_DOC_DIR do
-  DOCC_EXE = 'docc'
-  if RUBY_PLATFORM =~ /darwin/
-    DOCC_EXE = 'xcrun docc'
-  end
+  docc = ''
+  docc = 'xcrun ' if RUBY_PLATFORM =~ /darwin/
+  docc += 'docc'
 
-  sh "#{DOCC_EXE} convert \\
-    --emit-lmdb-index \\
-    --fallback-display-name AlpacaCoreSwift \\
-    --fallback-bundle-identifier AlpacaCoreSwift \\
-    --fallback-bundle-version 0 \\
-    --output-dir #{OUT_DOC_DIR}/swift/AlpacaCoreSwift.doccarchive \\
-    --diagnostics-file #{OUT_DOC_DIR}/swift/AlpacaCoreSwift-diagnostics.json \\
-    --additional-symbol-graph-dir #{OUT_DOC_DIR}/swift/symbol-graph"
+  sh %W(
+    #{docc} convert
+    --emit-lmdb-index
+    --fallback-display-name AlpacaCoreSwift
+    --fallback-bundle-identifier AlpacaCoreSwift
+    --fallback-bundle-version 0
+    --output-dir #{OUT_DOC_DIR}/swift/AlpacaCoreSwift.doccarchive
+    --diagnostics-file #{OUT_DOC_DIR}/swift/AlpacaCoreSwift-diagnostics.json
+    --additional-symbol-graph-dir #{OUT_DOC_DIR}/swift/symbol-graph
+  ).join(' ')
 end
 
 desc 'Generate all documentation'
