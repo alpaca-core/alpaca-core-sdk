@@ -67,7 +67,7 @@ Install the following software (we recommend using Chocolatey, Scoop, or WinGet,
     * Set the `ANDROID_NDK_ROOT` environment variable to the Android NDK installation directory
 * For the Java wrapper (optional):
     * JDK. [Microsoft OpenJDK 17](https://learn.microsoft.com/en-us/java/openjdk/download#openjdk-17) works, but any other JDK 17 or later should be fine as well
-    * Set the `JAVA_HOME` environment variable to the JDK installation directory 
+    * Set the `JAVA_HOME` environment variable to the JDK installation directory
 * For the Swift wrapper (optional): 
     * Install Swift in any of the ways described [here](https://www.swift.org/install/windows)
     * Note that on you need to use the clang compiler shipped with your swift installation
@@ -134,6 +134,8 @@ Technically you can setup the requirements manually, but, please, just use [Home
     * Install SDK with API Level at least 32 and NDK
     * Set the `ANDROID_NDK_ROOT` environment variable to the Android NDK installation directory
 * Optionally for the Java wrapper: `$ brew install openjdk` or `$ brew install openjdk@17` (both should work)
+    * Set the `JAVA_HOME` environment variable to the JDK installation directory, but note that CMake doesn't deal well with the brew symlinks for openjdk.
+    * Brew will symlink the installation to `/opt/homebrew/opt/openjdk`. *Do not* set this to `JAVA_HOME`. Instead, set it to the actual installation directory, which will likely be `/opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home`
 
 ### Visual Studio Code Setup
 
