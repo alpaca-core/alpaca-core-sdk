@@ -16,16 +16,10 @@ target_link_libraries(ac-jni-dict PUBLIC
 )
 
 # main module
-add_library(ac-jni MODULE
+ac_add_module(ac-jni
     JniEntrypoint.cpp
     JniApi.cpp
 )
-if(NOT WIN32)
-    target_compile_options(ac-jni PRIVATE
-        -fvisibility=hidden
-        -fvisibility-inlines-hidden
-    )
-endif()
 target_link_libraries(ac-jni PRIVATE
     ac-jni-dict
     ac::local

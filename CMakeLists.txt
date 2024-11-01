@@ -30,6 +30,7 @@ include(icm_build_failure_testing)
 include(CMakeDependentOption)
 include(ac_dep)
 include(icm_option)
+include(ac_module)
 
 #################
 # cfg

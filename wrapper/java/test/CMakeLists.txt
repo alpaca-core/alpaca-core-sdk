@@ -63,7 +63,7 @@ function(add_java_test name)
     endif()
 endfunction()
 
-add_library(test-ac-java-dict MODULE t-JniDict.cpp)
+ac_add_module(test-ac-java-dict t-JniDict.cpp)
 target_link_libraries(test-ac-java-dict PRIVATE ac-jni-dict)
 add_java_test(Dict
     SOURCES TestDict.java
