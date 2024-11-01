@@ -20,7 +20,12 @@ task generate_java_doc: OUT_DOC_DIR do
 end
 
 task generate_swift_doc: OUT_DOC_DIR do
-  sh "xcrun docc convert \\
+  DOCC_EXE = 'docc'
+  if RUBY_PLATFORM =~ /darwin/
+    DOCC_EXE = 'xcrun docc'
+  end
+
+  sh "#{DOCC_EXE} convert \\
     --emit-lmdb-index \\
     --fallback-display-name AlpacaCoreSwift \\
     --fallback-bundle-identifier AlpacaCoreSwift \\
