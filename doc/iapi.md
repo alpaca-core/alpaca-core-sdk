@@ -107,5 +107,5 @@ As an example, here's how the whisper.cpp schema looked like at some point durin
 
 ## Supported Models
 
-The supported models and their schemas can be found [here](https://docs-alpaca-core-iota.vercel.app/docs/getting-started/models)
+The supported models and their schemas can be found [here](https://alpacacore.com/docs/getting-started/models)
 

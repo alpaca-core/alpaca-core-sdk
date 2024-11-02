@@ -4,7 +4,7 @@ The Alpaca Core Local SDK, or *AC Local* for short, is a multi-platform SDK for 
 
 "Local" in this context means running on the device which executes the code. This could be a server, a desktop, or a mobile device.
 
-AC Local provides a unified API for doing inference with [multiple models](https://docs-alpaca-core-iota.vercel.app/docs/getting-started/models).
+AC Local provides a unified API for doing inference with [multiple models](https://alpacacore.com/docs/getting-started/models).
 
 ## API Elements
 
