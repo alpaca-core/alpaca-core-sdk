@@ -10,7 +10,7 @@ target_link_libraries(ac-whisper
         jalog::jalog
     PUBLIC
         splat::splat
-        ac::astl
+        ac::astl-private
 )
 target_sources(ac-whisper PRIVATE
     ac/whisper/export.h

@@ -10,6 +10,7 @@ target_link_libraries(ac-c-dict
         ac-c::util
     PRIVATE
         ac::dict
+        ac::astl-private
 )
 target_sources(ac-c-dict PRIVATE
     ac/export.h

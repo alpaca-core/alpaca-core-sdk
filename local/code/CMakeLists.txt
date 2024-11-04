@@ -7,7 +7,9 @@ target_include_directories(ac-local INTERFACE .)
 target_link_libraries(ac-local
     PRIVATE
         jalog::jalog
+        ac::astl-private
     PUBLIC
+        ac::astl-public
         ac::dict
         ac::schema
 )

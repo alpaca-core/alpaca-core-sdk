@@ -1,6 +1,7 @@
 # Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
+ac_dep(splat)
 
 CPMAddPackage(
     NAME dr_libs
@@ -23,7 +24,7 @@ target_link_libraries(ac-audio
         splat::splat
         itlib::itlib
     PRIVATE
-        ac::astl
+        ac::astl-private
         dr_libs
 )
 target_sources(ac-audio

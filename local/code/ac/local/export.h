@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include <splat/symbol_export.h>
+#include <astl/symbol_export.h>
 
 #if AC_LOCAL_SHARED
 #   if BUILDING_AC_LOCAL

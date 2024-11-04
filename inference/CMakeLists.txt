@@ -7,6 +7,8 @@
 #    message(STATUS "${CMAKE_PROJECT_NAME}: system Vulkan found")
 # endif()
 
+ac_dep(splat)
+
 find_package(CUDAToolkit)
 if(CUDAToolkit_FOUND)
     set(haveCuda YES)

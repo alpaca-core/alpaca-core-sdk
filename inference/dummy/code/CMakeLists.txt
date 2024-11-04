@@ -9,7 +9,7 @@ target_link_libraries(ac-dummy
         jalog::jalog
     PUBLIC
         splat::splat
-        ac::astl
+        ac::astl-private
 )
 target_sources(ac-dummy PRIVATE
     ac/dummy/export.h

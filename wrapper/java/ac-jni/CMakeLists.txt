@@ -13,6 +13,7 @@ target_link_libraries(ac-jni-dict PUBLIC
     JNI::JNI
     mapbox::jni.hpp
     ac::dict
+    ac::astl-private
 )
 
 # main module
