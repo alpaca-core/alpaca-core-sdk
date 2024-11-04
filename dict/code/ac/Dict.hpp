@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include <nlohmann/json.hpp>
+#include "vendor/nlohmann/json.hpp"
 
 namespace ac {
 
@@ -10,8 +10,10 @@ namespace ac {
 /// Dictionary type and utils.
 /// @{
 
-/// Dictionary type. A type alias for [nlohmann::json](https://github.com/nlohmann/json).
-using Dict = nlohmann::json;
+/// Dictionary type.
+/// A type alias for [nlohmann::json](https://github.com/nlohmann/json). However to avoid conflicts with potential other
+/// uses of nlohmann::json, it is renamed to acnl::json.
+using Dict = acnl::json;
 
 /// Blob (binary) carrier type.
 using Blob = std::vector<uint8_t>;

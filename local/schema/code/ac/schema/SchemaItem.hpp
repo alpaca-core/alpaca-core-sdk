@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include <nlohmann/json.hpp>
+#include <ac/vendor/nlohmann/json.hpp>
 #include <string_view>
 #include <stdexcept>
 #include <concepts>
@@ -12,8 +12,8 @@
 
 namespace ac::schema {
 
-using Dict = nlohmann::json;
-using OrderedDict = nlohmann::ordered_json;
+using Dict = acnl::json;
+using OrderedDict = acnl::ordered_json;
 
 class Object;
 

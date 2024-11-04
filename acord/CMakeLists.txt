@@ -5,4 +5,4 @@ ac_dep(boost)
 ac_dep(xec)
 
 add_subdirectory(ahttp)
-add_subdirectory(asset-mgr)
+# add_subdirectory(asset-mgr)
