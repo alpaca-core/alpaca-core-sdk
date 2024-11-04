@@ -1,7 +1,15 @@
 # Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
-# set(NLOHMANN_JSON_TARGET_NAME ac-json)
 add_library(ac-dict INTERFACE)
 add_library(ac::dict ALIAS ac-dict)
-target_include_directories(ac-dict INTERFACE .)
+target_sources(ac-dict
+    PUBLIC FILE_SET HEADERS FILES
+        ac/Dict.hpp
+        ac/vendor/nlohmann/json.hpp
+        ac/vendor/nlohmann/json_fwd.hpp
+)
+
+install(TARGETS ac-dict
+    FILE_SET HEADERS
+)
