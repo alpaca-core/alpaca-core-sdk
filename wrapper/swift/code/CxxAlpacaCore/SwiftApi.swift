@@ -9,7 +9,7 @@ public enum ACError: Error, Equatable {
     case invalidRunOp(String)
 }
 
-/// Initializes the AlpacaCore native SDK
+/// Initialize the AlpacaCore native SDK
 public func initSDK() {
     AC.initSDK()
 }
@@ -44,7 +44,7 @@ func callObserver(observer: UnsafeMutableRawPointer,
     }
 }
 
-/// Creates a model with the specified description and parameters, with optional progress tracking.
+/// Create a model with the specified description and parameters, with optional progress tracking.
 ///
 /// - Parameters:
 ///   - desc: A model description.
@@ -82,7 +82,7 @@ public class Model {
         self.model = model
     }
 
-    /// Creates an `Instance` from the specified name and parameters.
+    /// Create an `Instance` from the specified name and parameters.
     ///
     /// - Parameters:
     ///   - type: The type of the instance to create.
@@ -109,7 +109,7 @@ public class Instance {
         self.instance = instance
     }
 
-    /// Runs an operation on the `instance` with the provided operation name, parameters, and optional progress callback.
+    /// Run an operation on the `instance` with the provided operation name, parameters, and optional progress callback.
     ///
     /// - Parameters:
     ///   - op: The name of the operation to execute.
