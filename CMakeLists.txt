@@ -91,7 +91,7 @@ add_subdirectory(dict)
 ac_add_local_subdir()
 
 if(NOT AC_INFERENCE_LIBS STREQUAL "none")
-    # add_subdirectory(inference)
+    add_subdirectory(inference)
 endif()
 
 if(AC_BUILD_ACORD)
@@ -100,7 +100,7 @@ endif()
 
 if(AC_BUILD_LOCAL)
     # add after inference libs so that elements from them can be wrapped as well
-    # add_subdirectory(wrapper)
+    add_subdirectory(wrapper)
 endif()
 
 if(AC_BUILD_POC)
