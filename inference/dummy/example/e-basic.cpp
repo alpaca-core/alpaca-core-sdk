@@ -5,8 +5,8 @@
 #include <ac/dummy/Instance.hpp>
 
 // logging
-#include <jalog/Instance.hpp>
-#include <jalog/sinks/ColorSink.hpp>
+#include <ac/jalog/Instance.hpp>
+#include <ac/jalog/sinks/ColorSink.hpp>
 
 // models
 #include "ac-test-data-dummy-models.h"
@@ -14,8 +14,8 @@
 #include <iostream>
 
 int main() try {
-    jalog::Instance jl;
-    jl.setup().add<jalog::sinks::ColorSink>();
+    ac::jalog::Instance jl;
+    jl.setup().add<ac::jalog::sinks::ColorSink>();
 
     ac::dummy::Model model(AC_DUMMY_MODEL_SMALL, {});
     ac::dummy::Instance instance(model, {});

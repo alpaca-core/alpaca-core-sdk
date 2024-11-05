@@ -1,19 +1,19 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include <jalog/Log.hpp>
-#include <jalog/Scope.hpp>
+#include <ac/jalog/Log.hpp>
+#include <ac/jalog/Scope.hpp>
 
 namespace {
 
 void log_default(int n) {
-    JALOG(Error, "message from c++ ", n);
+    AC_JALOG(Error, "message from c++ ", n);
 }
 
-jalog::Scope cpp_scope("cpp_scope");
+ac::jalog::Scope cpp_scope("cpp_scope");
 
 void log_scope(int n) {
-    JALOG_SCOPE(cpp_scope, Critical, "scoped from c++ ", n);
+    AC_JALOG_SCOPE(cpp_scope, Critical, "scoped from c++ ", n);
 }
 
 } // namespace

@@ -8,8 +8,7 @@ target_link_libraries(example-ac-local-whisper
     PRIVATE
         ac::local
         ac::local-whisper
-        jalog::jalog
-        jalog::sinklib
+        ac::jalog
         ac-test-data::whisper
         ac-dev::audio
 )

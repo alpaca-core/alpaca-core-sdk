@@ -10,6 +10,7 @@ endif()
 # public
 add_subdirectory(astl)
 add_subdirectory(xxhash-cpp)
+add_subdirectory(jalog)
 
 if(AC_BUILD_TESTS OR AC_BUILD_EXAMPLES OR AC_BUILD_POC)
     add_subdirectory(ac-repo-root)

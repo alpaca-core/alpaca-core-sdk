@@ -5,5 +5,5 @@ add_unity_lib_test(logging jalogc
     t-logging.c
     t-more-logging.cpp
     LIBRARIES
-        jalog::jalog
+        ac::jalog
 )

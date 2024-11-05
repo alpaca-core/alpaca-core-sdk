@@ -19,9 +19,9 @@
 #include <ac-audio.hpp>
 
 // logging
-#include <jalog/Instance.hpp>
-#include <jalog/Log.hpp>
-#include <jalog/sinks/ColorSink.hpp>
+#include <ac/jalog/Instance.hpp>
+#include <ac/jalog/Log.hpp>
+#include <ac/jalog/sinks/ColorSink.hpp>
 
 // model source directory
 #include "ac-test-data-whisper-dir.h"
@@ -121,7 +121,7 @@ int initSDL(WindowState& wState, AudioState& aState) {
 
     SDL_RendererInfo info;
     SDL_GetRendererInfo(wState.m_renderer, &info);
-    JALOG(Info, "SDL_Renderer: ", info.name);
+    AC_JALOG(Info, "SDL_Renderer: ", info.name);
 
     char* buff;
     SDL_GetDefaultAudioInfo(&buff, &aState.m_defaultSpec, SDL_TRUE);
@@ -146,9 +146,9 @@ int initSDL(WindowState& wState, AudioState& aState) {
         //Get capture device name
         std::string deviceName(SDL_GetAudioDeviceName(i, SDL_TRUE));
         if (deviceName == defaultDeviceName) {
-            JALOG(Info, "[Default]: %d - %s\n", i, deviceName);
+            AC_JALOG(Info, "[Default]: %d - %s\n", i, deviceName);
         } else {
-            JALOG(Info, "%d - %s\n", i, deviceName);
+            AC_JALOG(Info, "%d - %s\n", i, deviceName);
         }
     }
 #endif
@@ -164,7 +164,7 @@ int initSDL(WindowState& wState, AudioState& aState) {
     if(aState.m_recordingDeviceId == 0)
     {
         //Report error
-        JALOG(Error, "Failed to open recording device! SDL Error: %s", SDL_GetError());
+        AC_JALOG(Error, "Failed to open recording device! SDL Error: %s", SDL_GetError());
         return 1;
     }
 
@@ -184,7 +184,7 @@ int initSDL(WindowState& wState, AudioState& aState) {
     if(aState.m_playbackDeviceId == 0)
     {
         //Report error
-        JALOG(Error, "Failed to open playback device! SDL Error: %s", SDL_GetError());
+        AC_JALOG(Error, "Failed to open playback device! SDL Error: %s", SDL_GetError());
         return 1;
     }
 
@@ -347,13 +347,13 @@ public:
     void unload() {
         m_state->dropInstance();
         m_state.reset();
-        JALOG(Info, "unloaded ", m_name);
+        AC_JALOG(Info, "unloaded ", m_name);
     }
     void load() {
         ac::whisper::Model::Params modelParams;
         m_state.reset(new State(m_binPath, modelParams));
         m_state->createInstance({});
-        JALOG(Info, "loaded ", m_name);
+        AC_JALOG(Info, "loaded ", m_name);
     }
 private:
     std::string m_binPath;
@@ -363,8 +363,8 @@ private:
 };
 
 int main(int, char**) {
-    jalog::Instance jl;
-    jl.setup().add<jalog::sinks::ColorSink>();
+    ac::jalog::Instance jl;
+    jl.setup().add<ac::jalog::sinks::ColorSink>();
 
     WindowState wState;
     AudioState aState;

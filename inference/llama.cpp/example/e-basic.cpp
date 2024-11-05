@@ -11,8 +11,8 @@
 #include <ac/llama/Session.hpp>
 
 // logging
-#include <jalog/Instance.hpp>
-#include <jalog/sinks/ColorSink.hpp>
+#include <ac/jalog/Instance.hpp>
+#include <ac/jalog/sinks/ColorSink.hpp>
 
 // model source directory
 #include "ac-test-data-llama-dir.h"
@@ -21,8 +21,8 @@
 #include <string>
 
 int main() try {
-    jalog::Instance jl;
-    jl.setup().add<jalog::sinks::ColorSink>();
+    ac::jalog::Instance jl;
+    jl.setup().add<ac::jalog::sinks::ColorSink>();
 
     // initialize the library
     ac::llama::initLibrary();

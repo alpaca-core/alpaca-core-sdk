@@ -7,7 +7,7 @@ target_include_directories(ac-whisper INTERFACE .)
 target_link_libraries(ac-whisper
     PRIVATE
         whisper
-        jalog::jalog
+        ac::jalog
     PUBLIC
         splat::splat
         ac::astl-private

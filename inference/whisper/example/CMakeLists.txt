@@ -8,8 +8,7 @@ set(TARGET example-ac-whisper-basic)
 add_executable(${TARGET} e-basic.cpp)
 target_link_libraries(${TARGET} PRIVATE
     ac::whisper
-    jalog::jalog
-    jalog::sinklib
+    ac::jalog
     ac-test-data::whisper
     ac-dev::audio
 )
@@ -20,8 +19,7 @@ if(TARGET ac-dev::imgui)
     add_executable(${TARGET} e-gui.cpp)
     target_link_libraries(${TARGET} PRIVATE
         ac::whisper
-        jalog::jalog
-        jalog::sinklib
+        ac::jalog
         ac-test-data::whisper
         ac-dev::audio
         ac-dev::imgui

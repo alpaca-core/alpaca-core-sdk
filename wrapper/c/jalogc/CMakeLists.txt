@@ -10,8 +10,7 @@ target_link_libraries(jalogc
     PUBLIC
         splat::splat
     PRIVATE
-        jalog::jalog
-        jalog::sinklib
+        ac::jalog
 )
 add_library(ac-c::jalogc ALIAS jalogc)
 

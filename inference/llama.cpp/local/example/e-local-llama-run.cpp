@@ -7,16 +7,16 @@
 #include <ac/local/Model.hpp>
 #include <ac/local/Instance.hpp>
 
-#include <jalog/Instance.hpp>
-#include <jalog/sinks/DefaultSink.hpp>
+#include <ac/jalog/Instance.hpp>
+#include <ac/jalog/sinks/DefaultSink.hpp>
 
 #include <iostream>
 
 #include "ac-test-data-llama-dir.h"
 
 int main() try {
-    jalog::Instance jl;
-    jl.setup().add<jalog::sinks::DefaultSink>();
+    ac::jalog::Instance jl;
+    jl.setup().add<ac::jalog::sinks::DefaultSink>();
 
     ac::local::ModelFactory factory;
     ac::local::addLlamaInference(factory);
