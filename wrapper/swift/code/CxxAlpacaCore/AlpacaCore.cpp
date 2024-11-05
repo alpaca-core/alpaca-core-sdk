@@ -9,16 +9,16 @@
 #include <ac/local/LocalLlama.hpp>
 #include <ac/local/LocalWhisper.hpp>
 
-#include <jalog/Instance.hpp>
-#include <jalog/sinks/DefaultSink.hpp>
+#include <ac/jalog/Instance.hpp>
+#include <ac/jalog/sinks/DefaultSink.hpp>
 
 namespace AC {
 
 static std::unique_ptr<local::ModelFactory> factorySingleton;
 
 void initSDK() {
-    jalog::Instance jl;
-    jl.setup().add<jalog::sinks::DefaultSink>();
+    ac::jalog::Instance jl;
+    jl.setup().add<ac::jalog::sinks::DefaultSink>();
 
     factorySingleton = std::make_unique<local::ModelFactory>();
 

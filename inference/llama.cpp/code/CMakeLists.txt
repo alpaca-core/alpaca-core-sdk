@@ -7,7 +7,7 @@ target_include_directories(ac-llama INTERFACE .)
 target_link_libraries(ac-llama
     PRIVATE
         llama
-        jalog::jalog
+        ac::jalog
     PUBLIC
         splat::splat
         ac::astl-private

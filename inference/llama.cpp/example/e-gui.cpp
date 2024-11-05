@@ -13,9 +13,9 @@
 #include <imgui_impl_sdlrenderer2.h>
 #include <SDL.h>
 
-#include <jalog/Instance.hpp>
-#include <jalog/Log.hpp>
-#include <jalog/sinks/ColorSink.hpp>
+#include <ac/jalog/Instance.hpp>
+#include <ac/jalog/Log.hpp>
+#include <ac/jalog/sinks/ColorSink.hpp>
 
 #include <algorithm>
 #include <iostream>
@@ -177,7 +177,7 @@ public:
 
     void unload() {
         m_state.reset();
-        JALOG(Info, "unloaded ", m_name);
+        AC_JALOG(Info, "unloaded ", m_name);
     }
     void load() {
         ac::llama::Model::Params modelParams;
@@ -192,8 +192,8 @@ private:
 
 int main(int, char**) {
     // setup logging
-    jalog::Instance jl;
-    jl.setup().add<jalog::sinks::ColorSink>();
+    ac::jalog::Instance jl;
+    jl.setup().add<ac::jalog::sinks::ColorSink>();
 
     // setup llama
     ac::llama::initLibrary();
@@ -220,7 +220,7 @@ int main(int, char**) {
 
     SDL_RendererInfo info;
     SDL_GetRendererInfo(renderer, &info);
-    JALOG(Info, "SDL_Renderer: ", info.name);
+    AC_JALOG(Info, "SDL_Renderer: ", info.name);
 
     // setup imgui
     IMGUI_CHECKVERSION();

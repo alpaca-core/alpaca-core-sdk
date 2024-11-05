@@ -27,6 +27,5 @@ target_link_libraries(ac-jni PRIVATE
     ac::local-dummy
     ac::local-llama
     ac::local-whisper
-    jalog::jalog
-    jalog::sinklib
+    ac::jalog
 )

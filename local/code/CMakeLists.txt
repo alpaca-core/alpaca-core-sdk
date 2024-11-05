@@ -6,7 +6,7 @@ add_library(ac::local ALIAS ac-local)
 
 target_link_libraries(ac-local
     PRIVATE
-        jalog::jalog
+        ac::jalog
         ac::astl-private
     PUBLIC
         ac::astl-public

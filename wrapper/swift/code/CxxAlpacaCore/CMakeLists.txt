@@ -37,8 +37,7 @@ target_link_libraries(AlpacaCoreSwift
         ac-local-dummy
         ac-local-whisper
         ac-local-llama
-        jalog::jalog
-        jalog::sinklib
+        ac::jalog
 )
 
 if(CMAKE_GENERATOR STREQUAL Xcode)

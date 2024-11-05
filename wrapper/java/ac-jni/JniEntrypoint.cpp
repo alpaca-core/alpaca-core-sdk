@@ -1,14 +1,14 @@
 #include "jni.hpp"
 #include "JniApi.hpp"
 
-#include <jalog/Instance.hpp>
-#include <jalog/sinks/DefaultSink.hpp>
+#include <ac/jalog/Instance.hpp>
+#include <ac/jalog/sinks/DefaultSink.hpp>
 
 #include <iostream>
 
 extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* jvm, void*) {
-    jalog::Instance jl;
-    jl.setup().add<jalog::sinks::DefaultSink>();
+    ac::jalog::Instance jl;
+    jl.setup().add<ac::jalog::sinks::DefaultSink>();
 
     auto& env = jni::GetEnv(*jvm);
 

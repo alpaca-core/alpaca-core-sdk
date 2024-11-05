@@ -6,7 +6,7 @@ add_library(ac::dummy ALIAS ac-dummy)
 target_include_directories(ac-dummy INTERFACE .)
 target_link_libraries(ac-dummy
     PRIVATE
-        jalog::jalog
+        ac::jalog
     PUBLIC
         splat::splat
         ac::astl-private

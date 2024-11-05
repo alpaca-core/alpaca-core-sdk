@@ -9,8 +9,7 @@ function(add_local_llama_example name)
     target_link_libraries(${tgt} PRIVATE
         ac::local
         ac::local-llama
-        jalog::jalog
-        jalog::sinklib
+        ac::jalog
         ac-test-data::llama
     )
     set_target_properties(${tgt} PROPERTIES FOLDER example)

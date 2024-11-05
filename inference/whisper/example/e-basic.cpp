@@ -12,8 +12,8 @@
 #include <ac-audio.hpp>
 
 // logging
-#include <jalog/Instance.hpp>
-#include <jalog/sinks/ColorSink.hpp>
+#include <ac/jalog/Instance.hpp>
+#include <ac/jalog/sinks/ColorSink.hpp>
 
 // model source directory
 #include "ac-test-data-whisper-dir.h"
@@ -23,8 +23,8 @@
 #include <vector>
 
 int main() try {
-    jalog::Instance jl;
-    jl.setup().add<jalog::sinks::ColorSink>();
+    ac::jalog::Instance jl;
+    jl.setup().add<ac::jalog::sinks::ColorSink>();
 
     std::cout << "Basic example\n";
 
