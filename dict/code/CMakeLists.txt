@@ -10,5 +10,6 @@ target_sources(ac-dict INTERFACE FILE_SET HEADERS FILES
 )
 
 install(TARGETS ac-dict
+    EXPORT ac-local
     FILE_SET HEADERS
 )

@@ -4,9 +4,9 @@
 add_library(ac-schema INTERFACE)
 add_library(ac::schema ALIAS ac-schema)
 target_link_libraries(ac-schema INTERFACE
-    ac::astl-private
+    ac::astl-public
     ac::dict
-    magic_enum::magic_enum
+    # magic_enum::magic_enum
 )
 target_sources(ac-schema INTERFACE FILE_SET HEADERS FILES
     ac/schema/ModelSchema.hpp
@@ -16,5 +16,6 @@ target_sources(ac-schema INTERFACE FILE_SET HEADERS FILES
 )
 
 install(TARGETS ac-schema
+    EXPORT ac-local
     FILE_SET HEADERS
 )

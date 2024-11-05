@@ -18,5 +18,6 @@ target_sources(astl-public INTERFACE FILE_SET HEADERS FILES
 # target_link_libraries(astl INTERFACE )
 
 install(TARGETS astl-public
+    EXPORT ac-local
     FILE_SET HEADERS
 )

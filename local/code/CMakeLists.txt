@@ -35,5 +35,10 @@ target_sources(ac-local
 )
 
 install(TARGETS ac-local
+    EXPORT ac-local
     FILE_SET HEADERS
+)
+install(EXPORT ac-local
+    NAMESPACE ac::
+    DESTINATION share/cmake
 )
