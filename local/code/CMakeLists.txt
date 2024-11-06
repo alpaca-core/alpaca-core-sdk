@@ -29,6 +29,9 @@ target_sources(ac-local
         ac/local/Instance.hpp
 
         ac/local/ModelFactory.hpp
+
+        ac/local/PluginInterface.hpp
+        ac/local/PluginLoader.hpp
     PRIVATE
         ac/local/Logging.hpp
         ac/local/Logging.cpp
@@ -36,6 +39,7 @@ target_sources(ac-local
         ac/local/VtableExports.cpp
 
         ac/local/ModelFactory.cpp
+        ac/local/PluginLoader.cpp
 )
 
 install(TARGETS ac-local
