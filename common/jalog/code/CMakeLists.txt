@@ -88,6 +88,6 @@ target_link_libraries(ac-jalog
 )
 
 install(TARGETS ac-jalog
-    EXPORT ac-local
+    EXPORT ac-local-targets
     FILE_SET HEADERS
 )

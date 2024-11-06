@@ -16,6 +16,6 @@ target_sources(ac-schema INTERFACE FILE_SET HEADERS FILES
 )
 
 install(TARGETS ac-schema
-    EXPORT ac-local
+    EXPORT ac-local-targets
     FILE_SET HEADERS
 )
