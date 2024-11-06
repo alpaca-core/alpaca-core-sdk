@@ -107,3 +107,16 @@ endif()
 if(AC_BUILD_POC)
     add_subdirectory(poc)
 endif()
+
+#################
+# export and install
+set(namespace ac::)
+
+export(EXPORT ac-local-targets
+    NAMESPACE ${namespace}
+)
+
+install(EXPORT ac-local-targets
+    NAMESPACE ${namespace}
+    DESTINATION share/cmake
+)
