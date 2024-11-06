@@ -3,6 +3,10 @@
 #
 icm_add_lib(ac-local AC_LOCAL)
 add_library(ac::local ALIAS ac-local)
+set_target_properties(ac-local PROPERTIES
+    DEBUG_POSTFIX -d
+    EXPORT_NAME local
+)
 
 target_link_libraries(ac-local
     PRIVATE

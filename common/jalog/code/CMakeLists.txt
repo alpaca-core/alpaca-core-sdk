@@ -3,6 +3,10 @@
 #
 icm_add_lib(ac-jalog AC_JALOG)
 add_library(ac::jalog ALIAS ac-jalog)
+set_target_properties(ac-jalog PROPERTIES
+    DEBUG_POSTFIX -d
+    EXPORT_NAME jalog
+)
 
 target_sources(ac-jalog
     INTERFACE FILE_SET HEADERS FILES
