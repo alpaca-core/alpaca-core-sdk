@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 #
 include("${CMAKE_CURRENT_LIST_DIR}/ac-local-targets.cmake")
-message(STATUS "ac-local dev @CMAKE_BUILD_TYPE@ found in ${CMAKE_CURRENT_LIST_DIR}")
+message(STATUS "ac-local @PROJECT_VERSION@@PROJECT_VERSION_TAG@ @CMAKE_BUILD_TYPE@ found in ${CMAKE_CURRENT_LIST_DIR}")
 
 if(WIN32 AND CMAKE_RUNTIME_OUTPUT_DIRECTORY)
     # on windows we need to have the dlls in the runtime directory
