@@ -114,8 +114,14 @@ endif()
 # export and install
 set(namespace ac::)
 
+# export
 export(EXPORT ac-local-targets
     NAMESPACE ${namespace}
+)
+configure_file(
+    cmake/lib/plugin_util.cmake
+    plugin_util.cmake
+    COPYONLY
 )
 configure_file(
     ac-local-config-export.in.cmake
@@ -123,6 +129,7 @@ configure_file(
     @ONLY
 )
 
+# install
 install(EXPORT ac-local-targets
     NAMESPACE ${namespace}
     DESTINATION share/cmake
