@@ -66,7 +66,14 @@ PluginInterface PluginLoader::loadPlugin(std::string_view path, std::string_view
         throw_ex{} << "Failed to find " << PluginLoadFunc_name << " in " << path << " " << lib;
     }
 
-    return f();
+    auto iface = f();
+
+    if (iface.acLocalVersion != Project_Version) {
+        unload_plugin(h);
+        throw_ex{} << "Plugin " << path << " " << lib << " was built with incompatible ac-local version";
+    }
+
+    return iface;
 }
 
 } // namespace ac::local

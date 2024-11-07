@@ -16,9 +16,17 @@ target_link_libraries(ac-local
         ac::dict
         ac::schema
 )
+
+configure_file(
+    version.in.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/ac/local/version.h
+    @ONLY
+)
+
 target_sources(ac-local
     INTERFACE FILE_SET HEADERS FILES
         ac/local/export.h
+        ac/local/version.h
 
         ac/local/ModelDesc.hpp
         ac/local/ProgressCb.hpp
