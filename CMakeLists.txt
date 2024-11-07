@@ -115,6 +115,11 @@ set(namespace ac::)
 export(EXPORT ac-local-targets
     NAMESPACE ${namespace}
 )
+configure_file(
+    ac-local-config-export.in.cmake
+    ac-local-config.cmake
+    @ONLY
+)
 
 install(EXPORT ac-local-targets
     NAMESPACE ${namespace}
