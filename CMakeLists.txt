@@ -25,7 +25,10 @@ CPMAddPackage(gh:iboB/icm@1.5.4)
 list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake"
     "${icm_SOURCE_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../ac-local-cmake-lib"
 )
+
+include(init_ac_local_prj)
 
 include(icm_add_lib)
 include(ac_lib_subdirs)
@@ -38,22 +41,8 @@ include(ac_module)
 
 #################
 # cfg
-if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-    set(alpacaCoreIsRoot YES)
-else()
-    set(alpacaCoreIsRoot NO)
-endif()
-
-if(alpacaCoreIsRoot)
-    # setup various compiler settings that would otherwise be expected to come
-    # from the outside
-    include(./root-setup.cmake)
-endif()
-
-# normally we wouldn't just prevent a warning globaly like the following lines,
-# but it is our opinion that this warning is just stupid
-if(NOT MSVC)
-	add_compile_options(-Wno-missing-field-initializers)
+if(projectIsSubdir)
+    set(ac-local_VERSION ${ac-local_VERSION} PARENT_SCOPE)
 endif()
 
 option(BUILD_SHARED_LIBS "${CMAKE_PROJECT_NAME}: build shared libraries" ON)
@@ -62,15 +51,11 @@ option(AC_BUILD_LOCAL "${CMAKE_PROJECT_NAME}: build local inference api" ON)
 
 set(AC_INFERENCE_LIBS "all" CACHE STRING "${CMAKE_PROJECT_NAME}: inference libraries to build")
 
-cmake_dependent_option(AC_BUILD_ACORD "${CMAKE_PROJECT_NAME}: build Alpaca Core Daemon (acord)" ${alpacaCoreIsRoot}
-    AC_BUILD_LOCAL OFF
-)
+option(AC_BUILD_TOOLS "${CMAKE_PROJECT_NAME}: build tools" ${toolsDefault})
 
-option(AC_BUILD_TOOLS "${CMAKE_PROJECT_NAME}: build tools" ${alpacaCoreIsRoot})
-
-option(AC_BUILD_TESTS "${CMAKE_PROJECT_NAME}: build tests" ${alpacaCoreIsRoot})
-option(AC_BUILD_EXAMPLES "${CMAKE_PROJECT_NAME}: build examples" ${alpacaCoreIsRoot})
-option(AC_BUILD_POC "${CMAKE_PROJECT_NAME}: build proof of concept targets" ${alpacaCoreIsRoot})
+option(AC_BUILD_TESTS "${CMAKE_PROJECT_NAME}: build tests" ${testsDefault})
+option(AC_BUILD_EXAMPLES "${CMAKE_PROJECT_NAME}: build examples" ${examplesDefault})
+option(AC_BUILD_POC "${CMAKE_PROJECT_NAME}: build proof of concept targets" ${examplesDefault})
 mark_as_advanced(AC_BUILD_TESTS AC_BUILD_EXAMPLES AC_BUILD_POC)
 
 #################
@@ -98,7 +83,7 @@ if(NOT AC_INFERENCE_LIBS STREQUAL "none")
 endif()
 
 if(AC_BUILD_ACORD)
-    add_subdirectory(acord)
+    # add_subdirectory(acord)
 endif()
 
 if(AC_BUILD_LOCAL)
@@ -117,11 +102,6 @@ set(namespace ac::)
 # export
 export(EXPORT ac-local-targets
     NAMESPACE ${namespace}
-)
-configure_file(
-    cmake/lib/plugin_util.cmake
-    plugin_util.cmake
-    COPYONLY
 )
 configure_file(
     ac-local-config-export.in.cmake
