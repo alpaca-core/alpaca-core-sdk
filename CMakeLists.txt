@@ -34,7 +34,6 @@ include(icm_add_lib)
 include(ac_lib_subdirs)
 include(icm_testing)
 include(icm_build_failure_testing)
-include(CMakeDependentOption)
 include(ac_dep)
 include(icm_option)
 include(ac_module)
@@ -42,6 +41,7 @@ include(ac_module)
 #################
 # cfg
 if(projectIsSubdir)
+    # make our version known to projects which add us as a subdirectory
     set(ac-local_VERSION ${ac-local_VERSION} PARENT_SCOPE)
 endif()
 

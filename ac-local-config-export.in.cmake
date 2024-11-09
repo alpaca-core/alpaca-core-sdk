@@ -21,5 +21,3 @@ if(WIN32 AND CMAKE_RUNTIME_OUTPUT_DIRECTORY)
         )
     endif()
 endif()
-
-include("${CMAKE_CURRENT_LIST_DIR}/plugin_util.cmake")
