@@ -4,20 +4,14 @@
 cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
 project(ac-local
-    VERSION 0.1.0
+    VERSION 0.1.1
     DESCRIPTION "Alpaca Core Local SDK"
     LANGUAGES C CXX
 )
 
 set(PROJECT_VERSION_TAG dev)
 
-#################
-# cpm
-if(NOT CPM_SOURCE_CACHE AND NOT DEFINED ENV{CPM_SOURCE_CACHE})
-    set(CPM_SOURCE_CACHE "${CMAKE_CURRENT_SOURCE_DIR}/.cpm")
-    message(STATUS "Setting cpm cache dir to: ${CPM_SOURCE_CACHE}")
-endif()
-include(./get_cpm.cmake)
+include(./get-ac-local-cmake-lib.cmake)
 
 #################
 # cmake lib
@@ -25,12 +19,12 @@ CPMAddPackage(gh:iboB/icm@1.5.4)
 list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake"
     "${icm_SOURCE_DIR}"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../ac-local-cmake-lib"
 )
 
 include(init_ac_local_prj)
 
 include(icm_add_lib)
+include(ac_local_lib)
 include(ac_lib_subdirs)
 include(icm_testing)
 include(icm_build_failure_testing)

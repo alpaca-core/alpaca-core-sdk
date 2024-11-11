@@ -1,5 +1,10 @@
 {
-  "version": 3,
+  "version": 5,
+  "vendor": {
+    "comments": {
+      "intro": "This is the only place where comments are allowed before CMake 3.31 (preset version 10)"
+    }
+  },
   "configurePresets": [
     {
       "name": "base",
@@ -8,7 +13,7 @@
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "installDir": "${sourceDir}/out/install/${presetName}",
       "cacheVariables": {
-        "CMAKE_EXPORT_COMPILE_COMMANDS": true
+        "AC_BUILD_PRESET_NAME": "${presetName}"
       }
     },
     {
@@ -25,112 +30,70 @@
     },
 
     {
-      "name": "debug",
-      "inherits": "base-debug"
+      "name": "standalone",
+      "description": "Standalone build with no deps on other projects. Suitable for CI builds.",
+      "hidden": true
     },
     {
-      "name": "release",
-      "inherits": "base-release"
-    },
-
-    {
-      "name": "static",
-      "hidden": true,
-      "cacheVariables": { "BUILD_SHARED_LIBS": "OFF" }
-    },
-    {
-      "name": "debug-static",
-      "inherits": ["base-debug", "static"]
-    },
-    {
-      "name": "release-static",
-      "inherits": ["base-release", "static"]
-    },
-
-    {
-      "name": "sanitized",
+      "name": "mono-root",
+      "description": "Deps on other projects are resolved by paths relative to this one. Suitable for local development.",
       "hidden": true,
       "cacheVariables": {
-        "AC_JAVA_WRAPPER": false,
-        "AC_SWIFT_WRAPPER": false
+        "AC_MONO_ROOT": true
       }
     },
     {
-      "name": "asan",
+      "name": "mono-comp",
       "hidden": true,
-      "inherits": "sanitized",
-      "cacheVariables": { "SAN_ADDR": true }
+      "cacheVariables": {
+        "AC_MONO_COMP": true
+      }
     },
     {
-      "name": "ubsan",
+      "name": "deploy-root",
+      "description": "Deps are resolved by find_package and must be installed in the system.",
       "hidden": true,
-      "inherits": "sanitized",
-      "cacheVariables": { "SAN_UB": true }
+      "cacheVariables": {
+        "AC_DEPLOY_ROOT": true
+      }
     },
     {
-      "name": "lsan",
+      "name": "deploy-comp",
       "hidden": true,
-      "inherits": "sanitized",
-      "cacheVariables": { "SAN_LEAK": true }
+      "cacheVariables": {
+        "AC_DEPLOY_COMP": true
+      }
+    },
+
+    {
+      "name": "debug",
+      "inherits": ["base-debug", "mono-root"]
     },
     {
-      "name": "tsan",
-      "hidden": true,
-      "inherits": "sanitized",
-      "cacheVariables": { "SAN_THREAD": true }
-    },
-    {
-      "name": "debug-asan",
-      "inherits": ["base-debug", "asan"]
-    },
-    {
-      "name": "release-asan",
-      "inherits": ["base-release", "asan"]
-    },
-    {
-      "name": "debug-tsan",
-      "inherits": ["base-debug", "tsan"]
-    },
-    {
-      "name": "release-tsan",
-      "inherits": ["base-release", "tsan"]
-    },
-    {
-      "name": "debug-aublsan",
-      "description": "combining addr, ub and leak sanitizers is widely supported on many platforms",
-      "inherits": ["base-debug", "asan", "ubsan", "lsan"]
+      "name": "release",
+      "inherits": ["base-release", "mono-root"]
     },
 
     {
       "name": "gcc",
       "hidden": true,
-      "cacheVariables": { "CMAKE_C_COMPILER": "gcc", "CMAKE_CXX_COMPILER": "g++" }
-    },
-    {
-      "name": "debug-gcc",
-      "inherits": ["base-debug", "gcc"]
-    },
-    {
-      "name": "release-gcc",
-      "inherits": ["base-release", "gcc"]
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++"
+      }
     },
     {
       "name": "clang",
       "hidden": true,
-      "cacheVariables": { "CMAKE_C_COMPILER": "clang", "CMAKE_CXX_COMPILER": "clang++" },
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++"
+      },
       "vendor": {
         "microsoft.com/VisualStudioSettings/CMake/1.0": {
           "intelliSenseMode": "windows-clang-x64"
         }
       }
-    },
-    {
-      "name": "debug-clang",
-      "inherits": ["base-debug", "clang"]
-    },
-    {
-      "name": "release-clang",
-      "inherits": ["base-release", "clang"]
     },
 
     {
@@ -147,26 +110,48 @@
         "CMAKE_ANDROID_STL_TYPE": "c++_static"
       }
     },
+
     {
-      "name": "debug-android",
-      "inherits": ["debug", "android"]
+      "name": "asan",
+      "hidden": true,
+      "cacheVariables": { "SAN_ADDR": true }
     },
     {
-      "name": "release-android",
-      "inherits": ["release", "android"]
+      "name": "ubsan",
+      "hidden": true,
+      "cacheVariables": { "SAN_UB": true }
+    },
+    {
+      "name": "lsan",
+      "hidden": true,
+      "cacheVariables": { "SAN_LEAK": true }
+    },
+    {
+      "name": "tsan",
+      "hidden": true,
+      "cacheVariables": { "SAN_THREAD": true }
     },
 
     {
-      "name": "tooling",
-      "description": "suitable for tooling: no wrappers, no tests, no examples, and no demos",
-      "inherits": ["base-debug"],
-      "cacheVariables": {
-        "AC_BUILD_ACORD": false,
-        "AC_BUILD_TESTS": false,
-        "AC_BUILD_EXAMPLES": false,
-        "AC_BUILD_POC": false,
-        "AC_WRAPPER_DEFAULT_VALUE": "OFF"
-      }
+      "name": "debug-asan",
+      "inherits": ["debug", "asan"]
+    },
+    {
+      "name": "release-asan",
+      "inherits": ["release", "asan"]
+    },
+    {
+      "name": "debug-tsan",
+      "inherits": ["debug", "tsan"]
+    },
+    {
+      "name": "release-tsan",
+      "inherits": ["release", "tsan"]
+    },
+    {
+      "name": "debug-aublsan",
+      "description": "combining addr, ub and leak sanitizers is widely supported on many platforms",
+      "inherits": ["debug", "asan", "ubsan", "lsan"]
     }
   ]
 }
