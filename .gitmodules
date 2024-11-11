@@ -7,6 +7,3 @@
 [submodule "inference/whisper/whisper.cpp"]
 	path = inference/whisper/whisper.cpp
 	url = https://github.com/alpaca-core/whisper.cpp.git
-[submodule "wrapper/java/jni.hpp"]
-	path = wrapper/java/jni.hpp
-	url = https://github.com/alpaca-core/jni.hpp.git

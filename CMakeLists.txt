@@ -39,17 +39,17 @@ if(NOT PROJECT_IS_TOP_LEVEL)
     set(ac-local_VERSION ${ac-local_VERSION} PARENT_SCOPE)
 endif()
 
-option(BUILD_SHARED_LIBS "${CMAKE_PROJECT_NAME}: build shared libraries" ON)
+option(BUILD_SHARED_LIBS "${PROJECT_NAME}: build shared libraries" ON)
 
-option(AC_BUILD_LOCAL "${CMAKE_PROJECT_NAME}: build local inference api" ON)
+option(AC_BUILD_LOCAL "${PROJECT_NAME}: build local inference api" ON)
 
-set(AC_INFERENCE_LIBS "all" CACHE STRING "${CMAKE_PROJECT_NAME}: inference libraries to build")
+set(AC_INFERENCE_LIBS "all" CACHE STRING "${PROJECT_NAME}: inference libraries to build")
 
-option(AC_BUILD_TOOLS "${CMAKE_PROJECT_NAME}: build tools" ON)
+option(AC_BUILD_TOOLS "${PROJECT_NAME}: build tools" ON)
 
-option(AC_BUILD_TESTS "${CMAKE_PROJECT_NAME}: build tests" ${testsDefault})
-option(AC_BUILD_EXAMPLES "${CMAKE_PROJECT_NAME}: build examples" ${examplesDefault})
-option(AC_BUILD_POC "${CMAKE_PROJECT_NAME}: build proof of concept targets" ${examplesDefault})
+option(AC_BUILD_TESTS "${PROJECT_NAME}: build tests" ${testsDefault})
+option(AC_BUILD_EXAMPLES "${PROJECT_NAME}: build examples" ${examplesDefault})
+option(AC_BUILD_POC "${PROJECT_NAME}: build proof of concept targets" ${examplesDefault})
 mark_as_advanced(AC_BUILD_TESTS AC_BUILD_EXAMPLES AC_BUILD_POC)
 
 #################
