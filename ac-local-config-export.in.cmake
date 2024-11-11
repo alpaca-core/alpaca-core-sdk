@@ -1,4 +1,4 @@
-# Copyright (c) Borislav Stanimirov
+# Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
 include("${CMAKE_CURRENT_LIST_DIR}/ac-local-targets.cmake")
