@@ -11,7 +11,7 @@ project(ac-local
 
 set(PROJECT_VERSION_TAG dev)
 
-include(./get-ac-local-cmake-lib.cmake)
+include(./get-ac-build.cmake)
 
 #################
 # cmake lib
@@ -21,7 +21,7 @@ list(APPEND CMAKE_MODULE_PATH
     "${icm_SOURCE_DIR}"
 )
 
-include(init_ac_local_prj)
+include(init_ac_prj)
 
 include(icm_add_lib)
 include(ac_local_lib)
@@ -34,7 +34,7 @@ include(ac_module)
 
 #################
 # cfg
-if(projectIsSubdir)
+if(NOT PROJECT_IS_TOP_LEVEL)
     # make our version known to projects which add us as a subdirectory
     set(ac-local_VERSION ${ac-local_VERSION} PARENT_SCOPE)
 endif()
@@ -45,7 +45,7 @@ option(AC_BUILD_LOCAL "${CMAKE_PROJECT_NAME}: build local inference api" ON)
 
 set(AC_INFERENCE_LIBS "all" CACHE STRING "${CMAKE_PROJECT_NAME}: inference libraries to build")
 
-option(AC_BUILD_TOOLS "${CMAKE_PROJECT_NAME}: build tools" ${toolsDefault})
+option(AC_BUILD_TOOLS "${CMAKE_PROJECT_NAME}: build tools" ON)
 
 option(AC_BUILD_TESTS "${CMAKE_PROJECT_NAME}: build tests" ${testsDefault})
 option(AC_BUILD_EXAMPLES "${CMAKE_PROJECT_NAME}: build examples" ${examplesDefault})

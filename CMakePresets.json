@@ -11,10 +11,7 @@
       "hidden": true,
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/out/build/${presetName}",
-      "installDir": "${sourceDir}/out/install/${presetName}",
-      "cacheVariables": {
-        "AC_BUILD_PRESET_NAME": "${presetName}"
-      }
+      "installDir": "${sourceDir}/out/install/${presetName}"
     },
     {
       "name": "base-debug",
@@ -31,47 +28,33 @@
 
     {
       "name": "standalone",
-      "description": "Standalone build with no deps on other projects. Suitable for CI builds.",
+      "description": "Standalone build. Suitable for users and CI builds.",
       "hidden": true
     },
     {
-      "name": "mono-root",
-      "description": "Deps on other projects are resolved by paths relative to this one. Suitable for local development.",
+      "name": "mono",
+      "description": "ac-build monorepo. Deps on other projects are resolved by paths relative to this one. Suitable for local development.",
       "hidden": true,
       "cacheVariables": {
-        "AC_MONO_ROOT": true
+        "AC_BUILD_MONO": true
       }
     },
     {
-      "name": "mono-comp",
+      "name": "component",
+      "description": "ac-build component. Deps on other projects are resolved by find_package.",
       "hidden": true,
       "cacheVariables": {
-        "AC_MONO_COMP": true
-      }
-    },
-    {
-      "name": "deploy-root",
-      "description": "Deps are resolved by find_package and must be installed in the system.",
-      "hidden": true,
-      "cacheVariables": {
-        "AC_DEPLOY_ROOT": true
-      }
-    },
-    {
-      "name": "deploy-comp",
-      "hidden": true,
-      "cacheVariables": {
-        "AC_DEPLOY_COMP": true
+        "AC_BUILD_COMPONENT": true
       }
     },
 
     {
       "name": "debug",
-      "inherits": ["base-debug", "mono-root"]
+      "inherits": ["base-debug", "mono"]
     },
     {
       "name": "release",
-      "inherits": ["base-release", "mono-root"]
+      "inherits": ["base-release", "mono"]
     },
 
     {
