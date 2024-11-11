@@ -91,6 +91,12 @@ endif()
 
 #################
 # export and install
+configure_file(
+    ac-local-config-version.in.cmake
+    ac-local-config-version.cmake
+    @ONLY
+)
+
 set(namespace ac::)
 
 # export
