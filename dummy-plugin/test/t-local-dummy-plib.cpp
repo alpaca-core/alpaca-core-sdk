@@ -3,7 +3,7 @@
 //
 #include "ac-test-data-dummy-models.h"
 
-#include <ac/local/LocalDummy.hpp>
+#include <aclp-dummy-plib.hpp>
 
 #include <ac/local/ModelFactory.hpp>
 
@@ -16,7 +16,7 @@
 
 struct DummyFactory : public ac::local::ModelFactory {
     DummyFactory() {
-        ac::local::addDummyInference(*this);
+        add_dummy_to_ac_local(*this);
     }
 };
 

@@ -65,17 +65,17 @@ function(add_ac_local_plugin)
 
 #if ACLPLIB_@nameSym@_SHARED
 #   if BUILDING_ACLPLIB_@nameSym@
-#       define ACLPLIB_@nameSym@_EXPORT SYMBOL_EXPORT
+#       define ACLPLIB_@nameSym@_API SYMBOL_EXPORT
 #   else
-#       define ACLPLIB_@nameSym@_EXPORT SYMBOL_IMPORT
+#       define ACLPLIB_@nameSym@_API SYMBOL_IMPORT
 #   endif
 #else
-#   define ACLPLIB_@nameSym@_EXPORT
+#   define ACLPLIB_@nameSym@_API
 #endif
 
 namespace ac::local { class ModelFactory; }
 
-extern "C" ACLPLIB_@nameSym@_EXPORT
+extern "C" ACLPLIB_@nameSym@_API
 void add_@nameSym@_to_ac_local(ac::local::ModelFactory& factory);
 ]=]
         @ONLY
@@ -93,6 +93,7 @@ void add_@nameSym@_to_ac_local(ac::local::ModelFactory& factory);
         ${privateName}-plib.cpp
         ${ARG_PLIB_SOURCES}
     )
+    add_library(aclp::${ARG_NAME}-plib ALIAS ${plibTargetName})
     target_link_libraries(${plibTargetName} PUBLIC
         ${baselibTargetName}
     )
