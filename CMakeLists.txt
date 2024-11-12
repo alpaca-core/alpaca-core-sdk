@@ -31,6 +31,7 @@ include(icm_build_failure_testing)
 include(ac_dep)
 include(icm_option)
 include(ac_module)
+include(ac_local_plugin_util)
 
 #################
 # cfg
