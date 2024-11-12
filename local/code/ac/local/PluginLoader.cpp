@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 //
 #include "PluginLoader.hpp"
-#include <string>
 #include <astl/throw_stdex.hpp>
 
 #if defined (_WIN32)
@@ -12,15 +11,8 @@
 
 typedef HMODULE hplugin;
 
-inline hplugin load_plugin(std::string_view dir, std::string_view lib) {
-    std::string l{dir};
-    l += '/';
-#if defined(__GNUC__)
-    l += "lib";
-#endif
-    l += lib;
-    l += ".dll";
-    return LoadLibraryA(l.c_str());
+inline hplugin load_plugin(const std::string& fname) {
+    return LoadLibraryA(fname.c_str());
 }
 
 #define unload_plugin FreeLibrary
@@ -54,23 +46,34 @@ namespace ac::local {
 static const char* PluginLoadFunc_name = "acLocalPluginLoad";
 
 PluginInterface PluginLoader::loadPlugin(std::string_view path, std::string_view lib) {
-    hplugin h = load_plugin(path, lib);
+    std::string fname{path};
+    fname += '/';
+#if defined(__GNUC__)
+    fname += "lib";
+#endif
+    fname += lib;
+    fname += ".dll";
+    return loadPlugin(fname);
+}
+
+PluginInterface PluginLoader::loadPlugin(const std::string& filename) {
+    hplugin h = load_plugin(filename);
     if (!h) {
-        throw_ex{} << "Failed to load plugin " << path << " "  << lib;
+        throw_ex{} << "Failed to load plugin " << filename;
     }
 
 
     auto f = (PluginInterface::PluginLoadFunc)get_proc(h, PluginLoadFunc_name);
     if (!f) {
         unload_plugin(h);
-        throw_ex{} << "Failed to find " << PluginLoadFunc_name << " in " << path << " " << lib;
+        throw_ex{} << "Failed to find " << PluginLoadFunc_name << " in " << filename;
     }
 
     auto iface = f();
 
     if (iface.acLocalVersion != Project_Version) {
         unload_plugin(h);
-        throw_ex{} << "Plugin " << path << " " << lib << " was built with incompatible ac-local version";
+        throw_ex{} << "Plugin " << filename << " was built with incompatible ac-local version";
     }
 
     return iface;
