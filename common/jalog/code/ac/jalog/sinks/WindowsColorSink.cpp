@@ -6,7 +6,7 @@
 #include "../Entry.hpp"
 #include "SimpleStdioSink.hpp"
 
-#include <itlib/time_t.hpp>
+#include <astl/time_t.hpp>
 
 #if !defined(NOMINMAX)
 #define NOMINMAX
@@ -71,7 +71,7 @@ void WindowsColorSink::record(const Entry& entry)
     // time
     {
         using namespace std::chrono;
-        itlib::time_t tt(system_clock::to_time_t(entry.timestamp));
+        astl::time_t tt(system_clock::to_time_t(entry.timestamp));
         auto tm = tt.localtime();
 
         char buf[26];

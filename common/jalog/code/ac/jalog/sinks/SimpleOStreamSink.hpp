@@ -8,7 +8,7 @@
 #include <ostream>
 #include <iomanip>
 
-#include <itlib/time_t.hpp>
+#include <astl/time_t.hpp>
 
 namespace ac::jalog::sinks
 {
@@ -43,7 +43,7 @@ public:
         // time
         {
             using namespace std::chrono;
-            itlib::time_t tt(system_clock::to_time_t(entry.timestamp));
+            astl::time_t tt(system_clock::to_time_t(entry.timestamp));
             auto tm = tt.localtime();
             out << std::put_time(&tm, "%m/%d %X");
 

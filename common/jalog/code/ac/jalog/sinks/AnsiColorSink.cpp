@@ -5,7 +5,7 @@
 
 #include "../Entry.hpp"
 
-#include <itlib/time_t.hpp>
+#include <astl/time_t.hpp>
 
 #include <cstdio>
 
@@ -19,7 +19,7 @@ void AnsiColorSink::record(const Entry& entry)
     // time
     {
         using namespace std::chrono;
-        itlib::time_t tt(system_clock::to_time_t(entry.timestamp));
+        astl::time_t tt(system_clock::to_time_t(entry.timestamp));
         auto tm = tt.localtime();
 
         char buf[32];

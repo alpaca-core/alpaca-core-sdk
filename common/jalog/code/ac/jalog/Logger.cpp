@@ -7,7 +7,7 @@
 #include "DefaultScope.hpp"
 #include "Sink.hpp"
 
-#include <itlib/qalgorithm.hpp>
+#include <astl/qalgorithm.hpp>
 
 #include <cassert>
 
@@ -97,7 +97,7 @@ void Logger::registerScope(Scope& scope)
     }
 
     // place scope into sparse vector registry
-    auto slot = itlib::pfind(m_scopes, nullptr);
+    auto slot = astl::pfind(m_scopes, nullptr);
     if (!slot)
     {
         slot = &m_scopes.emplace_back();
@@ -109,7 +109,7 @@ void Logger::unregisterScope(Scope& scope)
 {
     std::lock_guard l(m_mutex);
     // free slot in sparse vector registry
-    auto slot = itlib::pfind(m_scopes, &scope);
+    auto slot = astl::pfind(m_scopes, &scope);
     assert(slot); // bug! Scope must be registered
     *slot = nullptr;
 }
