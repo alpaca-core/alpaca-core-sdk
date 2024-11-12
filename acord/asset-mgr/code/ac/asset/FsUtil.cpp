@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #include "FsUtil.hpp"
-#include <astl/throw_ex.hpp>
+#include <astl/throw_stdex.hpp>
 #include <cstdio>
 #include <cstdlib>
 #include <filesystem>

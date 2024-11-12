@@ -1,7 +1,7 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include <astl/throw_ex.hpp>
+#include <astl/throw_stdex.hpp>
 #include <doctest/doctest.h>
 
 [[noreturn]] void throw_val(int val) {

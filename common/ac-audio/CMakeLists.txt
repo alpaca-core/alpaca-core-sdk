@@ -24,7 +24,7 @@ target_link_libraries(ac-audio
         splat::splat
         itlib::itlib
     PRIVATE
-        ac::astl-private
+        ac::astl
         dr_libs
 )
 target_sources(ac-audio

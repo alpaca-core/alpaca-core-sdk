@@ -81,7 +81,7 @@ endif()
 target_compile_definitions(ac-jalog PUBLIC -DAC_JALOG_NO_BUILTIN_ASYNC=1)
 target_link_libraries(ac-jalog
     PUBLIC
-        ac::astl-public
+        ac::astl
     PRIVATE
         itlib::itlib
 )

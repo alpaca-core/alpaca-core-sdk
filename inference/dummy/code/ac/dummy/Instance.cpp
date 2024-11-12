@@ -3,7 +3,7 @@
 //
 #include "Instance.hpp"
 #include "Model.hpp"
-#include <astl/throw_ex.hpp>
+#include <astl/throw_stdex.hpp>
 
 namespace ac::dummy {
 

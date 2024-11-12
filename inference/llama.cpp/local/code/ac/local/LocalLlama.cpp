@@ -18,7 +18,7 @@
 #include <astl/move.hpp>
 #include <astl/move_capture.hpp>
 #include <astl/iile.h>
-#include <astl/throw_ex.hpp>
+#include <astl/throw_stdex.hpp>
 #include <astl/workarounds.h>
 
 namespace ac::local {

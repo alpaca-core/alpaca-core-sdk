@@ -6,7 +6,7 @@ icm_add_test(
     NAME ac-jalog-qwrite
     TARGET test-ac-jalog-qwrite
     LIBRARIES
-        ac::astl-public
+        ac::astl
         doctest::main
     SOURCES t-qwrite.cpp
 )

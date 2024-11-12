@@ -1,6 +1,6 @@
-add_library(astl-public INTERFACE)
-add_library(ac::astl-public ALIAS astl-public)
-target_sources(astl-public INTERFACE FILE_SET HEADERS FILES
+add_library(astl INTERFACE)
+add_library(ac::astl ALIAS astl)
+target_sources(astl INTERFACE FILE_SET HEADERS FILES
     astl/symbol_export.h
     astl/mem_streambuf.hpp
     astl/safe_func.hpp
@@ -17,7 +17,7 @@ target_sources(astl-public INTERFACE FILE_SET HEADERS FILES
 # Any required dependencies must be copied inside
 # target_link_libraries(astl INTERFACE )
 
-install(TARGETS astl-public
+install(TARGETS astl
     EXPORT ac-local-targets
     FILE_SET HEADERS
 )

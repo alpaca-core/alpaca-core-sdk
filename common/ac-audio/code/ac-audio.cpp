@@ -9,7 +9,7 @@
 #include <dr_wav.h>
 
 #include <itlib/sentry.hpp>
-#include <astl/throw_ex.hpp>
+#include <astl/throw_stdex.hpp>
 
 #include <limits>
 

@@ -10,9 +10,8 @@ set_target_properties(ac-local PROPERTIES
 target_link_libraries(ac-local
     PRIVATE
         ac::jalog
-        ac::astl-private
     PUBLIC
-        ac::astl-public
+        ac::astl
         ac::dict
         ac::schema
 )

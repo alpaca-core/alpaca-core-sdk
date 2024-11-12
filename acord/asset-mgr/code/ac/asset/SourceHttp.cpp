@@ -6,7 +6,7 @@
 #include <ahttp/ahttp.hpp>
 #include <xxhash/hash.hpp>
 #include <astl/move.hpp>
-#include <astl/throw_ex.hpp>
+#include <astl/throw_stdex.hpp>
 #include <fstream>
 
 namespace ac::asset {

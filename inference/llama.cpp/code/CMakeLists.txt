@@ -10,7 +10,6 @@ target_link_libraries(ac-llama
         ac::jalog
     PUBLIC
         splat::splat
-        ac::astl-private
 )
 target_sources(ac-llama PRIVATE
     ac/llama/export.h

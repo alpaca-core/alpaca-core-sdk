@@ -12,7 +12,7 @@
 #include <string> // must be here (workardound for furi bug)
 #include <furi/furi.hpp>
 
-#include <astl/throw_ex.hpp>
+#include <astl/throw_stdex.hpp>
 #include <astl/move.hpp>
 
 #include <limits>

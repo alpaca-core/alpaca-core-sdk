@@ -3,7 +3,7 @@
 //
 #include "PluginLoader.hpp"
 #include <string>
-#include <astl/throw_ex.hpp>
+#include <astl/throw_stdex.hpp>
 
 #if defined (_WIN32)
 

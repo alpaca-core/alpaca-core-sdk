@@ -7,7 +7,7 @@
 
 #include <whisper.h>
 
-#include <astl/throw_ex.hpp>
+#include <astl/throw_stdex.hpp>
 #include <astl/iile.h>
 #include <astl/move.hpp>
 #include <itlib/sentry.hpp>

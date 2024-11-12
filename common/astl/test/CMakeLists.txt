@@ -2,8 +2,6 @@
 # SPDX-License-Identifier: MIT
 #
 macro(astl_test test)
-    # just test everything with astl-private
-    # we're not testing for api leakage here
     add_doctest_lib_test(${test} astl t-${test}.cpp)
 endmacro()
 

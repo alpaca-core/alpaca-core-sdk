@@ -4,7 +4,7 @@
 add_library(ac-schema INTERFACE)
 add_library(ac::schema ALIAS ac-schema)
 target_link_libraries(ac-schema INTERFACE
-    ac::astl-public
+    ac::astl
     ac::dict
     # magic_enum::magic_enum
 )

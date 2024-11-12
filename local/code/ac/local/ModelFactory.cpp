@@ -3,7 +3,7 @@
 //
 #include "ModelFactory.hpp"
 #include "ModelLoader.hpp"
-#include <astl/throw_ex.hpp>
+#include <astl/throw_stdex.hpp>
 
 namespace ac::local {
 
