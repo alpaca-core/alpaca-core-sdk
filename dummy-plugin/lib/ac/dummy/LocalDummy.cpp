@@ -4,8 +4,8 @@
 #include "LocalDummy.hpp"
 #include "DummyModelSchema.hpp"
 
-#include <ac/dummy/Instance.hpp>
-#include <ac/dummy/Model.hpp>
+#include "Instance.hpp"
+#include "Model.hpp"
 
 #include <ac/local/Instance.hpp>
 #include <ac/local/Model.hpp>
@@ -142,9 +142,11 @@ public:
 
 } // namespace
 
-void addDummyInference(ModelFactory& factory) {
-    static DummyModelLoader loader;
+} // namespace ac::local
+
+namespace ac::dummy {
+void addToModelFactory(local::ModelFactory & factory) {
+    static local::DummyModelLoader loader;
     factory.addLoader("dummy", loader);
 }
-
-} // namespace ac::local
+} // namespace ac::dummy

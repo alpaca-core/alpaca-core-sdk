@@ -22,7 +22,7 @@ Instance::Instance(Model& model, InitParams params)
 
 Instance::~Instance() = default;
 
-itlib::generator<const std::string&> Instance::newSession(std::vector<std::string> input, SessionParams params) {
+astl::generator<const std::string&> Instance::newSession(std::vector<std::string> input, SessionParams params) {
     int i = 0;
     auto maybeThrow = [&]() {
         if (i == params.throwOn) {

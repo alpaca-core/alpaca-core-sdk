@@ -1,8 +1,7 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include "export.h"
-#include <itlib/generator.hpp>
+#include <astl/generator.hpp>
 #include <span>
 #include <vector>
 #include <string>
@@ -10,7 +9,7 @@
 namespace ac::dummy {
 class Model;
 
-class AC_DUMMY_EXPORT Instance {
+class Instance {
 public:
     struct InitParams {
         int cutoff = -1; // cut off model data to n-th element (or don't cut if -1)
@@ -24,7 +23,7 @@ public:
         int throwOn = -1; // throw exception on n-th token (or don't throw if -1)
     };
 
-    itlib::generator<const std::string&> newSession(std::vector<std::string> input, SessionParams params);
+    astl::generator<const std::string&> newSession(std::vector<std::string> input, SessionParams params);
 
     const Model& model() const noexcept { return m_model; }
 private:

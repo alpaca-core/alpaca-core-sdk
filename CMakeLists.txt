@@ -47,6 +47,8 @@ set(AC_INFERENCE_LIBS "all" CACHE STRING "${PROJECT_NAME}: inference libraries t
 
 option(AC_BUILD_TOOLS "${PROJECT_NAME}: build tools" ON)
 
+option(AC_LOCAL_BUILD_DUMMY_PLUGIN "${PROJECT_NAME}: build dummy plugin for tests and examples" ON)
+
 option(AC_BUILD_TESTS "${PROJECT_NAME}: build tests" ${testsDefault})
 option(AC_BUILD_EXAMPLES "${PROJECT_NAME}: build examples" ${examplesDefault})
 option(AC_BUILD_POC "${PROJECT_NAME}: build proof of concept targets" ${examplesDefault})
@@ -71,6 +73,10 @@ add_subdirectory(common)
 add_subdirectory(dict)
 
 ac_add_local_subdir()
+
+if(AC_LOCAL_BUILD_DUMMY_PLUGIN)
+    add_subdirectory(dummy-plugin)
+endif()
 
 if(NOT AC_INFERENCE_LIBS STREQUAL "none")
     #add_subdirectory(inference)

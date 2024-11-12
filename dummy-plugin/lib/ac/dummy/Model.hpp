@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include "export.h"
 #include <string>
 #include <vector>
 #include <span>
@@ -10,7 +9,7 @@
 
 namespace ac::dummy {
 
-class AC_DUMMY_EXPORT Model {
+class Model {
 public:
     struct Params {
         std::string splice; // splice string before each data element
