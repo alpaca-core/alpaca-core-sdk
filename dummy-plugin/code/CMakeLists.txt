@@ -14,3 +14,13 @@ add_ac_local_plugin(
         ac/dummy/LocalDummy.hpp
         ac/dummy/LocalDummy.cpp
 )
+
+# install plib to make life easier for external projects
+# which want to add simple tests and examples
+set_target_properties(aclp-dummy-plib PROPERTIES
+    EXPORT_NAME aclp::dummy-plib
+)
+install(TARGETS aclp-dummy-plib
+    EXPORT ac-local-targets
+    FILE_SET HEADERS
+)

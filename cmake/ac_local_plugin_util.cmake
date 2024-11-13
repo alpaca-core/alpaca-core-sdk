@@ -95,10 +95,15 @@ void add_@nameSym@_to_ac_local(ac::local::ModelFactory& factory) {
 }
 ]=]
     )
-    add_ac_local_lib(${plibTargetName} ACLPLIB_${nameSym}
-        ${privateName}-plib.hpp
-        ${privateName}-plib.cpp
-        ${ARG_PLIB_SOURCES}
+    add_ac_local_lib(${plibTargetName} ACLPLIB_${nameSym})
+    target_sources(${plibTargetName}
+        PUBLIC FILE_SET HEADERS
+        BASE_DIRS "${CMAKE_CURRENT_BINARY_DIR}"
+        FILES
+            "${CMAKE_CURRENT_BINARY_DIR}/${privateName}-plib.hpp"
+        PRIVATE
+            ${privateName}-plib.cpp
+            ${ARG_PLIB_SOURCES}
     )
     add_library(aclp::${ARG_NAME}-plib ALIAS ${plibTargetName})
     target_link_libraries(${plibTargetName}
@@ -106,10 +111,6 @@ void add_@nameSym@_to_ac_local(ac::local::ModelFactory& factory) {
             ac::local
         PRIVATE
             ${baselibTargetName}
-    )
-    target_include_directories(${plibTargetName}
-        PUBLIC "${CMAKE_CURRENT_BINARY_DIR}"
-        INTERFACE .
     )
 
     # add plugin
@@ -183,8 +184,9 @@ static_assert(std::is_same_v<decltype(&acLocalPluginLoad), PluginInterface::Plug
     add_library(${infoTargetName} INTERFACE)
     add_library(aclp::${ARG_NAME}-plugin-info ALIAS ${infoTargetName})
     target_sources(${infoTargetName}
-        INTERFACE FILE_SET HEADERS FILES
-        BASE_DIRS ${CMAKE_CURRENT_BINARY_DIR}
-            ${infoTargetName}.h
+        INTERFACE FILE_SET HEADERS
+        BASE_DIRS "${CMAKE_CURRENT_BINARY_DIR}"
+        FILES
+            "${CMAKE_CURRENT_BINARY_DIR}/${infoTargetName}.h"
     )
 endfunction()

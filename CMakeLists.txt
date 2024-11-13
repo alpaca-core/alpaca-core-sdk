@@ -104,12 +104,8 @@ configure_file(
     @ONLY
 )
 
-set(namespace ac::)
-
 # export
-export(EXPORT ac-local-targets
-    NAMESPACE ${namespace}
-)
+export(EXPORT ac-local-targets)
 configure_file(
     ac-local-config-export.in.cmake
     ac-local-config.cmake
@@ -118,6 +114,5 @@ configure_file(
 
 # install
 install(EXPORT ac-local-targets
-    NAMESPACE ${namespace}
     DESTINATION share/cmake
 )

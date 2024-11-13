@@ -4,7 +4,7 @@
 add_ac_local_lib(ac-local AC_LOCAL)
 add_library(ac::local ALIAS ac-local)
 set_target_properties(ac-local PROPERTIES
-    EXPORT_NAME local
+    EXPORT_NAME ac::local
 )
 
 target_link_libraries(ac-local
