@@ -10,9 +10,9 @@ class ModelFactory;
 struct PluginInterface {
     using PluginLoadFunc = PluginInterface(*)();
 
-    Version acLocalVersion;
+    Version acLocalVersion; // version of ac-local this plugin was built with
 
-    Version pluginVersion;
+    Version pluginVersion; // version of the plugin itself
 
     void (*addLoadersToFactory)(ModelFactory& factory);
 };

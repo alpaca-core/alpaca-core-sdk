@@ -8,9 +8,19 @@ endmacro()
 dummy_baselib_test(Model)
 dummy_baselib_test(Instance)
 
-add_doctest_lib_test(i aclp-dummy-plib
+add_doctest_test(aclp-dummy-plib
     SOURCES
         t-local-dummy-plib.cpp
     LIBRARIES
+        aclp::dummy-plib
+        ac-test-data::dummy
+)
+
+add_doctest_test(aclp-dummy-plugin
+    SOURCES
+        t-local-dummy-plugin.cpp
+    LIBRARIES
+        ac::local
+        aclp::dummy-plugin-info
         ac-test-data::dummy
 )

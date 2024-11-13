@@ -14,7 +14,7 @@ function(add_ac_local_plugin)
     # public names for targets which may be installed
     set(publicName aclp-${ARG_NAME})
     set(pluginTargetName ${publicName}-plugin)
-    set(infoTargetName ${publicName}-info)
+    set(infoTargetName ${pluginTargetName}-info)
     string(MAKE_C_IDENTIFIER ${ARG_NAME} publicNameSym)
 
     # configure version
@@ -164,19 +164,25 @@ static_assert(std::is_same_v<decltype(&acLocalPluginLoad), PluginInterface::Plug
     )
 
     # add helper target for tests and examples which want to use the plugin directly
-    file(GENERATE
-        OUTPUT ${infoTargetName}.h
-        CONTENT [=[
+    string(CONFIGURE [=[
 // Generated file. Do not edit!
 #pragma once
-#define ACLP_@publicNameSym@_PLUGIN_FILE "$<TARGET_PROPERTY:FILE>"
+#define ACLP_@publicNameSym@_PLUGIN_FILE "$<TARGET_FILE:@pluginTargetName@>"
 ]=]
+        infoFileContentConfigured
+        @ONLY
+    )
+
+    file(GENERATE
+        OUTPUT ${infoTargetName}.h
+        CONTENT ${infoFileContentConfigured}
         TARGET ${pluginTargetName}
     )
     add_library(${infoTargetName} INTERFACE)
-    add_library(aclp::${ARG_NAME}-info ALIAS ${infoTargetName})
+    add_library(aclp::${ARG_NAME}-plugin-info ALIAS ${infoTargetName})
     target_sources(${infoTargetName}
         INTERFACE FILE_SET HEADERS FILES
+        BASE_DIRS ${CMAKE_CURRENT_BINARY_DIR}
             ${infoTargetName}.h
     )
 endfunction()

@@ -61,7 +61,7 @@ mark_as_advanced(AC_BUILD_TESTS AC_BUILD_EXAMPLES AC_BUILD_POC)
 CPMAddPackage(gh:iboB/itlib@1.11.4)
 
 if(AC_BUILD_TESTS)
-    CPMAddPackage(gh:iboB/doctest-util@0.1.2)
+    CPMAddPackage(gh:iboB/doctest-util@0.1.3)
     set_target_properties(doctest PROPERTIES FOLDER test)
     set_target_properties(doctest-main PROPERTIES FOLDER test)
     enable_testing()
