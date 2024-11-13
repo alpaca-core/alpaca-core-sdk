@@ -145,7 +145,7 @@ public:
 } // namespace ac::local
 
 namespace ac::dummy {
-void addToModelFactory(local::ModelFactory & factory) {
+void addToAcLocal(local::ModelFactory & factory) {
     static local::DummyModelLoader loader;
     factory.addLoader("dummy", loader);
 }

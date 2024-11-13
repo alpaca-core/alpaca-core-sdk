@@ -38,8 +38,7 @@ function(add_ac_local_plugin)
     add_library(${baselibTargetName} STATIC
         ${ARG_SOURCES}
         ${privateName}-version.h
-        ${ARG_NAME}-ac-local-interface.hpp
-        ${ARG_NAME}-ac-local-interface.cpp
+        ${ARG_NAME}-ac-local-interface.hpp        
     )
     target_link_libraries(${baselibTargetName} PUBLIC
         ac::local

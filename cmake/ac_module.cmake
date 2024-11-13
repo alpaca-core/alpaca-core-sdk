@@ -12,10 +12,10 @@ macro(ac_add_module name)
         )
     endif()
     if(APPLE)
-    	# by default on macOS the default suffix by cmake for modules is .so
-    	# this doesn't play well with many loaders which require .dylib
-    	# instead of changing this globally and potentially breaking third
-    	# party code, we'll only do this for our own modules
-    	set_target_properties(${name} PROPERTIES SUFFIX ".dylib")
+        # by default on macOS the default suffix by cmake for modules is .so
+        # this doesn't play well with many loaders which require .dylib
+        # instead of changing this globally and potentially breaking third
+        # party code, we'll only do this for our own modules
+        set_target_properties(${name} PROPERTIES SUFFIX ".dylib")
     endif()
 endmacro()

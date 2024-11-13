@@ -5,6 +5,6 @@
 namespace ac {
 namespace local { class ModelFactory; }
 namespace dummy {
-void addToModelFactory(local::ModelFactory& factory);
+void addToAcLocal(local::ModelFactory& factory);
 }
 }
