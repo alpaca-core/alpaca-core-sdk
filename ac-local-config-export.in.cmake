@@ -17,14 +17,14 @@ if(WIN32 AND CMAKE_RUNTIME_OUTPUT_DIRECTORY)
             COMMAND ${CMAKE_COMMAND} -E create_symlink
                 "${CMAKE_CURRENT_LIST_DIR}/bin/ac-jalog.dll"
                 "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/ac-jalog.dll"
+            COMMAND ${CMAKE_COMMAND} -E create_symlink
+                "${CMAKE_CURRENT_LIST_DIR}/bin/aclp-dummy-plib.dll"
+                "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/aclp-dummy-plib.dll"
             COMMAND_ERROR_IS_FATAL ANY
         )
     endif()
 endif()
 
-# propagate the module path to package adders
-set(CMAKE_MODULE_PATH
-    ${CMAKE_MODULE_PATH}
-    "@CMAKE_CURRENT_SOURCE_DIR@/cmake"
-    PARENT_SCOPE
-)
+# also add cmake lib
+list(APPEND CMAKE_MODULE_PATH "@CMAKE_CURRENT_SOURCE_DIR@/cmake")
+include(ac_local_plugin_util)
