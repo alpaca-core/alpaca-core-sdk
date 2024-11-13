@@ -1,6 +1,9 @@
 # Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
+include_guard(GLOBAL)
+
+include(ac_local_lib)
 
 function(add_ac_local_plugin)
     cmake_parse_arguments(ARG "" "NAME" "SOURCES;PLUGIN_SOURCES;PLIB_SOURCES;LIBRARIES" ${ARGN})
@@ -38,7 +41,7 @@ function(add_ac_local_plugin)
     add_library(${baselibTargetName} STATIC
         ${ARG_SOURCES}
         ${privateName}-version.h
-        ${ARG_NAME}-ac-local-interface.hpp        
+        ${ARG_NAME}-ac-local-interface.hpp
     )
     target_link_libraries(${baselibTargetName} PUBLIC
         ac::local

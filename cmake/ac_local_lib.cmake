@@ -1,6 +1,8 @@
 # Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
+include_guard(GLOBAL)
+
 function(add_ac_local_lib target cname)
     if(AC_LOCAL_STATIC)
         add_library(${target} STATIC ${ARGN})

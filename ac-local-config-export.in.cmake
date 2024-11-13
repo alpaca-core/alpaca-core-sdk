@@ -21,3 +21,10 @@ if(WIN32 AND CMAKE_RUNTIME_OUTPUT_DIRECTORY)
         )
     endif()
 endif()
+
+# propagate the module path to package adders
+set(CMAKE_MODULE_PATH
+    ${CMAKE_MODULE_PATH}
+    "@CMAKE_CURRENT_SOURCE_DIR@/cmake"
+    PARENT_SCOPE
+)
