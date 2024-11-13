@@ -21,7 +21,10 @@ typedef HMODULE hplugin;
 
 typedef void* hplugin;
 
-#define load_plugin dlopen
+hplugin load_plugin(const char* filename) {
+    return dlopen(filename, RTLD_NOW | RTLD_LOCAL);
+}
+
 #define unload_plugin dlclose
 #define get_proc dlsym
 
