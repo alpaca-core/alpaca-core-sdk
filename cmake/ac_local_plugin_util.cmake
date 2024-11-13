@@ -38,8 +38,8 @@ function(add_ac_local_plugin)
     add_library(${baselibTargetName} STATIC
         ${ARG_SOURCES}
         ${privateName}-version.h
-        add-${ARG_NAME}-to-ac-local.h
-        add-${ARG_NAME}-to-ac-local.cpp
+        ${ARG_NAME}-ac-local-interface.hpp
+        ${ARG_NAME}-ac-local-interface.cpp
     )
     target_link_libraries(${baselibTargetName} PUBLIC
         ac::local
@@ -85,7 +85,12 @@ void add_@nameSym@_to_ac_local(ac::local::ModelFactory& factory);
         CONTENT [=[
 // Generated file. Do not edit!
 #include "@privateName@-plib.hpp"
-#include "add-@ARG_NAME@-to-ac-local.h"
+#include "${ARG_NAME}-ac-local-interface.hpp"
+
+extern "C"
+void add_@nameSym@_to_ac_local(ac::local::ModelFactory& factory) {
+    ac::@nameSym@::addToAcLocal(factory);
+}
 ]=]
     )
     add_ac_local_lib(${plibTargetName} ACLPLIB_${nameSym}
@@ -94,8 +99,15 @@ void add_@nameSym@_to_ac_local(ac::local::ModelFactory& factory);
         ${ARG_PLIB_SOURCES}
     )
     add_library(aclp::${ARG_NAME}-plib ALIAS ${plibTargetName})
-    target_link_libraries(${plibTargetName} PUBLIC
-        ${baselibTargetName}
+    target_link_libraries(${plibTargetName}
+        PUBLIC
+            ac::local
+        PRIVATE
+            ${baselibTargetName}
+    )
+    target_include_directories(${plibTargetName}
+        PUBLIC "${CMAKE_CURRENT_BINARY_DIR}"
+        INTERFACE .
     )
 
     # add plugin
@@ -105,7 +117,7 @@ void add_@nameSym@_to_ac_local(ac::local::ModelFactory& factory);
 // Generated file. Do not edit!
 #include <astl/symbol_export.h>
 #include "@privateName@-version.h"
-#include "add-@ARG_NAME@-to-ac-local.h"
+#include "@ARG_NAME@-ac-local-interface.hpp"
 #include <ac/local/PluginInterface.hpp>
 
 namespace ac::local {
@@ -119,7 +131,7 @@ PluginInterface acLocalPluginLoad() {
     return {
         .acLocalVersion = ac::local::Project_Version,
         .pluginVersion = ownVersion,
-        .addLoadersToFactory = add_@nameSym@_to_ac_local,
+        .addLoadersToFactory = ac::@nameSym@::addToAcLocal,
     };
 }
 static_assert(std::is_same_v<decltype(&acLocalPluginLoad), PluginInterface::PluginLoadFunc>);

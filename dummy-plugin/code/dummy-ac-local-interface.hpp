@@ -5,5 +5,6 @@
 
 namespace ac::local { class ModelFactory; }
 
-extern "C"
-void add_dummy_to_ac_local(ac::local::ModelFactory& factory);
+namespace ac::dummy {
+void addToAcLocal(ac::local::ModelFactory& factory);
+}
