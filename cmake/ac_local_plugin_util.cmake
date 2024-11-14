@@ -192,7 +192,7 @@ static_assert(std::is_same_v<decltype(&acLocalPluginLoad), PluginInterface::Plug
 endfunction()
 
 function(make_ac_local_plugin_available)
-    cmake_parse_arguments(ARG "" "NAME;VERSION;MONO_DIR;GITHUB" "OPTIONS" ${ARGN})
+    cmake_parse_arguments(ARG "SAVE_TARGET_NAME_TO" "NAME;VERSION;MONO_DIR;GITHUB" "OPTIONS" ${ARGN})
 
     set(pluginId "${ARG_NAME}-${ARG_VERSION}-")
 
@@ -203,6 +203,10 @@ function(make_ac_local_plugin_available)
     endif()
 
     set(pluginId "${pluginId}${idSuffix}")
+
+    if(ARG_SAVE_TARGET_NAME_TO)
+        set(${ARG_SAVE_TARGET_NAME_TO} ${pluginId} PARENT_SCOPE)
+    endif()
 
     if(TARGET ${pluginId})
         # already available
@@ -343,5 +347,8 @@ function(make_ac_local_plugin_available)
         COMMENT "Building AC Plugin ${pluginId}"
     )
 
-    add_dependencies(${pluginId} ac::local cfg-${pluginId})
+    add_dependencies(${pluginId}
+        cfg-${pluginId}
+        ac::local
+    )
 endfunction()
