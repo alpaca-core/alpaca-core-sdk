@@ -190,3 +190,158 @@ static_assert(std::is_same_v<decltype(&acLocalPluginLoad), PluginInterface::Plug
             "${CMAKE_CURRENT_BINARY_DIR}/${infoTargetName}.h"
     )
 endfunction()
+
+function(make_ac_local_plugin_available)
+    cmake_parse_arguments(ARG "" "NAME;VERSION;MONO_DIR;GITHUB" "OPTIONS" ${ARGN})
+
+    set(pluginId "${ARG_NAME}-${ARG_VERSION}-")
+
+    if(NOT ARG_OPTIONS)
+        set(idSuffix "default")
+    else()
+        string(MD5 idSuffix "${ARG_OPTIONS}")
+    endif()
+
+    set(pluginId "${pluginId}${idSuffix}")
+
+    if(TARGET ${pluginId})
+        # already available
+        return()
+    endif()
+
+    # get source directory
+    if(NOT ACP_${pluginId}_SRC)
+
+        # fetch
+        if(AC_BUILD_MONO)
+            if(NOT ARG_MONO_DIR)
+                set(ARG_MONO_DIR ${ARG_NAME})
+            endif()
+            set(srcDir "${CMAKE_SOURCE_DIR}/../${ARG_MONO_DIR}")
+            # TODO: check version
+        else()
+            CPMAddPackage(
+                NAME ${ARG_NAME}
+                VERSION ${ARG_VERSION}
+                GITHUB_REPOSITORY ${ARG_GITHUB}
+                DOWNLOAD_ONLY # don't add as a subdirectory
+            )
+            set(srcDir "${${ARG_NAME}_SOURCE_DIR}")
+        endif()
+
+        set(ACP_${pluginId}_SRC "${srcDir}" CACHE PATH "AC Plugin ${pluginId} source")
+    else()
+        set(srcDir "${ACP_${pluginId}_SRC}")
+    endif()
+
+    # get binary directory
+    if(NOT ACP_${pluginId}_BIN)
+        set(binDir "${CMAKE_BINARY_DIR}/_ac-plugins/${pluginId}")
+        set(ACP_${pluginId}_BIN "${binDir}" CACHE PATH "AC Plugin ${pluginId} binary")
+    else()
+        set(binDir "${ACP_${pluginId}_BIN}")
+    endif()
+
+    # now we build a config file based on our configuration to set with cmake -C
+    set(cfg "# generated cache")
+    get_cmake_property(cacheVars CACHE_VARIABLES)
+    foreach(var ${cacheVars})
+        if(${var} STREQUAL "")
+            # ignore empty
+            continue()
+        endif()
+
+        if(var STREQUAL "CMAKE_ROOT")
+            # not our root :)
+            continue()
+        endif()
+        if(var STREQUAL "CMAKE_INSTALL_PREFIX")
+            # we'll be overwriting that
+            continue()
+        endif()
+
+        get_property(help CACHE ${var} PROPERTY HELPSTRING)
+        get_property(type CACHE ${var} PROPERTY TYPE)
+
+        if(type STREQUAL STATIC)
+            # managed by CMake
+            continue()
+        endif()
+
+        set(propagate NO)
+        if(var STREQUAL "CMAKE_BUILD_TYPE")
+            set(propagate YES)
+        elseif(var MATCHES "CMAKE_GENERATOR")
+            set(propagate YES)
+        elseif(var MATCHES "_ROOT$")
+            # ac-build root or other package
+            set(propagate YES)
+        elseif(var MATCHES "^AC_BUILD")
+            # ac-build options
+            set(propagate YES)
+        elseif(var MATCHES "_CFG_HASH$")
+            # don't thrash our cache
+            set(propagate NO)
+        elseif(var MATCHES "^ACP_")
+            # ac plugin options
+            set(propagate YES)
+        else()
+            if(help STREQUAL "No help, variable specified on the command line.")
+                # provided by command line of parent project
+                set(propagate YES)
+            endif()
+        endif()
+
+        if(propagate)
+            string(APPEND cfg "\nset(${var}\n  \"${${var}}\"\n  CACHE ${type} \"${help}\" FORCE)")
+        endif()
+    endforeach()
+
+    # message(${cfg})
+
+    # instead of recofiguring every time, check whether we have already configured
+    # set config hash
+    string(MD5 cfgHash "${cfg}")
+    set(cachedCfgHash "${ACP_${pluginId}_CFG_HASH}")
+    set(cfgFile "${CMAKE_BINARY_DIR}/_ac-plugins/${pluginId}-cfg.cmake")
+
+    set(optCfgCmd)
+
+    if(NOT EXISTS "${binDir}" OR NOT cfgHash STREQUAL cachedCfgHash)
+        # update hash
+        file(WRITE "${cfgFile}" "${cfg}")
+        set(ACP_${pluginId}_CFG_HASH "${cfgHash}" CACHE STRING "AC Plugin ${pluginId} config hash" FORCE)
+    endif()
+
+    # configure command which depends on the (possibly update cache cfg file)
+    add_custom_command(
+        COMMENT "Configuring AC Plugin ${pluginId}"
+        OUTPUT "${binDir}/CMakeCache.txt"
+        DEPENDS "${cfgFile}"
+        COMMAND ${CMAKE_COMMAND}
+            -S "${srcDir}"
+            -B "${binDir}"
+            -C "${cfgFile}"
+            -DAC_BUILD_COMPONENT=1 # override cache value
+    )
+
+    add_custom_target(cfg-${pluginId}
+        ALL
+        DEPENDS "${binDir}/CMakeCache.txt"
+    )
+
+    # add the target
+    add_custom_target(${pluginId}
+        ALL # always build
+        COMMAND ${CMAKE_COMMAND}
+            --build "${binDir}"
+            --config $<CONFIG>
+        COMMAND ${CMAKE_COMMAND}
+            --install "${binDir}"
+            --config $<CONFIG>
+            --prefix ${CMAKE_BINARY_DIR}/_ac-plugins
+        COMMENT "Building AC Plugin ${pluginId}"
+    )
+
+    add_dependencies(${pluginId} ac::local cfg-${pluginId})
+endfunction()
