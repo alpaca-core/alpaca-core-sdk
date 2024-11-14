@@ -301,6 +301,13 @@ function(make_ac_local_plugin_available)
         endif()
     endforeach()
 
+    # also propagate options
+    foreach(option ${ARG_OPTIONS})
+        cpm_parse_option("${option}") # does the best possible thing
+        set(${OPTION_KEY} "${OPTION_VALUE}")
+        string(APPEND cfg "\nset(${OPTION_KEY}\n  \"${OPTION_VALUE}\"\n CACHE STRING \"User option\" FORCE)")
+    endforeach()
+
     # message(${cfg})
 
     # instead of recofiguring every time, check whether we have already configured
