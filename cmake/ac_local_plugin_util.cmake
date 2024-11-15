@@ -191,7 +191,7 @@ static_assert(std::is_same_v<decltype(&acLocalPluginLoad), PluginInterface::Plug
 endfunction()
 
 function(make_ac_local_plugin_available)
-    cmake_parse_arguments(ARG "SAVE_TARGET_NAME_TO" "NAME;VERSION;MONO_DIR;GITHUB" "OPTIONS" ${ARGN})
+    cmake_parse_arguments(ARG "" "NAME;VERSION;MONO_DIR;GITHUB" "OPTIONS" ${ARGN})
 
     set(pluginId "${ARG_NAME}-${ARG_VERSION}-")
 
@@ -203,9 +203,8 @@ function(make_ac_local_plugin_available)
 
     set(pluginId "${pluginId}${idSuffix}")
 
-    if(ARG_SAVE_TARGET_NAME_TO)
-        set(${ARG_SAVE_TARGET_NAME_TO} ${pluginId} PARENT_SCOPE)
-    endif()
+    # show target name in parent scope
+    set(${ARG_NAME}_TARGET ${pluginId} PARENT_SCOPE)
 
     if(TARGET ${pluginId})
         # already available
@@ -223,6 +222,9 @@ function(make_ac_local_plugin_available)
             set(srcDir "${CMAKE_SOURCE_DIR}/../${ARG_MONO_DIR}")
             # TODO: check version
         else()
+            if(NOT ARG_GITHUB)
+                set(ARG_GITHUB "alpaca-core/${ARG_NAME}")
+            endif()
             CPMAddPackage(
                 NAME ${ARG_NAME}
                 VERSION ${ARG_VERSION}
