@@ -3,7 +3,7 @@
 //
 
 // inline file
-// needs a definition of DummyFactory to be complete
+// needs a definition of DummyRegistry to be complete
 
 #include "ac-test-data-dummy-models.h"
 
@@ -22,20 +22,20 @@ const ac::local::ModelDesc Model_Desc = {
 };
 
 TEST_CASE("bad model") {
-    DummyFactory f;
+    DummyRegistry f;
     CHECK_THROWS_WITH(
         f.createModel({
             .inferenceType = "dummy",
             .assets = {
                 {.path = "nope"}
             }
-            }, {}),
+        }, {}),
         "Failed to open file: nope"
     );
 }
 
 TEST_CASE("bad instance") {
-    DummyFactory f;
+    DummyRegistry f;
     auto model = f.createModel(Model_Desc, {});
     REQUIRE(model);
     CHECK_THROWS_WITH(model->createInstance("nope", {}), "dummy: unknown instance type: nope");
@@ -44,7 +44,7 @@ TEST_CASE("bad instance") {
 }
 
 TEST_CASE("general") {
-    DummyFactory f;
+    DummyRegistry f;
     auto model = f.createModel(Model_Desc, {});
     REQUIRE(model);
 
@@ -71,7 +71,7 @@ TEST_CASE("general") {
 }
 
 TEST_CASE("synthetic") {
-    DummyFactory f;
+    DummyRegistry f;
 
     std::string tag;
     float progress;

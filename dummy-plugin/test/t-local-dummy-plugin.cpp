@@ -3,7 +3,7 @@
 //
 #include <aclp-dummy-info.h>
 #include <ac/local/PluginLoader.hpp>
-#include <ac/local/ModelFactory.hpp>
+#include <ac/local/ModelLoaderRegistry.hpp>
 #include <doctest/doctest.h>
 #include <optional>
 
@@ -16,10 +16,10 @@ struct GlobalFixture {
 };
 GlobalFixture globalFixture;
 
-struct DummyFactory : public ac::local::ModelFactory {
-    DummyFactory() {
+struct DummyRegistry : public ac::local::ModelLoaderRegistry {
+    DummyRegistry() {
         REQUIRE(dummyPluginInterface.has_value());
-        dummyPluginInterface->addLoadersToFactory(*this);
+        dummyPluginInterface->addLoaders(*this);
     }
 };
 

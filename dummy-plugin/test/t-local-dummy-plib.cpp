@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 //
 #include <aclp-dummy-plib.hpp>
-#include <ac/local/ModelFactory.hpp>
+#include <ac/local/ModelLoaderRegistry.hpp>
 
-struct DummyFactory : public ac::local::ModelFactory {
-    DummyFactory() {
+struct DummyRegistry : public ac::local::ModelLoaderRegistry {
+    DummyRegistry() {
         add_dummy_to_ac_local(*this);
     }
 };

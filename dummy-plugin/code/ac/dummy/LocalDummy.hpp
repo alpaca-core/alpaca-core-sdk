@@ -3,8 +3,8 @@
 //
 #pragma once
 namespace ac {
-namespace local { class ModelFactory; }
+namespace local { class ModelLoaderRegistry; }
 namespace dummy {
-void addToAcLocal(local::ModelFactory& factory);
+void addToAcLocal(local::ModelLoaderRegistry& registry);
 }
 }

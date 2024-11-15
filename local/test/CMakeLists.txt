@@ -6,4 +6,4 @@ macro(add_local_test test)
 endmacro()
 
 add_local_test(ProgressCb)
-add_local_test(ModelFactory)
+add_local_test(ModelLoaderRegistry)

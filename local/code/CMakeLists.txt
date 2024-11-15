@@ -30,11 +30,12 @@ target_sources(ac-local
         ac/local/ModelDesc.hpp
         ac/local/ProgressCb.hpp
         ac/local/ModelPtr.hpp
-        ac/local/ModelLoader.hpp
         ac/local/Model.hpp
         ac/local/Instance.hpp
 
-        ac/local/ModelFactory.hpp
+        ac/local/ModelLoader.hpp
+        ac/local/ModelLoaderInfo.hpp
+        ac/local/ModelLoaderRegistry.hpp
 
         ac/local/PluginInterface.hpp
         ac/local/PluginLoader.hpp
@@ -44,7 +45,7 @@ target_sources(ac-local
 
         ac/local/VtableExports.cpp
 
-        ac/local/ModelFactory.cpp
+        ac/local/ModelLoaderRegistry.cpp
         ac/local/PluginLoader.cpp
 )
 

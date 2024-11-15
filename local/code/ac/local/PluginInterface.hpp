@@ -5,7 +5,7 @@
 #include "Version.hpp"
 
 namespace ac::local {
-class ModelFactory;
+class ModelLoaderRegistry;
 
 struct PluginInterface {
     using PluginLoadFunc = PluginInterface(*)();
@@ -14,7 +14,7 @@ struct PluginInterface {
 
     Version pluginVersion; // version of the plugin itself
 
-    void (*addLoadersToFactory)(ModelFactory& factory);
+    void (*addLoaders)(ModelLoaderRegistry& factory);
 };
 
 }

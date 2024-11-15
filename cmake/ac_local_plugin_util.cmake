@@ -74,10 +74,10 @@ function(add_ac_local_plugin)
 #   define ACLPLIB_@nameSym@_API
 #endif
 
-namespace ac::local { class ModelFactory; }
+namespace ac::local { class ModelLoaderRegistry; }
 
 extern "C" ACLPLIB_@nameSym@_API
-void add_@nameSym@_to_ac_local(ac::local::ModelFactory& factory);
+void add_@nameSym@_to_ac_local(ac::local::ModelLoaderRegistry& registry);
 ]=]
         @ONLY
     )
@@ -89,8 +89,8 @@ void add_@nameSym@_to_ac_local(ac::local::ModelFactory& factory);
 #include "${aclpName}-interface.hpp"
 
 extern "C"
-void add_@nameSym@_to_ac_local(ac::local::ModelFactory& factory) {
-    ac::@nameSym@::addToAcLocal(factory);
+void add_@nameSym@_to_ac_local(ac::local::ModelLoaderRegistry& registry) {
+    ac::@nameSym@::addToAcLocal(registry);
 }
 ]=]
     )
@@ -133,7 +133,7 @@ PluginInterface acLocalPluginLoad() {
     return {
         .acLocalVersion = ac::local::Project_Version,
         .pluginVersion = ownVersion,
-        .addLoadersToFactory = ac::@nameSym@::addToAcLocal,
+        .addLoaders = ac::@nameSym@::addToAcLocal,
     };
 }
 static_assert(std::is_same_v<decltype(&acLocalPluginLoad), PluginInterface::PluginLoadFunc>);
