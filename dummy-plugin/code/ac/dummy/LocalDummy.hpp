@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-namespace ac {
-namespace local { class ModelLoaderRegistry; }
-namespace dummy {
-void addToAcLocal(local::ModelLoaderRegistry& registry);
-}
+#include <ac/local/ModelLoaderInfo.hpp>
+#include <vector>
+
+namespace ac::dummy {
+std::vector<ac::local::ModelLoaderInfo> getLoaders();
 }

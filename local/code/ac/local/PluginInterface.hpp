@@ -3,6 +3,8 @@
 //
 #pragma once
 #include "Version.hpp"
+#include "ModelLoaderInfo.hpp"
+#include <vector>
 
 namespace ac::local {
 class ModelLoaderRegistry;
@@ -14,7 +16,7 @@ struct PluginInterface {
 
     Version pluginVersion; // version of the plugin itself
 
-    void (*addLoaders)(ModelLoaderRegistry& factory);
+    std::vector<ModelLoaderInfo> (*getLoaders)();
 };
 
 }

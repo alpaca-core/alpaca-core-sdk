@@ -6,7 +6,7 @@
 
 struct DummyRegistry : public ac::local::ModelLoaderRegistry {
     DummyRegistry() {
-        add_dummy_to_ac_local(*this);
+        add_dummy_to_ac_local_registry(*this);
     }
 };
 

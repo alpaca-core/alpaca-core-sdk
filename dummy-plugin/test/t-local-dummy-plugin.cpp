@@ -18,8 +18,7 @@ GlobalFixture globalFixture;
 
 struct DummyRegistry : public ac::local::ModelLoaderRegistry {
     DummyRegistry() {
-        REQUIRE(dummyPluginInterface.has_value());
-        dummyPluginInterface->addLoaders(*this);
+        addLoaders(dummyPluginInterface->getLoaders());
     }
 };
 

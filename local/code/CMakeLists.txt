@@ -39,6 +39,8 @@ target_sources(ac-local
 
         ac/local/PluginInterface.hpp
         ac/local/PluginLoader.hpp
+
+        ac/local/Lib.hpp
     PRIVATE
         ac/local/Logging.hpp
         ac/local/Logging.cpp
@@ -47,6 +49,8 @@ target_sources(ac-local
 
         ac/local/ModelLoaderRegistry.cpp
         ac/local/PluginLoader.cpp
+
+        ac/local/Lib.cpp
 )
 
 install(TARGETS ac-local

@@ -10,7 +10,6 @@
 #include <ac/local/Instance.hpp>
 #include <ac/local/Model.hpp>
 #include <ac/local/ModelLoader.hpp>
-#include <ac/local/ModelLoaderRegistry.hpp>
 
 #include <astl/move.hpp>
 #include <astl/iile.h>
@@ -145,11 +144,13 @@ public:
 } // namespace ac::local
 
 namespace ac::dummy {
-void addToAcLocal(local::ModelLoaderRegistry& registry) {
-    registry.loaders.push_back({
+std::vector<ac::local::ModelLoaderInfo> getLoaders() {
+    std::vector<ac::local::ModelLoaderInfo> ret;
+    ret.push_back({
         .name = "ac-local dummy",
         .schemaType = "dummy",
         .loader = std::make_unique<local::DummyModelLoader>()
     });
+    return ret;
 }
 } // namespace ac::dummy

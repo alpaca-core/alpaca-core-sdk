@@ -18,6 +18,8 @@ public:
 
     std::vector<ModelLoaderInfo> loaders;
 
+    void addLoaders(std::vector<ModelLoaderInfo> loaders);
+
     const ModelLoaderInfo* findLoader(std::string_view schemaType) const;
 
     // temp until we figure out better loader queries

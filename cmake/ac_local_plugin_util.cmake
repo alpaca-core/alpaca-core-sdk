@@ -57,7 +57,7 @@ function(add_ac_local_plugin)
 
     # add plib
     file(CONFIGURE
-        OUTPUT ${aclpName}-plib.hpp
+        OUTPUT ${aclpName}-plib.h
         CONTENT [=[
 // Generated file. Do not edit!
 #pragma once
@@ -74,10 +74,29 @@ function(add_ac_local_plugin)
 #   define ACLPLIB_@nameSym@_API
 #endif
 
-namespace ac::local { class ModelLoaderRegistry; }
+#if defined(__cplusplus)
+extern "C"
+#endif
+ACLPLIB_@nameSym@_API
+void add_@nameSym@_to_ac_local_global_registry();
+]=]
+        @ONLY
+    )
+        file(CONFIGURE
+        OUTPUT ${aclpName}-plib.hpp
+        CONTENT [=[
+// Generated file. Do not edit!
+#pragma once
+#include "@aclpName@-plib.h"
+#include <ac/local/ModelLoaderInfo.hpp>
+#include <vector>
 
-extern "C" ACLPLIB_@nameSym@_API
-void add_@nameSym@_to_ac_local(ac::local::ModelLoaderRegistry& registry);
+namespace ac::local { class ModelLoaderRegistry; }
+ACLPLIB_@nameSym@_API
+void add_@nameSym@_to_ac_local_registry(ac::local::ModelLoaderRegistry& registry);
+
+ACLPLIB_@nameSym@_API
+std::vector<ac::local::ModelLoaderInfo> get_@nameSym@_model_loaders();
 ]=]
         @ONLY
     )
@@ -86,11 +105,21 @@ void add_@nameSym@_to_ac_local(ac::local::ModelLoaderRegistry& registry);
         CONTENT [=[
 // Generated file. Do not edit!
 #include "@aclpName@-plib.hpp"
-#include "${aclpName}-interface.hpp"
+#include "@aclpName@-interface.hpp"
+#include <ac/local/Lib.hpp>
+#include <ac/local/ModelLoaderRegistry.hpp>
 
 extern "C"
-void add_@nameSym@_to_ac_local(ac::local::ModelLoaderRegistry& registry) {
-    ac::@nameSym@::addToAcLocal(registry);
+void add_@nameSym@_to_ac_local_global_registry() {
+    add_@nameSym@_to_ac_local_registry(ac::local::Lib::modelLoaderRegistry());
+}
+
+void add_@nameSym@_to_ac_local_registry(ac::local::ModelLoaderRegistry& registry) {
+    registry.addLoaders(ac::@nameSym@::getLoaders());
+}
+
+std::vector<ac::local::ModelLoaderInfo> get_@nameSym@_model_loaders() {
+    return ac::@nameSym@::getLoaders();
 }
 ]=]
     )
@@ -99,6 +128,7 @@ void add_@nameSym@_to_ac_local(ac::local::ModelLoaderRegistry& registry) {
         PUBLIC FILE_SET HEADERS
         BASE_DIRS "${CMAKE_CURRENT_BINARY_DIR}"
         FILES
+            "${CMAKE_CURRENT_BINARY_DIR}/${aclpName}-plib.h"
             "${CMAKE_CURRENT_BINARY_DIR}/${aclpName}-plib.hpp"
         PRIVATE
             ${aclpName}-plib.cpp
@@ -133,7 +163,7 @@ PluginInterface acLocalPluginLoad() {
     return {
         .acLocalVersion = ac::local::Project_Version,
         .pluginVersion = ownVersion,
-        .addLoaders = ac::@nameSym@::addToAcLocal,
+        .getLoaders = ac::@nameSym@::getLoaders,
     };
 }
 static_assert(std::is_same_v<decltype(&acLocalPluginLoad), PluginInterface::PluginLoadFunc>);

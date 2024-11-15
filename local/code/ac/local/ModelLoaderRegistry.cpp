@@ -7,6 +7,12 @@
 
 namespace ac::local {
 
+void ModelLoaderRegistry::addLoaders(std::vector<ModelLoaderInfo> loaders) {
+    for (auto& loader : loaders) {
+        this->loaders.push_back(astl::move(loader));
+    }
+}
+
 const ModelLoaderInfo* ModelLoaderRegistry::findLoader(std::string_view schemaType) const {
     for (auto& loader : loaders) {
         if (loader.schemaType == schemaType) {
