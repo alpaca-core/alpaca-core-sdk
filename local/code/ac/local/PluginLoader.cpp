@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #include "PluginLoader.hpp"
+#include "Version.hpp"
 #include <astl/throw_stdex.hpp>
 
 #if defined (_WIN32)

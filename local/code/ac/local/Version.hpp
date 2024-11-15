@@ -3,23 +3,12 @@
 //
 #pragma once
 #include "version.h"
+#include <astl/version.hpp>
 #include <compare>
 
 namespace ac::local {
-struct Version {
-    int major = 0;
-    int minor = 0;
-    int patch = 0;
 
-    constexpr Version() = default;
-    constexpr Version(int major, int minor, int patch)
-        : major(major), minor(minor), patch(patch)
-    {}
-
-    auto operator<=>(const Version&) const = default;
-};
-
-inline constexpr Version Project_Version(
+inline constexpr astl::version Project_Version(
     AC_LOCAL_VERSION_MAJOR,
     AC_LOCAL_VERSION_MINOR,
     AC_LOCAL_VERSION_PATCH

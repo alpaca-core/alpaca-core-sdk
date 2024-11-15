@@ -151,12 +151,13 @@ const std::vector<ac::local::ModelLoaderPtr>& get_@nameSym@_model_loaders() {
 #include "@aclpName@-version.h"
 #include "@aclpName@-interface.hpp"
 #include <ac/local/PluginInterface.hpp>
+#include <ac/local/Version.hpp>
 
 namespace ac::local {
 
 extern "C" SYMBOL_EXPORT
 PluginInterface acLocalPluginLoad() {
-    constexpr Version ownVersion(
+    constexpr astl::version ownVersion(
         ACLP_@nameSym@_VERSION_MAJOR, ACLP_@nameSym@_VERSION_MINOR, ACLP_@nameSym@_VERSION_PATCH
     );
 
