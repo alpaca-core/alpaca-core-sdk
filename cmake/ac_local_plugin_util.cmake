@@ -109,17 +109,19 @@ void add_@nameSym@_to_ac_local_registry(ac::local::ModelLoaderRegistry& registry
 #include "@aclpName@-interface.hpp"
 #include <ac/local/PluginPlibUtil.inl>
 
+PlibHelper g_helper{ac::@nameSym@::getPluginInterface()};
+
 extern "C"
 void add_@nameSym@_to_ac_local_global_registry() {
-    addLoadersToGlobalRegistry(ac::@nameSym@::getLoaders);
+    g_helper.addLoadersToGlobalRegistry();
 }
 
 void add_@nameSym@_to_ac_local_registry(ac::local::ModelLoaderRegistry& registry) {
-    addLoadersToRegistry(ac::@nameSym@::getLoaders, registry);
+    g_helper.addLoadersToRegistry(registry);
 }
 
 const std::vector<ac::local::ModelLoaderPtr>& get_@nameSym@_model_loaders() {
-    return getGLoaders(ac::@nameSym@::getLoaders);
+    return g_helper.getLoaders();
 }
 ]=]
     )
@@ -156,18 +158,23 @@ const std::vector<ac::local::ModelLoaderPtr>& get_@nameSym@_model_loaders() {
 namespace ac::local {
 
 extern "C" SYMBOL_EXPORT
-PluginInterface acLocalPluginLoad() {
-    constexpr astl::version ownVersion(
-        ACLP_@nameSym@_VERSION_MAJOR, ACLP_@nameSym@_VERSION_MINOR, ACLP_@nameSym@_VERSION_PATCH
-    );
-
-    return {
-        .acLocalVersion = ac::local::Project_Version,
-        .pluginVersion = ownVersion,
-        .getLoaders = ac::@nameSym@::getLoaders,
-    };
+int aclp_ac_local_version() {
+    return ac::local::Project_Version.to_int();
 }
-static_assert(std::is_same_v<decltype(&acLocalPluginLoad), PluginInterface::PluginLoadFunc>);
+static_assert(std::is_same_v<decltype(&aclp_ac_local_version), PluginInterface::GetAcLocalVersionFunc>);
+
+extern "C" SYMBOL_EXPORT
+int aclp_own_version() {
+    return astl::version(
+        ACLP_@nameSym@_VERSION_MAJOR, ACLP_@nameSym@_VERSION_MINOR, ACLP_@nameSym@_VERSION_PATCH
+    ).to_int();
+}
+
+extern "C" SYMBOL_EXPORT
+PluginInterface aclp_get_interface() {
+    return ac::@nameSym@::getPluginInterface();
+}
+static_assert(std::is_same_v<decltype(&aclp_get_interface), PluginInterface::GetFunc>);
 
 } // namespace ac::local
 ]=]

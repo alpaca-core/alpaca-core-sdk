@@ -7,6 +7,8 @@
 #include "Instance.hpp"
 #include "Model.hpp"
 
+#include "aclp-dummy-version.h"
+
 #include <ac/local/Instance.hpp>
 #include <ac/local/Model.hpp>
 #include <ac/local/ModelLoader.hpp>
@@ -153,9 +155,24 @@ public:
 } // namespace ac::local
 
 namespace ac::dummy {
+
 std::vector<ac::local::ModelLoaderPtr> getLoaders() {
     std::vector<ac::local::ModelLoaderPtr> ret;
     ret.push_back(std::make_unique<local::DummyModelLoader>());
     return ret;
 }
+
+local::PluginInterface getPluginInterface() {
+    return {
+        .label = "ac-local dummy",
+        .desc = "Dummy plugin for ac-local",
+        .vendor = "Alpaca Core",
+        .version = astl::version(
+            ACLP_dummy_VERSION_MAJOR, ACLP_dummy_VERSION_MINOR, ACLP_dummy_VERSION_PATCH
+        ),
+        .init = nullptr,
+        .getLoaders = getLoaders,
+    };
+}
+
 } // namespace ac::dummy

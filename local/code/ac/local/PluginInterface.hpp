@@ -7,17 +7,21 @@
 #include <vector>
 
 namespace ac::local {
-class ModelLoaderRegistry;
 
 struct PluginInterface {
-    using PluginLoadFunc = PluginInterface(*)();
+    using GetAcLocalVersionFunc = int(*)();
+    using GetFunc = PluginInterface(*)();
 
-    astl::version acLocalVersion; // version of ac-local this plugin was built with
+    const char* label; // optional own name (not necessarily unique)
+    const char* desc; // optional short description
+    const char* vendor; // optional vendor name
+    astl::version version; // version of the plugin
 
-    astl::version pluginVersion; // version of the plugin itself
+    using InitFunc = void(*)();
+    InitFunc init; // optional init function
 
     using GetLoadersFunc = std::vector<ModelLoaderPtr>(*)();
-    GetLoadersFunc getLoaders;
+    GetLoadersFunc getLoaders; // function to get loaders
 };
 
 }

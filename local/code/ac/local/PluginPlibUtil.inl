@@ -8,38 +8,47 @@
 #include <ac/local/PluginInterface.hpp>
 
 namespace {
-using GLF = ac::local::PluginInterface::GetLoadersFunc;
-std::vector<ac::local::ModelLoaderPtr> g_loaders;
-bool g_addedToGlobalRegistry = false;
+using namespace ac::local;
 
-void fillLoaders(GLF getLoaders) {
-    if (!g_loaders.empty()) {
-        // already filled
-        return;
+struct PlibHelper {
+    PluginInterface m_pluginInterface;
+    PlibHelper(const PluginInterface& pluginInterface) : m_pluginInterface(pluginInterface) {}
+
+    std::vector<ModelLoaderPtr> m_loaders;
+    bool m_addedToGlobalRegistry = false;
+
+    void fillLoaders() {
+        if (!m_loaders.empty()) {
+            // already filled
+            return;
+        }
+        if (m_pluginInterface.init) {
+            m_pluginInterface.init();
+        }
+        m_loaders = m_pluginInterface.getLoaders();
     }
-    g_loaders = getLoaders();
-}
 
-void addLoadersToRegistry(GLF getLoaders, ac::local::ModelLoaderRegistry& registry) {
-    fillLoaders(getLoaders);
-    for (auto& loader : g_loaders) {
-        registry.addLoader(*loader);
+    void addLoadersToRegistry(ac::local::ModelLoaderRegistry& registry) {
+        fillLoaders();
+        for (auto& loader : m_loaders) {
+            registry.addLoader(*loader);
+        }
     }
-}
 
-void addLoadersToGlobalRegistry(GLF getLoaders) {
-    if (g_addedToGlobalRegistry) {
-        // already added
-        return;
+    void addLoadersToGlobalRegistry() {
+        if (m_addedToGlobalRegistry) {
+            // already added
+            return;
+        }
+        addLoadersToRegistry(ac::local::Lib::modelLoaderRegistry());
+        m_addedToGlobalRegistry = true;
     }
-    addLoadersToRegistry(getLoaders, ac::local::Lib::modelLoaderRegistry());
-    g_addedToGlobalRegistry = true;
-}
 
-const auto& getGLoaders(GLF getLoaders) {
-    fillLoaders(getLoaders);
-    return g_loaders;
-}
+    const auto& getLoaders() {
+        fillLoaders();
+        return m_loaders;
+    }
+};
 
 } // namespace
 

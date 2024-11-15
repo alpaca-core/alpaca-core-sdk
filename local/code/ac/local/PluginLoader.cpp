@@ -33,7 +33,8 @@ hplugin load_plugin(const char* filename) {
 
 namespace ac::local {
 
-static const char* PluginLoadFunc_name = "acLocalPluginLoad";
+static const char* GetAcLocalVersionFunc = "aclp_ac_local_version";
+static const char* PluginLoadFunc_name = "aclp_get_interface";
 
 PluginInterface PluginLoader::loadPlugin(const std::string& filename) {
     hplugin h = load_plugin(filename.c_str());
@@ -41,19 +42,24 @@ PluginInterface PluginLoader::loadPlugin(const std::string& filename) {
         throw_ex{} << "Failed to load plugin " << filename;
     }
 
+    auto getVer = (PluginInterface::GetAcLocalVersionFunc)get_proc(h, GetAcLocalVersionFunc);
+    if (!getVer) {
+        unload_plugin(h);
+        throw_ex{} << "Failed to find " << GetAcLocalVersionFunc << " in " << filename;
+    }
 
-    auto f = (PluginInterface::PluginLoadFunc)get_proc(h, PluginLoadFunc_name);
+    if (getVer() != Project_Version.to_int()) {
+        unload_plugin(h);
+        throw_ex{} << "Plugin " << filename << " was built with incompatible ac-local version";
+    }
+
+    auto f = (PluginInterface::GetFunc)get_proc(h, PluginLoadFunc_name);
     if (!f) {
         unload_plugin(h);
         throw_ex{} << "Failed to find " << PluginLoadFunc_name << " in " << filename;
     }
 
     auto iface = f();
-
-    if (iface.acLocalVersion != Project_Version) {
-        unload_plugin(h);
-        throw_ex{} << "Plugin " << filename << " was built with incompatible ac-local version";
-    }
 
     return iface;
 }

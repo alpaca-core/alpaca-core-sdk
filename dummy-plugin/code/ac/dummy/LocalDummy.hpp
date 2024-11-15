@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include <ac/local/ModelLoaderPtr.hpp>
+#include <ac/local/PluginInterface.hpp>
 #include <vector>
 
 namespace ac::dummy {
-std::vector<ac::local::ModelLoaderPtr> getLoaders();
+local::PluginInterface getPluginInterface();
 }
