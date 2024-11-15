@@ -115,6 +115,15 @@ public:
 
 class DummyModelLoader final : public ModelLoader {
 public:
+    virtual const Info& info() const noexcept override {
+        static Info i = {
+            .name = "ac-local dummy",
+            .vendor = "Alpaca Core",
+            .inferenceSchemaTypes = {"dummy"},
+        };
+        return i;
+    }
+
     virtual ModelPtr loadModel(ModelDesc desc, Dict params, ProgressCb pcb) override {
         if (desc.assets.size() > 1) throw_ex{} << "dummy: expected one or zero assets";
 
@@ -144,13 +153,9 @@ public:
 } // namespace ac::local
 
 namespace ac::dummy {
-std::vector<ac::local::ModelLoaderInfo> getLoaders() {
-    std::vector<ac::local::ModelLoaderInfo> ret;
-    ret.push_back({
-        .name = "ac-local dummy",
-        .schemaType = "dummy",
-        .loader = std::make_unique<local::DummyModelLoader>()
-    });
+std::vector<ac::local::ModelLoaderPtr> getLoaders() {
+    std::vector<ac::local::ModelLoaderPtr> ret;
+    ret.push_back(std::make_unique<local::DummyModelLoader>());
     return ret;
 }
 } // namespace ac::dummy

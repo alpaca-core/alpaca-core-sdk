@@ -34,7 +34,7 @@ target_sources(ac-local
         ac/local/Instance.hpp
 
         ac/local/ModelLoader.hpp
-        ac/local/ModelLoaderInfo.hpp
+        ac/local/ModelLoaderPtr.hpp
         ac/local/ModelLoaderRegistry.hpp
 
         ac/local/PluginInterface.hpp

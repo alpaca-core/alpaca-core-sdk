@@ -88,15 +88,16 @@ void add_@nameSym@_to_ac_local_global_registry();
 // Generated file. Do not edit!
 #pragma once
 #include "@aclpName@-plib.h"
-#include <ac/local/ModelLoaderInfo.hpp>
+#include <ac/local/ModelLoaderPtr.hpp>
 #include <vector>
 
 namespace ac::local { class ModelLoaderRegistry; }
-ACLPLIB_@nameSym@_API
-void add_@nameSym@_to_ac_local_registry(ac::local::ModelLoaderRegistry& registry);
 
 ACLPLIB_@nameSym@_API
-std::vector<ac::local::ModelLoaderInfo> get_@nameSym@_model_loaders();
+const std::vector<ac::local::ModelLoaderPtr>& get_@nameSym@_model_loaders();
+
+ACLPLIB_@nameSym@_API
+void add_@nameSym@_to_ac_local_registry(ac::local::ModelLoaderRegistry& registry);
 ]=]
         @ONLY
     )
@@ -106,20 +107,19 @@ std::vector<ac::local::ModelLoaderInfo> get_@nameSym@_model_loaders();
 // Generated file. Do not edit!
 #include "@aclpName@-plib.hpp"
 #include "@aclpName@-interface.hpp"
-#include <ac/local/Lib.hpp>
-#include <ac/local/ModelLoaderRegistry.hpp>
+#include <ac/local/PluginPlibUtil.inl>
 
 extern "C"
 void add_@nameSym@_to_ac_local_global_registry() {
-    add_@nameSym@_to_ac_local_registry(ac::local::Lib::modelLoaderRegistry());
+    addLoadersToGlobalRegistry(ac::@nameSym@::getLoaders);
 }
 
 void add_@nameSym@_to_ac_local_registry(ac::local::ModelLoaderRegistry& registry) {
-    registry.addLoaders(ac::@nameSym@::getLoaders());
+    addLoadersToRegistry(ac::@nameSym@::getLoaders, registry);
 }
 
-std::vector<ac::local::ModelLoaderInfo> get_@nameSym@_model_loaders() {
-    return ac::@nameSym@::getLoaders();
+const std::vector<ac::local::ModelLoaderPtr>& get_@nameSym@_model_loaders() {
+    return getGLoaders(ac::@nameSym@::getLoaders);
 }
 ]=]
     )

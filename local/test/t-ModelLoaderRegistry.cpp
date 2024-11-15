@@ -2,44 +2,51 @@
 // SPDX-License-Identifier: MIT
 //
 #include <ac/local/ModelLoaderRegistry.hpp>
+#include <ac/local/ModelLoader.hpp>
 #include <doctest/doctest.h>
 
-using Info = ac::local::ModelLoaderInfo;
+using Info = ac::local::ModelLoader::Info;
 
-Info makeLlamaA() {
-    return Info{
-        .name = "llama a",
-        .schemaType = "llama",
-    };
-}
+Info LlamaA{
+    .name = "llama a",
+    .inferenceSchemaTypes = {"llama"},
+};
 
-Info makeLlamaB() {
-    return Info{
-        .name = "llama b",
-        .schemaType = "llama",
-    };
-}
+Info LlamaB{
+    .name = "llama b",
+    .inferenceSchemaTypes = {"llama"},
+};
 
-Info makeWhisper() {
-    return Info{
-        .name = "my whisper",
-        .schemaType = "whisper",
-    };
-}
+Info Whisper{
+    .name = "my whisper",
+    .inferenceSchemaTypes = {"whisper"},
+};
+
+struct TestLoader : public ac::local::ModelLoader {
+    const Info& m_info;
+    TestLoader(const Info& info) : m_info(info) {}
+    virtual const Info& info() const noexcept override { return m_info; }
+    virtual ac::local::ModelPtr loadModel(ac::local::ModelDesc desc, ac::Dict params, ac::local::ProgressCb cb) override {
+        return {};
+    }
+};
 
 TEST_CASE("ModelFactory") {
     ac::local::ModelLoaderRegistry registry;
-    CHECK(registry.findLoader("llama") == nullptr);
+    CHECK_FALSE(registry.findLoader("llama"));
 
-    registry.loaders.push_back(makeLlamaA());
-    registry.loaders.push_back(makeLlamaB());
-    registry.loaders.push_back(makeWhisper());
+    TestLoader llamaA(LlamaA), llamaB(LlamaB), whisper(Whisper);
+
+    registry.addLoader(llamaA);
+    registry.addLoader(llamaB);
+    registry.addLoader(whisper);
 
     auto la = registry.findLoader("llama");
-    CHECK(la != nullptr);
-    CHECK(la->name == "llama a");
+    CHECK(!!la);
+    CHECK(&la->loader.info() == &LlamaA);
+    CHECK_FALSE(la->plugin);
 
     auto wh = registry.findLoader("whisper");
-    CHECK(wh != nullptr);
-    CHECK(wh->name == "my whisper");
+    CHECK(!!wh);
+    CHECK(&wh->loader.info() == &Whisper);
 }

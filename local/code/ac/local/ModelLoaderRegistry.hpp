@@ -2,13 +2,20 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include "ModelLoaderInfo.hpp"
+#include "export.h"
+#include "ModelPtr.hpp"
+#include "ModelDesc.hpp"
+#include "ProgressCb.hpp"
+#include <ac/Dict.hpp>
 #include <vector>
+#include <optional>
 
 /// @defgroup cpp-local C++ Local API
 /// C++ API for local inference.
 
 namespace ac::local {
+class ModelLoader;
+struct PluginInfo;
 
 class AC_LOCAL_EXPORT ModelLoaderRegistry {
 public:
@@ -16,14 +23,22 @@ public:
     ModelLoaderRegistry(const ModelLoaderRegistry&) = delete;
     ModelLoaderRegistry& operator=(const ModelLoaderRegistry&) = delete;
 
-    std::vector<ModelLoaderInfo> loaders;
+    struct LoaderData {
+        ModelLoader& loader; // never null
+        PluginInfo* plugin; // may be null for loaders that have been added directly
+    };
 
-    void addLoaders(std::vector<ModelLoaderInfo> loaders);
+    const std::vector<LoaderData>& loaders() const noexcept { return m_loaders; }
 
-    const ModelLoaderInfo* findLoader(std::string_view schemaType) const;
+    void addLoader(ModelLoader& loader, PluginInfo* plugin = nullptr);
+    void addPlugin(PluginInfo& plugin);
+
+    std::optional<LoaderData> findLoader(std::string_view schemaType) const noexcept;
 
     // temp until we figure out better loader queries
-    ModelPtr createModel(ModelDesc desc, Dict params, ProgressCb cb = {});
+    ModelPtr createModel(ModelDesc desc, Dict params, ProgressCb cb = {}) const;
+private:
+    std::vector<LoaderData> m_loaders;
 };
 
 } // namespace ac::local

@@ -3,7 +3,7 @@
 //
 #pragma once
 #include "Version.hpp"
-#include "ModelLoaderInfo.hpp"
+#include "ModelLoaderPtr.hpp"
 #include <vector>
 
 namespace ac::local {
@@ -16,7 +16,8 @@ struct PluginInterface {
 
     Version pluginVersion; // version of the plugin itself
 
-    std::vector<ModelLoaderInfo> (*getLoaders)();
+    using GetLoadersFunc = std::vector<ModelLoaderPtr>(*)();
+    GetLoadersFunc getLoaders;
 };
 
 }

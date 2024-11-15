@@ -19,6 +19,27 @@ class AC_LOCAL_EXPORT ModelLoader {
 public:
     virtual ~ModelLoader();
 
+    struct Info {
+        /// Human-readable name of the loader.
+        /// Does not necessarily have to be unique across loaders.
+        std::string name;
+
+        /// Optional human readable name of the loader vendor.
+        std::string vendor;
+
+        /// Supported asset schemas
+        std::vector<std::string> assetSchemaTypes;
+
+        /// Supported inference schemas
+        std::vector<std::string> inferenceSchemaTypes;
+
+        /// Additional tags that can be used to filter loaders
+        std::vector<std::string> tags;
+    };
+
+    /// Info of the loader.
+    virtual const Info& info() const noexcept = 0;
+
     /// Load a model based on the provided description and parameters.
     /// The progress callback is optional and can be used to report the progress of the loading process.
     /// The returned model is owned by the caller and is not bound to the loader in any way.

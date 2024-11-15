@@ -2,33 +2,32 @@
 // SPDX-License-Identifier: MIT
 //
 #include "ModelLoaderRegistry.hpp"
+#include "ModelLoader.hpp"
 #include <astl/throw_stdex.hpp>
 #include <astl/move.hpp>
+#include <astl/qalgorithm.hpp>
 
 namespace ac::local {
 
-void ModelLoaderRegistry::addLoaders(std::vector<ModelLoaderInfo> loaders) {
-    for (auto& loader : loaders) {
-        this->loaders.push_back(astl::move(loader));
-    }
+void ModelLoaderRegistry::addLoader(ModelLoader& loader, PluginInfo* plugin) {
+    m_loaders.push_back({loader, plugin});
 }
 
-const ModelLoaderInfo* ModelLoaderRegistry::findLoader(std::string_view schemaType) const {
-    for (auto& loader : loaders) {
-        if (loader.schemaType == schemaType) {
-            return &loader;
+std::optional<ModelLoaderRegistry::LoaderData> ModelLoaderRegistry::findLoader(std::string_view schemaType) const noexcept {
+    for (auto& data : m_loaders) {
+        if (astl::pfind(data.loader.info().inferenceSchemaTypes, schemaType)) {
+            return data;
         }
     }
-    return nullptr;
+    return std::nullopt;
 }
 
-ModelPtr ModelLoaderRegistry::createModel(ModelDesc desc, Dict params, ProgressCb cb) {
-    auto l = findLoader(desc.inferenceType);
-    if (!l) {
+ModelPtr ModelLoaderRegistry::createModel(ModelDesc desc, Dict params, ProgressCb cb) const {
+    auto data = findLoader(desc.inferenceType);
+    if (!data) {
         ac::throw_ex{} << "No loader found for schema type: " << desc.inferenceType;
     }
-    assert(l->loader);
-    return l->loader->loadModel(astl::move(desc), astl::move(params), astl::move(cb));
+    return data->loader.loadModel(astl::move(desc), astl::move(params), astl::move(cb));
 }
 
 } // namespace ac::local

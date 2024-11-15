@@ -17,8 +17,12 @@ struct GlobalFixture {
 GlobalFixture globalFixture;
 
 struct DummyRegistry : public ac::local::ModelLoaderRegistry {
+    std::vector<ac::local::ModelLoaderPtr> loaders;
     DummyRegistry() {
-        addLoaders(dummyPluginInterface->getLoaders());
+        loaders = dummyPluginInterface->getLoaders();
+        for (auto& loader : loaders) {
+            addLoader(*loader);
+        }
     }
 };
 
