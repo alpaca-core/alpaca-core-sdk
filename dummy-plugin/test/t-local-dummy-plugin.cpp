@@ -1,7 +1,7 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include <aclp-dummy-plugin-info.h>
+#include <aclp-dummy-info.h>
 #include <ac/local/PluginLoader.hpp>
 #include <ac/local/ModelFactory.hpp>
 #include <doctest/doctest.h>

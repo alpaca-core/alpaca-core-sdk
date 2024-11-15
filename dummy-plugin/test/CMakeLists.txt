@@ -21,6 +21,6 @@ add_doctest_test(aclp-dummy-plugin
         t-local-dummy-plugin.cpp
     LIBRARIES
         ac::local
-        aclp::dummy-plugin-info
+        aclp::dummy-info
         ac-test-data::dummy
 )

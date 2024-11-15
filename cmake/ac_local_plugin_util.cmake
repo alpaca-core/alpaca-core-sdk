@@ -6,23 +6,23 @@ include_guard(GLOBAL)
 include(ac_local_lib)
 
 function(add_ac_local_plugin)
-    cmake_parse_arguments(ARG "" "NAME" "SOURCES;PLUGIN_SOURCES;PLIB_SOURCES;LIBRARIES" ${ARGN})
+    cmake_parse_arguments(ARG "" "NAME;PUBLIC_SUFFIX" "SOURCES;PLUGIN_SOURCES;PLIB_SOURCES;LIBRARIES" ${ARGN})
 
     # private names for targets which are not installed and never leave the project
-    set(privateName aclp-${ARG_NAME})
-    set(baselibTargetName ${privateName}-baselib)
-    set(plibTargetName ${privateName}-plib)
+    set(aclpName aclp-${ARG_NAME})
+    set(baselibTargetName ${aclpName}-baselib)
+    set(plibTargetName ${aclpName}-plib)
+    set(infoTargetName ${aclpName}-info)
     string(MAKE_C_IDENTIFIER ${ARG_NAME} nameSym)
 
     # public names for targets which may be installed
-    set(publicName aclp-${ARG_NAME})
-    set(pluginTargetName ${publicName}-plugin)
-    set(infoTargetName ${pluginTargetName}-info)
-    string(MAKE_C_IDENTIFIER ${ARG_NAME} publicNameSym)
+    set(publicName ${aclpName}${ARG_PUBLIC_SUFFIX})
+    set(pluginTargetName ${publicName})
+    # string(MAKE_C_IDENTIFIER ${ARG_NAME} publicNameSym)
 
     # configure version
     file(CONFIGURE
-        OUTPUT ${privateName}-version.h
+        OUTPUT ${aclpName}-version.h
         CONTENT [=[
 // Generated file. Do not edit!
 #pragma once
@@ -39,8 +39,8 @@ function(add_ac_local_plugin)
     # add base lib
     add_library(${baselibTargetName} STATIC
         ${ARG_SOURCES}
-        ${privateName}-version.h
-        ${ARG_NAME}-ac-local-interface.hpp
+        ${aclpName}-version.h
+        ${aclpName}-interface.hpp
     )
     target_link_libraries(${baselibTargetName} PUBLIC
         ac::local
@@ -57,7 +57,7 @@ function(add_ac_local_plugin)
 
     # add plib
     file(CONFIGURE
-        OUTPUT ${privateName}-plib.hpp
+        OUTPUT ${aclpName}-plib.hpp
         CONTENT [=[
 // Generated file. Do not edit!
 #pragma once
@@ -82,11 +82,11 @@ void add_@nameSym@_to_ac_local(ac::local::ModelFactory& factory);
         @ONLY
     )
     file(CONFIGURE
-        OUTPUT ${privateName}-plib.cpp
+        OUTPUT ${aclpName}-plib.cpp
         CONTENT [=[
 // Generated file. Do not edit!
-#include "@privateName@-plib.hpp"
-#include "${ARG_NAME}-ac-local-interface.hpp"
+#include "@aclpName@-plib.hpp"
+#include "${aclpName}-interface.hpp"
 
 extern "C"
 void add_@nameSym@_to_ac_local(ac::local::ModelFactory& factory) {
@@ -99,9 +99,9 @@ void add_@nameSym@_to_ac_local(ac::local::ModelFactory& factory) {
         PUBLIC FILE_SET HEADERS
         BASE_DIRS "${CMAKE_CURRENT_BINARY_DIR}"
         FILES
-            "${CMAKE_CURRENT_BINARY_DIR}/${privateName}-plib.hpp"
+            "${CMAKE_CURRENT_BINARY_DIR}/${aclpName}-plib.hpp"
         PRIVATE
-            ${privateName}-plib.cpp
+            ${aclpName}-plib.cpp
             ${ARG_PLIB_SOURCES}
     )
     add_library(aclp::${ARG_NAME}-plib ALIAS ${plibTargetName})
@@ -114,12 +114,12 @@ void add_@nameSym@_to_ac_local(ac::local::ModelFactory& factory) {
 
     # add plugin
     file(CONFIGURE
-        OUTPUT ${privateName}-entrypoint.cpp
+        OUTPUT ${aclpName}-entrypoint.cpp
         CONTENT [=[
 // Generated file. Do not edit!
 #include <astl/symbol_export.h>
-#include "@privateName@-version.h"
-#include "@ARG_NAME@-ac-local-interface.hpp"
+#include "@aclpName@-version.h"
+#include "@aclpName@-interface.hpp"
 #include <ac/local/PluginInterface.hpp>
 
 namespace ac::local {
@@ -143,12 +143,12 @@ static_assert(std::is_same_v<decltype(&acLocalPluginLoad), PluginInterface::Plug
         @ONLY
     )
     add_library(${pluginTargetName} MODULE
-        ${privateName}-entrypoint.cpp
+        ${aclpName}-entrypoint.cpp
         ${ARG_PLUGIN_SOURCES}
     )
     add_library(aclp::${ARG_NAME} ALIAS ${pluginTargetName})
     set_target_properties(${pluginTargetName} PROPERTIES
-        PREFIX ""
+        PREFIX "" # no lib on unix-like platforms
     )
     if(NOT WIN32)
         target_compile_options(${pluginTargetName} PRIVATE
@@ -169,7 +169,7 @@ static_assert(std::is_same_v<decltype(&acLocalPluginLoad), PluginInterface::Plug
     string(CONFIGURE [=[
 // Generated file. Do not edit!
 #pragma once
-#define ACLP_@publicNameSym@_PLUGIN_FILE "$<TARGET_FILE:@pluginTargetName@>"
+#define ACLP_@nameSym@_PLUGIN_FILE "$<TARGET_FILE:@pluginTargetName@>"
 ]=]
         infoFileContentConfigured
         @ONLY
@@ -181,7 +181,7 @@ static_assert(std::is_same_v<decltype(&acLocalPluginLoad), PluginInterface::Plug
         TARGET ${pluginTargetName}
     )
     add_library(${infoTargetName} INTERFACE)
-    add_library(aclp::${ARG_NAME}-plugin-info ALIAS ${infoTargetName})
+    add_library(aclp::${ARG_NAME}-info ALIAS ${infoTargetName})
     target_sources(${infoTargetName}
         INTERFACE FILE_SET HEADERS
         BASE_DIRS "${CMAKE_CURRENT_BINARY_DIR}"
