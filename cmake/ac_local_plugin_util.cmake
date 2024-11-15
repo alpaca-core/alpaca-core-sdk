@@ -30,9 +30,8 @@ function(add_ac_local_plugin)
 #define ACLP_@nameSym@_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
 #define ACLP_@nameSym@_VERSION_MINOR @PROJECT_VERSION_MINOR@
 #define ACLP_@nameSym@_VERSION_PATCH @PROJECT_VERSION_PATCH@
-#define ACLP_@nameSym@_VERSION_TAG   "@PROJECT_VERSION_TAG@"
 
-#define ACLP_@nameSym@_VERSION_STRING "@PROJECT_VERSION@@PROJECT_VERSION_TAG@"
+#define ACLP_@nameSym@_VERSION_STRING "@PROJECT_VERSION@"
 ]=]
         @ONLY
     )
@@ -128,7 +127,7 @@ namespace ac::local {
 extern "C" SYMBOL_EXPORT
 PluginInterface acLocalPluginLoad() {
     constexpr Version ownVersion(
-        ACLP_@nameSym@_VERSION_MAJOR, ACLP_@nameSym@_VERSION_MINOR, ACLP_@nameSym@_VERSION_PATCH, ACLP_@nameSym@_VERSION_TAG
+        ACLP_@nameSym@_VERSION_MAJOR, ACLP_@nameSym@_VERSION_MINOR, ACLP_@nameSym@_VERSION_PATCH
     );
 
     return {

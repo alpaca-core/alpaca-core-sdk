@@ -9,8 +9,6 @@ project(ac-local
     LANGUAGES C CXX
 )
 
-set(PROJECT_VERSION_TAG dev)
-
 include(./get-ac-build.cmake)
 
 #################
