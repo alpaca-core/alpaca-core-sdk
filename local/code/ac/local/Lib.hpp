@@ -7,9 +7,11 @@
 
 namespace ac::local {
 class ModelLoaderRegistry;
+class PluginManager;
 
 struct AC_LOCAL_EXPORT Lib {
     static ModelLoaderRegistry& modelLoaderRegistry();
+    static PluginManager& pluginManager();
 };
 
 } // namespace ac::local

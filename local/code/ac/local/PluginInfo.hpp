@@ -10,7 +10,7 @@ namespace ac::local {
 
 struct PluginInfo {
     std::string fullPath;
-    std::stringView name; // points within fullPath, filename without "aclp-" prefix and extension
+    std::string name; // part of fullPath, filename without "aclp-" prefix and extension
 
     // data obtained from loaded plugin
 
@@ -22,6 +22,8 @@ struct PluginInfo {
     astl::version version = {};
 
     std::vector<ModelLoaderPtr> loaders; // provided loaders
+
+    bool addedToGlobalRegistry = false;
 };
 
 } // namespace ac::local

@@ -38,6 +38,8 @@ target_sources(ac-local
         ac/local/ModelLoaderRegistry.hpp
 
         ac/local/PluginInterface.hpp
+        ac/local/PluginInfo.hpp
+        ac/local/PluginManager.hpp
         ac/local/PluginLoader.hpp
 
         ac/local/Lib.hpp
@@ -48,6 +50,7 @@ target_sources(ac-local
         ac/local/VtableExports.cpp
 
         ac/local/ModelLoaderRegistry.cpp
+        ac/local/PluginManager.cpp
         ac/local/PluginLoader.cpp
 
         ac/local/Lib.cpp
