@@ -11,9 +11,6 @@ struct version {
     int minor = 0;
     int patch = 0;
 
-    constexpr version() = default;
-    constexpr version(int major, int minor, int patch) : major(major), minor(minor), patch(patch) {}
-
     constexpr auto operator<=>(const version&) const noexcept = default;
 
     static constexpr version from_int(int v) noexcept {

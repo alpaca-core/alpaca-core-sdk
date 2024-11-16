@@ -19,7 +19,7 @@ struct PluginInfo {
     std::string label;
     std::string desc;
     std::string vendor;
-    version version;
+    astl::version version = {};
 
     std::vector<ModelLoaderPtr> loaders; // provided loaders
 };

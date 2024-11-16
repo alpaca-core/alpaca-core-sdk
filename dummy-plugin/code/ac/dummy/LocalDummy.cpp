@@ -167,9 +167,9 @@ local::PluginInterface getPluginInterface() {
         .label = "ac-local dummy",
         .desc = "Dummy plugin for ac-local",
         .vendor = "Alpaca Core",
-        .version = astl::version(
+        .version = astl::version{
             ACLP_dummy_VERSION_MAJOR, ACLP_dummy_VERSION_MINOR, ACLP_dummy_VERSION_PATCH
-        ),
+        },
         .init = nullptr,
         .getLoaders = getLoaders,
     };

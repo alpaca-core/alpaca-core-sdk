@@ -165,9 +165,9 @@ static_assert(std::is_same_v<decltype(&aclp_ac_local_version), PluginInterface::
 
 extern "C" SYMBOL_EXPORT
 int aclp_own_version() {
-    return astl::version(
+    return astl::version{
         ACLP_@nameSym@_VERSION_MAJOR, ACLP_@nameSym@_VERSION_MINOR, ACLP_@nameSym@_VERSION_PATCH
-    ).to_int();
+    }.to_int();
 }
 
 extern "C" SYMBOL_EXPORT
