@@ -9,7 +9,7 @@ namespace ac::local {
 
 namespace {
 ModelLoaderRegistry g_modelLoaderRegistry;
-PluginManager g_pluginManager;
+PluginManager g_pluginManager(g_modelLoaderRegistry);
 } // namespace
 
 ModelLoaderRegistry& Lib::modelLoaderRegistry() {
