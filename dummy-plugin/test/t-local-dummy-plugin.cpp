@@ -7,6 +7,8 @@
 #include <ac/local/ModelLoaderRegistry.hpp>
 #include <doctest/doctest.h>
 
+#include <ac-test-util/JalogFixture.inl>
+
 struct GlobalFixture {
     GlobalFixture() {
         ac::local::Lib::pluginManager().loadPlugin(ACLP_dummy_PLUGIN_FILE);

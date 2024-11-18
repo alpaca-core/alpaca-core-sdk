@@ -2,7 +2,12 @@
 # SPDX-License-Identifier: MIT
 #
 macro(dummy_baselib_test test)
-    add_doctest_lib_test(${test} aclp-dummy-baselib t-${test}.cpp LIBRARIES ac-test-data::dummy)
+    add_doctest_lib_test(${test} aclp-dummy-baselib t-${test}.cpp
+        LIBRARIES
+            ac-test-data::dummy
+            ac-dev::test-util
+            ac::jalog
+    )
 endmacro()
 
 dummy_baselib_test(Model)
@@ -12,15 +17,19 @@ add_doctest_test(aclp-dummy-plib
     SOURCES
         t-local-dummy-plib.cpp
     LIBRARIES
+        ac-dev::test-util
         aclp::dummy-plib
         ac-test-data::dummy
+        ac::jalog
 )
 
 add_doctest_test(aclp-dummy-plugin
     SOURCES
         t-local-dummy-plugin.cpp
     LIBRARIES
+        ac-dev::test-util
         ac::local
         aclp::dummy-info
         ac-test-data::dummy
+        ac::jalog
 )

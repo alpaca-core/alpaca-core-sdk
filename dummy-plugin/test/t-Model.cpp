@@ -6,6 +6,8 @@
 #include <doctest/doctest.h>
 #include <algorithm>
 
+#include <ac-test-util/JalogFixture.inl>
+
 TEST_CASE("simple") {
     ac::dummy::Model model(AC_DUMMY_MODEL_LARGE, {});
     auto& data = model.data();

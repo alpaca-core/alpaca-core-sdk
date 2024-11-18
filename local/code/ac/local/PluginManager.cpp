@@ -179,10 +179,11 @@ const PluginInfo* PluginManager::tryLoadPlugin(const std::string& path, LoadPlug
 
     auto interface = load();
     AC_LOCAL_LOG(Info, "Loaded plugin ", path,
-        "\n     ver:", interface.version,
-        "\n   label:", interface.label,
-        "\n  vendor:", interface.vendor,
-        "\n    desc:", interface.desc
+        "\n    name: ", name,
+        "\n   label: ", interface.label,
+        "\n     ver: ", interface.version,
+        "\n  vendor: ", interface.vendor,
+        "\n    desc: ", interface.desc
     );
 
     if (cb.interfaceFilter && !cb.interfaceFilter(interface)) {

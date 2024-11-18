@@ -6,6 +6,9 @@
 #include "ac-test-data-dummy-models.h"
 #include <doctest/doctest.h>
 
+#include <ac-test-util/JalogFixture.inl>
+
+
 TEST_CASE("splice") {
     ac::dummy::Model small(AC_DUMMY_MODEL_SMALL, {});
     ac::dummy::Instance inst(small, {.cutoff = 2});
