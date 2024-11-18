@@ -2,26 +2,23 @@
 // SPDX-License-Identifier: MIT
 //
 #include <aclp-dummy-info.h>
-#include <ac/local/PluginLoader.hpp>
+#include <ac/local/Lib.hpp>
+#include <ac/local/PluginManager.hpp>
 #include <ac/local/ModelLoaderRegistry.hpp>
 #include <doctest/doctest.h>
-#include <optional>
-
-std::optional<ac::local::PluginInterface> dummyPluginInterface;
 
 struct GlobalFixture {
     GlobalFixture() {
-        dummyPluginInterface.emplace(ac::local::PluginLoader::loadPlugin(ACLP_dummy_PLUGIN_FILE));
+        ac::local::Lib::pluginManager().loadPlugin(ACLP_dummy_PLUGIN_FILE);
     }
 };
 GlobalFixture globalFixture;
 
 struct DummyRegistry : public ac::local::ModelLoaderRegistry {
-    std::vector<ac::local::ModelLoaderPtr> loaders;
     DummyRegistry() {
-        loaders = dummyPluginInterface->getLoaders();
+        auto& loaders = ac::local::Lib::modelLoaderRegistry().loaders();
         for (auto& loader : loaders) {
-            addLoader(*loader);
+            addLoader(loader.loader);
         }
     }
 };

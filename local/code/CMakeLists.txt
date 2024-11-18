@@ -40,7 +40,6 @@ target_sources(ac-local
         ac/local/PluginInterface.hpp
         ac/local/PluginInfo.hpp
         ac/local/PluginManager.hpp
-        ac/local/PluginLoader.hpp
 
         ac/local/Lib.hpp
     PRIVATE
@@ -51,7 +50,6 @@ target_sources(ac-local
 
         ac/local/ModelLoaderRegistry.cpp
         ac/local/PluginManager.cpp
-        ac/local/PluginLoader.cpp
 
         ac/local/Lib.cpp
 )
