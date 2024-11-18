@@ -1,6 +1,3 @@
-[submodule "inference/ggml"]
-	path = inference/ggml
-	url = https://github.com/alpaca-core/ggml.git
 [submodule "inference/whisper/whisper.cpp"]
 	path = inference/whisper/whisper.cpp
 	url = https://github.com/alpaca-core/whisper.cpp.git
