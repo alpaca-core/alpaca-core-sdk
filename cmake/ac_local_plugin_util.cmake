@@ -229,6 +229,8 @@ static_assert(std::is_same_v<decltype(&aclp_get_interface), PluginInterface::Get
 endfunction()
 
 function(make_ac_local_plugin_available)
+    set(rootBinDir "${CMAKE_BINARY_DIR}/_ac-plugins")
+
     cmake_parse_arguments(ARG "" "NAME;VERSION;MONO_DIR;GITHUB" "OPTIONS" ${ARGN})
 
     set(pluginId "${ARG_NAME}-${ARG_VERSION}-")
@@ -279,7 +281,7 @@ function(make_ac_local_plugin_available)
 
     # get binary directory
     if(NOT ACP_${pluginId}_BIN)
-        set(binDir "${CMAKE_BINARY_DIR}/_ac-plugins/${pluginId}")
+        set(binDir "${rootBinDir}/${pluginId}")
         set(ACP_${pluginId}_BIN "${binDir}" CACHE PATH "AC Plugin ${pluginId} binary")
     else()
         set(binDir "${ACP_${pluginId}_BIN}")
@@ -353,7 +355,7 @@ function(make_ac_local_plugin_available)
     # set config hash
     string(MD5 cfgHash "${cfg}")
     set(cachedCfgHash "${ACP_${pluginId}_CFG_HASH}")
-    set(cfgFile "${CMAKE_BINARY_DIR}/_ac-plugins/${pluginId}-cfg.cmake")
+    set(cfgFile "${rootBinDir}/${pluginId}-cfg.cmake")
 
     set(optCfgCmd)
 
@@ -389,7 +391,7 @@ function(make_ac_local_plugin_available)
         COMMAND ${CMAKE_COMMAND}
             --install "${binDir}"
             --config $<CONFIG>
-            --prefix ${CMAKE_BINARY_DIR}/_ac-plugins
+            --prefix "${rootBinDir}"
         COMMENT "Building AC Plugin ${pluginId}"
     )
 
@@ -397,4 +399,20 @@ function(make_ac_local_plugin_available)
         cfg-${pluginId}
         ac::local
     )
+
+    if(NOT AC_BUILD_DEPLOY AND NOT TARGET aclp::out-dir)
+        add_library(aclp-out-dir INTERFACE)
+        add_library(aclp::out-dir ALIAS aclp-out-dir)
+        file(CONFIGURE
+            OUTPUT "${rootBinDir}/aclp-out-dir.h"
+            CONTENT [=[
+// Generated file. Do not edit!
+#pragma once
+#define ACLP_OUT_DIR "@rootBinDir@/lib/ac-local"
+]=]
+            @ONLY
+        )
+        target_include_directories(aclp-out-dir INTERFACE "${rootBinDir}")
+        target_compile_definitions(aclp-out-dir INTERFACE -DHAVE_ACLP_OUT_DIR)
+    endif()
 endfunction()

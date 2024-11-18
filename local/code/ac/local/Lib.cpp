@@ -24,6 +24,14 @@ PluginManager& Lib::pluginManager() {
     return g_pluginManager;
 }
 
+void Lib::addPluginDir(std::string_view dir) {
+    g_pluginManager.addPluginDir(dir);
+}
+
+void Lib::addPluginDirsFromEnvVar(std::string envVar) {
+    g_pluginManager.addPluginDirsFromEnvVar(envVar);
+}
+
 const PluginInfo* Lib::loadPlugin(const std::string& path) {
     return g_pluginManager.loadPlugin(path);
 }

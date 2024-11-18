@@ -20,6 +20,9 @@ struct AC_LOCAL_EXPORT Lib {
 
     static PluginManager& pluginManager();
 
+    static void addPluginDir(std::string_view dir);
+    static void addPluginDirsFromEnvVar(std::string envVar);
+
     static const PluginInfo* loadPlugin(const std::string& path);
     static void loadAllPlugins();
 };
