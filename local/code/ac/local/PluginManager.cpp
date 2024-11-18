@@ -133,11 +133,6 @@ inline jalog::BasicStream& operator,(jalog::BasicStream& s, const astl::version&
 }
 
 const PluginInfo* PluginManager::tryLoadPlugin(const std::string& path, LoadPluginCb& cb) {
-    if (auto p = findPluginByPath(m_plugins, path)) {
-        // deduplicate
-        return p;
-    }
-
     if (cb.pathFilter && !cb.pathFilter(path)) {
         AC_LOCAL_LOG(Info, "User filtered plugin by path: ", path);
         return nullptr;
@@ -147,6 +142,11 @@ const PluginInfo* PluginManager::tryLoadPlugin(const std::string& path, LoadPlug
     if (cb.nameFilter && !cb.nameFilter(name)) {
         AC_LOCAL_LOG(Info, "User filtered plugin by name: ", path);
         return nullptr;
+    }
+
+    if (auto p = findPluginByPath(m_plugins, path)) {
+        AC_LOCAL_LOG(Info, "Plugin ", path, " already loaded");
+        return p;
     }
 
     hplugin hplugin = load_plugin(path.c_str());
