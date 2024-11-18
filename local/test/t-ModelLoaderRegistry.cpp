@@ -31,7 +31,7 @@ struct TestLoader : public ac::local::ModelLoader {
     }
 };
 
-TEST_CASE("ModelFactory") {
+TEST_CASE("ModelLoaderRegistry") {
     ac::local::ModelLoaderRegistry registry;
     CHECK_FALSE(registry.findLoader("llama"));
 
