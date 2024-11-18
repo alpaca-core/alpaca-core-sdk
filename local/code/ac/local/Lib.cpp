@@ -8,7 +8,7 @@
 namespace ac::local {
 
 namespace {
-ModelLoaderRegistry g_modelLoaderRegistry;
+ModelLoaderRegistry g_modelLoaderRegistry("global");
 PluginManager g_pluginManager(g_modelLoaderRegistry);
 } // namespace
 

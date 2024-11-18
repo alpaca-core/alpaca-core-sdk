@@ -19,9 +19,11 @@ struct PluginInfo;
 
 class AC_LOCAL_EXPORT ModelLoaderRegistry {
 public:
-    ModelLoaderRegistry() = default;
+    ModelLoaderRegistry(std::string_view name = {});
     ModelLoaderRegistry(const ModelLoaderRegistry&) = delete;
     ModelLoaderRegistry& operator=(const ModelLoaderRegistry&) = delete;
+
+    const std::string& name() const noexcept { return m_name; }
 
     struct LoaderData {
         ModelLoader& loader; // never null
@@ -38,6 +40,7 @@ public:
     // temp until we figure out better loader queries
     ModelPtr createModel(ModelDesc desc, Dict params, ProgressCb cb = {}) const;
 private:
+    std::string m_name;
     std::vector<LoaderData> m_loaders;
 };
 

@@ -7,8 +7,19 @@
 #include <astl/throw_stdex.hpp>
 #include <astl/move.hpp>
 #include <astl/qalgorithm.hpp>
+#include <charconv>
 
 namespace ac::local {
+
+ModelLoaderRegistry::ModelLoaderRegistry(std::string_view name)
+    : m_name(name)
+{
+    if (m_name.empty()) {
+        char hex[20] = "0x";
+        auto r = std::to_chars(hex + 2, hex + sizeof(hex), reinterpret_cast<uintptr_t>(this), 16);
+        m_name = std::string_view(hex, r.ptr - hex);
+    }
+}
 
 inline jalog::BasicStream& operator,(jalog::BasicStream& s, const std::vector<std::string>& vec) {
     s, "[";
@@ -21,7 +32,7 @@ inline jalog::BasicStream& operator,(jalog::BasicStream& s, const std::vector<st
 
 void ModelLoaderRegistry::addLoader(ModelLoader& loader, PluginInfo* plugin) {
     [[maybe_unused]] auto& info = loader.info();
-    AC_LOCAL_LOG(Info, "Adding loader ", info.name,
+    AC_LOCAL_LOG(Info, "Registry ", m_name, " adding loader ", info.name,
         "\n       vendor: ", info.vendor,
         "\n  asset types: ", info.assetSchemaTypes,
         "\n  infer types: ", info.inferenceSchemaTypes,
