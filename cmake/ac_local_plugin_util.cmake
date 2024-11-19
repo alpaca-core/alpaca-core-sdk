@@ -179,12 +179,12 @@ static_assert(std::is_same_v<decltype(&aclp_get_interface), PluginInterface::Get
 } // namespace ac::local
 ]=]
         @ONLY
-    )    
-   	if(APPLE)
-   		# MODULE targets on apple have the appropriate defaults
-   		set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-   		unset(CMAKE_INSTALL_RPATH)
-   	endif()   	
+    )
+    if(APPLE)
+        # MODULE targets on apple have the appropriate defaults
+        set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+        unset(CMAKE_INSTALL_RPATH)
+    endif()
     add_library(${pluginTargetName} MODULE
         ${aclpName}-entrypoint.cpp
         ${ARG_PLUGIN_SOURCES}
