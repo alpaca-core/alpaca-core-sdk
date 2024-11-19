@@ -77,17 +77,8 @@ if(AC_LOCAL_BUILD_DUMMY_PLUGIN)
     add_subdirectory(dummy-plugin)
 endif()
 
-if(NOT AC_INFERENCE_LIBS STREQUAL "none")
-    #add_subdirectory(inference)
-endif()
-
 if(AC_BUILD_ACORD)
     # add_subdirectory(acord)
-endif()
-
-if(AC_BUILD_LOCAL)
-    # add after inference libs so that elements from them can be wrapped as well
-    #add_subdirectory(wrapper)
 endif()
 
 if(AC_BUILD_POC)

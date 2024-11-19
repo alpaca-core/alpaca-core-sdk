@@ -1,3 +1,0 @@
-[submodule "inference/whisper/whisper.cpp"]
-	path = inference/whisper/whisper.cpp
-	url = https://github.com/alpaca-core/whisper.cpp.git
