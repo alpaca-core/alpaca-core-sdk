@@ -67,8 +67,10 @@ endif()
 #################
 # subdirs/targets
 
-add_subdirectory(common)
+add_subdirectory(astl)
 add_subdirectory(dict)
+add_subdirectory(jalog)
+add_subdirectory(ac-test-util)
 
 ac_add_local_subdir()
 
