@@ -7,9 +7,9 @@
 namespace astl {
 
 struct version {
-    int major = 0;
-    int minor = 0;
-    int patch = 0;
+    int major;
+    int minor;
+    int patch;
 
     constexpr auto operator<=>(const version&) const noexcept = default;
 

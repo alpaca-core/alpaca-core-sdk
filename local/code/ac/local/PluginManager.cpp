@@ -13,6 +13,10 @@
 
 #include <cstdlib>
 #include <filesystem>
+#include <type_traits>
+
+// this is required to avoid warnings when returning PluginInterface from extern "C" functions
+static_assert(std::is_trivial_v<ac::local::PluginInterface>, "PluginInterface must be trivial");
 
 #if defined (_WIN32)
 
