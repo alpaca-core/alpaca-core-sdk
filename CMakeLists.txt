@@ -22,13 +22,12 @@ list(APPEND CMAKE_MODULE_PATH
 include(init_ac_prj)
 
 include(icm_add_lib)
-include(ac_local_lib)
-include(ac_lib_subdirs)
 include(icm_testing)
 include(icm_build_failure_testing)
-include(ac_dep)
 include(icm_option)
-include(ac_module)
+
+include(ac_local_lib)
+include(ac_lib_subdirs)
 include(ac_local_plugin_util)
 
 #################
@@ -75,14 +74,6 @@ ac_add_local_subdir()
 
 if(AC_LOCAL_BUILD_DUMMY_PLUGIN)
     add_subdirectory(dummy-plugin)
-endif()
-
-if(AC_BUILD_ACORD)
-    # add_subdirectory(acord)
-endif()
-
-if(AC_BUILD_POC)
-    add_subdirectory(poc)
 endif()
 
 #################
