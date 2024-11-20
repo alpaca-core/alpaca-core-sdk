@@ -3,8 +3,8 @@
 #
 add_subdirectory(code)
 
-if(AC_BUILD_TESTS OR AC_BUILD_EXAMPLES)
+if(AC_LOCAL_BUILD_TESTS OR AC_LOCAL_BUILD_EXAMPLES)
     add_subdirectory(test-models)
 endif()
 
-ac_add_test_subdir()
+ac_local_add_test_subdir()

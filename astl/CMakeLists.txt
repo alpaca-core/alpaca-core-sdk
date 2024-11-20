@@ -3,4 +3,4 @@
 #
 add_subdirectory(include)
 
-ac_add_test_subdir()
+ac_local_add_test_subdir()

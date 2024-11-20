@@ -2,5 +2,5 @@
 # SPDX-License-Identifier: MIT
 #
 add_subdirectory(code)
-ac_add_test_subdir()
+ac_local_add_test_subdir()
 add_subdirectory(schema)

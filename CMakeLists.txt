@@ -27,7 +27,6 @@ include(icm_build_failure_testing)
 include(icm_option)
 
 include(ac_local_lib)
-include(ac_lib_subdirs)
 include(ac_local_plugin_util)
 
 #################
@@ -37,46 +36,47 @@ if(NOT PROJECT_IS_TOP_LEVEL)
     set(ac-local_VERSION ${ac-local_VERSION} PARENT_SCOPE)
 endif()
 
-option(BUILD_SHARED_LIBS "${PROJECT_NAME}: build shared libraries" ON)
-
-option(AC_BUILD_LOCAL "${PROJECT_NAME}: build local inference api" ON)
-
-set(AC_INFERENCE_LIBS "all" CACHE STRING "${PROJECT_NAME}: inference libraries to build")
-
-option(AC_BUILD_TOOLS "${PROJECT_NAME}: build tools" ON)
-
-option(AC_LOCAL_BUILD_DUMMY_PLUGIN "${PROJECT_NAME}: build dummy plugin for tests and examples" ON)
-
-option(AC_BUILD_TESTS "${PROJECT_NAME}: build tests" ${testsDefault})
-option(AC_BUILD_EXAMPLES "${PROJECT_NAME}: build examples" ${examplesDefault})
-option(AC_BUILD_POC "${PROJECT_NAME}: build proof of concept targets" ${examplesDefault})
-mark_as_advanced(AC_BUILD_TESTS AC_BUILD_EXAMPLES AC_BUILD_POC)
+option(AC_LOCAL_BUILD_TESTS "${PROJECT_NAME}: build tests" ${testsDefault})
+option(AC_LOCAL_BUILD_EXAMPLES "${PROJECT_NAME}: build examples" ${examplesDefault})
+mark_as_advanced(AC_LOCAL_BUILD_TESTS AC_LOCAL_BUILD_EXAMPLES)
 
 #################
 # global packages
 
 CPMAddPackage(gh:iboB/itlib@1.11.4)
 
-if(AC_BUILD_TESTS)
+if(AC_LOCAL_BUILD_TESTS)
     CPMAddPackage(gh:iboB/doctest-util@0.1.3)
     set_target_properties(doctest PROPERTIES FOLDER test)
     set_target_properties(doctest-main PROPERTIES FOLDER test)
     enable_testing()
 endif()
 
+macro(ac_local_add_test_subdir)
+    if(AC_LOCAL_BUILD_TESTS)
+        add_subdirectory(test)
+    endif()
+endmacro()
+
 #################
 # subdirs/targets
 
+# we thought about allowing finer-grain config from here
+# motivating examples would be:
+# - build only astl and jalog
+# - build only dict
+# - don't build dummy
+# we could do it if there's interest
+
 add_subdirectory(astl)
-add_subdirectory(dict)
-add_subdirectory(jalog)
 add_subdirectory(ac-test-util)
 
-ac_add_local_subdir()
+add_subdirectory(jalog)
+add_subdirectory(dict)
 
-if(AC_LOCAL_BUILD_DUMMY_PLUGIN)
-    add_subdirectory(dummy-plugin)
-endif()
+add_subdirectory(local)
+
+add_subdirectory(dummy-plugin)
 
 #################
 # export and install
