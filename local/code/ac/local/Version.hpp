@@ -8,10 +8,10 @@
 
 namespace ac::local {
 
-inline constexpr astl::version Project_Version(
+inline constexpr astl::version Project_Version{
     AC_LOCAL_VERSION_MAJOR,
     AC_LOCAL_VERSION_MINOR,
     AC_LOCAL_VERSION_PATCH
-);
+};
 
 } // namespace ac::local
