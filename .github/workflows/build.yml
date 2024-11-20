@@ -1,5 +1,4 @@
 name: Build
-# keep manual for now (or we would run out of minutes while we're private)
 on:
   workflow_dispatch: # manual
   push:
@@ -13,42 +12,22 @@ jobs:
     strategy:
       matrix:
         cfg:
-          - {name: "linux gcc dbg", os: ubuntu-latest, preset: debug }
-          - {name: "windows msvc dbg", os: windows-latest, preset: debug }
-          # using macos-15 here as it has xcode 16 (with swift 6) as default
-          - {name: "macos clang dbg", os: macos-15, preset: debug }
+          - {name: "linux gcc dbg", os: ubuntu-latest, preset: debug-ci }
+          - {name: "windows msvc dbg", os: windows-latest, preset: debug-ci }
+          - {name: "macos clang dbg", os: macos-latest, preset: debug-ci }
     steps:
       - name: Clone
         uses: actions/checkout@v4
-        with:
-          submodules: true
       - name: Install Ninja
         uses: seanmiddleditch/gha-setup-ninja@v5
-      - name: Install SDL
-        uses: libsdl-org/setup-sdl@main
-        id: sdl
-        with:
-          # install-linux-dependencies: true
-          version: 2.30.7
-      - name: Cache CPM packages
-        uses: actions/cache@v3
-        with:
-          key: cpm-packages
-          path: .cpm
-          enableCrossOsArchive: true
       - name: VC Vars
         # Setup vcvars on Windows
         # MSVC's address sanitizer attaches dependencies to several DLLs which are not in PATH
         # vcvars will add them to PATH and allow msvc asan executables to run
         if: matrix.cfg.os == 'windows-latest'
         uses: ilammy/msvc-dev-cmd@v1
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
       - name: Configure
-        run: cmake --preset ${{ matrix.cfg.preset }} -DAC_BUILD_POC=0 -B build
+        run: cmake --preset ${{ matrix.cfg.preset }} -B build
       - name: Build
         run: cmake --build build
       - name: Test
