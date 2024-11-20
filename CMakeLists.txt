@@ -43,8 +43,6 @@ mark_as_advanced(AC_LOCAL_BUILD_TESTS AC_LOCAL_BUILD_EXAMPLES)
 #################
 # global packages
 
-CPMAddPackage(gh:iboB/itlib@1.11.4)
-
 if(AC_LOCAL_BUILD_TESTS)
     CPMAddPackage(gh:iboB/doctest-util@0.1.3)
     set_target_properties(doctest PROPERTIES FOLDER test)
