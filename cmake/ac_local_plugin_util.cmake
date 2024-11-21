@@ -149,9 +149,10 @@ const std::vector<ac::local::ModelLoaderPtr>& get_@nameSym@_model_loaders() {
             get_filename_component(schemaName ${schema} NAME_WE)
             set(schemaHeader ${schemaName}.hpp)
             add_custom_command(
-                OUTPUT ${schemaHeader}
+                OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${schemaHeader}
                 COMMENT "Generating C++ schema header ${schemaHeader}"
-                COMMAND ruby "${GENERATE_CXX_SCHEMA_RB}" "${CMAKE_CURRENT_SOURCE_DIR}/${schema}" "${schemaHeader}"
+                COMMAND ruby "${GENERATE_CXX_SCHEMA_RB}" "${schema}" "${CMAKE_CURRENT_BINARY_DIR}/${schemaHeader}"
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                 DEPENDS ${schema}
                 DEPENDS "${GENERATE_CXX_SCHEMA_RB}"
             )
