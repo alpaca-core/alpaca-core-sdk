@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #include "LocalDummy.hpp"
-#include "DummyModelSchema.hpp"
+#include "dummy-schema.hpp"
 
 #include "Instance.hpp"
 #include "Model.hpp"
@@ -29,9 +29,9 @@ public:
     using Schema = ac::local::schema::Dummy::InstanceGeneral;
 
     static dummy::Instance::InitParams InitParams_fromDict(Dict& d) {
-        Schema::Params schemaParams(d);
+        auto schemaParams = Schema::Params::fromDict(d);
         dummy::Instance::InitParams ret;
-        ret.cutoff = schemaParams.cutoff.getValue();
+        ret.cutoff = schemaParams.cutoff;
         return ret;
     }
 
@@ -41,39 +41,25 @@ public:
     {}
 
     Dict run(Dict& params) {
-        const Schema::OpRun::Params schemaParams(params);
-
-        if (!schemaParams.input.hasValue()) {
-            throw_ex{} << "Missing input";
-        }
-
-        std::vector<std::string> input;
-        input.reserve(schemaParams.input.size());
-        for (size_t i = 0; i < schemaParams.input.size(); ++i) {
-            input.push_back(std::string(schemaParams.input[i].getValue()));
-        }
+        const auto schemaParams = Schema::OpRun::Params::fromDict(params);
 
         dummy::Instance::SessionParams sparams;
-        sparams.splice = schemaParams.splice.getValue();
-        sparams.throwOn = schemaParams.throwOn.getValue();
+        sparams.splice = schemaParams.splice;
+        sparams.throwOn = schemaParams.throwOn;
 
-        auto s = m_instance.newSession(std::move(input), sparams);
+        auto s = m_instance.newSession(std::move(schemaParams.input), sparams);
 
-        Dict ret;
-        Schema::OpRun::Return schemaRet(ret);
-
-        std::string result;
+        Schema::OpRun::Return ret;
         for (auto& w : s) {
-            result += w;
-            result += ' ';
+            ret.result += w;
+            ret.result += ' ';
         }
-        if (!result.empty()) {
+        if (!ret.result.empty()) {
             // remove last space
-            result.pop_back();
+            ret.result.pop_back();
         }
 
-        schemaRet.result.setValue(std::move(result));
-        return ret;
+        return ret.toDict();
     }
 
     virtual Dict runOp(std::string_view op, Dict params, ProgressCb) override {
@@ -93,9 +79,9 @@ public:
     using Schema = ac::local::schema::Dummy;
 
     static dummy::Model::Params ModelParams_fromDict(Dict& d) {
-        Schema::Params schemaParams(d);
+        auto schemaParams = Schema::Params::fromDict(d);
         dummy::Model::Params ret;
-        ret.splice = std::string(schemaParams.spliceString.optGetValue().value_or(""));
+        ret.splice = astl::move(schemaParams.spliceString.value_or(""));
         return ret;
     }
 

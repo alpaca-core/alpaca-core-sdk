@@ -6,16 +6,19 @@ add_library(ac::schema ALIAS ac-schema)
 target_link_libraries(ac-schema INTERFACE
     ac::astl
     ac::dict
-    # magic_enum::magic_enum
 )
 target_sources(ac-schema INTERFACE FILE_SET HEADERS FILES
-    ac/schema/ModelSchema.hpp
-    ac/schema/ModelSchemaGenHelper.hpp
-    # ac/schema/SchemaEnum.hpp
-    ac/schema/SchemaItem.hpp
+    ac/schema/TupleIndexByItemId.hpp
 )
 
 install(TARGETS ac-schema
     EXPORT ac-local-targets
     FILE_SET HEADERS
+)
+
+set(GENERATE_CXX_SCHEMA_RB ${CMAKE_CURRENT_SOURCE_DIR}/generate-cpp-for-ac-model-schema.rb
+    CACHE INTERNAL "Path to generate-cpp-for-ac-model-schema.rb"
+)
+install(PROGRAMS generate-cpp-for-ac-model-schema.rb
+    DESTINATION bin
 )

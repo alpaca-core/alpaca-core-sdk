@@ -13,6 +13,8 @@ add_ac_local_plugin(
         ac/dummy/Instance.cpp
         ac/dummy/LocalDummy.hpp
         ac/dummy/LocalDummy.cpp
+    SCHEMAS
+        ac/dummy/dummy-schema.yml
 )
 
 # install plib and info  to make life easier for external projects

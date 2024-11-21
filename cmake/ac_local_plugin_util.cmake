@@ -6,7 +6,7 @@ include_guard(GLOBAL)
 include(ac_local_lib)
 
 function(add_ac_local_plugin)
-    cmake_parse_arguments(ARG "" "NAME;PUBLIC_SUFFIX" "SOURCES;PLUGIN_SOURCES;PLIB_SOURCES;LIBRARIES" ${ARGN})
+    cmake_parse_arguments(ARG "" "NAME;PUBLIC_SUFFIX" "SOURCES;SCHEMAS;PLUGIN_SOURCES;PLIB_SOURCES;LIBRARIES" ${ARGN})
 
     # private names for targets which are not installed and never leave the project
     set(aclpName aclp-${ARG_NAME})
@@ -143,6 +143,29 @@ const std::vector<ac::local::ModelLoaderPtr>& get_@nameSym@_model_loaders() {
         PRIVATE
             ${baselibTargetName}
     )
+
+    if(ARG_SCHEMAS)
+        foreach(schema IN LISTS ARG_SCHEMAS)
+            get_filename_component(schemaName ${schema} NAME_WE)
+            set(schemaHeader ${schemaName}.hpp)
+            add_custom_command(
+                OUTPUT ${schemaHeader}
+                COMMENT "Generating C++ schema header ${schemaHeader}"
+                COMMAND ruby "${GENERATE_CXX_SCHEMA_RB}" "${CMAKE_CURRENT_SOURCE_DIR}/${schema}" "${schemaHeader}"
+                DEPENDS ${schema}
+                DEPENDS "${GENERATE_CXX_SCHEMA_RB}"
+            )
+            add_custom_target(${schemaName}-schema
+                DEPENDS ${schemaHeader}
+            )
+            add_dependencies(${baselibTargetName} ${schemaName}-schema)
+            target_sources(${plibTargetName}
+                PUBLIC FILE_SET HEADERS
+                BASE_DIRS "${CMAKE_CURRENT_BINARY_DIR}"
+                FILES "${CMAKE_CURRENT_BINARY_DIR}/${schemaHeader}"
+            )
+        endforeach()
+    endif()
 
     # add plugin
     file(CONFIGURE
@@ -295,7 +318,7 @@ function(make_ac_local_plugin_available)
     # now we build a config file based on our configuration to set with cmake -C
     set(cfg "# generated cache")
     get_cmake_property(cacheVars CACHE_VARIABLES)
-    foreach(var ${cacheVars})
+    foreach(var IN LISTS cacheVars)
         if(${var} STREQUAL "")
             # ignore empty
             continue()
@@ -348,7 +371,7 @@ function(make_ac_local_plugin_available)
     endforeach()
 
     # also propagate options
-    foreach(option ${ARG_OPTIONS})
+    foreach(option IN LISTS ARG_OPTIONS)
         cpm_parse_option("${option}") # does the best possible thing
         set(${OPTION_KEY} "${OPTION_VALUE}")
         string(APPEND cfg "\nset(${OPTION_KEY}\n  \"${OPTION_VALUE}\"\n CACHE STRING \"User option\" FORCE)")

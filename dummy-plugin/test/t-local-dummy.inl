@@ -53,7 +53,7 @@ TEST_CASE("general") {
 
     CHECK_THROWS_WITH(i->runOp("nope", {}), "dummy: unknown op: nope");
 
-    CHECK_THROWS_WITH(i->runOp("run", { {"foo", "nope"} }), "Missing input");
+    CHECK_THROWS_WITH(i->runOp("run", { {"foo", "nope"} }), "Missing required field input");
 
     auto res = i->runOp("run", { {"input", {"a", "b"}} });
     CHECK(res.at("result").get<std::string>() == "a soco b bate");

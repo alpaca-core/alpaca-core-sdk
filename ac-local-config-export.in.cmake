@@ -28,3 +28,6 @@ endif()
 # also add cmake lib
 list(APPEND CMAKE_MODULE_PATH "@CMAKE_CURRENT_SOURCE_DIR@/cmake")
 include(ac_local_plugin_util)
+
+# export tools
+set(GENERATE_CXX_SCHEMA_RB "@GENERATE_CXX_SCHEMA_RB@")
