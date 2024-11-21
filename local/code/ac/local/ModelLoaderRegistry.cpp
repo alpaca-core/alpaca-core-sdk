@@ -34,7 +34,6 @@ void ModelLoaderRegistry::addLoader(ModelLoader& loader, PluginInfo* plugin) {
     [[maybe_unused]] auto& info = loader.info();
     AC_LOCAL_LOG(Info, "Registry ", m_name, " adding loader ", info.name,
         "\n       vendor: ", info.vendor,
-        "\n  asset types: ", info.assetSchemaTypes,
         "\n  infer types: ", info.inferenceSchemaTypes,
         "\n         tags: ", info.tags
     );

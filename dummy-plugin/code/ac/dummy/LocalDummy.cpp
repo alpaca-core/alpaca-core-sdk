@@ -126,6 +126,10 @@ public:
         return i;
     }
 
+    virtual bool canLoadModel(const ModelDesc&, const Dict&) const noexcept override {
+        return true;
+    }
+
     virtual ModelPtr loadModel(ModelDesc desc, Dict params, ProgressCb pcb) override {
         if (desc.assets.size() > 1) throw_ex{} << "dummy: expected one or zero assets";
 

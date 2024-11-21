@@ -26,6 +26,7 @@ struct TestLoader : public ac::local::ModelLoader {
     const Info& m_info;
     TestLoader(const Info& info) : m_info(info) {}
     virtual const Info& info() const noexcept override { return m_info; }
+    virtual bool canLoadModel(const ac::local::ModelDesc&, const ac::Dict&) const noexcept override { return true; }
     virtual ac::local::ModelPtr loadModel(ac::local::ModelDesc, ac::Dict, ac::local::ProgressCb) override {
         return {};
     }

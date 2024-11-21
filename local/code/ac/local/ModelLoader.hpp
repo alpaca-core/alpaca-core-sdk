@@ -27,9 +27,6 @@ public:
         /// Optional human readable name of the loader vendor.
         std::string vendor;
 
-        /// Supported asset schemas
-        std::vector<std::string> assetSchemaTypes;
-
         /// Supported inference schemas
         std::vector<std::string> inferenceSchemaTypes;
 
@@ -39,6 +36,9 @@ public:
 
     /// Info of the loader.
     virtual const Info& info() const noexcept = 0;
+
+    /// Check if the model can be loaded
+    virtual bool canLoadModel(const ModelDesc& desc, const Dict& params) const noexcept = 0;
 
     /// Load a model based on the provided description and parameters.
     /// The progress callback is optional and can be used to report the progress of the loading process.
