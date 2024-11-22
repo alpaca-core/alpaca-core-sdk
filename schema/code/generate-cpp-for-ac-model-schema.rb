@@ -129,6 +129,10 @@ def generate_struct(lines, name, data, indent)
   lines << "#{indent}        return ret;"
   lines << "#{indent}    }"
 
+  lines << "#{indent}    static #{name.pascal_case} fromDict(Dict&& dict) {"
+  lines << "#{indent}        return fromDict(dict);"
+  lines << "#{indent}    }"
+
   lines << ''
 
   lines << "#{indent}    Dict toDict() {"

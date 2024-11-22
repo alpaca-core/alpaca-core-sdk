@@ -13,7 +13,6 @@ target_link_libraries(ac-local
     PUBLIC
         ac::astl
         ac::dict
-        ac::schema
 )
 
 configure_file(

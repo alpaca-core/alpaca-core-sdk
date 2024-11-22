@@ -173,6 +173,9 @@ const std::vector<ac::local::ModelLoaderPtr>& get_@nameSym@_model_loaders() {
                 FILES "${CMAKE_CURRENT_BINARY_DIR}/${schemaHeader}"
             )
         endforeach()
+
+        target_link_libraries(${baselibTargetName} PUBLIC ac::schema)
+        target_link_libraries(${plibTargetName} PUBLIC ac::schema)
     endif()
 
     # add plugin

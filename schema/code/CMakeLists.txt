@@ -8,6 +8,7 @@ target_link_libraries(ac-schema INTERFACE
     ac::dict
 )
 target_sources(ac-schema INTERFACE FILE_SET HEADERS FILES
+    ac/schema/Helpers.hpp
     ac/schema/TupleIndexByItemId.hpp
 )
 
