@@ -145,6 +145,13 @@ const std::vector<ac::local::ModelLoaderPtr>& get_@nameSym@_model_loaders() {
     )
 
     if(ARG_SCHEMAS)
+        # we would ideally find ruby "properly" but cmake's ruby module does not allow us to specify components
+        # like the python does, for example.
+        # since we can't ask for the interpreter alone, the line below will fail if the ruby library is not found
+        # we don't need the ruby library, but more importantly it's not available on many systems (esp windows)
+        # so... we just use env ruby and hope for the best
+        # find_package(Ruby 3 REQUIRED)
+
         foreach(schema IN LISTS ARG_SCHEMAS)
             get_filename_component(schemaName ${schema} NAME_WE)
             set(schemaHeader ${schemaName}.hpp)
