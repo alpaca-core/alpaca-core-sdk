@@ -12,4 +12,4 @@ struct DummyRegistry : public ac::local::ModelLoaderRegistry {
     }
 };
 
-#include "t-local-dummy.inl"
+#include "t-dummy.inl"

@@ -15,7 +15,17 @@ dummy_baselib_test(Instance)
 
 add_doctest_test(aclp-dummy-plib
     SOURCES
-        t-local-dummy-plib.cpp
+        t-dummy-plib.cpp
+    LIBRARIES
+        ac-dev::test-util
+        aclp::dummy-plib
+        ac-test-data::dummy
+        ac::jalog
+)
+
+add_doctest_test(aclp-dummy-schema
+    SOURCES
+        t-dummy-schema.cpp
     LIBRARIES
         ac-dev::test-util
         aclp::dummy-plib
@@ -25,7 +35,7 @@ add_doctest_test(aclp-dummy-plib
 
 add_doctest_test(aclp-dummy-plugin
     SOURCES
-        t-local-dummy-plugin.cpp
+        t-dummy-plugin.cpp
     LIBRARIES
         ac-dev::test-util
         ac::local
