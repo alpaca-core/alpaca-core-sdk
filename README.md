@@ -14,24 +14,40 @@ It provides a unified API for doing inference with multiple models. The API itse
 * Programming language specific (Language API): The API which one calls writing code in a specific programming language. It's just a means to call the:
 * Inference API: A JSON/CBOR/POJO-like API which is used to communicate with the underlying inference engines following their specific API schema.
 
-Read the [full introduction here](doc/intro.md).
+Read the [full introduction here](doc/intro.md) or check out the documentation at https://alpacacore.com.
 
 ## Supported models
 
-* Multiple LLM-s through [llama.cpp](https://github.com/ggerganov/llama.cpp)
-* Whisper through [whisper.cpp](https://github.com/ggerganov/whisper.cpp)
+The SDK on its own does not support any models. It contains the tools for building and loading plugins which provide inference for specific models. 
+
+Some libraries which have AC Local Plugins include:
+
+* By Alpaca Core:
+    * [ilib-llama.cpp](https://github.com/alpaca-core/ilib-llama.cpp): Multiple LLM-s by wrapping [ggerganov/llama.cpp](https://github.com/ggerganov/llama.cpp)
+    * [ilib-whisper.cpp](https://github.com/alpaca-core/ilib-whisper.cpp): Whisper ASR by wrapping [ggerganov/whisper.cpp](https://github.com/ggerganov/whisper.cpp)
+    * [ilib-sd.cpp](https://github.com/alpaca-core/ilib-sd.cpp): Image generation with Stable Diffusion by wrapping [leejet/stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp)
+    * [ilib-ac-tortoise](https://github.com/alpaca-core/ilib-ac-tortoise): TTS with tortoise. Based on [balisujohn/tortoise.cpp](https://github.com/balisujohn/tortoise.cpp)
 
 *This list will be updated as new models are added.*
+
+## Bindings, Wrappers, and Integrations
+
+This repo contains the Inference SDK implementation and Inference API documentation. The Inference SDK is implemented in C++, and thus the C++ Language API and *its* documentation are also hosted here. Additionally there are bindings, wrappers, and integrations for other languages and platforms. Their documentation is hosted in, and accessible from their respective repositories:
+
+* By Alpaca Core:
+    * [C wrapper](https://github.com/alpaca-core/ac-local-c)
+    * [Java wrapper](https://github.com/alpaca-core/ac-local-java)
+    * [Swift wrapper](https://github.com/alpaca-core/ac-local-swift)
+    * [Cocoa DictConverter](https://github.com/alpaca-core/ac-dict-cocoa) - Convert `NSDictionary` to `ac::Dict` and back in Objective-C++
 
 ## Minimal Example
 
 ```cpp
-ac::local::ModelFactory factory;
-ac::local::addLlamaInference(factory);
+ac::local::Lib::loadAllPlugins();
 
 auto model = factory.createModel(
     {
-        .inferenceType = "llama.cpp",
+        .inferenceType = "llama",
         .assets = {
             {.path = "/path/to/model.gguf"}
         }
@@ -43,32 +59,22 @@ auto instance = model->createInstance("general", {});
 auto result = instance->runOp("run",
     {{"prompt", "If you could travel faster than light,"}}, {});
 
-
 std::cout << result << "\n";
 ```
 
-## Bindings, Wrappers, and Integrations
-
-* [C wrapper](wrapper/c)
-* [Java wrapper](wrapper/java)
-* [Swift wrapper](wrapper/swift)
-* [Cocoa DictConverter](wrapper/cocoa) - Convert `NSDictionary` to `ac::Dict` and back in Objective-C++
-
 ## Demos
-
-There are multiple examples in this repo. Look for the `example` directories throughout the tree. Besides them, there are also are several larger demos in separate repositories:
 
 * AI Chat (LLM-based chatbot)
     * Android: [alpaca-core/demo-android-ai-chat](https://github.com/alpaca-core/demo-android-ai-chat)
     * IOS: [alpaca-core/demo-ios-ai-chat](https://github.com/alpaca-core/demo-ios-ai-chat)
 
-## Build
+## Usage
 
-*The repo has submodules. Don't forget to fetch them.*
+Check out the [guide on getting started](doc/getting-started.md).
 
-Use CMake. Works as a root or as a subdirectory. Some useful presets are provided in the repo.
+## Contributing
 
-Detailed build instructions can be found in the [documentation](doc/dev/build.md).
+Check out the [contributing guide](CONTRIBUTING.md).
 
 ## License
 

@@ -17,7 +17,7 @@ Here's the list in no particular order:
 | [itlib](https://github.com/iboB/itlib) | C++ STL extensions library |
 | [jalog](https://github.com/iboB/jalog) | logging |
 
-## In demos and examples
+## In tools, demos, and examples
 
 | Library | Usage |
 | --- | --- |
@@ -31,3 +31,4 @@ Here's the list in no particular order:
 | [CPM.cmake](https://github.com/TheLartians/CPM.cmake) | package management |
 | [iboB's CMake Modules](https://github.com/iboB/splat) | CMake modules |
 | [doctest](https://github.com/onqtam/doctest) | testing |
+| [doctest-util](https://github.com/iboB/doctest-util) | testing |
