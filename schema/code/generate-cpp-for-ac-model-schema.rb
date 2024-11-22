@@ -24,6 +24,8 @@ CPP_TYPE = {
 def generate_read_from_val(pr)
   if pr[:type] == :object
     "#{pr[:cpp_val_type]}::fromDict(val)"
+  elsif pr[:type] == :binary
+    "std::move(val.get_binary())"
   else
     "std::move(val.get<#{pr[:cpp_val_type]}>())"
   end
@@ -35,6 +37,12 @@ def generate_write(pr)
       "#{pr[:cpp_name]}->toDict()"
     else
       "#{pr[:cpp_name]}.toDict()"
+    end
+  elsif pr[:type] == :binary
+    if (pr[:opt])
+      "Dict::binary(std::move(*#{pr[:cpp_name]}))"
+    else
+      "Dict::binary(std::move(#{pr[:cpp_name]}))"
     end
   else
     if (pr[:opt])
