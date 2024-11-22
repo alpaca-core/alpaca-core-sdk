@@ -3,6 +3,9 @@
 #
 add_library(ac-schema INTERFACE)
 add_library(ac::schema ALIAS ac-schema)
+set_target_properties(ac-schema PROPERTIES
+    EXPORT_NAME ac::schema
+)
 target_link_libraries(ac-schema INTERFACE
     ac::astl
     ac::dict
@@ -20,6 +23,6 @@ install(TARGETS ac-schema
 set(GENERATE_CXX_SCHEMA_RB ${CMAKE_CURRENT_SOURCE_DIR}/generate-cpp-for-ac-model-schema.rb
     CACHE INTERNAL "Path to generate-cpp-for-ac-model-schema.rb"
 )
-install(PROGRAMS generate-cpp-for-ac-model-schema.rb
-    DESTINATION bin
+install(FILES generate-cpp-for-ac-model-schema.rb
+    DESTINATION opt/alpaca-core/codegen
 )

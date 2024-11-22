@@ -3,10 +3,12 @@
 #
 require 'yaml'
 
+CASE_SPLIT = /[ _\-]/
+
 class String
-  def pascal_case = split('_').map(&:capitalize).join
+  def pascal_case = split(CASE_SPLIT).map(&:capitalize).join
   def camel_case
-    first, *rest = split('_')
+    first, *rest = split(CASE_SPLIT)
     first + rest.map(&:capitalize).join
   end
 end
@@ -97,14 +99,20 @@ def generate_struct(lines, name, data, indent)
   props.each do |pr|
     lines << "#{indent}    // #{pr[:desc]}" if pr[:desc]
     decl = "#{indent}    #{pr[:cpp_decl_type]} #{pr[:cpp_name]}"
-    decl += " = #{pr[:default]}" if pr[:default]
+    if pr[:default]
+      if pr[:type] == :array
+        decl += " = {#{pr[:default].map(&:inspect).join(', ')}}"
+      else
+        decl += " = #{pr[:default].inspect}"
+      end
+    end
     decl += ';'
     lines << decl
   end
 
   lines << ''
 
-  lines << "#{indent}    static #{name.pascal_case} fromDict(Dict& dict) {"
+  lines << "#{indent}    static #{name.pascal_case} fromDict([[maybe_unused]] Dict& dict) {"
   lines << "#{indent}        #{name.pascal_case} ret;"
   props.each do |pr|
     lines << ''
