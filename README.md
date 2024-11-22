@@ -87,3 +87,5 @@ Copyright &copy; 2024 [Alpaca Core, Inc](https://github.com/alpaca-core)
 ## Third Party Libraries
 
 [A list of the third party libraries used here](third-party.md). Please consider supporting them.
+
+Additionally, if you deploy this software as binary, please include `etc/ac-local-deploy-licenses.md` in your deployment.

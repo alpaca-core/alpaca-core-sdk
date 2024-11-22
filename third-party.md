@@ -30,5 +30,5 @@ Here's the list in no particular order:
 | --- | --- |
 | [CPM.cmake](https://github.com/TheLartians/CPM.cmake) | package management |
 | [iboB's CMake Modules](https://github.com/iboB/splat) | CMake modules |
-| [doctest](https://github.com/onqtam/doctest) | testing |
+| [doctest](https://github.com/doctest/doctest) | testing |
 | [doctest-util](https://github.com/iboB/doctest-util) | testing |
