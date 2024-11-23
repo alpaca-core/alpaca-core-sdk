@@ -11,6 +11,10 @@ The inference API defines the communication protocol with a given inference engi
   "description": "A schema for the inference API of a model type",
   "type": "object",
   "properties": {
+    "id": {
+      "description": "A unique identifier of the schema",
+      "type": "string"
+    },
     "description": {
       "description": "A human-readable description of the inference engine",
       "type": "string"
@@ -69,6 +73,7 @@ As an example, here's how the whisper.cpp schema looked like at some point durin
 
 ```json
 {
+  "id": "whisper",
   "description": "Inference based on our fork of https://github.com/ggerganov/whisper.cpp",
   "params": { "type": "null" },
   "instances": {
