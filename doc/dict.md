@@ -16,5 +16,3 @@ The supported types are:
 * `object` - a nested key-value store
 * `array` - an ordered list of values
 * `binary` - a contiguous memory buffer
-
-`Dict` is currently implemented as a typedef of [`nlohmann::json`](https://github.com/nlohmann/json)
