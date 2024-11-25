@@ -1,16 +1,6 @@
 # Build
 
-These are the build instruction and build documentation for the Alpaca Core Local SDK.
-
-If you're not only interested in building the project but also setting up a development environment, you might want also to check out the [development environment documentation](dev-env.md).
-
-> [!IMPORTANT]
-> When cloning this repo, don't forget to fetch the submodules.
-> * Either: `$ git clone https://github.com/alpaca-core/ac-local.git --recurse-submodules`
-> * Or:
->    * `$ git clone https://github.com/alpaca-core/ac-local.git`
->    * `$ cd ac-local`
->    * `$ git submodule update --init --recursive`
+> If you're not only interested in building the project but also setting up a development environment, you might want also to check out the [development environment documentation](dev-env.md).
 
 ## Prerequisites
 
@@ -20,11 +10,8 @@ The minimum requirements are:
     * MSVC 19.30 (Visual Studio 2022 v17.00) or later
     * GCC 11 or later
     * Clang 14 or later
-* [CMake](https://cmake.org/) 3.22 or later
+* [CMake](https://cmake.org/) 3.24 or later
 * For some build flavors and optional components:
-    * Android: CMake 3.24 is needed to properly find JNI
-    * The Java wrapper should work with Java 8+, but Java 17+ is needed to build the Java tests and examples
-    * To build the Swift wrapper, you need Swift 6.0.0 or later. Moreover, on non-macOS systems you need to use the clang compiler shipped with your swift installation.
     * GUI Demos: [SDL2](https://wiki.libsdl.org/SDL2/FrontPage)
     * Different computational backends require their respective SDKs and dependencies
 
@@ -32,36 +19,13 @@ If you want practical steps on for specific environments, check the [developer e
 
 ## Configure
 
-Some useful presets are provided in `CMakePresets.json`. As a convention each presets writes the configured files in `<repo-root>/out/build/<preset-name>`. Note that most of the included CMake presets all also require [ninja](https://ninja-build.org/).
-
-Example:
-
-* `$ cmake --preset=release`
-* Configuration files are written in `<repo-root>/out/build/release`
-
-For finer grain control or if you're using the repo as a subdirectory:
-
 ### CMake Options
 
-* `AC_BUILD_LOCAL` - build the local inference api and integrations of inference libraries
-* `AC_INFERENCE_LIBS` - `all` or `none` or semicolon separated list. Which inference libraries to build. The supported ones are:
-    * `dummy`: a dummy inference library for testing and experimenting
-    * `llama.cpp`: wrapping our fork of [ggerganov/llama.cpp](https://github.com/ggerganov/llama.cpp)
-    * `whisper`: wrapping our fork of [ggerganov/whisper.cpp](https://github.com/ggerganov/whisper.cpp)
-* `AC_BUILD_ACORD`: build the Alpaca Core daemon. This is `OFF` by default if the project is a subdir. Only available if `AC_BUILD_LOCAL` is `ON`.
 * Advanced and `OFF` by default if the project is a subdir:
-    * `AC_BUILD_TOOLS` - build all tools for all active components. No finer-grain options are available yet
-    * `AC_BUILD_TESTS` - build all tests for all active components. No finer-grain options are available yet. Git LFS is required for some tests
-    * `AC_BUILD_EXAMPLES` - build all examples for all active components. No finer-grain options are available yet. Git LFS is required for some examples
-    * `AC_BUILD_POC` - build proof of concept, sandbox, and experimental projects
-* Wrapper config. 
-    * Wrapper options are have three possible values: `ON`, `OFF`, and `AUTO`. `AUTO` will try to detect if the wrapper can be built.
-    * `AC_WRAPPER_DEFAULT_VALUE`: this is not a CMake option, but you can define it for the initial configuration. It determines what the dafault value for wrapper options will be. If it's not defined, it defaults to `OFF` when the project is a subdir, and `AUTO` if it's root.
-    * `AC_C_WRAPPER`: build C wrapper. `AUTO` equals `ON`. C should always be available if you have C++.
-    * `AC_JAVA_WRAPPER`: build Java wrapper. `AUTO` checks if JNI is available
-    * `AC_COCOA_WRAPPER`: build Cocoa wrapper. `AUTO` checks for `APPLE`
-    * `AC_SWIFT_WRAPPER`: build Swift wrapper. `AUTO` checks if `swiftc` is available
-* Only available when ac-local is the root project and `OFF` by default:
+    * `AC_LOCAL_BUILD_TOOLS` - build tools for all components. No finer-grain options are available yet
+    * `AC_LOCAL_BUILD_TESTS` - build tests for all active components. No finer-grain options are available yet. Git LFS is required for some tests
+    * `AC_LOCAL_BUILD_EXAMPLES` - build examples for all active components. No finer-grain options are available yet. Git LFS is required for some examples
+* From ac-build and only available when ac-local is the root project and `OFF` by default:
     * `SAN_ADDR`: enable address sanitizer.
     * `SAN_UB`: enable undefined behavior sanitizer. Not supported on Windows.
     * `SAN_LEAK`: enable leak sanitizer. Only supported on Linux.

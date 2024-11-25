@@ -15,9 +15,9 @@ We use Ubuntu 24.04, but the setup will likely work for other versions as well.
 * `$ git lfs install` - do not forget this!
 * `$ sudo apt install cmake`
 * `$ sudo apt install ninja-build`
+* `$ sudo apt install ruby` - needed for schema codegen
 * `$ sudo apt install libssl-dev` (optional for HTTPS downloads)
 * `$ sudo apt install libsdl2-dev` (optional for GUI demos)
-* Optionally for the java wrapper: `$ sudo apt install openjdk-17-jdk`
 * Compute backends (may or may not be applicable to your system):
     * Cuda: `$ sudo apt install nvidia-cuda-toolkit`
     * Vulkan: `$ sudo apt install libvulkan-dev`
@@ -32,11 +32,9 @@ We use Manjaro so some packages might have different names in pure AUR Arch Linu
 * `$ sudo pacman -S cmake`
 * `$ sudo pacman -S gcc`
 * `$ sudo pacman -S ninja`
+* `$ sudo pacman -S ruby` - needed for schema codegen
 * `$ sudo pacman -S openssl` (optional for HTTPS downloads)
 * `$ sudo pacman -S sdl2` (optional for GUI demos)
-* Optionally for the java wrapper: `$ sudo pacman -S jdk-openjdk`
-* Optionally for the swift wrapper: `$ pamac build swift-bin`
-    * Note that to build the swift wrapper, you will have to configure with `-DCMAKE_CXX_COMPILER=/usr/lib/swift/bin/clang++ -DCMAKE_C_COMPILER=/usr/lib/swift/bin/clang`
 * Compute backends (may or may not be applicable to your system):
     * Cuda: `$ sudo pacman -S cuda`
     * Vulkan: `$ sudo pacman -Sg vulkan-devel`
@@ -55,6 +53,8 @@ Install the following software (we recommend using Chocolatey, Scoop, or WinGet,
 * [CMake](https://cmake.org/download/) 3.24 or later
 * OpenSSL 3 (Optional for HTTPS downloads). Windows binary builds available [here](https://slproweb.com/products/Win32OpenSSL.html) (Install the Win64 non-light version))
     * set the `OPEN_SSL_ROOT_DIR` environment variable to the OpenSSL installation directory
+* Ruby 3+ is needed for the schema codegen:
+    * If you don't use a package manager, use [Ruby Installer](https://rubyinstaller.org/)
 * SDL2 (Optional, for GUI demos and tools). If you also install the Vulkan SDK, follow the steps for it below. They also provide SDL2. Alternatively:
     * Binary builds available [here](https://github.com/libsdl-org/SDL/releases) (note that first entries there will be for SDL3, scroll to find the latest SDL2 release).         
     * Add the SDL2 installation directory to the `CMAKE_PREFIX_PATH` environment variable 
@@ -65,13 +65,6 @@ Install the following software (we recommend using Chocolatey, Scoop, or WinGet,
     * [Android gradle plugin](https://developer.android.com/build/releases/gradle-plugin)
     * Set the `ANDROID_HOME` environment variable to the Android SDK installation directory
     * Set the `ANDROID_NDK_ROOT` environment variable to the Android NDK installation directory
-* For the Java wrapper (optional):
-    * JDK. [Microsoft OpenJDK 17](https://learn.microsoft.com/en-us/java/openjdk/download#openjdk-17) works, but any other JDK 17 or later should be fine as well
-    * Set the `JAVA_HOME` environment variable to the JDK installation directory
-* For the Swift wrapper (optional): 
-    * Install Swift in any of the ways described [here](https://www.swift.org/install/windows)
-    * Note that on you need to use the clang compiler shipped with your swift installation
-    * Also note that installing the Swift will add clang++ to your system path. If you also use other clang compilers, you will have to juggle the system path around accorting to what you currently need.
 * Optional compute backends which may or may not be applicable to your system:
     * [CUDA 12](https://developer.nvidia.com/cuda-downloads)
     * Vulkan SDK
@@ -89,7 +82,7 @@ Enable git LFS: `> git lfs install`
 * Even if you want to target Android, you do *not* need the Android development components. 
     * If you already have them, it's fine. You do not need to uninstall them.
     * We don't support android builds through Visual Studio
-* Use "open folder" in Visual Studio to open the project directory, configure, and build.
+* Use "open folder" in Visual Studio to open project directories, configure, and build.
     * Alternatively configuring with a Visual Studio generator will likely work, but it's not supported
 
 ### VS Code Setup
@@ -107,13 +100,13 @@ Enable git LFS: `> git lfs install`
     * CMake Tools
     * CMake Language Support
     * C/C++
-* Open the project directory in VS Code, configure, and build.
+* Open project directories in VS Code, configure, and build.
 
 ## macOS
 
 We use macOS Sequoia, but the setup will likely work for earlier versions as well.
 
-Note, however, that we do not support x86 macOS. We only support Apple Silicon.
+Note that since most plugins don't support accelleration on x86 macOS, we don't support it either. We only support Apple Silicon.
 
 On macOS we recommend using VS Code or Xcode.
 
@@ -133,9 +126,6 @@ Technically you can setup the requirements manually, but, please, just use [Home
     * Install Android Studio
     * Install SDK with API Level at least 32 and NDK
     * Set the `ANDROID_NDK_ROOT` environment variable to the Android NDK installation directory
-* Optionally for the Java wrapper: `$ brew install openjdk` or `$ brew install openjdk@17` (both should work)
-    * Set the `JAVA_HOME` environment variable to the JDK installation directory, but note that CMake doesn't deal well with the brew symlinks for openjdk.
-    * Brew will symlink the installation to `/opt/homebrew/opt/openjdk`. *Do not* set this to `JAVA_HOME`. Instead, set it to the actual installation directory, which will likely be `/opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home`
 
 ### Visual Studio Code Setup
 
@@ -144,6 +134,6 @@ Technically you can setup the requirements manually, but, please, just use [Home
     * CMake Tools
     * CMake Language Support
     * C/C++
-* Open the project directory in VS Code, configure, and build.
+* Open project directories in VS Code, configure, and build.
 
 ### Xcode Setup
