@@ -107,16 +107,16 @@ public:
         static Info i = {
             .name = "ac-local dummy",
             .vendor = "Alpaca Core",
-            .inferenceSchemaTypes = {"dummy"},
+            .assetTypes = {"dummy"},
         };
         return i;
     }
 
-    virtual bool canLoadModel(const ModelDesc&, const Dict&) const noexcept override {
-        return true;
+    virtual bool canLoadModel(const ModelAssetDesc& desc, const Dict&) const noexcept override {
+        return desc.type == "dummy";
     }
 
-    virtual ModelPtr loadModel(ModelDesc desc, Dict params, ProgressCb pcb) override {
+    virtual ModelPtr loadModel(ModelAssetDesc desc, Dict params, ProgressCb pcb) override {
         if (desc.assets.size() > 1) throw_ex{} << "dummy: expected one or zero assets";
 
         if (desc.assets.empty()) {

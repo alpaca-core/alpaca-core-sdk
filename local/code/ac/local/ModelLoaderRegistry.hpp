@@ -4,7 +4,7 @@
 #pragma once
 #include "export.h"
 #include "ModelPtr.hpp"
-#include "ModelDesc.hpp"
+#include "ModelAssetDesc.hpp"
 #include "ProgressCb.hpp"
 #include <ac/Dict.hpp>
 #include <vector>
@@ -35,10 +35,10 @@ public:
     void addLoader(ModelLoader& loader, PluginInfo* plugin = nullptr);
     void addPlugin(PluginInfo& plugin);
 
-    std::optional<LoaderData> findLoader(std::string_view schemaType) const noexcept;
+    std::optional<LoaderData> findLoader(std::string_view modelAssetType) const noexcept;
 
     // temp until we figure out better loader queries
-    ModelPtr createModel(ModelDesc desc, Dict params, ProgressCb cb = {}) const;
+    ModelPtr createModel(ModelAssetDesc desc, Dict params, ProgressCb cb = {}) const;
 private:
     std::string m_name;
     std::vector<LoaderData> m_loaders;

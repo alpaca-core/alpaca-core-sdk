@@ -14,8 +14,8 @@
 
 #include <astl/move.hpp>
 
-const ac::local::ModelDesc Model_Desc = {
-    .inferenceType = "dummy",
+const ac::local::ModelAssetDesc Model_Desc = {
+    .type = "dummy",
     .assets = {
         {.path = AC_DUMMY_MODEL_SMALL}
     }
@@ -25,7 +25,7 @@ TEST_CASE("bad model") {
     DummyRegistry f;
     CHECK_THROWS_WITH(
         f.createModel({
-            .inferenceType = "dummy",
+            .type = "dummy",
             .assets = {
                 {.path = "nope"}
             }
@@ -76,7 +76,7 @@ TEST_CASE("synthetic") {
     std::string tag;
     float progress;
     auto model = f.createModel({
-        .inferenceType = "dummy",
+        .type = "dummy",
         .assets = {}
         }, {}, [&](const std::string_view t, float p) {
         tag = std::string(t);

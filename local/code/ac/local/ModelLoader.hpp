@@ -4,7 +4,7 @@
 #pragma once
 #include "export.h"
 #include "ModelPtr.hpp"
-#include "ModelDesc.hpp"
+#include "ModelAssetDesc.hpp"
 #include "ProgressCb.hpp"
 #include <ac/Dict.hpp>
 
@@ -27,8 +27,12 @@ public:
         /// Optional human readable name of the loader vendor.
         std::string vendor;
 
-        /// Supported inference schemas
-        std::vector<std::string> inferenceSchemaTypes;
+        /// Supported model types
+        /// Note that this only suggests that the loader may be able to load the model. It's not a 100% guarantee
+        std::vector<std::string> assetTypes;
+
+        /// Supported inference interfaces for the general instance
+        std::vector<std::string> generalInstanceInterfaces;
 
         /// Additional tags that can be used to filter loaders
         std::vector<std::string> tags;
@@ -41,12 +45,13 @@ public:
     virtual const Info& info() const noexcept = 0;
 
     /// Check if the model can be loaded
-    virtual bool canLoadModel(const ModelDesc& desc, const Dict& params) const noexcept = 0;
+    /// This function is used by `ModelLoaderRegistry` to check if an attempt to load a model should be made.
+    virtual bool canLoadModel(const ModelAssetDesc& desc, const Dict& params) const noexcept = 0;
 
     /// Load a model based on the provided description and parameters.
     /// The progress callback is optional and can be used to report the progress of the loading process.
     /// The returned model is owned by the caller and is not bound to the loader in any way.
-    virtual ModelPtr loadModel(ModelDesc desc, Dict params, ProgressCb cb) = 0;
+    virtual ModelPtr loadModel(ModelAssetDesc desc, Dict params, ProgressCb cb) = 0;
 };
 
 } // namespace ac::local

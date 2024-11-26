@@ -26,7 +26,7 @@ LoadDummyFixture loadDummyFixture;
 
 TEST_CASE("dummy schema") {
     auto model = ac::local::Lib::modelLoaderRegistry().createModel({
-        .inferenceType = "dummy",
+        .type = "dummy",
         .name = "synthetic"
     }, {});
 
