@@ -32,6 +32,9 @@ public:
 
         /// Additional tags that can be used to filter loaders
         std::vector<std::string> tags;
+
+        /// Loader-specific user data which can be used to store additional information
+        void* userData = nullptr;
     };
 
     /// Info of the loader.

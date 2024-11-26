@@ -195,8 +195,9 @@ const PluginInfo* PluginManager::tryLoadPlugin(const std::string& path, LoadPlug
         return nullptr;
     }
 
+    void* pluginUserData = nullptr;
     if (interface.init) try {
-        interface.init();
+        pluginUserData = interface.init();
     }
     catch (const std::exception& ex) {
         AC_LOCAL_LOG(Error, "Failed to init plugin: ", ex.what());
@@ -214,6 +215,7 @@ const PluginInfo* PluginManager::tryLoadPlugin(const std::string& path, LoadPlug
     info.nativeHandle = hplugin;
     hplugin = nullptr; // release sentry
 
+    info.userData = pluginUserData;
     info.loaders = interface.getLoaders();
 
     for (auto& loader : info.loaders) {

@@ -21,6 +21,9 @@ struct PluginInfo {
     std::string vendor;
     astl::version version = {};
 
+    // plugin-specific user data
+    void* userData = nullptr;
+
     std::vector<ModelLoaderPtr> loaders; // provided loaders
 };
 
