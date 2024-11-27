@@ -26,8 +26,10 @@ def generate_read_from_val(pr)
     "#{pr[:cpp_val_type]}::fromDict(val)"
   elsif pr[:type] == :binary
     "std::move(val.get_binary())"
+  elsif pr[:type] == :string
+    "std::move(val.get_ref<std::string&>())"
   else
-    "std::move(val.get<#{pr[:cpp_val_type]}>())"
+    "val.get<#{pr[:cpp_val_type]}>()"
   end
 end
 
