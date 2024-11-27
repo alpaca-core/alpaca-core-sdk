@@ -103,7 +103,7 @@
 
 #ifndef NLOHMANN_JSON_NAMESPACE_BEGIN
 #define NLOHMANN_JSON_NAMESPACE_BEGIN                \
-    namespace nlohmann                               \
+    namespace acnl                                   \
     {                                                \
     inline namespace NLOHMANN_JSON_NAMESPACE_CONCAT( \
                 NLOHMANN_JSON_ABI_TAGS,              \
@@ -169,7 +169,7 @@ struct ordered_map;
 
 /// @brief specialization that maintains the insertion order of object keys
 /// @sa https://json.nlohmann.me/api/ordered_json/
-using ordered_json = basic_json<nlohmann::ordered_map>;
+using ordered_json = basic_json<acnl::ordered_map>;
 
 NLOHMANN_JSON_NAMESPACE_END
 
