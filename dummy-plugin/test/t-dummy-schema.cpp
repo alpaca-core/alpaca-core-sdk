@@ -25,7 +25,7 @@ struct LoadDummyFixture {
 LoadDummyFixture loadDummyFixture;
 
 TEST_CASE("dummy schema") {
-    auto model = ac::local::Lib::modelLoaderRegistry().createModel({
+    auto model = ac::local::Lib::modelLoaderRegistry().loadModel({
         .type = "dummy",
         .name = "synthetic"
     }, {});

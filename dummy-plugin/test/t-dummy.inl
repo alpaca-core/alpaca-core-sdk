@@ -24,7 +24,7 @@ const ac::local::ModelAssetDesc Model_Desc = {
 TEST_CASE("bad model") {
     DummyRegistry f;
     CHECK_THROWS_WITH(
-        f.createModel({
+        f.loadModel({
             .type = "dummy",
             .assets = {
                 {.path = "nope"}
@@ -36,7 +36,7 @@ TEST_CASE("bad model") {
 
 TEST_CASE("bad instance") {
     DummyRegistry f;
-    auto model = f.createModel(Model_Desc, {});
+    auto model = f.loadModel(Model_Desc, {});
     REQUIRE(model);
     CHECK_THROWS_WITH(model->createInstance("nope", {}), "dummy: unknown instance type: nope");
     CHECK_THROWS_WITH(model->createInstance("general", { {"cutoff", 40} }),
@@ -45,7 +45,7 @@ TEST_CASE("bad instance") {
 
 TEST_CASE("general") {
     DummyRegistry f;
-    auto model = f.createModel(Model_Desc, {});
+    auto model = f.loadModel(Model_Desc, {});
     REQUIRE(model);
 
     auto i = model->createInstance("general", {});
@@ -75,7 +75,7 @@ TEST_CASE("synthetic") {
 
     std::string tag;
     float progress;
-    auto model = f.createModel({
+    auto model = f.loadModel({
         .type = "dummy",
         .assets = {}
         }, {}, [&](const std::string_view t, float p) {

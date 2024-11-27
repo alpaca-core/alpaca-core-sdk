@@ -3,6 +3,7 @@
 //
 #include "ModelLoaderRegistry.hpp"
 #include "ModelLoader.hpp"
+#include "CommonModelLoaderScorers.hpp"
 #include "Logging.hpp"
 #include <astl/throw_stdex.hpp>
 #include <astl/move.hpp>
@@ -45,15 +46,38 @@ void ModelLoaderRegistry::removeLoader(ModelLoader& loader) {
     astl::erase_first_if(m_loaders, [&](const auto& data) { return data.loader == &loader; });
 }
 
-ModelPtr ModelLoaderRegistry::createModel(ModelAssetDesc desc, Dict params, ProgressCb cb) const {
-    for (auto& data : m_loaders) {
-        if (data.loader->canLoadModel(desc, params)) {
-            return data.loader->loadModel(astl::move(desc), astl::move(params), astl::move(cb));
+ModelLoader* ModelLoaderRegistry::findBestLoader(
+    const ModelLoaderScorer& scorer, const ModelAssetDesc& desc, const Dict& params
+) const {
+    ModelLoader* best = nullptr;
+    auto bestScore = scorer.denyScore();
+    auto acceptScore = scorer.acceptScore();
+
+    for (const auto& data : m_loaders) {
+        auto score = scorer.score(*data.loader, data.plugin, desc, params);
+        if (score > bestScore) {
+            best = data.loader;
+            bestScore = score;
         }
+        if (score >= acceptScore) {
+            return best;
+        }
+    }
+
+    return best;
+}
+
+ModelPtr ModelLoaderRegistry::loadModel(const ModelLoaderScorer& scorer, ModelAssetDesc desc, Dict params, ProgressCb cb) const {
+    if (auto loader = findBestLoader(scorer, desc, params)) {
+        return loader->loadModel(astl::move(desc), astl::move(params), astl::move(cb));
     }
 
     ac::throw_ex{} << "No loader found for: " << desc.name;
     MSVC_WO_10766806();
+}
+
+ModelPtr ModelLoaderRegistry::loadModel(ModelAssetDesc desc, Dict params, ProgressCb cb) const {
+    return loadModel(CanLoadScorer{}, astl::move(desc), astl::move(params), astl::move(cb));
 }
 
 } // namespace ac::local

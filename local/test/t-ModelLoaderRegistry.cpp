@@ -3,6 +3,7 @@
 //
 #include <ac/local/ModelLoaderRegistry.hpp>
 #include <ac/local/ModelLoader.hpp>
+#include <ac/local/CommonModelLoaderScorers.hpp>
 #include <doctest/doctest.h>
 
 using Info = ac::local::ModelLoader::Info;
@@ -15,15 +16,17 @@ Info LlamaB{
     .name = "llama b",
 };
 
-Info Whisper{
-    .name = "my whisper",
+Info WhisperX{
+    .name = "whisper x",
 };
 
 struct TestLoader : public ac::local::ModelLoader {
     const Info& m_info;
     TestLoader(const Info& info) : m_info(info) {}
     virtual const Info& info() const noexcept override { return m_info; }
-    virtual bool canLoadModel(const ac::local::ModelAssetDesc&, const ac::Dict&) const noexcept override { return true; }
+    virtual bool canLoadModel(const ac::local::ModelAssetDesc& desc, const ac::Dict&) const noexcept override {
+        return m_info.name.starts_with(desc.type);
+    }
     virtual ac::local::ModelPtr loadModel(ac::local::ModelAssetDesc, ac::Dict, ac::local::ProgressCb) override {
         return {};
     }
@@ -31,20 +34,25 @@ struct TestLoader : public ac::local::ModelLoader {
 
 TEST_CASE("ModelLoaderRegistry") {
     ac::local::ModelLoaderRegistry registry;
-    //CHECK_FALSE(registry.findLoader("llama"));
 
-    TestLoader llamaA(LlamaA), llamaB(LlamaB), whisper(Whisper);
+    ac::local::ModelAssetDesc
+        llama {.type = "llama", .name = "llama-7b"},
+        whisper {.type = "whisper", .name = "whisper-tiny"};
+
+    ac::local::CanLoadScorer s;
+    CHECK_FALSE(registry.findBestLoader(s, llama, {}));
+
+    TestLoader llamaA(LlamaA), llamaB(LlamaB), whisperX(WhisperX);
 
     registry.addLoader(llamaA);
     registry.addLoader(llamaB);
-    registry.addLoader(whisper);
+    registry.addLoader(whisperX);
 
-    //auto la = registry.findLoader("llama");
-    //CHECK(!!la);
-    //CHECK(&la->loader.info() == &LlamaA);
-    //CHECK_FALSE(la->plugin);
+    auto la = registry.findBestLoader(s, llama, {});
+    REQUIRE(la);
+    CHECK(&la->info() == &LlamaA);
 
-    //auto wh = registry.findLoader("whisper");
-    //CHECK(!!wh);
-    //CHECK(&wh->loader.info() == &Whisper);
+    auto wh = registry.findBestLoader(s, whisper, {});
+    REQUIRE(wh);
+    CHECK(&wh->info() == &WhisperX);
 }

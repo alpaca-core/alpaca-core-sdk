@@ -16,6 +16,7 @@
 namespace ac::local {
 class ModelLoader;
 struct PluginInfo;
+class ModelLoaderScorer;
 
 class AC_LOCAL_EXPORT ModelLoaderRegistry {
 public:
@@ -35,8 +36,17 @@ public:
     void addLoader(ModelLoader& loader, PluginInfo* plugin = nullptr);
     void removeLoader(ModelLoader& loader);
 
-    // temp until we figure out better loader queries
-    ModelPtr createModel(ModelAssetDesc desc, Dict params, ProgressCb cb = {}) const;
+    // find the best loader for the given model description and parameters
+    // returns nullptr if all loaders rank equal or lower then the denyScore of the scorer
+    ModelLoader* findBestLoader(const ModelLoaderScorer& scorer, const ModelAssetDesc& desc, const Dict& params) const;
+
+    // utliity functions to directly load the model
+
+    // load model with the first loader which can load it
+    ModelPtr loadModel(ModelAssetDesc desc, Dict params, ProgressCb cb = {}) const;
+
+    // load model with a scorer to select the best loader
+    ModelPtr loadModel(const ModelLoaderScorer& scorer, ModelAssetDesc desc, Dict params, ProgressCb cb = {}) const;
 private:
     std::string m_name;
     std::vector<LoaderData> m_loaders;
