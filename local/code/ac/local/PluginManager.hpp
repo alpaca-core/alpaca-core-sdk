@@ -4,11 +4,9 @@
 #pragma once
 #include "export.h"
 #include "PluginInfo.hpp"
+#include "LoadPluginCb.hpp"
 
 #include <string_view>
-
-#include <astl/safe_func.hpp>
-#include <astl/ufunction.hpp>
 
 namespace ac::local {
 class ModelLoaderRegistry;
@@ -30,20 +28,6 @@ public:
 
     void addPluginDir(std::string_view dir);
     void addPluginDirsFromEnvVar(std::string envVar);
-
-    struct LoadPluginCb {
-        template <typename Sig>
-        using Func = astl::ufunction<Sig>;
-
-        using PluginPathFilter = Func<bool(std::string_view path)>;
-        PluginPathFilter pathFilter;
-        using PluginNameFilter = Func<bool(std::string_view name)>;
-        PluginNameFilter nameFilter;
-        using PluginInterfaceFilter = Func<bool(const PluginInterface&)>;
-        PluginInterfaceFilter interfaceFilter;
-        using OnPluginLoaded = astl::safe_func<Func<void(const PluginInfo&)>>;
-        OnPluginLoaded onPluginLoaded;
-    };
 
     // load from path (including filename), ignores pluginDirs
     const PluginInfo* loadPlugin(const std::string& path, LoadPluginCb cb = {});

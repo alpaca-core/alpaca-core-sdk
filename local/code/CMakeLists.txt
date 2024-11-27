@@ -38,6 +38,7 @@ target_sources(ac-local
 
         ac/local/PluginInterface.hpp
         ac/local/PluginInfo.hpp
+        ac/local/LoadPluginCb.hpp
         ac/local/PluginManager.hpp
 
         ac/local/Lib.hpp

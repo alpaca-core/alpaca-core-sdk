@@ -4,6 +4,9 @@
 #include "Lib.hpp"
 #include "ModelLoaderRegistry.hpp"
 #include "PluginManager.hpp"
+#include "ModelAssetDesc.hpp"
+#include <ac/Dict.hpp>
+#include <astl/move.hpp>
 
 namespace ac::local {
 
@@ -18,6 +21,14 @@ ModelLoaderRegistry& Lib::modelLoaderRegistry() {
 
 void Lib::addLoader(ModelLoader& loader) {
     g_modelLoaderRegistry.addLoader(loader);
+}
+
+ModelPtr Lib::loadModel(ModelAssetDesc desc, Dict params, ProgressCb cb) {
+    return g_modelLoaderRegistry.loadModel(astl::move(desc), astl::move(params), astl::move(cb));
+}
+
+ModelPtr Lib::loadModel(const ModelLoaderScorer& scorer, ModelAssetDesc desc, Dict params, ProgressCb cb) {
+    return g_modelLoaderRegistry.loadModel(scorer, astl::move(desc), astl::move(params), astl::move(cb));
 }
 
 PluginManager& Lib::pluginManager() {
@@ -36,8 +47,8 @@ const PluginInfo* Lib::loadPlugin(const std::string& path) {
     return g_pluginManager.loadPlugin(path);
 }
 
-void Lib::loadAllPlugins() {
-    g_pluginManager.loadPlugins();
+void Lib::loadPlugins(LoadPluginCb cb) {
+    g_pluginManager.loadPlugins(astl::move(cb));
 }
 
 } // namespace ac::local
