@@ -439,7 +439,8 @@ function(make_ac_local_plugin_available)
         ac::local
     )
 
-    set(ACLP_OUT_DIR "${rootBinDir}/lib/ac-local" PARENT_SCOPE)
+    set(ACLP_OUT_DIR "${rootBinDir}/lib/ac-local")
+    set(ACLP_OUT_DIR "${ACLP_OUT_DIR}" PARENT_SCOPE) # propagate to parent
 
     if(NOT AC_BUILD_DEPLOY AND NOT TARGET aclp::out-dir)
         add_library(aclp-out-dir INTERFACE)
@@ -449,7 +450,7 @@ function(make_ac_local_plugin_available)
             CONTENT [=[
 // Generated file. Do not edit!
 #pragma once
-#cmakedefine @ACLP_OUT_DIR@
+#define ACLP_OUT_DIR "@ACLP_OUT_DIR@"
 ]=]
             @ONLY
         )
