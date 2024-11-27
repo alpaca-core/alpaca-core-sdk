@@ -20,7 +20,7 @@ struct DummyRegistry : public ac::local::ModelLoaderRegistry {
     DummyRegistry() {
         auto& loaders = ac::local::Lib::modelLoaderRegistry().loaders();
         for (auto& loader : loaders) {
-            addLoader(loader.loader);
+            addLoader(*loader.loader);
         }
     }
 };

@@ -35,7 +35,7 @@ public:
         template <typename Sig>
         using Func = astl::ufunction<Sig>;
 
-        using PluginPathFilter = Func<bool(std::string_view name)>;
+        using PluginPathFilter = Func<bool(std::string_view path)>;
         PluginPathFilter pathFilter;
         using PluginNameFilter = Func<bool(std::string_view name)>;
         PluginNameFilter nameFilter;

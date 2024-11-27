@@ -21,6 +21,8 @@ struct PluginInfo {
     std::string vendor;
     astl::version version = {};
 
+    std::vector<std::string> tags;
+
     // plugin-specific raw data
     void* rawData = nullptr;
 

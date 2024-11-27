@@ -26,14 +26,14 @@ public:
     const std::string& name() const noexcept { return m_name; }
 
     struct LoaderData {
-        ModelLoader& loader; // never null
+        ModelLoader* loader; // never null
         PluginInfo* plugin; // may be null for loaders that have been added directly
     };
 
     const std::vector<LoaderData>& loaders() const noexcept { return m_loaders; }
 
     void addLoader(ModelLoader& loader, PluginInfo* plugin = nullptr);
-    void addPlugin(PluginInfo& plugin);
+    void removeLoader(ModelLoader& loader);
 
     // temp until we figure out better loader queries
     ModelPtr createModel(ModelAssetDesc desc, Dict params, ProgressCb cb = {}) const;

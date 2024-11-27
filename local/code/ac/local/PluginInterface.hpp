@@ -17,8 +17,13 @@ struct PluginInterface {
     const char* vendor; // optional vendor name
     astl::version version; // version of the plugin
 
-    using InitFunc = void*(*)();
-    InitFunc init; // optional init function, returns plugin raw data
+    const char* const* tags; // optional tags
+    int numTags; // number of tags
+
+    void* rawData; // optional raw data
+
+    using InitFunc = void(*)();
+    InitFunc init; // optional init function
 
     using GetLoadersFunc = std::vector<ModelLoaderPtr>(*)();
     GetLoadersFunc getLoaders; // function to get loaders

@@ -50,7 +50,18 @@ PluginManager::PluginManager(ModelLoaderRegistry& registry)
     : m_registry(registry)
 {}
 
-PluginManager::~PluginManager() = default;
+PluginManager::~PluginManager() {
+    for (auto& plugin : m_plugins) {
+        if (!plugin.loaders.empty()) {
+            for (auto& loader : plugin.loaders) {
+                m_registry.removeLoader(*loader);
+            }
+        }
+        plugin.loaders.clear();
+        unload_plugin((hplugin)plugin.nativeHandle);
+    }
+    m_plugins.clear();
+}
 
 std::string_view PluginManager::pluginPathToName(std::string_view path) {
     if (auto fnamePos = path.find_last_of("/\\"); fnamePos != std::string_view::npos) {
@@ -195,9 +206,8 @@ const PluginInfo* PluginManager::tryLoadPlugin(const std::string& path, LoadPlug
         return nullptr;
     }
 
-    void* pluginRawData= nullptr;
     if (interface.init) try {
-        pluginRawData= interface.init();
+        interface.init();
     }
     catch (const std::exception& ex) {
         AC_LOCAL_LOG(Error, "Failed to init plugin: ", ex.what());
@@ -215,8 +225,13 @@ const PluginInfo* PluginManager::tryLoadPlugin(const std::string& path, LoadPlug
     info.nativeHandle = hplugin;
     hplugin = nullptr; // release sentry
 
-    info.rawData = pluginRawData;
+    info.rawData = interface.rawData;
     info.loaders = interface.getLoaders();
+
+    info.tags.reserve(interface.numTags);
+    for (int i = 0; i < interface.numTags; ++i) {
+        info.tags.push_back(interface.tags[i]);
+    }
 
     for (auto& loader : info.loaders) {
         m_registry.addLoader(*loader, &info);

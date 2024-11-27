@@ -7,6 +7,7 @@
 #include <astl/throw_stdex.hpp>
 #include <astl/move.hpp>
 #include <astl/qalgorithm.hpp>
+#include <astl/workarounds.h>
 #include <charconv>
 
 namespace ac::local {
@@ -37,18 +38,22 @@ void ModelLoaderRegistry::addLoader(ModelLoader& loader, PluginInfo* plugin) {
         "\n         tags: ", info.tags
     );
 
-    m_loaders.push_back({loader, plugin});
+    m_loaders.push_back({&loader, plugin});
 }
 
+void ModelLoaderRegistry::removeLoader(ModelLoader& loader) {
+    astl::erase_first_if(m_loaders, [&](const auto& data) { return data.loader == &loader; });
+}
 
 ModelPtr ModelLoaderRegistry::createModel(ModelAssetDesc desc, Dict params, ProgressCb cb) const {
     for (auto& data : m_loaders) {
-        if (data.loader.canLoadModel(desc, params)) {
-            return data.loader.loadModel(astl::move(desc), astl::move(params), astl::move(cb));
+        if (data.loader->canLoadModel(desc, params)) {
+            return data.loader->loadModel(astl::move(desc), astl::move(params), astl::move(cb));
         }
     }
 
     ac::throw_ex{} << "No loader found for: " << desc.name;
+    MSVC_WO_10766806();
 }
 
 } // namespace ac::local
