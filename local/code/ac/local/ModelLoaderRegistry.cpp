@@ -34,29 +34,21 @@ void ModelLoaderRegistry::addLoader(ModelLoader& loader, PluginInfo* plugin) {
     [[maybe_unused]] auto& info = loader.info();
     AC_LOCAL_LOG(Info, "Registry ", m_name, " adding loader ", info.name,
         "\n       vendor: ", info.vendor,
-        "\n  asset types: ", info.assetTypes,
-        "\n   interfaces: ", info.generalInstanceInterfaces,
         "\n         tags: ", info.tags
     );
 
     m_loaders.push_back({loader, plugin});
 }
 
-std::optional<ModelLoaderRegistry::LoaderData> ModelLoaderRegistry::findLoader(std::string_view modelAssetType) const noexcept {
-    for (auto& data : m_loaders) {
-        if (astl::pfind(data.loader.info().assetTypes, modelAssetType)) {
-            return data;
-        }
-    }
-    return std::nullopt;
-}
 
 ModelPtr ModelLoaderRegistry::createModel(ModelAssetDesc desc, Dict params, ProgressCb cb) const {
-    auto data = findLoader(desc.type);
-    if (!data) {
-        ac::throw_ex{} << "No loader found for asset type: " << desc.type;
+    for (auto& data : m_loaders) {
+        if (data.loader.canLoadModel(desc, params)) {
+            return data.loader.loadModel(astl::move(desc), astl::move(params), astl::move(cb));
+        }
     }
-    return data->loader.loadModel(astl::move(desc), astl::move(params), astl::move(cb));
+
+    ac::throw_ex{} << "No loader found for: " << desc.name;
 }
 
 } // namespace ac::local

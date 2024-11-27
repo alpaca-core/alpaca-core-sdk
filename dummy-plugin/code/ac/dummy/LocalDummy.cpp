@@ -107,7 +107,6 @@ public:
         static Info i = {
             .name = "ac-local dummy",
             .vendor = "Alpaca Core",
-            .assetTypes = {"dummy"},
         };
         return i;
     }

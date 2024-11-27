@@ -18,7 +18,7 @@ struct PluginInterface {
     astl::version version; // version of the plugin
 
     using InitFunc = void*(*)();
-    InitFunc init; // optional init function, returns plugin user data
+    InitFunc init; // optional init function, returns plugin raw data
 
     using GetLoadersFunc = std::vector<ModelLoaderPtr>(*)();
     GetLoadersFunc getLoaders; // function to get loaders

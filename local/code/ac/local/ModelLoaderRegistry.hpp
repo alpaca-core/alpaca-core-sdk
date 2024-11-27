@@ -35,8 +35,6 @@ public:
     void addLoader(ModelLoader& loader, PluginInfo* plugin = nullptr);
     void addPlugin(PluginInfo& plugin);
 
-    std::optional<LoaderData> findLoader(std::string_view modelAssetType) const noexcept;
-
     // temp until we figure out better loader queries
     ModelPtr createModel(ModelAssetDesc desc, Dict params, ProgressCb cb = {}) const;
 private:

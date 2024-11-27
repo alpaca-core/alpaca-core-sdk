@@ -13,7 +13,7 @@ namespace ac::local {
 /// Base class for model loaders.
 /// Model loaders are responsible for loading models based on the provided description and parameters. They are typically
 /// facades for an underlying inference library. While model loaders can be used on their own, they are typically used
-/// via the `ModelFactory` class.
+/// via the `ModelLoaderRegistry` class.
 /// @ingroup cpp-local
 class AC_LOCAL_EXPORT ModelLoader {
 public:
@@ -27,25 +27,26 @@ public:
         /// Optional human readable name of the loader vendor.
         std::string vendor;
 
-        /// Supported model types
-        /// Note that this only suggests that the loader may be able to load the model. It's not a 100% guarantee
-        std::vector<std::string> assetTypes;
-
-        /// Supported inference interfaces for the general instance
-        std::vector<std::string> generalInstanceInterfaces;
+        /// Model schema for the models this loader produces.
+        Dict modelSchema;
 
         /// Additional tags that can be used to filter loaders
         std::vector<std::string> tags;
 
-        /// Loader-specific user data which can be used to store additional information
-        void* userData = nullptr;
+        /// Additional metadata that can be used to store more structured information
+        Dict metadata;
+
+        /// Loader-specific raw data which can be used to store additional information.
+        /// Use this only as a last resort. You must make sure you know what's in there.
+        void* rawData = nullptr;
     };
 
     /// Info of the loader.
     virtual const Info& info() const noexcept = 0;
 
     /// Check if the model can be loaded
-    /// This function is used by `ModelLoaderRegistry` to check if an attempt to load a model should be made.
+    /// This function is used by `ModelLoaderRegistry` to check if the model should be loaded by this loader.
+    /// Keep it as lightweight as possible.
     virtual bool canLoadModel(const ModelAssetDesc& desc, const Dict& params) const noexcept = 0;
 
     /// Load a model based on the provided description and parameters.
