@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
+#include <ac/Dict.hpp>
 #include <string>
 #include <vector>
 
@@ -23,6 +24,9 @@ struct ModelAssetDesc {
         std::string tag;  ///< Tag of the asset. Some loaders may require this to be set.
     };
     std::vector<AssetInfo> assets; ///< List of assets
+
+    /// Data to be used by model loaders (however they see fit)
+    Dict loaderData;
 
     /// Model name tag.
     /// Not used by the library in any way besides logs and may be helpful for debugging
