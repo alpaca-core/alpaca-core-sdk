@@ -144,40 +144,6 @@ const std::vector<ac::local::ModelLoaderPtr>& get_@nameSym@_model_loaders() {
             ${baselibTargetName}
     )
 
-    if(ARG_SCHEMAS)
-        # we would ideally find ruby "properly" but cmake's ruby module does not allow us to specify components
-        # like the python does, for example.
-        # since we can't ask for the interpreter alone, the line below will fail if the ruby library is not found
-        # we don't need the ruby library, but more importantly it's not available on many systems (esp windows)
-        # so... we just use env ruby and hope for the best
-        # find_package(Ruby 3 REQUIRED)
-
-        foreach(schema IN LISTS ARG_SCHEMAS)
-            get_filename_component(schemaName ${schema} NAME_WE)
-            set(schemaHeader ${schemaName}.hpp)
-            add_custom_command(
-                OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${schemaHeader}
-                COMMENT "Generating C++ schema header ${schemaHeader}"
-                COMMAND ruby "${GENERATE_CXX_SCHEMA_RB}" "${schema}" "${CMAKE_CURRENT_BINARY_DIR}/${schemaHeader}"
-                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                DEPENDS ${schema}
-                DEPENDS "${GENERATE_CXX_SCHEMA_RB}"
-            )
-            add_custom_target(${schemaName}-schema
-                DEPENDS ${schemaHeader}
-            )
-            add_dependencies(${baselibTargetName} ${schemaName}-schema)
-            target_sources(${plibTargetName}
-                PUBLIC FILE_SET HEADERS
-                BASE_DIRS "${CMAKE_CURRENT_BINARY_DIR}"
-                FILES "${CMAKE_CURRENT_BINARY_DIR}/${schemaHeader}"
-            )
-        endforeach()
-
-        target_link_libraries(${baselibTargetName} PUBLIC ac::schema)
-        target_link_libraries(${plibTargetName} PUBLIC ac::schema)
-    endif()
-
     # add plugin
     file(CONFIGURE
         OUTPUT ${aclpName}-entrypoint.cpp

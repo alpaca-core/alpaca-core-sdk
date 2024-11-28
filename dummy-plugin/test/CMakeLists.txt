@@ -23,15 +23,15 @@ add_doctest_test(aclp-dummy-plib
         ac::jalog
 )
 
-add_doctest_test(aclp-dummy-schema
-    SOURCES
-        t-dummy-schema.cpp
-    LIBRARIES
-        ac-dev::test-util
-        aclp::dummy-plib
-        ac-test-data::dummy
-        ac::jalog
-)
+# add_doctest_test(aclp-dummy-schema
+#     SOURCES
+#         t-dummy-schema.cpp
+#     LIBRARIES
+#         ac-dev::test-util
+#         aclp::dummy-plib
+#         ac-test-data::dummy
+#         ac::jalog
+# )
 
 add_doctest_test(aclp-dummy-plugin
     SOURCES

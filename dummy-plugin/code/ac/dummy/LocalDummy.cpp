@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #include "LocalDummy.hpp"
-#include "dummy-schema.hpp"
+#include "DummySchema.hpp"
 
 #include "Instance.hpp"
 #include "Model.hpp"
