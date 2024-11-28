@@ -46,8 +46,8 @@ struct switch_index {
 template <>
 struct switch_index<-1> {
     template <typename Tuple, typename VFunc>
-    static constexpr auto switch_case(Tuple&, int, VFunc&& f) -> decltype(f()) {
-        return f();
+    static constexpr auto switch_case(Tuple&, int, VFunc&& f) -> decltype(f(nullptr)) {
+        return f(nullptr);
     }
 };
 

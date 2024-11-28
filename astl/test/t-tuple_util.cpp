@@ -21,7 +21,7 @@ struct to_int {
         return static_cast<int>(t);
     }
 
-    constexpr int operator()() {
+    constexpr int operator()(nullptr_t) const {
         return -45;
     }
 };
