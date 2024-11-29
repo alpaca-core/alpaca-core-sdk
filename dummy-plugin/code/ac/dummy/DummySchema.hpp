@@ -7,17 +7,18 @@
 
 namespace ac::local::schema {
 
-struct DummySchema {
+struct Dummy {
     static constexpr auto id = "dummy";
+    using Params = std::nullptr_t;
 
     struct InstanceGeneral {
         static constexpr auto id = "general";
 
         struct Params {
-            int cutoff = 0;
+            Field<int> cutoff = Default(0);
 
             template <typename Visitor>
-            void visit(Visitor& v) {
+            void visitFields(Visitor& v) {
                 v(cutoff, "cutoff", "Cutoff value", true);
             }
         };

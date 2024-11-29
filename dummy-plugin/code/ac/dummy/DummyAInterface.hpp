@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
+#include <ac/schema/Field.hpp>
 #include <vector>
 #include <string>
+#include <tuple>
 
 namespace ac::local::schema {
 
@@ -15,26 +17,28 @@ struct DummyAInterface {
         static constexpr auto desc = "Run the dummy inference and produce some output";
 
         struct Params {
-            std::vector<std::string> input;
-            bool splice = false;
-            int throwOn = -1;
+            Field<std::vector<std::string>> input;
+            Field<bool> splice = Default(false);
+            Field<int> throwOn = Default(-1);
 
             template <typename Visitor>
-            void visit(Visitor& v) {
-                v(input, "input", "Input items", true);
+            void visitFields(Visitor& v) {
+                v(input, "input", "Input items");
                 v(splice, "splice", "Splice input with model data (otherwise append model data to input)");
                 v(throwOn, "throwOn", "Throw exception on n-th token (or don't throw if -1)");
             }
         };
         struct Return {
-            std::string result;
+            Field<std::string> result;
 
             template <typename Visitor>
-            void visit(Visitor& v) {
-                v(result, "result", "Output text (tokens joined with space)", true);
+            void visitFields(Visitor& v) {
+                v(result, "result", "Output text (tokens joined with space)");
             }
         };
     };
+
+    using Ops = std::tuple<OpRun>;
 };
 
 } // namespace ac::local::schema

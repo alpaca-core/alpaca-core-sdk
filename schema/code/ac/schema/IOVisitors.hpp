@@ -114,8 +114,7 @@ struct FromDictVisitor {
 template <typename T>
 T Struct_fromDict(Dict&& d) {
     T ret;
-    FromDictVisitor v(d);
-    ret.visitFields(v);
+    FromDictVisitor::readFromDict(d, ret);
     return ret;
 }
 

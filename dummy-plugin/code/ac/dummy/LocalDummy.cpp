@@ -13,10 +13,11 @@
 #include <ac/local/Model.hpp>
 #include <ac/local/ModelLoader.hpp>
 
+#include <ac/schema/DispatchHelpers.hpp>
+
 #include <astl/move.hpp>
 #include <astl/iile.h>
 #include <astl/throw_stdex.hpp>
-#include <astl/workarounds.h>
 
 namespace ac::local {
 
@@ -26,22 +27,22 @@ class DummyInstance final : public Instance {
     std::shared_ptr<dummy::Model> m_model;
     dummy::Instance m_instance;
 public:
-    using Schema = ac::local::schema::Dummy::InstanceGeneral;
+    using Schema = schema::Dummy::InstanceGeneral;
 
-    static dummy::Instance::InitParams InitParams_fromDict(Dict& d) {
-        auto schemaParams = Schema::Params::fromDict(d);
+    static dummy::Instance::InitParams InitParams_fromDict(Dict&& d) {
+        auto schemaParams = schema::Struct_fromDict<Schema::Params>(astl::move(d));
         dummy::Instance::InitParams ret;
         ret.cutoff = schemaParams.cutoff;
         return ret;
     }
 
-    DummyInstance(std::shared_ptr<dummy::Model> model, Dict& params)
+    DummyInstance(std::shared_ptr<dummy::Model> model, Dict&& params)
         : m_model(astl::move(model))
-        , m_instance(*m_model, InitParams_fromDict(params))
+        , m_instance(*m_model, InitParams_fromDict(astl::move(params)))
     {}
 
     Dict run(Dict& params) {
-        const auto schemaParams = Schema::OpRun::Params::fromDict(params);
+        const auto schemaParams = schema::Struct_fromDict<schema::DummyAInterface::OpRun::Params>(params);
 
         dummy::Instance::SessionParams sparams;
         sparams.splice = schemaParams.splice;
@@ -49,34 +50,29 @@ public:
 
         auto s = m_instance.newSession(std::move(schemaParams.input), sparams);
 
-        Schema::OpRun::Return ret;
+        schema::DummyAInterface::OpRun::Return ret;
+        auto res = ret.result.materialize();
         for (auto& w : s) {
-            ret.result += w;
-            ret.result += ' ';
+            res += w;
+            res += ' ';
         }
-        if (!ret.result.empty()) {
+        if (!res.empty()) {
             // remove last space
-            ret.result.pop_back();
+            res.pop_back();
         }
 
-        return ret.toDict();
+        return schema::Struct_toDict(std::move(ret));
     }
 
     virtual Dict runOp(std::string_view op, Dict params, ProgressCb) override {
-        switch (Schema::getOpIndexById(op)) {
-        case Schema::opIndex<Schema::OpRun>:
-            return run(params);
-        default:
-            throw_ex{} << "dummy: unknown op: " << op;
-            MSVC_WO_10766806();
-        }
+        schema::dispatchById<schema::DummyAInterface::Ops>(op, std::move(params), *this);
     }
 };
 
 class DummyModel final : public Model {
     std::shared_ptr<dummy::Model> m_model;
 public:
-    using Schema = ac::local::schema::Dummy;
+    using Schema = schema::Dummy;
 
     static dummy::Model::Params ModelParams_fromDict(Dict& d) {
         auto schemaParams = Schema::Params::fromDict(d);
