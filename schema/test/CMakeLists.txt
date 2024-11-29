@@ -6,5 +6,6 @@ macro(schema_test test)
 endmacro()
 
 schema_test(TupleIndexByItemId)
+schema_test(Field)
 schema_test(DispatchHelpers)
 schema_test(visitors)

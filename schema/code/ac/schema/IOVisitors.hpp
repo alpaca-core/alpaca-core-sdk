@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
+#include "Field.hpp"
 #include <ac/Dict.hpp>
 #include <astl/throw_stdex.hpp>
 #include <astl/move.hpp>
@@ -13,13 +14,13 @@ namespace ac::local::schema {
 namespace impl {
 struct DummyVisitor {
     template <typename T>
-    void field(T& value, std::string_view name, std::string_view desc, bool required);
+    void operator()(Field<T>& field, std::string_view name, std::string_view desc);
 };
 } // namespace impl
 
 template <typename T>
 concept Visitable = requires(T t) {
-    t.visitFields(std::declval<impl::DummyVisitor>());
+    t.visitFields(std::declval<impl::DummyVisitor&>());
 };
 
 struct ToDictVisitor {
@@ -41,27 +42,31 @@ struct ToDictVisitor {
     static void writeToDict(Dict& out, std::vector<T>& value) {
         out = Dict::array();
         for (auto& v : value) {
-            vriteToDict(out.emplace_back(), v);
+            writeToDict(out.emplace_back(), v);
         }
     }
 
     template <typename T>
-    void field(T& value, std::string_view name, std::string_view, bool) {
-        writeToDict(out[name], value);
-    }
-
-    template <typename T>
-    void field(std::optional<T>& value, std::string_view name, std::string_view desc, bool required) {
-        if (!value) {
-            if (required) {
+    void operator()(Field<T>& field, std::string_view name, std::string_view) {
+        if (field.defaultSet()) return; // don't be redundant
+        if (!field.hasValue()) {
+            if (field.required()) {
                 throw_ex{} << "Required field " << name << " is not set";
             }
+            // nothing to write for nullopt
             return;
         }
-
-        field(*value, name, {}, true);
+        writeToDict(out[name], field.value());
     }
 };
+
+template <typename T>
+Dict Struct_toDict(T&& s) {
+    Dict ret;
+    ToDictVisitor v(ret);
+    s.visitFields(v);
+    return ret;
+}
 
 struct FromDictVisitor {
     Dict& in;
@@ -70,12 +75,12 @@ struct FromDictVisitor {
     template <Visitable T>
     static void readFromDict(Dict& in, T& value) {
         FromDictVisitor sub(in);
-        value.visitFields(value);
+        value.visitFields(sub);
     }
 
     template <typename T>
     static void readFromDict(Dict& in, T& value) {
-        value = in.get<value>();
+        value = in.get<T>();
     }
 
     static void readFromDict(Dict& in, std::string& value) {
@@ -85,21 +90,32 @@ struct FromDictVisitor {
     template <typename T>
     static void readFromDict(Dict& in, std::vector<T>& value) {
         value.clear();
-        for (auto& v : *in) {
+        for (auto& v : in) {
             readFromDict(v, value.emplace_back());
         }
     }
 
-    Dict* find(std::string_view name, bool required) {
+    template <typename T>
+    void operator()(Field<T>& field, std::string_view name, std::string_view) {
         auto it = in.find(name);
         if (it == in.end()) {
-            if (required) {
+            if (field.required()) {
                 throw_ex{} << "Required field " << name << " is not set";
             }
-            return nullptr;
+            // otherwise leave the field as is
+            return;
         }
-        return &*it;
+
+        readFromDict(*it, field.materialize());
     }
 };
+
+template <typename T>
+T Struct_fromDict(Dict&& d) {
+    T ret;
+    FromDictVisitor v(d);
+    ret.visitFields(v);
+    return ret;
+}
 
 } // namespace ac::local::schema
