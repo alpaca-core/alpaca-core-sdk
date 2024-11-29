@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #include <ac/schema/IOVisitors.hpp>
+#include <ac/schema/SchemaVisitor.hpp>
 #include <doctest/doctest.h>
 
 using namespace ac::local::schema;
@@ -78,4 +79,81 @@ TEST_CASE("io visitors") {
 
     auto cc = Struct_fromDict<Company>(std::move(dict));
     checkAc(cc);
+}
+
+TEST_CASE("schema") {
+    OrderedDict dict;
+    Struct_toSchema<Company>(dict);
+
+    auto schema = dict.dump(2);
+
+    CHECK(schema == R"json({
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Company name"
+    },
+    "mission": {
+      "type": "string",
+      "description": "Mission statement"
+    },
+    "revenue": {
+      "type": "number",
+      "description": "Yearly revenue",
+      "default": 0.0
+    },
+    "ceo": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the person"
+        },
+        "age": {
+          "type": "integer",
+          "description": "Age of the person",
+          "default": 0
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "description": "CEO"
+    },
+    "employees": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the person"
+          },
+          "age": {
+            "type": "integer",
+            "description": "Age of the person",
+            "default": 0
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "description": "List of employees"
+    },
+    "products": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of products"
+    }
+  },
+  "required": [
+    "name",
+    "ceo",
+    "employees"
+  ]
+})json");
 }

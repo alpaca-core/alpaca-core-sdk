@@ -23,6 +23,7 @@ concept Visitable = requires(T t) {
     t.visitFields(std::declval<impl::DummyVisitor&>());
 };
 
+template <typename Dict = ac::Dict>
 struct ToDictVisitor {
     Dict& out;
     ToDictVisitor(Dict& out) : out(out) {}
@@ -60,7 +61,7 @@ struct ToDictVisitor {
     }
 };
 
-template <typename T>
+template <typename T, typename Dict = ac::Dict>
 Dict Struct_toDict(T&& s) {
     Dict ret;
     ToDictVisitor v(ret);
