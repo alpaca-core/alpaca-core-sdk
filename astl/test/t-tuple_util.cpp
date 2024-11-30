@@ -49,3 +49,27 @@ TEST_CASE("type_switch") {
     static_assert(astl::tuple::switch_type<double>(t, to_int{}) == 3);
     static_assert(astl::tuple::switch_type<char>(t, to_int{}) == -45);
 }
+
+struct identity {
+    template <typename T>
+    constexpr T& operator()(T& t) const {
+        return t;
+    }
+    int& operator()(nullptr_t) const {
+        throw 0;
+    }
+};
+
+TEST_CASE("ref") {
+    std::tuple t = {1, 2, 3, 4};
+
+    SUBCASE("switch_index") {
+        astl::tuple::switch_index(t, 2, identity{}) = 42;
+        CHECK(std::get<2>(t) == 42);
+    }
+
+    SUBCASE("switch_type") {
+        astl::tuple::switch_type<int>(t, identity{}) = 42;
+        CHECK(std::get<0>(t) == 42);
+    }
+}
