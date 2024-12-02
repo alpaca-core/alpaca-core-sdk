@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #include "LocalDummy.hpp"
-#include "DummySchema.hpp"
+#include "DummyLoaderSchema.hpp"
 
 #include "Instance.hpp"
 #include "Model.hpp"
@@ -27,8 +27,9 @@ namespace {
 class DummyInstance final : public Instance {
     std::shared_ptr<dummy::Model> m_model;
     dummy::Instance m_instance;
+    schema::OpDispatcherData m_dispatcherData;
 public:
-    using Schema = schema::Dummy::InstanceGeneral;
+    using Schema = schema::DummyLoader::InstanceGeneral;
 
     static dummy::Instance::InitParams InitParams_fromDict(Dict&& d) {
         auto schemaParams = schema::Struct_fromDict<Schema::Params>(astl::move(d));
@@ -40,16 +41,18 @@ public:
     DummyInstance(std::shared_ptr<dummy::Model> model, Dict&& params)
         : m_model(astl::move(model))
         , m_instance(*m_model, InitParams_fromDict(astl::move(params)))
-    {}
+    {
+        schema::registerHandlers<schema::DummyInterface::Ops>(m_dispatcherData, *this);
+    }
 
-    schema::DummyAInterface::OpRun::Return on(schema::DummyAInterface::OpRun, schema::DummyAInterface::OpRun::Params params) {
+    schema::DummyInterface::OpRun::Return on(schema::DummyInterface::OpRun, schema::DummyInterface::OpRun::Params params) {
         dummy::Instance::SessionParams sparams;
         sparams.splice = params.splice;
         sparams.throwOn = params.throwOn;
 
         auto s = m_instance.newSession(std::move(params.input), sparams);
 
-        schema::DummyAInterface::OpRun::Return ret;
+        schema::DummyInterface::OpRun::Return ret;
         auto& res = ret.result.materialize();
         for (auto& w : s) {
             res += w;
@@ -63,19 +66,19 @@ public:
         return ret;
     }
 
-    Dict onNoOp(std::string_view op, Dict) {
-        throw_ex{} << "dummy: unknown operation: " << op;
-    }
-
     virtual Dict runOp(std::string_view op, Dict params, ProgressCb) override {
-        return schema::dispatchOp<schema::DummyAInterface::Ops>(op, std::move(params), *this);
+        auto ret = m_dispatcherData.dispatch(op, astl::move(params));
+        if (!ret) {
+            throw_ex{} << "dummy: unknown op: " << op;
+        }
+        return *ret;
     }
 };
 
 class DummyModel final : public Model {
     std::shared_ptr<dummy::Model> m_model;
 public:
-    using Schema = schema::Dummy;
+    using Schema = schema::DummyLoader;
 
     static dummy::Model::Params ModelParams_fromDict(Dict& d) {
         auto schemaParams = schema::Struct_fromDict<Schema::Params>(std::move(d));

@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include "DummyAInterface.hpp"
+#include "DummyInterface.hpp"
 #include <tuple>
 
 namespace ac::local::schema {
 
-struct Dummy {
+struct DummyLoader {
     static constexpr auto id = "dummy";
     struct Params {
         Field<std::string> spliceString = std::nullopt;
@@ -22,15 +22,15 @@ struct Dummy {
         static constexpr auto id = "general";
 
         struct Params {
-            Field<int> cutoff = Default(0);
+            Field<int> cutoff = Default(-1);
 
             template <typename Visitor>
             void visitFields(Visitor& v) {
-                v(cutoff, "cutoff", "Cutoff value");
+                v(cutoff, "cutoff", "Cut off model data to n-th element (or don't cut if -1)");
             }
         };
 
-        using Interfaces = std::tuple<DummyAInterface>;
+        using Interfaces = std::tuple<DummyInterface>;
     };
 
     using Instances = std::tuple<InstanceGeneral>;

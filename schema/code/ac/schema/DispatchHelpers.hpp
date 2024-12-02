@@ -5,30 +5,40 @@
 #include "IOVisitors.hpp"
 #include <ac/DictFwd.hpp>
 #include <astl/tuple_util.hpp>
+#include <astl/qalgorithm.hpp>
 
 namespace ac::local::schema {
 
-namespace impl {
-struct FindById {
-    std::string_view id;
-    template <typename T>
-    bool operator()(int, const T& elem) const {
-        return elem.id == id;
+struct OpDispatcherData {
+    struct HandlerData {
+        std::string_view id;
+        std::function<Dict(Dict&&)> handler;
+    };
+    std::vector<HandlerData> handlers;
+
+    template <typename Op, typename Handler>
+    void registerHandler(Op, Handler& h) {
+        auto stronglyTypedCall = [&](Dict&& params) {
+            return Struct_toDict(h.on(Op{}, Struct_fromDict<typename Op::Params>(std::move(params))));
+        };
+        handlers.push_back({Op::id, std::move(stronglyTypedCall)});
+    }
+
+    std::optional<Dict> dispatch(std::string_view id, Dict&& params) {
+        auto h = astl::pfind_if(handlers, [&](const HandlerData& item) {
+            return item.id == id;
+        });
+        if (!h) return {};
+        return h->handler(std::move(params));
     }
 };
-} // namespace impl
 
-template <typename Ops, typename Dispatcher>
-Dict dispatchOp(std::string_view opId, Dict&& opParams, Dispatcher& dispatcher) {
-    Ops ops;
-    return astl::tuple::find_if(ops, impl::FindById{opId},
-        [&]<typename Op>(Op& op) {
-            return Struct_toDict(dispatcher.on(op, Struct_fromDict<typename Op::Params>(std::move(opParams))));
-        },
-        [&] {
-            return dispatcher.onNoOp(opId, opParams);
-        }
-    );
+template <typename Ops, typename Handler>
+void registerHandlers(OpDispatcherData& data, Handler& h) {
+    Ops ops{};
+    astl::tuple::for_each(ops, [&]<typename Op>(Op op) {
+        data.registerHandler(op, h);
+    });
 }
 
 } // namespace ac::local::schema

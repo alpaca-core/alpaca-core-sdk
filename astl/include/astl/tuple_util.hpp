@@ -54,4 +54,20 @@ constexpr decltype(auto) switch_index(Tuple& tup, int i, VFunc vf, NFunc nf) {
     return impl::find_if<0>(tup, qfunc, vf, nf);
 }
 
+namespace impl {
+template <typename Func>
+struct expand_for_each {
+    Func& f;
+    template <typename... Args>
+    constexpr void operator()(Args&... args) {
+        (f(args), ...);
+    }
+};
+} // namespace impl
+
+template <typename Tuple, typename Func>
+constexpr void for_each(Tuple& tup, Func f) {
+    std::apply(impl::expand_for_each{f}, tup);
+}
+
 } // namespace astl::tuple

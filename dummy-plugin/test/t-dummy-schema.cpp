@@ -6,13 +6,12 @@
 #include <ac/local/Instance.hpp>
 #include <ac/local/ModelLoaderRegistry.hpp>
 
-#include <ac/schema/Helpers.hpp>
+#include <ac/schema/CallHelpers.hpp>
 
 #include <ac-test-util/JalogFixture.inl>
 
 #include <doctest/doctest.h>
 
-#include <dummy-schema.hpp>
 #include <aclp-dummy-plib.hpp>
 #include <ac-test-data-dummy-models.h>
 

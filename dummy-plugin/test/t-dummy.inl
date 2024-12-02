@@ -39,7 +39,7 @@ TEST_CASE("bad instance") {
     auto model = f.loadModel(Model_Desc, {});
     REQUIRE(model);
     CHECK_THROWS_WITH(model->createInstance("nope", {}), "dummy: unknown instance type: nope");
-    CHECK_THROWS_WITH(model->createInstance("general", { {"cutoff", 40} }),
+    CHECK_THROWS_WITH(model->createInstance("general", {{"cutoff", 40}}),
         "Cutoff 40 greater than model size 3");
 }
 
@@ -53,20 +53,20 @@ TEST_CASE("general") {
 
     CHECK_THROWS_WITH(i->runOp("nope", {}), "dummy: unknown op: nope");
 
-    CHECK_THROWS_WITH(i->runOp("run", { {"foo", "nope"} }), "Missing required field input");
+    CHECK_THROWS_WITH(i->runOp("run", {{"foo", "nope"}}), "Required field input is not set");
 
-    auto res = i->runOp("run", { {"input", {"a", "b"}} });
+    auto res = i->runOp("run", {{"input", {"a", "b"}}});
     CHECK(res.at("result").get<std::string>() == "a soco b bate");
 
-    res = i->runOp("run", { {"input", {"a", "b"}}, {"splice", false} });
+    res = i->runOp("run", {{"input", {"a", "b"}}, {"splice", false}});
     CHECK(res.at("result").get<std::string>() == "a b soco bate vira");
 
-    CHECK_THROWS_WITH(i->runOp("run", { {"input", {"a", "b"}}, {"throw_on", 3} }), "Throw on token 3");
+    CHECK_THROWS_WITH(i->runOp("run", {{"input", {"a", "b"}}, {"throw_on", 3}}), "Throw on token 3");
 
-    auto ci = model->createInstance("general", { {"cutoff", 2} });
+    auto ci = model->createInstance("general", {{"cutoff", 2}});
     REQUIRE(ci);
 
-    res = ci->runOp("run", { {"input", {"a", "b", "c"}} });
+    res = ci->runOp("run", {{"input", {"a", "b", "c"}}});
     CHECK(res.at("result").get<std::string>() == "a soco b bate c soco");
 }
 
@@ -89,6 +89,6 @@ TEST_CASE("synthetic") {
 
     auto instance = model->createInstance("general", {});
 
-    auto res = instance->runOp("run", { {"input", {"a", "b"}} });
+    auto res = instance->runOp("run", {{"input", {"a", "b"}}});
     CHECK(res.at("result").get<std::string>() == "a one b two");
 }

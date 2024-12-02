@@ -9,8 +9,8 @@
 
 namespace ac::local::schema {
 
-struct DummyAInterface {
-    static constexpr auto id = "dummy-a/v1";
+struct DummyInterface {
+    static constexpr auto id = "dummy/v1";
 
     struct OpRun {
         static constexpr auto id = "run";
@@ -18,14 +18,14 @@ struct DummyAInterface {
 
         struct Params {
             Field<std::vector<std::string>> input;
-            Field<bool> splice = Default(false);
+            Field<bool> splice = Default(true);
             Field<int> throwOn = Default(-1);
 
             template <typename Visitor>
             void visitFields(Visitor& v) {
                 v(input, "input", "Input items");
                 v(splice, "splice", "Splice input with model data (otherwise append model data to input)");
-                v(throwOn, "throwOn", "Throw exception on n-th token (or don't throw if -1)");
+                v(throwOn, "throw_on", "Throw exception on n-th token (or don't throw if -1)");
             }
         };
         struct Return {
