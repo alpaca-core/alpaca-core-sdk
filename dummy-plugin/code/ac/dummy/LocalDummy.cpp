@@ -18,6 +18,7 @@
 #include <astl/move.hpp>
 #include <astl/iile.h>
 #include <astl/throw_stdex.hpp>
+#include <astl/workarounds.h>
 
 namespace ac::local {
 
@@ -41,17 +42,15 @@ public:
         , m_instance(*m_model, InitParams_fromDict(astl::move(params)))
     {}
 
-    Dict run(Dict& params) {
-        const auto schemaParams = schema::Struct_fromDict<schema::DummyAInterface::OpRun::Params>(params);
-
+    schema::DummyAInterface::OpRun::Return on(schema::DummyAInterface::OpRun, schema::DummyAInterface::OpRun::Params params) {
         dummy::Instance::SessionParams sparams;
-        sparams.splice = schemaParams.splice;
-        sparams.throwOn = schemaParams.throwOn;
+        sparams.splice = params.splice;
+        sparams.throwOn = params.throwOn;
 
-        auto s = m_instance.newSession(std::move(schemaParams.input), sparams);
+        auto s = m_instance.newSession(std::move(params.input), sparams);
 
         schema::DummyAInterface::OpRun::Return ret;
-        auto res = ret.result.materialize();
+        auto& res = ret.result.materialize();
         for (auto& w : s) {
             res += w;
             res += ' ';
@@ -61,11 +60,15 @@ public:
             res.pop_back();
         }
 
-        return schema::Struct_toDict(std::move(ret));
+        return ret;
+    }
+
+    Dict onNoOp(std::string_view op, Dict) {
+        throw_ex{} << "dummy: unknown operation: " << op;
     }
 
     virtual Dict runOp(std::string_view op, Dict params, ProgressCb) override {
-        schema::dispatchById<schema::DummyAInterface::Ops>(op, std::move(params), *this);
+        return schema::dispatchOp<schema::DummyAInterface::Ops>(op, std::move(params), *this);
     }
 };
 
@@ -75,9 +78,9 @@ public:
     using Schema = schema::Dummy;
 
     static dummy::Model::Params ModelParams_fromDict(Dict& d) {
-        auto schemaParams = Schema::Params::fromDict(d);
+        auto schemaParams = schema::Struct_fromDict<Schema::Params>(std::move(d));
         dummy::Model::Params ret;
-        ret.splice = astl::move(schemaParams.spliceString.value_or(""));
+        ret.splice = astl::move(schemaParams.spliceString.valueOr(""));
         return ret;
     }
 
@@ -87,10 +90,10 @@ public:
     explicit DummyModel(Dict& params) : m_model(std::make_shared<dummy::Model>(ModelParams_fromDict(params))) {}
 
     virtual std::unique_ptr<Instance> createInstance(std::string_view type, Dict params) override {
-        switch (Schema::getInstanceById(type)) {
-        case Schema::instanceIndex<Schema::InstanceGeneral>:
-            return std::make_unique<DummyInstance>(m_model, params);
-        default:
+        if (type == "general") {
+            return std::make_unique<DummyInstance>(m_model, astl::move(params));
+        }
+        else {
             throw_ex{} << "dummy: unknown instance type: " << type;
             MSVC_WO_10766806();
         }

@@ -13,7 +13,6 @@ target_link_libraries(ac-schema INTERFACE
 target_sources(ac-schema INTERFACE FILE_SET HEADERS FILES
     ac/schema/CallHelpers.hpp
     ac/schema/DispatchHelpers.hpp
-    ac/schema/TupleIndexByItemId.hpp
 )
 
 install(TARGETS ac-schema

@@ -9,7 +9,14 @@ namespace ac::local::schema {
 
 struct Dummy {
     static constexpr auto id = "dummy";
-    using Params = std::nullptr_t;
+    struct Params {
+        Field<std::string> spliceString = std::nullopt;
+
+        template <typename Visitor>
+        void visitFields(Visitor& v) {
+            v(spliceString, "splice_string", "String to splice between model data elements");
+        }
+    };
 
     struct InstanceGeneral {
         static constexpr auto id = "general";
@@ -19,7 +26,7 @@ struct Dummy {
 
             template <typename Visitor>
             void visitFields(Visitor& v) {
-                v(cutoff, "cutoff", "Cutoff value", true);
+                v(cutoff, "cutoff", "Cutoff value");
             }
         };
 
