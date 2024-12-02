@@ -15,22 +15,14 @@ TEST_CASE("type_index") {
     static_assert(type_index_v<char, t> == -1);
 }
 
-struct to_int {
-    template <typename T>
-    constexpr int operator()(T t) const {
-        return static_cast<int>(t);
-    }
-
-    constexpr int operator()(nullptr_t) const {
-        return -45;
-    }
-};
-
 TEST_CASE("index_switch") {
     std::tuple t = {1, 2.3f, 3.2, 4.1f};
 
     auto do_switch = [&](int n) {
-        return astl::tuple::switch_index(t, n, to_int{});
+        return astl::tuple::switch_index(t, n,
+            [](auto& v) { return static_cast<int>(v); },
+            [] { return -45; }
+        );
     };
 
     CHECK(do_switch(0) == 1);
@@ -39,15 +31,6 @@ TEST_CASE("index_switch") {
     CHECK(do_switch(3) == 4);
     CHECK(do_switch(4212) == -45);
     CHECK(do_switch(-3) == -45);
-}
-
-TEST_CASE("type_switch") {
-    constexpr std::tuple t = { 1, 2.3f, 3.2, 4.1f };
-
-    static_assert(astl::tuple::switch_type<int>(t, to_int{}) == 1);
-    static_assert(astl::tuple::switch_type<float>(t, to_int{}) == 2);
-    static_assert(astl::tuple::switch_type<double>(t, to_int{}) == 3);
-    static_assert(astl::tuple::switch_type<char>(t, to_int{}) == -45);
 }
 
 struct identity {
@@ -63,13 +46,9 @@ struct identity {
 TEST_CASE("ref") {
     std::tuple t = {1, 2, 3, 4};
 
-    SUBCASE("switch_index") {
-        astl::tuple::switch_index(t, 2, identity{}) = 42;
-        CHECK(std::get<2>(t) == 42);
-    }
-
-    SUBCASE("switch_type") {
-        astl::tuple::switch_type<int>(t, identity{}) = 42;
-        CHECK(std::get<0>(t) == 42);
-    }
+    astl::tuple::switch_index(t, 2,
+        std::identity{},
+        []() -> int& { throw 0; }
+    ) = 42;
+    CHECK(std::get<2>(t) == 42);
 }
