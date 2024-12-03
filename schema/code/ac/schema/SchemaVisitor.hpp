@@ -46,6 +46,9 @@ struct SchemaVisitor {
             T schema;
             schema.visitFields(v);
         }
+        else if constexpr (std::same_as<T, Blob>) {
+            obj["type"] = "binary";
+        }
         else {
             // assume array
             obj["type"] = "array";
