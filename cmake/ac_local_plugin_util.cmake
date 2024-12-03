@@ -6,7 +6,7 @@ include_guard(GLOBAL)
 include(ac_local_lib)
 
 function(add_ac_local_plugin)
-    cmake_parse_arguments(ARG "" "NAME;PUBLIC_SUFFIX" "SOURCES;SCHEMAS;PLUGIN_SOURCES;PLIB_SOURCES;LIBRARIES" ${ARGN})
+    cmake_parse_arguments(ARG "" "NAME;PUBLIC_SUFFIX" "SOURCES;PLUGIN_SOURCES;PLIB_SOURCES;LIBRARIES" ${ARGN})
 
     # private names for targets which are not installed and never leave the project
     set(aclpName aclp-${ARG_NAME})

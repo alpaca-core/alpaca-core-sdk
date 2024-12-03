@@ -7,8 +7,7 @@ set_target_properties(ac-schema PROPERTIES
     EXPORT_NAME ac::schema
 )
 target_link_libraries(ac-schema INTERFACE
-    ac::astl
-    ac::dict
+    ac::local
 )
 target_sources(ac-schema INTERFACE FILE_SET HEADERS FILES
     ac/schema/CallHelpers.hpp
