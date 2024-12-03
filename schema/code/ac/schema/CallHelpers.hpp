@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
+#include "IOVisitors.hpp"
 #include <ac/local/Model.hpp>
 #include <ac/local/Instance.hpp>
 #include <utility>
@@ -10,12 +11,14 @@ namespace ac::local {
 
 template <typename Instance>
 auto Model_createInstance(Model& model, typename Instance::Params p) {
-    return model.createInstance(Instance::id, p.toDict());
+    return model.createInstance(Instance::id, schema::Struct_toDict(std::move(p)));
 }
 
 template <typename Op>
 typename Op::Return Instance_runOp(Instance& instance, typename Op::Params p, ProgressCb cb = {}) {
-    return Op::Return::fromDict(instance.runOp(Op::id, p.toDict(), std::move(cb)));
+    return schema::Struct_fromDict<typename Op::Return>(
+        instance.runOp(Op::id, schema::Struct_toDict(std::move(p)), std::move(cb))
+    );
 }
 
 } // namespace ac::local
