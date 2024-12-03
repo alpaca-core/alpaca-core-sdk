@@ -7,11 +7,10 @@
 
 namespace ac::local::schema {
 
-using OrderedDict = acnl::ordered_json;
-
+template <typename Dict = ac::Dict>
 struct SchemaVisitor {
-    OrderedDict& out;
-    OrderedDict* props;
+    Dict& out;
+    Dict* props;
     std::vector<std::string_view> req;
 
     ~SchemaVisitor() {
@@ -20,50 +19,50 @@ struct SchemaVisitor {
         }
     }
 
-    SchemaVisitor(OrderedDict& out) : out(out) {
+    SchemaVisitor(Dict& out) : out(out) {
         out["type"] = "object";
         props = &out["properties"];
     }
 
     template <std::signed_integral I>
-    static void describeField(OrderedDict& obj) {
+    static void describeField(Dict& obj) {
         obj["type"] = "integer";
     }
 
     template <std::unsigned_integral I>
-    static void describeField(OrderedDict& obj) {
+    static void describeField(Dict& obj) {
         obj["type"] = "integer";
     }
 
     template <std::floating_point F>
-    static void describeField(OrderedDict& obj) {
+    static void describeField(Dict& obj) {
         obj["type"] = "number";
     }
 
     template <std::same_as<std::string> S>
-    static void describeField(OrderedDict& obj) {
+    static void describeField(Dict& obj) {
         obj["type"] = "string";
     }
 
     template <std::same_as<bool> B>
-    static void describeField(OrderedDict& obj) {
+    static void describeField(Dict& obj) {
         obj["type"] = "boolean";
     }
 
     template <std::same_as<std::nullptr_t> N>
-    static void describeField(OrderedDict& obj) {
+    static void describeField(Dict& obj) {
         obj["type"] = "null";
     }
 
     template <Visitable V>
-    static void describeField(OrderedDict& d) {
+    static void describeField(Dict& d) {
         SchemaVisitor v(d);
         V schema;
         schema.visitFields(v);
     }
 
     template <typename Vec>
-    static void describeField(OrderedDict& obj) {
+    static void describeField(Dict& obj) {
         obj["type"] = "array";
         describeField<typename Vec::value_type>(obj["items"]);
     }
@@ -77,7 +76,7 @@ struct SchemaVisitor {
             obj["description"] = desc;
         }
         if (t.defaultSet()) {
-            ToDictVisitor<OrderedDict>::writeToDict(obj["default"], t.value());
+            ToDictVisitor<Dict>::writeToDict(obj["default"], t.value());
         }
         else if (t.required()) {
             req.push_back(name);
@@ -85,9 +84,9 @@ struct SchemaVisitor {
     }
 };
 
-template <typename T>
-void Struct_toSchema(OrderedDict& out) {
-    SchemaVisitor::describeField<T>(out);
+template <typename T, typename Dict>
+void Struct_toSchema(Dict& out) {
+    SchemaVisitor<Dict>::describeField<T>(out);
 }
 
 } // namespace ac::local::schema

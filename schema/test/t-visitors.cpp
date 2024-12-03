@@ -82,7 +82,7 @@ TEST_CASE("io visitors") {
 }
 
 TEST_CASE("schema") {
-    OrderedDict dict;
+    acnl::ordered_json dict;
     Struct_toSchema<Company>(dict);
 
     auto schema = dict.dump(2);
