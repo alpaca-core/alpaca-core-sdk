@@ -27,8 +27,8 @@ public:
         /// Optional human readable name of the loader vendor.
         std::string vendor;
 
-        /// Model schema for the models this loader produces.
-        Dict modelSchema;
+        /// Schema for the loader.
+        Dict schema;
 
         /// Additional tags that can be used to filter loaders
         std::vector<std::string> tags;

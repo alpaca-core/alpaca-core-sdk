@@ -59,15 +59,15 @@ template <typename Func>
 struct expand_for_each {
     Func& f;
     template <typename... Args>
-    constexpr void operator()(Args&... args) {
-        (f(args), ...);
+    constexpr void operator()(Args&&... args) {
+        (f(std::forward<Args>(args)), ...);
     }
 };
 } // namespace impl
 
 template <typename Tuple, typename Func>
-constexpr void for_each(Tuple& tup, Func f) {
-    std::apply(impl::expand_for_each{f}, tup);
+constexpr void for_each(Tuple&& tup, Func f) {
+    std::apply(impl::expand_for_each{f}, std::forward<Tuple>(tup));
 }
 
 } // namespace astl::tuple

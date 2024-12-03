@@ -24,47 +24,33 @@ struct SchemaVisitor {
         props = &out["properties"];
     }
 
-    template <std::signed_integral I>
+    template <typename T>
     static void describeField(Dict& obj) {
-        obj["type"] = "integer";
-    }
-
-    template <std::unsigned_integral I>
-    static void describeField(Dict& obj) {
-        obj["type"] = "integer";
-    }
-
-    template <std::floating_point F>
-    static void describeField(Dict& obj) {
-        obj["type"] = "number";
-    }
-
-    template <std::same_as<std::string> S>
-    static void describeField(Dict& obj) {
-        obj["type"] = "string";
-    }
-
-    template <std::same_as<bool> B>
-    static void describeField(Dict& obj) {
-        obj["type"] = "boolean";
-    }
-
-    template <std::same_as<std::nullptr_t> N>
-    static void describeField(Dict& obj) {
-        obj["type"] = "null";
-    }
-
-    template <Visitable V>
-    static void describeField(Dict& d) {
-        SchemaVisitor v(d);
-        V schema;
-        schema.visitFields(v);
-    }
-
-    template <typename Vec>
-    static void describeField(Dict& obj) {
-        obj["type"] = "array";
-        describeField<typename Vec::value_type>(obj["items"]);
+        if constexpr (std::signed_integral<T> || std::unsigned_integral<T>) {
+            obj["type"] = "integer";
+        }
+        else if constexpr (std::floating_point<T>) {
+            obj["type"] = "number";
+        }
+        else if constexpr (std::same_as<T, std::string> || std::same_as<T, std::string_view>) {
+            obj["type"] = "string";
+        }
+        else if constexpr (std::same_as<T, bool>) {
+            obj["type"] = "boolean";
+        }
+        else if constexpr (std::same_as<T, std::nullptr_t>) {
+            obj["type"] = "null";
+        }
+        else if constexpr (Visitable<T>) {
+            SchemaVisitor v(obj);
+            T schema;
+            schema.visitFields(v);
+        }
+        else {
+            // assume array
+            obj["type"] = "array";
+            describeField<typename T::value_type>(obj["items"]);
+        }
     }
 
     template <typename T>

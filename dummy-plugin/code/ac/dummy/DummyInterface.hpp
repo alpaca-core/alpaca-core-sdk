@@ -14,7 +14,7 @@ struct DummyInterface {
 
     struct OpRun {
         static constexpr auto id = "run";
-        static constexpr auto desc = "Run the dummy inference and produce some output";
+        static constexpr auto description = "Run the dummy inference and produce some output";
 
         struct Params {
             Field<std::vector<std::string>> input;

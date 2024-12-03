@@ -8,7 +8,9 @@
 namespace ac::local::schema {
 
 struct DummyLoader {
-    static constexpr auto id = "dummy";
+    static inline constexpr std::string_view id = "dummy";
+    static inline constexpr std::string_view description = "Dummy inference for tests, examples, and experiments.";
+
     struct Params {
         Field<std::string> spliceString = std::nullopt;
 
@@ -19,7 +21,8 @@ struct DummyLoader {
     };
 
     struct InstanceGeneral {
-        static constexpr auto id = "general";
+        static inline constexpr std::string_view id = "general";
+        static inline constexpr std::string_view description = "General instance";
 
         struct Params {
             Field<int> cutoff = Default(-1);
