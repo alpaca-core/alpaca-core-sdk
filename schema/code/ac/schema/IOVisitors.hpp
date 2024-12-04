@@ -67,10 +67,9 @@ struct ToDictVisitor {
 };
 
 template <typename T, typename Dict = ac::Dict>
-Dict Struct_toDict(T&& s) {
+Dict Struct_toDict(T&& t) {
     Dict ret;
-    ToDictVisitor v(ret);
-    s.visitFields(v);
+    ToDictVisitor<Dict>::writeToDict(ret, t);
     return ret;
 }
 
