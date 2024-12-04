@@ -75,7 +75,7 @@ struct SchemaVisitor {
 
 template <typename T, typename Dict>
 void Struct_toSchema(Dict& out) {
-    SchemaVisitor<Dict>::describeField<T>(out);
+    SchemaVisitor<Dict>::template describeField<T>(out);
 }
 
 } // namespace ac::local::schema

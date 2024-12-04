@@ -41,7 +41,7 @@ struct ToDictVisitor {
 
     template <typename T>
     static void writeToDict(Dict& out, Blob& value) {
-        out = ac::Dict::binary(std::move(Blob));
+        out = ac::Dict::binary(std::move(value));
     }
 
     template <typename T>
