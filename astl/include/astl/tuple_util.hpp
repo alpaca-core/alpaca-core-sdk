@@ -58,6 +58,7 @@ namespace impl {
 template <typename Func>
 struct expand_for_each {
     Func& f;
+    expand_for_each(Func& f) : f(f) {}
     template <typename... Args>
     constexpr void operator()(Args&&... args) {
         (f(std::forward<Args>(args)), ...);
