@@ -14,7 +14,7 @@ It provides a unified API for doing inference with multiple models. The API itse
 * Programming language specific (Language API): The API which one calls writing code in a specific programming language. It's just a means to call the:
 * Inference API: A JSON/CBOR/POJO-like API which is used to communicate with the underlying inference engines following their specific API schema.
 
-Read the [full introduction here](doc/intro.md) or check out the documentation at https://alpacacore.com.
+Read the [full introduction here](doc/intro.md).
 
 ## Supported models
 
@@ -45,24 +45,26 @@ This repo contains the Inference SDK implementation and Inference API documentat
 ```cpp
 ac::local::Lib::loadAllPlugins();
 
-auto model = factory.createModel(
+auto model = ac::local::Lib::createModel(
     {
-        .inferenceType = "llama",
+        .type = "llama.cpp gguf",
         .assets = {
             {.path = "/path/to/model.gguf"}
         }
-    }, {}, {}
+    }, 
+    { /*default params*/ }
 );
 
-auto instance = model->createInstance("general", {});
+auto instance = model->createInstance("general", { /*default params*/ });
 
-auto result = instance->runOp("run",
-    {{"prompt", "If you could travel faster than light,"}}, {});
+auto result = instance->runOp("run", {{"prompt", "If you could travel faster than light,"}});
 
 std::cout << result << "\n";
 ```
 
 ## Demos
+
+Most inference libraries with AC Local plugins have simple examples in their respective repositories. Additionally we have some standalone demos:
 
 * AI Chat (LLM-based chatbot)
     * Android: [alpaca-core/demo-android-ai-chat](https://github.com/alpaca-core/demo-android-ai-chat)
