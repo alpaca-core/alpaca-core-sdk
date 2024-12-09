@@ -88,7 +88,7 @@ As an example, here's how the whisper.cpp schema looked like at some point durin
             "properties": {
               "audioBinaryMono": {
                 "description": "Audio data to transcribe",
-                "type": "blob"
+                "type": "binary"
               }
             },
             "required": [ "audioBinaryMono" ]
