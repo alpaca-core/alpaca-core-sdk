@@ -8,7 +8,7 @@ If you like our software, consider giving these libraries a star on GitHub, a do
 
 Here's the list in no particular order:
 
-## In Alpaca Core Local itself
+## Embedded in AC Local itself
 
 | Library | Usage |
 | --- | --- |
@@ -29,6 +29,6 @@ Here's the list in no particular order:
 | Library | Usage |
 | --- | --- |
 | [CPM.cmake](https://github.com/TheLartians/CPM.cmake) | package management |
-| [iboB's CMake Modules](https://github.com/iboB/splat) | CMake modules |
+| [ICM](https://github.com/iboB/icm) | CMake modules |
 | [doctest](https://github.com/doctest/doctest) | testing |
 | [doctest-util](https://github.com/iboB/doctest-util) | testing |
