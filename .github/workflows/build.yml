@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         cfg:
-          - {name: "linux gcc dbg", os: ubuntu-latest, preset: debug-ci }
+          - {name: "linux gcc dbg", os: ubuntu-22.04, preset: debug-ci }
           - {name: "windows msvc dbg", os: windows-latest, preset: debug-ci }
           - {name: "macos clang dbg", os: macos-latest, preset: debug-ci }
     steps:
