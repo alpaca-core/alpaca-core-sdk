@@ -151,7 +151,11 @@ auto result = instance->runOp("run", {{"prompt", "A recipe for rice cakes:"}});
 std::cout << result << "\n";
 ```
 
-Wait. What are plugins?
+Plugins? What are plugins?
+
+AC Local doesn't have any loaders, and thus doesn't support any models on its own. The typical way to get loaders is to use plugins which provide them. AC Local contains the tools for building and loading plugins. Read more about loaders and plugins [here](loaders-plugins.md).
+
+Alpaca Core itself develops a few plugins.
 
 ## More
 
