@@ -72,6 +72,7 @@ add_subdirectory(ac-test-util)
 add_subdirectory(jalog)
 add_subdirectory(dict)
 
+add_subdirectory(api)
 add_subdirectory(local)
 add_subdirectory(schema)
 

@@ -1,4 +1,4 @@
-    # Copyright (c) Alpaca Core
+# Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
 add_subdirectory(code)

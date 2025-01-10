@@ -3,14 +3,14 @@
 //
 #pragma once
 #include "export.h"
+#include "Frame.hpp"
 #include <optional>
 #include <memory>
+#include <functional>
 
 namespace ac {
 class Session;
 class SessionExecutor;
-
-struct Frame {};
 
 class AC_API_EXPORT SessionHandler {
 public:
@@ -44,7 +44,7 @@ public:
     bool pushSessionOutFrame(Frame&& frame);
 
     // close the session
-    bool closeSession();
+    void closeSession();
 
     ////////////////////////////////////////////////
     // handler interface
