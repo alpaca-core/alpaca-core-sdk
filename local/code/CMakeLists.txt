@@ -32,9 +32,9 @@ target_sources(ac-local
         ac/local/Model.hpp
         ac/local/Instance.hpp
 
-        ac/local/ModelLoader.hpp
-        ac/local/ModelLoaderPtr.hpp
-        ac/local/ModelLoaderRegistry.hpp
+        ac/local/Provider.hpp
+        ac/local/ProviderPtr.hpp
+        ac/local/ProviderRegistry.hpp
 
         ac/local/PluginInterface.hpp
         ac/local/PluginInfo.hpp
@@ -45,22 +45,22 @@ target_sources(ac-local
 
         ac/local/Lib.hpp
 
-        ac/local/ModelLoaderScorer.hpp
-        ac/local/CommonModelLoaderScorers.hpp
+        ac/local/ProviderScorer.hpp
+        ac/local/CommonProviderScorers.hpp
     PRIVATE
         ac/local/Logging.hpp
         ac/local/Logging.cpp
 
         ac/local/VtableExports.cpp
 
-        ac/local/ModelLoaderRegistry.cpp
+        ac/local/ProviderRegistry.cpp
         ac/local/PluginManager.cpp
 
         ac/local/Session.cpp
 
         ac/local/Lib.cpp
 
-        ac/local/CommonModelLoaderScorers.cpp
+        ac/local/CommonProviderScorers.cpp
 )
 
 install(TARGETS ac-local

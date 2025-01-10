@@ -8,7 +8,7 @@
 namespace ac::local::schema {
 
 template <typename Dict, typename Schema>
-Dict generateLoaderSchema() {
+Dict generateProviderSchema() {
     Dict dict;
     dict["id"] = Schema::id;
     dict["description"] = Schema::description;

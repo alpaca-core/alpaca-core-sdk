@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include "ModelLoader.hpp"
+#include "Provider.hpp"
 #include <memory>
 
 namespace ac::local {
-using ModelLoaderPtr = std::unique_ptr<ModelLoader>;
+using ProviderPtr = std::unique_ptr<Provider>;
 } // namespace ac::local

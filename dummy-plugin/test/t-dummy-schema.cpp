@@ -4,14 +4,14 @@
 #include <ac/local/Lib.hpp>
 #include <ac/local/Model.hpp>
 #include <ac/local/Instance.hpp>
-#include <ac/local/ModelLoaderRegistry.hpp>
+#include <ac/local/ProviderRegistry.hpp>
 
 #include <ac/schema/CallHelpers.hpp>
 
 #include <ac/local/PluginPlibUtil.inl>
 
 #include <ac/dummy/LocalDummy.hpp>
-#include <ac/dummy/DummyLoaderSchema.hpp>
+#include <ac/dummy/DummyProviderSchema.hpp>
 
 #include <ac-test-util/JalogFixture.inl>
 
@@ -24,7 +24,7 @@ struct LoadDummyFixture {
     LoadDummyFixture()
         : helper(ac::dummy::getPluginInterface())
     {
-        helper.addLoadersToGlobalRegistry();
+        helper.addProvidersToGlobalRegistry();
     }
 };
 
@@ -34,11 +34,11 @@ TEST_CASE("dummy schema") {
     auto model = ac::local::Lib::loadModel({
         .type = "dummy",
         .name = "synthetic"
-    }, {});
+        }, {});
 
     REQUIRE(!!model);
 
-    using Instance = ac::local::schema::DummyLoader::InstanceGeneral;
+    using Instance = ac::local::schema::DummyProvider::InstanceGeneral;
     auto instance = Model_createInstance<Instance>(*model, {.cutoff = 2});
 
     using Interface = ac::local::schema::DummyInterface;

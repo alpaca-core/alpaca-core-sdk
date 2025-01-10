@@ -8,7 +8,7 @@
 
 namespace ac::local {
 
-/// Model asset description. Used by `ModelLoader` to load models.
+/// Model asset description. Used by `Provider` to load models.
 /// @ingroup cpp-local
 struct ModelAssetDesc {
     /// Asset (weights) type. May be used by loaders to check whether they can load the model.

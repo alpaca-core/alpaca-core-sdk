@@ -9,12 +9,12 @@
 #include <string_view>
 
 namespace ac::local {
-class ModelLoaderRegistry;
+class ProviderRegistry;
 struct PluginInterface;
 
 class AC_LOCAL_EXPORT PluginManager {
 public:
-    PluginManager(ModelLoaderRegistry& registry);
+    PluginManager(ProviderRegistry& registry);
     ~PluginManager();
 
     PluginManager(const PluginManager&) = delete;
@@ -22,7 +22,7 @@ public:
 
     static std::string_view pluginPathToName(std::string_view path);
 
-    ModelLoaderRegistry& modelLoaderRegistry() const noexcept { return m_registry; }
+    ProviderRegistry& providerRegistry() const noexcept { return m_registry; }
     const std::vector<PluginInfo>& plugins() const noexcept { return m_plugins; }
     const std::vector<std::string>& pluginDirs() const noexcept { return m_pluginDirs; }
 
@@ -38,7 +38,7 @@ public:
 private:
     const PluginInfo* tryLoadPlugin(const std::string& path, LoadPluginCb& cb);
 
-    ModelLoaderRegistry& m_registry;
+    ProviderRegistry& m_registry;
 
     std::vector<std::string> m_pluginDirs;
 

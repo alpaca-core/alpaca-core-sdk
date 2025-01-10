@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #include "LocalDummy.hpp"
-#include "DummyLoaderSchema.hpp"
+#include "DummyProviderSchema.hpp"
 
 #include "Instance.hpp"
 #include "Model.hpp"
@@ -11,7 +11,7 @@
 
 #include <ac/local/Instance.hpp>
 #include <ac/local/Model.hpp>
-#include <ac/local/ModelLoader.hpp>
+#include <ac/local/Provider.hpp>
 
 #include <ac/schema/DispatchHelpers.hpp>
 
@@ -29,7 +29,7 @@ class DummyInstance final : public Instance {
     dummy::Instance m_instance;
     schema::OpDispatcherData m_dispatcherData;
 public:
-    using Schema = schema::DummyLoader::InstanceGeneral;
+    using Schema = schema::DummyProvider::InstanceGeneral;
 
     static dummy::Instance::InitParams InitParams_fromDict(Dict&& d) {
         auto schemaParams = schema::Struct_fromDict<Schema::Params>(astl::move(d));
@@ -78,7 +78,7 @@ public:
 class DummyModel final : public Model {
     std::shared_ptr<dummy::Model> m_model;
 public:
-    using Schema = schema::DummyLoader;
+    using Schema = schema::DummyProvider;
 
     static dummy::Model::Params ModelParams_fromDict(Dict& d) {
         auto schemaParams = schema::Struct_fromDict<Schema::Params>(std::move(d));
@@ -103,7 +103,7 @@ public:
     }
 };
 
-class DummyModelLoader final : public ModelLoader {
+class DummyProvider final : public Provider {
 public:
     virtual const Info& info() const noexcept override {
         static Info i = {
@@ -147,9 +147,9 @@ public:
 
 namespace ac::dummy {
 
-std::vector<ac::local::ModelLoaderPtr> getLoaders() {
-    std::vector<ac::local::ModelLoaderPtr> ret;
-    ret.push_back(std::make_unique<local::DummyModelLoader>());
+std::vector<ac::local::ProviderPtr> getProviders() {
+    std::vector<ac::local::ProviderPtr> ret;
+    ret.push_back(std::make_unique<local::DummyProvider>());
     return ret;
 }
 
@@ -162,7 +162,7 @@ local::PluginInterface getPluginInterface() {
             ACLP_dummy_VERSION_MAJOR, ACLP_dummy_VERSION_MINOR, ACLP_dummy_VERSION_PATCH
         },
         .init = nullptr,
-        .getLoaders = getLoaders,
+        .getProviders = getProviders,
     };
 }
 

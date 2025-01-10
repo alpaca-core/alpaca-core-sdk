@@ -88,16 +88,16 @@ void add_@nameSym@_to_ac_local_global_registry();
 // Generated file. Do not edit!
 #pragma once
 #include "@aclpName@-plib.h"
-#include <ac/local/ModelLoaderPtr.hpp>
+#include <ac/local/ProviderPtr.hpp>
 #include <vector>
 
-namespace ac::local { class ModelLoaderRegistry; }
+namespace ac::local { class ProviderRegistry; }
 
 ACLPLIB_@nameSym@_API
-const std::vector<ac::local::ModelLoaderPtr>& get_@nameSym@_model_loaders();
+const std::vector<ac::local::ProviderPtr>& get_@nameSym@_model_providers();
 
 ACLPLIB_@nameSym@_API
-void add_@nameSym@_to_ac_local_registry(ac::local::ModelLoaderRegistry& registry);
+void add_@nameSym@_to_ac_local_registry(ac::local::ProviderRegistry& registry);
 ]=]
         @ONLY
     )
@@ -113,15 +113,15 @@ PlibHelper g_helper{ac::@nameSym@::getPluginInterface()};
 
 extern "C"
 void add_@nameSym@_to_ac_local_global_registry() {
-    g_helper.addLoadersToGlobalRegistry();
+    g_helper.addProvidersToGlobalRegistry();
 }
 
-void add_@nameSym@_to_ac_local_registry(ac::local::ModelLoaderRegistry& registry) {
-    g_helper.addLoadersToRegistry(registry);
+void add_@nameSym@_to_ac_local_registry(ac::local::ProviderRegistry& registry) {
+    g_helper.addProvidersToRegistry(registry);
 }
 
-const std::vector<ac::local::ModelLoaderPtr>& get_@nameSym@_model_loaders() {
-    return g_helper.getLoaders();
+const std::vector<ac::local::ProviderPtr>& get_@nameSym@_model_providers() {
+    return g_helper.getProviders();
 }
 ]=]
     )

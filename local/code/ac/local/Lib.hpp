@@ -12,21 +12,21 @@
 #include <string_view>
 
 namespace ac::local {
-class ModelLoaderRegistry;
-class ModelLoader;
-class ModelLoaderScorer;
+class ProviderRegistry;
+class Provider;
+class ProviderScorer;
 struct ModelAssetDesc;
 
 class PluginManager;
 struct PluginInfo;
 
 struct AC_LOCAL_EXPORT Lib {
-    static ModelLoaderRegistry& modelLoaderRegistry();
+    static ProviderRegistry& providerRegistry();
 
-    static void addLoader(ModelLoader& loader);
+    static void addProvider(Provider& provider);
 
     static ModelPtr loadModel(ModelAssetDesc desc, Dict params, ProgressCb cb = {});
-    static ModelPtr loadModel(const ModelLoaderScorer& scorer, ModelAssetDesc desc, Dict params, ProgressCb cb = {});
+    static ModelPtr loadModel(const ProviderScorer& scorer, ModelAssetDesc desc, Dict params, ProgressCb cb = {});
 
     static PluginManager& pluginManager();
 

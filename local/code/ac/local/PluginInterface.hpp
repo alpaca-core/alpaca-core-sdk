@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include "ModelLoaderPtr.hpp"
+#include "ProviderPtr.hpp"
 #include <astl/version.hpp>
 #include <vector>
 
@@ -25,8 +25,8 @@ struct PluginInterface {
     using InitFunc = void(*)();
     InitFunc init; // optional init function
 
-    using GetLoadersFunc = std::vector<ModelLoaderPtr>(*)();
-    GetLoadersFunc getLoaders; // function to get loaders
+    using GetProvidersFunc = std::vector<ProviderPtr>(*)();
+    GetProvidersFunc getProviders; // function to get providers
 };
 
 }

@@ -1,12 +1,12 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include <ac/local/ModelLoaderRegistry.hpp>
-#include <ac/local/ModelLoader.hpp>
-#include <ac/local/CommonModelLoaderScorers.hpp>
+#include <ac/local/ProviderRegistry.hpp>
+#include <ac/local/Provider.hpp>
+#include <ac/local/CommonProviderScorers.hpp>
 #include <doctest/doctest.h>
 
-using Info = ac::local::ModelLoader::Info;
+using Info = ac::local::Provider::Info;
 
 Info LlamaA{
     .name = "llama a",
@@ -20,9 +20,9 @@ Info WhisperX{
     .name = "whisper x",
 };
 
-struct TestLoader : public ac::local::ModelLoader {
+struct TestProvider : public ac::local::Provider {
     const Info& m_info;
-    TestLoader(const Info& info) : m_info(info) {}
+    TestProvider(const Info& info) : m_info(info) {}
     virtual const Info& info() const noexcept override { return m_info; }
     virtual bool canLoadModel(const ac::local::ModelAssetDesc& desc, const ac::Dict&) const noexcept override {
         return m_info.name.starts_with(desc.type);
@@ -32,27 +32,27 @@ struct TestLoader : public ac::local::ModelLoader {
     }
 };
 
-TEST_CASE("ModelLoaderRegistry") {
-    ac::local::ModelLoaderRegistry registry;
+TEST_CASE("ProviderRegistry") {
+    ac::local::ProviderRegistry registry;
 
     ac::local::ModelAssetDesc
-        llama {.type = "llama", .name = "llama-7b"},
-        whisper {.type = "whisper", .name = "whisper-tiny"};
+        llama{ .type = "llama", .name = "llama-7b" },
+        whisper{ .type = "whisper", .name = "whisper-tiny" };
 
     ac::local::CanLoadScorer s;
-    CHECK_FALSE(registry.findBestLoader(s, llama, {}));
+    CHECK_FALSE(registry.findBestProvider(s, llama, {}));
 
-    TestLoader llamaA(LlamaA), llamaB(LlamaB), whisperX(WhisperX);
+    TestProvider llamaA(LlamaA), llamaB(LlamaB), whisperX(WhisperX);
 
-    registry.addLoader(llamaA);
-    registry.addLoader(llamaB);
-    registry.addLoader(whisperX);
+    registry.addProvider(llamaA);
+    registry.addProvider(llamaB);
+    registry.addProvider(whisperX);
 
-    auto la = registry.findBestLoader(s, llama, {});
+    auto la = registry.findBestProvider(s, llama, {});
     REQUIRE(la);
     CHECK(&la->info() == &LlamaA);
 
-    auto wh = registry.findBestLoader(s, whisper, {});
+    auto wh = registry.findBestProvider(s, whisper, {});
     REQUIRE(wh);
     CHECK(&wh->info() == &WhisperX);
 }

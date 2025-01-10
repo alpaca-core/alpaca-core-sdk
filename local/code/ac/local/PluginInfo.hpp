@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include "ModelLoaderPtr.hpp"
+#include "ProviderPtr.hpp"
 #include <astl/version.hpp>
 #include <vector>
 
@@ -26,7 +26,7 @@ struct PluginInfo {
     // plugin-specific raw data
     void* rawData = nullptr;
 
-    std::vector<ModelLoaderPtr> loaders; // provided loaders
+    std::vector<ProviderPtr> providers; // provided providers
 };
 
 } // namespace ac::local
