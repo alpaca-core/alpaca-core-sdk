@@ -3,11 +3,11 @@
 //
 #pragma once
 #include "export.h"
+#include "Frame.hpp"
 #include <optional>
+#include <functional>
 
 namespace ac {
-
-struct Frame {};
 
 class AC_API_EXPORT Session {
 public:
@@ -21,10 +21,11 @@ public:
     virtual bool acceptOutFrames() const = 0;
     virtual bool pushOutFrame(Frame&& frame) = 0;
 
-    virtual bool close();
+    virtual void close() = 0;
 };
 
-struct SessionExecutor {
+class AC_API_EXPORT SessionExecutor {
+public:
     virtual ~SessionExecutor();
     virtual void post(std::function<void()> task) = 0;
 };
