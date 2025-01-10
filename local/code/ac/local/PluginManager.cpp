@@ -3,7 +3,7 @@
 //
 #include "PluginManager.hpp"
 #include "PluginInterface.hpp"
-#include "ModelLoaderRegistry.hpp"
+#include "ProviderRegistry.hpp"
 #include "Logging.hpp"
 #include "Version.hpp"
 
@@ -46,18 +46,18 @@ inline hplugin load_plugin(const char* filename) {
 
 namespace ac::local {
 
-PluginManager::PluginManager(ModelLoaderRegistry& registry)
+PluginManager::PluginManager(ProviderRegistry& registry)
     : m_registry(registry)
 {}
 
 PluginManager::~PluginManager() {
     for (auto& plugin : m_plugins) {
-        if (!plugin.loaders.empty()) {
-            for (auto& loader : plugin.loaders) {
-                m_registry.removeLoader(*loader);
+        if (!plugin.providers.empty()) {
+            for (auto& provider : plugin.providers) {
+                m_registry.removeProvider(*provider);
             }
         }
-        plugin.loaders.clear();
+        plugin.providers.clear();
         unload_plugin((hplugin)plugin.nativeHandle);
     }
     m_plugins.clear();
@@ -226,15 +226,15 @@ const PluginInfo* PluginManager::tryLoadPlugin(const std::string& path, LoadPlug
     hplugin = nullptr; // release sentry
 
     info.rawData = interface.rawData;
-    info.loaders = interface.getLoaders();
+    info.providers = interface.getProviders();
 
     info.tags.reserve(interface.numTags);
     for (int i = 0; i < interface.numTags; ++i) {
         info.tags.push_back(interface.tags[i]);
     }
 
-    for (auto& loader : info.loaders) {
-        m_registry.addLoader(*loader, &info);
+    for (auto& provider : info.providers) {
+        m_registry.addProvider(*provider, &info);
     }
 
     cb.onPluginLoaded(info);

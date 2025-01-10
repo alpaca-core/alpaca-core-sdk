@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 //
 #include <aclp-dummy-plib.hpp>
-#include <ac/local/ModelLoaderRegistry.hpp>
+#include <ac/local/ProviderRegistry.hpp>
 
 #include <ac-test-util/JalogFixture.inl>
 
-struct DummyRegistry : public ac::local::ModelLoaderRegistry {
+struct DummyRegistry : public ac::local::ProviderRegistry {
     DummyRegistry() {
         add_dummy_to_ac_local_registry(*this);
     }

@@ -4,7 +4,7 @@
 
 // inline file - no include guard
 #include <ac/local/Lib.hpp>
-#include <ac/local/ModelLoaderRegistry.hpp>
+#include <ac/local/ProviderRegistry.hpp>
 #include <ac/local/PluginInterface.hpp>
 
 namespace {
@@ -14,10 +14,10 @@ struct PlibHelper {
     PluginInterface m_pluginInterface;
     PlibHelper(const PluginInterface& pluginInterface) : m_pluginInterface(pluginInterface) {}
 
-    std::vector<ModelLoaderPtr> m_loaders;
+    std::vector<ProviderPtr> m_loaders;
     bool m_addedToGlobalRegistry = false;
 
-    void fillLoaders() {
+    void fillProviders() {
         if (!m_loaders.empty()) {
             // already filled
             return;
@@ -25,27 +25,27 @@ struct PlibHelper {
         if (m_pluginInterface.init) {
             m_pluginInterface.init();
         }
-        m_loaders = m_pluginInterface.getLoaders();
+        m_loaders = m_pluginInterface.getProviders();
     }
 
-    void addLoadersToRegistry(ac::local::ModelLoaderRegistry& registry) {
-        fillLoaders();
+    void addProvidersToRegistry(ac::local::ProviderRegistry& registry) {
+        fillProviders();
         for (auto& loader : m_loaders) {
-            registry.addLoader(*loader);
+            registry.addProvider(*loader);
         }
     }
 
-    void addLoadersToGlobalRegistry() {
+    void addProvidersToGlobalRegistry() {
         if (m_addedToGlobalRegistry) {
             // already added
             return;
         }
-        addLoadersToRegistry(ac::local::Lib::modelLoaderRegistry());
+        addProvidersToRegistry(ac::local::Lib::providerRegistry());
         m_addedToGlobalRegistry = true;
     }
 
-    const auto& getLoaders() {
-        fillLoaders();
+    const auto& getProviders() {
+        fillProviders();
         return m_loaders;
     }
 };

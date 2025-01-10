@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #include "Lib.hpp"
-#include "ModelLoaderRegistry.hpp"
+#include "ProviderRegistry.hpp"
 #include "PluginManager.hpp"
 #include "ModelAssetDesc.hpp"
 #include <ac/Dict.hpp>
@@ -11,24 +11,24 @@
 namespace ac::local {
 
 namespace {
-ModelLoaderRegistry g_modelLoaderRegistry("global");
-PluginManager g_pluginManager(g_modelLoaderRegistry);
+ProviderRegistry g_providerRegistry("global");
+PluginManager g_pluginManager(g_providerRegistry);
 } // namespace
 
-ModelLoaderRegistry& Lib::modelLoaderRegistry() {
-    return g_modelLoaderRegistry;
+ProviderRegistry& Lib::providerRegistry() {
+    return g_providerRegistry;
 }
 
-void Lib::addLoader(ModelLoader& loader) {
-    g_modelLoaderRegistry.addLoader(loader);
+void Lib::addProvider(Provider& provider) {
+    g_providerRegistry.addProvider(provider);
 }
 
 ModelPtr Lib::loadModel(ModelAssetDesc desc, Dict params, ProgressCb cb) {
-    return g_modelLoaderRegistry.loadModel(astl::move(desc), astl::move(params), astl::move(cb));
+    return g_providerRegistry.loadModel(astl::move(desc), astl::move(params), astl::move(cb));
 }
 
-ModelPtr Lib::loadModel(const ModelLoaderScorer& scorer, ModelAssetDesc desc, Dict params, ProgressCb cb) {
-    return g_modelLoaderRegistry.loadModel(scorer, astl::move(desc), astl::move(params), astl::move(cb));
+ModelPtr Lib::loadModel(const ProviderScorer& scorer, ModelAssetDesc desc, Dict params, ProgressCb cb) {
+    return g_providerRegistry.loadModel(scorer, astl::move(desc), astl::move(params), astl::move(cb));
 }
 
 PluginManager& Lib::pluginManager() {

@@ -8,17 +8,17 @@
 
 namespace ac::local {
 
-class ModelLoader;
+class Provider;
 struct PluginInfo;
 struct ModelAssetDesc;
 
-class AC_LOCAL_EXPORT ModelLoaderScorer {
+class AC_LOCAL_EXPORT ProviderScorer {
 public:
     using score_t = int;
 
-    virtual ~ModelLoaderScorer();
+    virtual ~ProviderScorer();
 
-    // ignore the loader if the score is less than or equal to this
+    // ignore the provider if the score is less than or equal to this
     virtual score_t denyScore() const noexcept {
         return std::numeric_limits<score_t>::min();
     }
@@ -29,8 +29,8 @@ public:
     }
 
     virtual score_t score(
-        const ModelLoader& loader,
-        const PluginInfo* loaderPlugin,
+        const Provider& provider,
+        const PluginInfo* providerPlugin,
         const ModelAssetDesc& model,
         const Dict& params
     ) const noexcept = 0;

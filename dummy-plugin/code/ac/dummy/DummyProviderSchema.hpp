@@ -7,7 +7,7 @@
 
 namespace ac::local::schema {
 
-struct DummyLoader {
+struct DummyProvider {
     static inline constexpr std::string_view id = "dummy";
     static inline constexpr std::string_view description = "Dummy inference for tests, examples, and experiments.";
 

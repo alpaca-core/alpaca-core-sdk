@@ -4,7 +4,7 @@
 #include <aclp-dummy-info.h>
 #include <ac/local/Lib.hpp>
 #include <ac/local/PluginManager.hpp>
-#include <ac/local/ModelLoaderRegistry.hpp>
+#include <ac/local/ProviderRegistry.hpp>
 #include <doctest/doctest.h>
 
 #include <ac-test-util/JalogFixture.inl>
@@ -16,11 +16,11 @@ struct GlobalFixture {
 };
 GlobalFixture globalFixture;
 
-struct DummyRegistry : public ac::local::ModelLoaderRegistry {
+struct DummyRegistry : public ac::local::ProviderRegistry {
     DummyRegistry() {
-        auto& loaders = ac::local::Lib::modelLoaderRegistry().loaders();
-        for (auto& loader : loaders) {
-            addLoader(*loader.loader);
+        auto& providers = ac::local::Lib::providerRegistry().providers();
+        for (auto& provider : providers) {
+            addProvider(*provider.provider);
         }
     }
 };
