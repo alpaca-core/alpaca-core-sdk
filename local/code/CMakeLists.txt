@@ -41,6 +41,8 @@ target_sources(ac-local
         ac/local/LoadPluginCb.hpp
         ac/local/PluginManager.hpp
 
+        ac/local/Session.hpp
+
         ac/local/Lib.hpp
 
         ac/local/ModelLoaderScorer.hpp
@@ -53,6 +55,8 @@ target_sources(ac-local
 
         ac/local/ModelLoaderRegistry.cpp
         ac/local/PluginManager.cpp
+
+        ac/local/Session.cpp
 
         ac/local/Lib.cpp
 
