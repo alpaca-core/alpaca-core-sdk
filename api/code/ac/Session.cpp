@@ -6,12 +6,16 @@
 #include <cassert>
 
 namespace ac {
+
+Session::Session(SessionExecutorPtr executor)
+    : m_executor(std::move(executor))
+{}
+
 // export vtable
 Session::~Session() = default;
 
-void Session::resetHandler(SessionHandlerPtr handler, std::unique_ptr<SessionExecutor> executor) {
+void Session::resetHandler(SessionHandlerPtr handler) {
     if (m_handler) {
-        m_handler->shClosed();
         m_handler->m_session = nullptr;
     }
 
@@ -20,14 +24,15 @@ void Session::resetHandler(SessionHandlerPtr handler, std::unique_ptr<SessionExe
     if (m_handler) {
         assert(m_handler->m_session == nullptr);
         m_handler->m_session = this;
-        m_handler->m_executor = std::move(executor);
-        // not necessarily opened
-    }
-}
+        if (!m_handler->m_executor) {
+            m_handler->m_executor = m_executor;
+        }
 
-SessionExecutor* Session::executor() const {
-    if (!m_handler) return nullptr;
-    return m_handler->m_executor.get();
+        // don't change executors!
+        assert(m_handler->m_executor == m_executor);
+
+        // not necessarily opened yet
+    }
 }
 
 // just export vtable

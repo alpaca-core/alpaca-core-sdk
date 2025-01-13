@@ -16,10 +16,13 @@ struct SynSessionExecutor final : public SessionExecutor {
 };
 }
 
-SyncSession::SyncSession(SessionHandlerPtr handler) {
-    resetHandler(handler, std::make_unique<SynSessionExecutor>());
+SyncSession::SyncSession(SessionHandlerPtr handler)
+    : Session(std::make_shared<SynSessionExecutor>())
+{
+    resetHandler(handler);
     m_handler->shOpened();
 }
+
 SyncSession::~SyncSession() {
     close();
 }
@@ -44,7 +47,7 @@ bool SyncSession::valid() const noexcept {
 }
 
 void SyncSession::runTasks() {
-    auto& tasks = static_cast<SynSessionExecutor*>(executor())->m_tasks;
+    auto& tasks = static_cast<SynSessionExecutor*>(m_executor.get())->m_tasks;
     for (auto& task : tasks) {
         task();
     }
@@ -73,7 +76,8 @@ bool SyncSession::pushOutFrame(Frame&& frame) {
 
 void SyncSession::close() {
     runTasks();
-    resetHandler({}, {});
+    m_handler->shClosed();
+    resetHandler({});
 }
 
 }
