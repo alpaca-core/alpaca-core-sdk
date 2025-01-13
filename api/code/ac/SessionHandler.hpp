@@ -4,6 +4,7 @@
 #pragma once
 #include "export.h"
 #include "Frame.hpp"
+#include "SessionExecutorPtr.hpp"
 #include <astl/shared_from.hpp>
 #include <optional>
 #include <memory>
@@ -11,14 +12,14 @@
 
 namespace ac {
 class Session;
-class SessionExecutor;
 
 class AC_API_EXPORT SessionHandler : public astl::enable_shared_from {
 public:
     SessionHandler(const SessionHandler&) = delete;
     SessionHandler& operator=(const SessionHandler&) = delete;
-    SessionHandler(SessionHandler&&) noexcept = delete;
-    SessionHandler& operator=(SessionHandler&&) noexcept = delete;
+
+    // check if the handler is connected to a session
+    bool connected() const noexcept;
 
     ////////////////////////////////////////////////
     // session proxies
@@ -49,6 +50,7 @@ public:
 
     ////////////////////////////////////////////////
     // handler interface
+    // all functions are called on the session strand
 
     // called when the session is opened
     virtual void shOpened();
@@ -72,7 +74,7 @@ protected:
 private:
     friend class Session;
     Session* m_session = nullptr;
-    std::unique_ptr<SessionExecutor> m_executor;
+    SessionExecutorPtr m_executor;
 };
 
 }

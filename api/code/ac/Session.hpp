@@ -4,16 +4,16 @@
 #pragma once
 #include "export.h"
 #include "Frame.hpp"
+#include "SessionExecutorPtr.hpp"
 #include "SessionHandlerPtr.hpp"
 #include <optional>
 #include <functional>
 
 namespace ac {
 
-class SessionExecutor;
-
 class AC_API_EXPORT Session {
 public:
+    Session(SessionExecutorPtr executor);
     virtual ~Session();
 
     virtual bool hasInFrames() const = 0;
@@ -25,8 +25,8 @@ public:
     virtual void close() = 0;
 
 protected:
-    void resetHandler(SessionHandlerPtr handler, std::unique_ptr<SessionExecutor> executor);
-    SessionExecutor* executor() const;
+    void resetHandler(SessionHandlerPtr handler);
+    SessionExecutorPtr m_executor;
     SessionHandlerPtr m_handler;
 };
 

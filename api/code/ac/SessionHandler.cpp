@@ -10,8 +10,16 @@ namespace ac {
 SessionHandler::SessionHandler() = default;
 SessionHandler::~SessionHandler() = default;
 
+bool SessionHandler::connected() const noexcept {
+    return !!m_session;
+}
+
 void SessionHandler::postSessionStrandTask(std::function<void()> task) {
-    m_executor->post(astl::move(task));
+    m_executor->post([self = shared_from_this(), task = astl::move(task)]() {
+        // this can only fail if we're posting a taks in the handler's destructor, which is definitely not a good idea
+        assert(self);
+        task();
+    });
 }
 
 bool SessionHandler::sessionHasInFrames() const {
