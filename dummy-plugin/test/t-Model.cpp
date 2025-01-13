@@ -9,7 +9,7 @@
 #include <ac-test-util/JalogFixture.inl>
 
 TEST_CASE("simple") {
-    ac::dummy::Model model(AC_DUMMY_MODEL_LARGE, {});
+    ac::dummy::Model model({.path = AC_DUMMY_MODEL_LARGE});
     auto& data = model.data();
     CHECK(data.size() == 25);
     CHECK(data[0] == "We");
@@ -23,7 +23,7 @@ TEST_CASE("simple") {
 }
 
 TEST_CASE("splice") {
-    ac::dummy::Model model(AC_DUMMY_MODEL_SMALL, {.splice = "Soco"});
+    ac::dummy::Model model({.path = AC_DUMMY_MODEL_SMALL, .splice = "Soco"});
     auto& data = model.data();
     CHECK(data.size() == 6);
     CHECK(data[0] == "Soco");
@@ -43,5 +43,5 @@ TEST_CASE("synthetic") {
 }
 
 TEST_CASE("exceptions") {
-    CHECK_THROWS_WITH_AS(ac::dummy::Model("nope nope", {}), "Failed to open file: nope nope", std::runtime_error);
+    CHECK_THROWS_WITH_AS(ac::dummy::Model({.path = "nope nope"}), "Failed to open file: nope nope", std::runtime_error);
 }

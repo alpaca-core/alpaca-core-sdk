@@ -12,10 +12,12 @@ struct DummyProvider {
     static inline constexpr std::string_view description = "Dummy inference for tests, examples, and experiments.";
 
     struct Params {
+        Field<std::string> filePath = std::nullopt;
         Field<std::string> spliceString = std::nullopt;
 
         template <typename Visitor>
         void visitFields(Visitor& v) {
+            v(filePath, "file_path", "Optional path to the file with model data. Empty for synthetic data");
             v(spliceString, "splice_string", "String to splice between model data elements");
         }
     };
