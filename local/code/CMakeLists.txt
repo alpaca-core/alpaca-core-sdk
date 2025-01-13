@@ -43,6 +43,7 @@ target_sources(ac-local
         ac/local/PluginManager.hpp
 
         ac/local/Session.hpp
+        ac/local/SyncSession.hpp
 
         ac/local/Lib.hpp
 
@@ -58,6 +59,7 @@ target_sources(ac-local
         ac/local/PluginManager.cpp
 
         ac/local/Session.cpp
+        ac/local/SyncSession.cpp
 
         ac/local/Lib.cpp
 
