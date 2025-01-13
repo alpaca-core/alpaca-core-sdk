@@ -62,7 +62,7 @@ public:
     }
 };
 
-class DummySession final : public TFsm<DummySession>, public SessionHandler {
+class DummySessionHandler final : public TFsm<DummySessionHandler>, public SessionHandler {
     struct StateInitial final : public State {
         using State::State;
 
@@ -125,7 +125,7 @@ class DummySession final : public TFsm<DummySession>, public SessionHandler {
             if (!ret) {
                 throw_ex{} << "dummy: unknown op: " << f.op;
             }
-            fsm.writeFrame(Frame{"ret", *ret});
+            fsm.writeFrame(Frame{f.op, *ret});
         }
 
         schema::DummyInterface::OpRun::Return on(schema::DummyInterface::OpRun, schema::DummyInterface::OpRun::Params params) {
@@ -159,7 +159,12 @@ class DummySession final : public TFsm<DummySession>, public SessionHandler {
     void pumpInFrames() {
         while (sessionHasInFrames()) {
             auto f = getSessionInFrame();
-            on(*f);
+            try {
+                on(*f);
+            }
+            catch (std::exception& e) {
+                writeFrame(Frame{"error", e.what()});
+            }
         }
     }
     void writeFrame(Frame&& t) {
@@ -310,7 +315,7 @@ public:
     }
 
     virtual SessionHandlerPtr createSessionHandler(std::string_view) {
-        return {};
+        return std::make_shared<DummySessionHandler>();
     }
 };
 
