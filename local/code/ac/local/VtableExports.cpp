@@ -5,6 +5,7 @@
 #include "ModelLoader.hpp"
 #include "Model.hpp"
 #include "Instance.hpp"
+#include "VectorStore.hpp"
 
 // export vtables for classes which only have that
 
@@ -13,4 +14,5 @@ ModelLoaderScorer::~ModelLoaderScorer() = default;
 ModelLoader::~ModelLoader() = default;
 Model::~Model() = default;
 Instance::~Instance() = default;
+VectorStore::~VectorStore() = default;
 } // namespace ac::local

@@ -21,7 +21,7 @@ public:
     virtual void removeRecords(ac::Dict ids) = 0;
 
     // Returns a record by id
-    virtual ac::Dict get(ac::Dict param);
+    virtual ac::Dict get(ac::Dict param) = 0;
 
     // Returns a list of ids and scores
     // Requires a vector and a top K
