@@ -4,6 +4,7 @@
 #pragma once
 #include "export.h"
 #include "Frame.hpp"
+#include <astl/shared_from.hpp>
 #include <optional>
 #include <memory>
 #include <functional>
@@ -12,7 +13,7 @@ namespace ac {
 class Session;
 class SessionExecutor;
 
-class AC_API_EXPORT SessionHandler {
+class AC_API_EXPORT SessionHandler : public astl::enable_shared_from {
 public:
     SessionHandler(const SessionHandler&) = delete;
     SessionHandler& operator=(const SessionHandler&) = delete;
