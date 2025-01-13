@@ -31,7 +31,7 @@ target_sources(ac-api
     PRIVATE
         ac/SessionHandler.cpp
 
-        ac/VtableExports.cpp
+        ac/Session.cpp
 )
 
 install(TARGETS ac-api

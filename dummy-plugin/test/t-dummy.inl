@@ -21,6 +21,12 @@ const ac::local::ModelAssetDesc Model_Desc = {
     }
 };
 
+std::shared_ptr<ac::SessionHandler> createDummyHandler() {
+    DummyRegistry d;
+    REQUIRE(d.providers().size() == 1);
+    return d.providers().front().provider->createSessionHandler({});
+}
+
 TEST_CASE("bad model") {
     DummyRegistry f;
     CHECK_THROWS_WITH(
