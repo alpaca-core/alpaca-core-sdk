@@ -10,6 +10,8 @@
 #include <ac/local/Model.hpp>
 #include <ac/local/Instance.hpp>
 
+#include <ac/local/SyncSession.hpp>
+
 #include <doctest/doctest.h>
 
 #include <astl/move.hpp>
@@ -21,80 +23,118 @@ const ac::local::ModelAssetDesc Model_Desc = {
     }
 };
 
-std::shared_ptr<ac::SessionHandler> createDummyHandler() {
-    DummyRegistry d;
+std::unique_ptr<ac::local::SyncSession> createTestSession(DummyRegistry& d) {
     REQUIRE(d.providers().size() == 1);
-    return d.providers().front().provider->createSessionHandler({});
+    auto s = std::make_unique<ac::local::SyncSession>(d.providers().front().provider->createSessionHandler({}));
+    REQUIRE(s);
+    REQUIRE(s->valid());
+    return s;
+}
+
+void checkError(ac::local::SyncSession& s, const std::string_view msg) {
+    auto frame = s.get();
+    REQUIRE(frame);
+    CHECK(frame->op == "error");
+    CHECK(frame->data.get<std::string_view>() == msg);
 }
 
 TEST_CASE("bad model") {
-    DummyRegistry f;
-    CHECK_THROWS_WITH(
-        f.loadModel({
-            .type = "dummy",
-            .assets = {
-                {.path = "nope"}
-            }
-        }, {}),
-        "Failed to open file: nope"
-    );
+    DummyRegistry d;
+    auto s = createTestSession(d);
+    CHECK_FALSE(s->get());
+    s->put({"nope", {}});
+    checkError(*s, "dummy: expected 'load' op, got: nope");
+
+    s->put({"load", {{"file_path", "nope"}}});
+    checkError(*s, "Failed to open file: nope");
 }
 
+//TEST_CASE("bad model") {
+//    DummyRegistry f;
+//    CHECK_THROWS_WITH(
+//        f.loadModel({
+//            .type = "dummy",
+//            .assets = {
+//                {.path = "nope"}
+//            }
+//        }, {}),
+//        "Failed to open file: nope"
+//    );
+//}
+
 TEST_CASE("bad instance") {
-    DummyRegistry f;
-    auto model = f.loadModel(Model_Desc, {});
-    REQUIRE(model);
-    CHECK_THROWS_WITH(model->createInstance("nope", {}), "dummy: unknown instance type: nope");
-    CHECK_THROWS_WITH(model->createInstance("general", {{"cutoff", 40}}),
-        "Cutoff 40 greater than model size 3");
+    DummyRegistry d;
+    auto s = createTestSession(d);
+
+    s->put({ "load", {{"file_path", AC_DUMMY_MODEL_SMALL}} });
+    CHECK_FALSE(s->get());
+
+    s->put({ "nope", {} });
+    checkError(*s, "dummy: expected 'create' op, got: nope");
+
+    s->put({ "create", {{"cutoff", 40}} });
+    checkError(*s, "Cutoff 40 greater than model size 3");
 }
 
 TEST_CASE("general") {
-    DummyRegistry f;
-    auto model = f.loadModel(Model_Desc, {});
-    REQUIRE(model);
+    DummyRegistry d;
+    auto s = createTestSession(d);
 
-    auto i = model->createInstance("general", {});
-    REQUIRE(i);
+    s->put({"load", {{"file_path", AC_DUMMY_MODEL_SMALL}}});
+    CHECK_FALSE(s->get());
 
-    CHECK_THROWS_WITH(i->runOp("nope", {}), "dummy: unknown op: nope");
+    s->put({"create", {}});
+    CHECK_FALSE(s->get());
 
-    CHECK_THROWS_WITH(i->runOp("run", {{"foo", "nope"}}), "Required field input is not set");
+    s->put({"nope", {}});
+    checkError(*s, "dummy: unknown op: nope");
 
-    auto res = i->runOp("run", {{"input", {"a", "b"}}});
-    CHECK(res.at("result").get<std::string>() == "a soco b bate");
+    s->put({ "run", {{"foo", "nope"}}});
+    checkError(*s, "Required field input is not set");
 
-    res = i->runOp("run", {{"input", {"a", "b"}}, {"splice", false}});
-    CHECK(res.at("result").get<std::string>() == "a b soco bate vira");
+    s->put({"run", {{"input", {"a", "b"}}}});
+    auto f = s->get();
+    REQUIRE(f);
+    CHECK(f->op == "run");
+    CHECK(f->data.at("result").get<std::string>() == "a soco b bate");
 
-    CHECK_THROWS_WITH(i->runOp("run", {{"input", {"a", "b"}}, {"throw_on", 3}}), "Throw on token 3");
+    s->put({"run", {{"input", {"a", "b"}}, {"splice", false}}});
+    f = s->get();
+    REQUIRE(f);
+    CHECK(f->op == "run");
+    CHECK(f->data.at("result").get<std::string>() == "a b soco bate vira");
 
-    auto ci = model->createInstance("general", {{"cutoff", 2}});
-    REQUIRE(ci);
+    s->put({"run", {{"input", {"a", "b"}}, {"throw_on", 3}}});
+    checkError(*s, "Throw on token 3");
 
-    res = ci->runOp("run", {{"input", {"a", "b", "c"}}});
-    CHECK(res.at("result").get<std::string>() == "a soco b bate c soco");
+    auto s2 = createTestSession(d);
+
+    s2->put({"load", {{"file_path", AC_DUMMY_MODEL_SMALL}}});
+    CHECK_FALSE(s2->get());
+
+    s2->put({"create", {{"cutoff", 2}}});
+    CHECK_FALSE(s2->get());
+
+    s2->put({"run", {{"input", {"a", "b", "c"}}}});
+    f = s2->get();
+    REQUIRE(f);
+    CHECK(f->op == "run");
+    CHECK(f->data.at("result").get<std::string>() == "a soco b bate c soco");
 }
 
 TEST_CASE("synthetic") {
-    DummyRegistry f;
+    DummyRegistry d;
+    auto s = createTestSession(d);
 
-    std::string tag;
-    float progress;
-    auto model = f.loadModel({
-        .type = "dummy",
-        .assets = {}
-        }, {}, [&](const std::string_view t, float p) {
-        tag = std::string(t);
-        progress = p;
-        return true;
-    });
-    REQUIRE(model);
-    CHECK(tag == "synthetic");
-    CHECK(progress == 0.5f);
+    s->put({"load", {}});
+    CHECK_FALSE(s->get());
 
-    auto instance = model->createInstance("general", {});
+    s->put({"create", {}});
+    CHECK_FALSE(s->get());
 
-    auto res = instance->runOp("run", {{"input", {"a", "b"}}});
-    CHECK(res.at("result").get<std::string>() == "a one b two");
+    s->put({"run", {{"input", {"a", "b"}}}});
+    auto f = s->get();
+    REQUIRE(f);
+    CHECK(f->op == "run");
+    CHECK(f->data.at("result").get<std::string>() == "a one b two");;
 }

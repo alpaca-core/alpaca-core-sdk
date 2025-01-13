@@ -16,10 +16,9 @@ struct SynSessionExecutor final : public SessionExecutor {
 };
 }
 
-SyncSession::SyncSession(SessionHandlerPtr handler)
-    : m_handler(std::move(handler))
-{
-    resetHandler(m_handler, std::make_unique<SynSessionExecutor>());
+SyncSession::SyncSession(SessionHandlerPtr handler) {
+    resetHandler(handler, std::make_unique<SynSessionExecutor>());
+    m_handler->shOpened();
 }
 SyncSession::~SyncSession() {
     close();

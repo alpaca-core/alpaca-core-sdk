@@ -28,7 +28,6 @@ private:
 
     void close() override;
 
-    SessionHandlerPtr m_handler;
     std::optional<Frame> m_inFrame;
     std::optional<Frame> m_outFrame;
 

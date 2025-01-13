@@ -7,6 +7,9 @@
 
 namespace ac {
 
+SessionHandler::SessionHandler() = default;
+SessionHandler::~SessionHandler() = default;
+
 void SessionHandler::postSessionStrandTask(std::function<void()> task) {
     m_executor->post(astl::move(task));
 }

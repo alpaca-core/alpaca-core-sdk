@@ -21,6 +21,7 @@ void Session::resetHandler(SessionHandlerPtr handler, std::unique_ptr<SessionExe
         assert(m_handler->m_session == nullptr);
         m_handler->m_session = this;
         m_handler->m_executor = std::move(executor);
+        // not necessarily opened
     }
 }
 
