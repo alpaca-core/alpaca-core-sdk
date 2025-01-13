@@ -87,6 +87,7 @@ configure_file(
 )
 
 # export
+export(EXPORT ac-api-targets)
 export(EXPORT ac-local-targets)
 configure_file(
     ac-local-config-export.in.cmake
@@ -95,6 +96,9 @@ configure_file(
 )
 
 # install
+install(EXPORT ac-api-targets
+    DESTINATION share/cmake
+)
 install(EXPORT ac-local-targets
     DESTINATION share/cmake
 )

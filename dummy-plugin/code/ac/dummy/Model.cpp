@@ -9,39 +9,42 @@
 
 namespace ac::dummy {
 
-Model::Model(const char* path, Params params)
-    : m_params(astl::move(params))
-{
-    std::ifstream file(path);
-    if (!file.is_open()) {
-        DUMMY_LOG(Error, "Failed to open file: ", path);
-        throw_ex{} << "Failed to open file: " << path;
-    }
-
-    DUMMY_LOG(Info, "Loading model from ", path);
-
-    while (!file.eof()) {
-        std::string word;
-        file >> word;
-        if (word.empty()) {
-            // ignore empty strings
-            continue;
-        }
-        addDataItem(astl::move(word));
-    }
-}
-
 static constexpr std::string_view SyntheticModel_Data[] = {
     "one", "two", "three", "four", "five", "once", "I", "caught", "a", "fish", "alive",
     "six", "seven", "eight", "nine", "ten", "then", "I", "let", "it", "go", "again"
 };
 
+
 Model::Model(Params params)
     : m_params(astl::move(params))
 {
-    for (auto& item : SyntheticModel_Data) {
-        addDataItem(std::string(item));
+    auto& path = m_params.path;
+
+    if (path.empty()) {
+        for (auto& item : SyntheticModel_Data) {
+            addDataItem(std::string(item));
+        }
     }
+    else {
+        std::ifstream file(path);
+        if (!file.is_open()) {
+            DUMMY_LOG(Error, "Failed to open file: ", path);
+            throw_ex{} << "Failed to open file: " << path;
+        }
+
+        DUMMY_LOG(Info, "Loading model from ", path);
+
+        while (!file.eof()) {
+            std::string word;
+            file >> word;
+            if (word.empty()) {
+                // ignore empty strings
+                continue;
+            }
+            addDataItem(astl::move(word));
+        }
+    }
+
 }
 
 Model::~Model() = default;

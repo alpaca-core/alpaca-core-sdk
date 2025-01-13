@@ -2,13 +2,9 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include <ac/Dict.hpp>
+#include <memory>
 
 namespace ac {
-
-struct Frame {
-    std::string op;
-    Dict data;
-};
-
+class SessionHandler;
+using SessionHandlerPtr = std::shared_ptr<SessionHandler>;
 } // namespace ac

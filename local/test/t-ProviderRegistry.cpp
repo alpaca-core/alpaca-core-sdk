@@ -30,6 +30,9 @@ struct TestProvider : public ac::local::Provider {
     virtual ac::local::ModelPtr loadModel(ac::local::ModelAssetDesc, ac::Dict, ac::local::ProgressCb) override {
         return {};
     }
+    virtual ac::SessionHandlerPtr createSessionHandler(std::string_view) {
+        return {};
+    }
 };
 
 TEST_CASE("ProviderRegistry") {

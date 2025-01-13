@@ -10,7 +10,7 @@
 
 
 TEST_CASE("splice") {
-    ac::dummy::Model small(AC_DUMMY_MODEL_SMALL, {});
+    ac::dummy::Model small({.path = AC_DUMMY_MODEL_SMALL});
     ac::dummy::Instance inst(small, {.cutoff = 2});
     {
         auto s = inst.newSession({"a", "b", "c"}, {});
@@ -25,7 +25,7 @@ TEST_CASE("splice") {
 }
 
 TEST_CASE("no-splice") {
-    ac::dummy::Model small(AC_DUMMY_MODEL_SMALL, {});
+    ac::dummy::Model small({.path = AC_DUMMY_MODEL_SMALL});
     ac::dummy::Instance inst(small, {});
     {
         auto s = inst.newSession({"a", "b"}, {.splice = false});
@@ -39,7 +39,7 @@ TEST_CASE("no-splice") {
 }
 
 TEST_CASE("model splice") {
-    ac::dummy::Model small(AC_DUMMY_MODEL_SMALL, {.splice = "x"});
+    ac::dummy::Model small({.path = AC_DUMMY_MODEL_SMALL, .splice = "x"});
     ac::dummy::Instance inst(small, {});
     {
         auto s = inst.newSession({ "a", "b", "c" }, {});
@@ -54,7 +54,7 @@ TEST_CASE("model splice") {
 }
 
 TEST_CASE("exceptions") {
-    ac::dummy::Model small(AC_DUMMY_MODEL_SMALL, {});
+    ac::dummy::Model small({.path = AC_DUMMY_MODEL_SMALL});
 
     CHECK_THROWS_WITH_AS(ac::dummy::Instance(small, {.cutoff = 1000}), "Cutoff 1000 greater than model size 3", std::runtime_error);
 

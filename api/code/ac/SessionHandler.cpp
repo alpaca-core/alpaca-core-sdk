@@ -7,7 +7,7 @@
 
 namespace ac {
 
-void SessionHandler::pushSessionStrandTask(std::function<void()> task) {
+void SessionHandler::postSessionStrandTask(std::function<void()> task) {
     m_executor->post(astl::move(task));
 }
 
@@ -35,5 +35,10 @@ void SessionHandler::closeSession() {
     if (!m_session) return;
     m_session->close();
 }
+
+void SessionHandler::shOpened() {}
+void SessionHandler::shClosed() {}
+void SessionHandler::shOnAvailableSessionInFrames() {}
+void SessionHandler::shOnSessionAcceptsOutFrames() {}
 
 } // namespace ac
