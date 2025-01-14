@@ -4,6 +4,7 @@
 #pragma once
 #include "export.h"
 #include "Frame.hpp"
+#include "SessionHandlerPtr.hpp"
 #include "SessionExecutorPtr.hpp"
 #include <astl/shared_from.hpp>
 #include <optional>
@@ -45,18 +46,24 @@ public:
     // otherwise consumes the frame and returns true
     bool pushSessionOutFrame(Frame&& frame);
 
-    // close the session
+    // close the session - disconnect
     void closeSession();
 
     ////////////////////////////////////////////////
     // handler interface
     // all functions are called on the session strand
 
-    // called when the session is opened
-    virtual void shOpened();
+    // called when the handler is attached to a session
+    // prev is the previous handler, if any
+    virtual void shAttached(const SessionHandlerPtr& prev);
 
-    // called when the session is closed
-    virtual void shClosed();
+    // called when the handler is detached from a session (replaced by another)
+    // (not the same as the session being closed)
+    // this method would usually not be overridden
+    virtual void shDetached();
+
+    // called when the session is closed (disconnected)
+    virtual void shSessionClosed();
 
     // called when the session has input frames available
     // will be called once only if sessionHasInFrames returns false or getSessionInFrame returns nullopt

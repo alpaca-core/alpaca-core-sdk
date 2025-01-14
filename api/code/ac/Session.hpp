@@ -24,8 +24,12 @@ public:
 
     virtual void close() = 0;
 
+    void resetHandler(SessionHandlerPtr handler, bool attach = true);
+
+    const SessionHandlerPtr& handler() const { return m_handler; }
+    const SessionExecutorPtr& executor() const { return m_executor; }
+
 protected:
-    void resetHandler(SessionHandlerPtr handler);
     SessionExecutorPtr m_executor;
     SessionHandlerPtr m_handler;
 };
