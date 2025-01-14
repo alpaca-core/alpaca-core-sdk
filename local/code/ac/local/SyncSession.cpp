@@ -20,7 +20,6 @@ SyncSession::SyncSession(SessionHandlerPtr handler)
     : Session(std::make_shared<SynSessionExecutor>())
 {
     resetHandler(handler);
-    m_handler->shOpened();
 }
 
 SyncSession::~SyncSession() {
@@ -76,7 +75,7 @@ bool SyncSession::pushOutFrame(Frame&& frame) {
 
 void SyncSession::close() {
     runTasks();
-    m_handler->shClosed();
+    m_handler->shSessionClosed();
     resetHandler({});
 }
 

@@ -181,12 +181,12 @@ class DummySessionHandler final : public TFsm<DummySessionHandler>, public Sessi
         }
     }
 
-    virtual void shOpened() override {
+    virtual void shAttached(const SessionHandlerPtr&) override {
         transitionTo(initial);
         pumpInFrames();
     }
-    virtual void shClosed() override {
-        // for sanity force a crash touched again
+    virtual void shSessionClosed() override {
+        // for sanity force a crash if touched again
         m_state = nullptr;
     }
     virtual void shOnAvailableSessionInFrames() override {

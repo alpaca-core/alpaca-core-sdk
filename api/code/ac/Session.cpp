@@ -14,9 +14,11 @@ Session::Session(SessionExecutorPtr executor)
 // export vtable
 Session::~Session() = default;
 
-void Session::resetHandler(SessionHandlerPtr handler) {
-    if (m_handler) {
-        m_handler->m_session = nullptr;
+void Session::resetHandler(SessionHandlerPtr handler, bool attach) {
+    auto oldHandler = std::move(m_handler);
+    if (oldHandler) {
+        oldHandler->m_session = nullptr;
+        oldHandler->shDetached();
     }
 
     m_handler = std::move(handler);
@@ -31,7 +33,9 @@ void Session::resetHandler(SessionHandlerPtr handler) {
         // don't change executors!
         assert(m_handler->m_executor == m_executor);
 
-        // not necessarily opened yet
+        if (attach) {
+            m_handler->shAttached(oldHandler);
+        }
     }
 }
 

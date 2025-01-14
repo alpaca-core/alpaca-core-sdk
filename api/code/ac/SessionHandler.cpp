@@ -47,8 +47,9 @@ void SessionHandler::closeSession() {
     m_session->close();
 }
 
-void SessionHandler::shOpened() {}
-void SessionHandler::shClosed() {}
+void SessionHandler::shAttached(const SessionHandlerPtr&) {}
+void SessionHandler::shDetached() {}
+void SessionHandler::shSessionClosed() {}
 void SessionHandler::shOnAvailableSessionInFrames() {}
 void SessionHandler::shOnSessionAcceptsOutFrames() {}
 
