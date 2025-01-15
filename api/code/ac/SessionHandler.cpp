@@ -22,11 +22,6 @@ void SessionHandler::postSessionStrandTask(std::function<void()> task) {
     });
 }
 
-bool SessionHandler::sessionHasInFrames() const {
-    if (!m_session) return false;
-    return m_session->hasInFrames();
-}
-
 std::optional<Frame> SessionHandler::getSessionInFrame() {
     if (!m_session) return {};
     return m_session->getInFrame();

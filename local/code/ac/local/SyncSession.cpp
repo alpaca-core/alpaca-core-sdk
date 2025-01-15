@@ -62,10 +62,6 @@ void SyncSession::runTasks() {
     tasks.clear();
 }
 
-bool SyncSession::hasInFrames() const {
-    return m_inFrame.has_value();
-}
-
 std::optional<Frame> SyncSession::getInFrame() {
     std::optional<Frame> ret;
     std::swap(ret, m_inFrame);

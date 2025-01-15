@@ -20,7 +20,6 @@ public:
     bool valid() const noexcept;
 
 private:
-    bool hasInFrames() const override;
     std::optional<Frame> getInFrame() override;
 
     bool acceptOutFrames() const override;

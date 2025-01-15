@@ -157,8 +157,9 @@ class DummySessionHandler final : public TFsm<DummySessionHandler>, public Sessi
     std::deque<Frame> m_outQueue;
 
     void pumpInFrames() {
-        while (sessionHasInFrames()) {
+        while (true) {
             auto f = getSessionInFrame();
+            if (!f) break;
             try {
                 on(*f);
             }
