@@ -13,8 +13,8 @@ namespace ac {
 
 class AC_API_EXPORT Session {
 public:
-    Session(SessionExecutorPtr executor);
-    virtual ~Session();
+    Session(const Session&) = delete;
+    Session& operator=(const Session&) = delete;
 
     // sync queries
     virtual bool hasInFrames() const = 0;
@@ -35,6 +35,9 @@ public:
     const SessionExecutorPtr& executor() const { return m_executor; }
 
 protected:
+    Session(SessionExecutorPtr executor);
+    virtual ~Session(); // only virtual to export the vtable
+
     SessionExecutorPtr m_executor;
     SessionHandlerPtr m_handler;
 };
