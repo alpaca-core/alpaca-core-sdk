@@ -10,7 +10,7 @@ namespace ac::local {
 
 // sync session useful for tests and trivial examples
 // it is not intended to be used in production code
-class AC_LOCAL_EXPORT SyncSession final : public Session {
+class AC_LOCAL_EXPORT SyncSession final : private Session {
 public:
     SyncSession(SessionHandlerPtr handler);
     ~SyncSession();
