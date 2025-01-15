@@ -32,9 +32,6 @@ public:
     // thus capturing [this] or members by ref, when posting from a derived class, is safe
     void postSessionStrandTask(std::function<void()> task);
 
-    // check if the session has pending input frames
-    bool sessionHasInFrames() const;
-
     // get the next input frame from the session (or nullopt if none)
     std::optional<Frame> getSessionInFrame();
 

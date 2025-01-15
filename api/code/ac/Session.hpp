@@ -17,7 +17,6 @@ public:
     Session& operator=(const Session&) = delete;
 
     // sync queries
-    virtual bool hasInFrames() const = 0;
     virtual std::optional<Frame> getInFrame() = 0;
 
     virtual bool acceptOutFrames() const = 0;
