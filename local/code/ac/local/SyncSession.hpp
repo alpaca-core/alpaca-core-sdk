@@ -26,10 +26,14 @@ private:
     bool acceptOutFrames() const override;
     bool pushOutFrame(Frame&& frame) override;
 
+    void pollInFramesAvailable() override;
+    void pollOutFramesAccepted() override;
+
     void close() override;
 
-    std::optional<Frame> m_inFrame;
-    std::optional<Frame> m_outFrame;
+    std::optional<Frame> m_inFrame, m_outFrame;
+
+    bool m_pollInFrames = false, m_pollOutFrames = false;
 
     void runTasks();
 };

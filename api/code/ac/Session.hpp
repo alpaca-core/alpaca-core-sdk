@@ -16,11 +16,16 @@ public:
     Session(SessionExecutorPtr executor);
     virtual ~Session();
 
+    // sync queries
     virtual bool hasInFrames() const = 0;
     virtual std::optional<Frame> getInFrame() = 0;
 
     virtual bool acceptOutFrames() const = 0;
     virtual bool pushOutFrame(Frame&& frame) = 0;
+
+    // async queries
+    virtual void pollInFramesAvailable() = 0;
+    virtual void pollOutFramesAccepted() = 0;
 
     virtual void close() = 0;
 

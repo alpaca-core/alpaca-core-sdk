@@ -8,7 +8,7 @@
 namespace ac::local {
 
 namespace {
-struct SynSessionExecutor final : public SessionExecutor {
+struct SyncSessionExecutor final : public SessionExecutor {
     std::vector<std::function<void()>> m_tasks;
     virtual void post(std::function<void()> task) {
         m_tasks.push_back(std::move(task));
@@ -17,7 +17,7 @@ struct SynSessionExecutor final : public SessionExecutor {
 }
 
 SyncSession::SyncSession(SessionHandlerPtr handler)
-    : Session(std::make_shared<SynSessionExecutor>())
+    : Session(std::make_shared<SyncSessionExecutor>())
 {
     resetHandler(handler);
 }
@@ -29,16 +29,25 @@ SyncSession::~SyncSession() {
 void SyncSession::put(Frame&& frame) {
     if (m_inFrame) throw_ex{} << "SyncSession::put: in-frame already present";
     m_inFrame = std::move(frame);
-    if (m_handler) {
+    if (m_pollInFrames) {
+        m_pollInFrames = false;
         m_handler->shOnAvailableSessionInFrames();
-        runTasks();
     }
+    runTasks();
 }
 
 std::optional<Frame> SyncSession::get() noexcept {
+    runTasks();
+
+    if (!m_outFrame) return {};
+
     std::optional<Frame> ret;
     std::swap(ret, m_outFrame);
-    return std::move(ret);
+    if (m_pollOutFrames) {
+        m_pollOutFrames = false;
+        m_handler->shOnSessionAcceptsOutFrames();
+    }
+    return ret;
 }
 
 bool SyncSession::valid() const noexcept {
@@ -46,7 +55,7 @@ bool SyncSession::valid() const noexcept {
 }
 
 void SyncSession::runTasks() {
-    auto& tasks = static_cast<SynSessionExecutor*>(m_executor.get())->m_tasks;
+    auto& tasks = static_cast<SyncSessionExecutor*>(m_executor.get())->m_tasks;
     for (auto& task : tasks) {
         task();
     }
@@ -71,6 +80,14 @@ bool SyncSession::pushOutFrame(Frame&& frame) {
     if (m_outFrame) return false;
     m_outFrame = std::move(frame);
     return true;
+}
+
+void SyncSession::pollInFramesAvailable() {
+    m_pollInFrames = true;
+}
+
+void SyncSession::pollOutFramesAccepted() {
+    m_pollOutFrames = true;
 }
 
 void SyncSession::close() {

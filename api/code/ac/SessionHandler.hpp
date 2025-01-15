@@ -46,6 +46,14 @@ public:
     // otherwise consumes the frame and returns true
     bool pushSessionOutFrame(Frame&& frame);
 
+    // initiate a poll for available in frames
+    // will call shOnAvailableSessionInFrames when frames are available
+    void pollSessionInFramesAvailable();
+
+    // initiate a poll for accepting out frames
+    // will call shOnSessionAcceptsOutFrames when the session is ready to accept frames
+    void pollSessionOutFramesAccepted();
+
     // close the session - disconnect
     void closeSession();
 
@@ -66,11 +74,11 @@ public:
     virtual void shSessionClosed();
 
     // called when the session has input frames available
-    // will be called once only if sessionHasInFrames returns false or getSessionInFrame returns nullopt
+    // will be called only if requested by pollSessionInFramesAvailable
     virtual void shOnAvailableSessionInFrames();
 
-    // called when the session is accepting output frames
-    // will be called once only if sessionAcceptsOutFrames returns false or pushSessionOutFrame returns false
+    // called when the session is ready to accept output frames
+    // will be called only if requested by pollSessionOutFramesAccepted
     virtual void shOnSessionAcceptsOutFrames();
 
 protected:

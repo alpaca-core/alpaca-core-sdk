@@ -42,6 +42,16 @@ bool SessionHandler::pushSessionOutFrame(Frame&& frame) {
     return m_session->pushOutFrame(astl::move(frame));
 }
 
+void SessionHandler::pollSessionInFramesAvailable() {
+    if (!m_session) return;
+    m_session->pollInFramesAvailable();
+}
+
+void SessionHandler::pollSessionOutFramesAccepted() {
+    if (!m_session) return;
+    m_session->pollOutFramesAccepted();
+}
+
 void SessionHandler::closeSession() {
     if (!m_session) return;
     m_session->close();
