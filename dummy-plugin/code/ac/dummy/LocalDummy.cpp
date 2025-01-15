@@ -166,6 +166,7 @@ class DummySessionHandler final : public TFsm<DummySessionHandler>, public Sessi
                 writeFrame(Frame{"error", e.what()});
             }
         }
+        pollSessionInFramesAvailable();
     }
     void writeFrame(Frame&& t) {
         if (sessionAcceptsOutFrames()) {
@@ -179,6 +180,7 @@ class DummySessionHandler final : public TFsm<DummySessionHandler>, public Sessi
             pushSessionOutFrame(std::move(m_outQueue.front()));
             m_outQueue.pop_front();
         }
+        pollSessionOutFramesAccepted();
     }
 
     virtual void shAttached(const SessionHandlerPtr&) override {
@@ -190,10 +192,10 @@ class DummySessionHandler final : public TFsm<DummySessionHandler>, public Sessi
         m_state = nullptr;
     }
     virtual void shOnAvailableSessionInFrames() override {
-        postSessionStrandTask([this] { pumpInFrames(); });
+        pumpInFrames();
     }
     virtual void shOnSessionAcceptsOutFrames() override {
-        postSessionStrandTask([this] { dumpOutQueue(); });
+        dumpOutQueue();
     }
 };
 

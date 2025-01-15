@@ -49,19 +49,6 @@ TEST_CASE("bad model") {
     checkError(*s, "Failed to open file: nope");
 }
 
-//TEST_CASE("bad model") {
-//    DummyRegistry f;
-//    CHECK_THROWS_WITH(
-//        f.loadModel({
-//            .type = "dummy",
-//            .assets = {
-//                {.path = "nope"}
-//            }
-//        }, {}),
-//        "Failed to open file: nope"
-//    );
-//}
-
 TEST_CASE("bad instance") {
     DummyRegistry d;
     auto s = createTestSession(d);
