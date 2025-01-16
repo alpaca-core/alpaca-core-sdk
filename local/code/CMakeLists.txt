@@ -56,6 +56,7 @@ target_sources(ac-local
         ac/local/Session.hpp
         ac/local/SyncSession.hpp
         ac/local/LocalConnection.hpp
+        ac/local/TestBlockingSession.hpp
 
         ac/local/Lib.hpp
 
@@ -73,6 +74,7 @@ target_sources(ac-local
         ac/local/Session.cpp
         ac/local/SyncSession.cpp
         ac/local/LocalConnection.cpp
+        ac/local/TestBlockingSession.cpp
 
         ac/local/Lib.cpp
 
