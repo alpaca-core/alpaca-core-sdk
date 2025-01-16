@@ -7,6 +7,16 @@ set_target_properties(ac-local PROPERTIES
     EXPORT_NAME ac::local
 )
 
+if(NOT TARGET Boost::boost)
+    # only add boost if not added from the outside
+    CPMAddPackage(gh:iboB/boost-trim@1.85.0)
+endif()
+
+if(NOT TARGET Boost::asio)
+    # asio is header only, so this is fine
+    add_library(Boost::asio ALIAS Boost::boost)
+endif()
+
 target_link_libraries(ac-local
     PRIVATE
         ac::jalog
@@ -14,6 +24,7 @@ target_link_libraries(ac-local
         ac::api
         ac::astl
         ac::dict
+        Boost::asio
 )
 
 configure_file(
@@ -44,6 +55,7 @@ target_sources(ac-local
 
         ac/local/Session.hpp
         ac/local/SyncSession.hpp
+        ac/local/LocalConnection.hpp
 
         ac/local/Lib.hpp
 
@@ -60,6 +72,7 @@ target_sources(ac-local
 
         ac/local/Session.cpp
         ac/local/SyncSession.cpp
+        ac/local/LocalConnection.cpp
 
         ac/local/Lib.cpp
 
