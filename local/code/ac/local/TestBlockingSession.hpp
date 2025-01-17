@@ -19,6 +19,8 @@ public:
     std::optional<Frame> awaitInFrame(int32_t mstimeout = -1);
     void pushOutFrame(Frame&& frame);
 
+    void suspendRemote();
+
 private:
     class Impl;
     std::unique_ptr<Impl> m_impl;
