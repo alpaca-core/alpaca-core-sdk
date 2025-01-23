@@ -6,4 +6,6 @@ macro(add_frame_test test)
 endmacro()
 
 add_frame_test(Dict)
+
 add_frame_test(Status)
+add_frame_test(Stream)

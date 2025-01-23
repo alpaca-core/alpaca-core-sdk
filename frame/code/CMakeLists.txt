@@ -33,12 +33,16 @@ target_sources(ac-frame
 
         # frameio
         ac/frameio/Status.hpp
+        ac/frameio/Stream.hpp
+        ac/frameio/StreamPtr.hpp
 
         ac/Session.hpp
         ac/SessionHandler.hpp
 
         ac/Provider.hpp
     PRIVATE
+        ac/frameio/Stream.cpp
+
         ac/SessionHandler.cpp
 
         ac/Session.cpp
