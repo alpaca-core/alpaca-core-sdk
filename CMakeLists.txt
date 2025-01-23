@@ -70,7 +70,6 @@ add_subdirectory(astl)
 add_subdirectory(ac-test-util)
 
 add_subdirectory(jalog)
-add_subdirectory(dict)
 
 add_subdirectory(frame)
 add_subdirectory(local)
