@@ -72,7 +72,7 @@ add_subdirectory(ac-test-util)
 add_subdirectory(jalog)
 add_subdirectory(dict)
 
-add_subdirectory(api)
+add_subdirectory(frame)
 add_subdirectory(local)
 add_subdirectory(schema)
 
@@ -87,7 +87,7 @@ configure_file(
 )
 
 # export
-export(EXPORT ac-api-targets)
+export(EXPORT ac-frame-targets)
 export(EXPORT ac-local-targets)
 configure_file(
     ac-local-config-export.in.cmake
@@ -96,7 +96,7 @@ configure_file(
 )
 
 # install
-install(EXPORT ac-api-targets
+install(EXPORT ac-frame-targets
     DESTINATION share/cmake
 )
 install(EXPORT ac-local-targets

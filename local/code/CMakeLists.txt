@@ -21,7 +21,7 @@ target_link_libraries(ac-local
     PRIVATE
         ac::jalog
     PUBLIC
-        ac::api
+        ac::frame
         ac::astl
         ac::dict
         Boost::asio
