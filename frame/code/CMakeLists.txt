@@ -10,7 +10,6 @@ set_target_properties(ac-frame PROPERTIES
 target_link_libraries(ac-frame
     PUBLIC
         ac::astl
-        ac::dict
 )
 
 configure_file(
@@ -21,6 +20,10 @@ configure_file(
 
 target_sources(ac-frame
     INTERFACE FILE_SET HEADERS FILES
+        ac/Dict.hpp
+        ac/vendor/nlohmann/json.hpp
+        ac/vendor/nlohmann/json_fwd.hpp
+
         ac/export.h
         ac/version.h
 

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include <ac/Dict.hpp>
+#include "Dict.hpp"
 
 namespace ac {
 

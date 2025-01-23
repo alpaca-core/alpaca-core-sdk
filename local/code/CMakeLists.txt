@@ -23,7 +23,6 @@ target_link_libraries(ac-local
     PUBLIC
         ac::frame
         ac::astl
-        ac::dict
         Boost::asio
 )
 
