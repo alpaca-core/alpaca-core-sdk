@@ -11,7 +11,7 @@
 
 namespace ac {
 
-class AC_API_EXPORT Session {
+class AC_FRAME_EXPORT Session {
 public:
     Session(const Session&) = delete;
     Session& operator=(const Session&) = delete;
@@ -41,7 +41,7 @@ protected:
     SessionHandlerPtr m_handler;
 };
 
-class AC_API_EXPORT SessionExecutor {
+class AC_FRAME_EXPORT SessionExecutor {
 public:
     virtual ~SessionExecutor();
     virtual void post(std::function<void()> task) = 0;

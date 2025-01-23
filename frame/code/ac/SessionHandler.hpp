@@ -14,7 +14,7 @@
 namespace ac {
 class Session;
 
-class AC_API_EXPORT SessionHandler : public astl::enable_shared_from {
+class AC_FRAME_EXPORT SessionHandler : public astl::enable_shared_from {
 public:
     SessionHandler(const SessionHandler&) = delete;
     SessionHandler& operator=(const SessionHandler&) = delete;

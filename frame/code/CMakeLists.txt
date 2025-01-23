@@ -1,13 +1,13 @@
 # Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
-add_ac_local_lib(ac-api AC_API)
-add_library(ac::api ALIAS ac-api)
-set_target_properties(ac-api PROPERTIES
-    EXPORT_NAME ac::api
+add_ac_local_lib(ac-frame AC_FRAME)
+add_library(ac::frame ALIAS ac-frame)
+set_target_properties(ac-frame PROPERTIES
+    EXPORT_NAME ac::frame
 )
 
-target_link_libraries(ac-api
+target_link_libraries(ac-frame
     PUBLIC
         ac::astl
         ac::dict
@@ -19,7 +19,7 @@ configure_file(
     @ONLY
 )
 
-target_sources(ac-api
+target_sources(ac-frame
     INTERFACE FILE_SET HEADERS FILES
         ac/export.h
         ac/version.h
@@ -34,7 +34,7 @@ target_sources(ac-api
         ac/Session.cpp
 )
 
-install(TARGETS ac-api
-    EXPORT ac-api-targets
+install(TARGETS ac-frame
+    EXPORT ac-frame-targets
     FILE_SET HEADERS
 )
