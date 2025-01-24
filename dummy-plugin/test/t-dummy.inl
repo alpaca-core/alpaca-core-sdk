@@ -116,22 +116,27 @@ TEST_CASE("general") {
         s.push({"run", {{"input", {"a", "b"}}, {"throw_on", 3}}});
         checkError(s, "Throw on token 3");
     }
-
-    //auto s2 = createTestSession(d);
-
-    //s2.push({ "load", {{"file_path", AC_DUMMY_MODEL_SMALL}} });
-    //CHECK_FALSE(s2.poll());
-
-    //s2.push({ "create", {{"cutoff", 2}} });
-    //CHECK_FALSE(s2.poll());
-
-    //s2.push({ "run", {{"input", {"a", "b", "c"}}} });
-    //f = s2.poll();
-    //REQUIRE(f);
-    //CHECK(f.op == "run");
-    //CHECK(f.data.at("result").get<std::string>() == "a soco b bate c soco");
 }
-/*
+
+TEST_CASE("general cutoff") {
+    DummyRegistry d;
+
+    auto s = createTestSession(d);
+
+    s.push({ "load", {{"file_path", AC_DUMMY_MODEL_SMALL}} });
+    CHECK(s.poll().blocked());
+
+    s.push({ "create", {{"cutoff", 2}} });
+    CHECK(s.poll().blocked());
+
+    s.push({ "run", {{"input", {"a", "b", "c"}}} });
+    auto res = s.poll();
+    CHECK(res.success());
+    auto& f = res.frame;
+    CHECK(f.op == "run");
+    CHECK(f.data.at("result").get<std::string>() == "a soco b bate c soco");
+}
+
 TEST_CASE("synthetic") {
     DummyRegistry d;
     auto s = createTestSession(d);
@@ -143,9 +148,9 @@ TEST_CASE("synthetic") {
     CHECK(s.poll().blocked());
 
     s.push({"run", {{"input", {"a", "b"}}}});
-    auto f = s.poll();
-    REQUIRE(f);
+    auto res = s.poll();
+    CHECK(res.success());
+    auto& f = res.frame;
     CHECK(f.op == "run");
     CHECK(f.data.at("result").get<std::string>() == "a one b two");;
 }
-*/
