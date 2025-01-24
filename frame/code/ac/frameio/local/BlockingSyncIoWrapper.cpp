@@ -26,7 +26,9 @@ BlockingSyncIoWrapper::BlockingSyncIoWrapper(SessionHandlerPtr handler) {
     });
 }
 
-BlockingSyncIoWrapper::~BlockingSyncIoWrapper() = default;
+BlockingSyncIoWrapper::~BlockingSyncIoWrapper() {
+    close();
+}
 
 using namespace astl::timeout_vals;
 

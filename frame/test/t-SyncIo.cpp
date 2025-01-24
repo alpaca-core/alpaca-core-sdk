@@ -113,6 +113,9 @@ TEST_CASE("SyncIo") {
     }
     auto f = io.poll(no_wait);
     CHECK(f.blocked());
+
+    io.close();
+    progress();
 }
 
 TEST_CASE("SyncIo Wrapper") {
