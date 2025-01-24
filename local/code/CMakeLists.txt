@@ -7,23 +7,12 @@ set_target_properties(ac-local PROPERTIES
     EXPORT_NAME ac::local
 )
 
-if(NOT TARGET Boost::boost)
-    # only add boost if not added from the outside
-    CPMAddPackage(gh:iboB/boost-trim@1.85.0)
-endif()
-
-if(NOT TARGET Boost::asio)
-    # asio is header only, so this is fine
-    add_library(Boost::asio ALIAS Boost::boost)
-endif()
-
 target_link_libraries(ac-local
     PRIVATE
         ac::jalog
     PUBLIC
         ac::frame
         ac::astl
-        Boost::asio
 )
 
 configure_file(
