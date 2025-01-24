@@ -39,6 +39,14 @@ void checkError(Session& s, const std::string_view msg) {
     CHECK(s.poll().closed());
 }
 
+void checkRunResult(Session& s, const std::string_view msg) {
+    auto res = s.poll();
+    CHECK(res.success());
+    auto& frame = res.frame;
+    CHECK(frame.op == "run");
+    CHECK(frame.data.at("result").get<std::string>() == msg);
+}
+
 TEST_CASE("bad model") {
     DummyRegistry d;
 
@@ -55,7 +63,6 @@ TEST_CASE("bad model") {
         checkError(s, "Failed to open file: nope");
     }
 }
-
 
 TEST_CASE("bad instance") {
     DummyRegistry d;
@@ -96,22 +103,10 @@ TEST_CASE("general") {
     SUBCASE("request error") {
 
         s.push({"run", {{"input", {"a", "b"}}}});
-        {
-            auto res = s.poll();
-            CHECK(res.success());
-            auto& f = res.frame;
-            CHECK(f.op == "run");
-            CHECK(f.data.at("result").get<std::string>() == "a soco b bate");
-        }
+        checkRunResult(s, "a soco b bate");
 
         s.push({"run", {{"input", {"a", "b"}}, {"splice", false}}});
-        {
-            auto res = s.poll();
-            CHECK(res.success());
-            auto& f = res.frame;
-            CHECK(f.op == "run");
-            CHECK(f.data.at("result").get<std::string>() == "a b soco bate vira");
-        }
+        checkRunResult(s, "a b soco bate vira");
 
         s.push({"run", {{"input", {"a", "b"}}, {"throw_on", 3}}});
         checkError(s, "Throw on token 3");
@@ -130,11 +125,7 @@ TEST_CASE("general cutoff") {
     CHECK(s.poll().blocked());
 
     s.push({ "run", {{"input", {"a", "b", "c"}}} });
-    auto res = s.poll();
-    CHECK(res.success());
-    auto& f = res.frame;
-    CHECK(f.op == "run");
-    CHECK(f.data.at("result").get<std::string>() == "a soco b bate c soco");
+    checkRunResult(s, "a soco b bate c soco");
 }
 
 TEST_CASE("synthetic") {
@@ -148,9 +139,5 @@ TEST_CASE("synthetic") {
     CHECK(s.poll().blocked());
 
     s.push({"run", {{"input", {"a", "b"}}}});
-    auto res = s.poll();
-    CHECK(res.success());
-    auto& f = res.frame;
-    CHECK(f.op == "run");
-    CHECK(f.data.at("result").get<std::string>() == "a one b two");;
+    checkRunResult(s, "a one b two");
 }
