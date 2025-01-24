@@ -23,13 +23,13 @@ void CoroSessionHandler::postResume() {
     });
 }
 
-void CoroSessionHandler::pollFrame(Frame& frame, Status& status, int32_t timeout) noexcept {
+void CoroSessionHandler::pollFrame(Frame& frame, Status& status, astl::timeout timeout) noexcept {
     shInput().poll(frame, timeout, [this, &status, pl = shared_from_this()](Frame&, Status s) {
         status = s;
         m_currentCoro.resume();
     });
 }
-void CoroSessionHandler::pushFrame(Frame& frame, Status& status, int32_t timeout) noexcept {
+void CoroSessionHandler::pushFrame(Frame& frame, Status& status, astl::timeout timeout) noexcept {
     shOutput().push(frame, timeout, [this, &status, pl = shared_from_this()](Frame&, Status s) {
         status = s;
         m_currentCoro.resume();

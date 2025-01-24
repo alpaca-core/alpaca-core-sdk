@@ -6,9 +6,10 @@
 #include "SessionHandlerPtr.hpp"
 #include "SessionHandler.hpp"
 #include "FrameWithStatus.hpp"
+#include <astl/expected.hpp>
+#include <astl/timeout.hpp>
 #include <coroutine>
 #include <stdexcept>
-#include <astl/expected.hpp>
 
 namespace ac::frameio {
 
@@ -26,8 +27,8 @@ public:
     static SessionHandlerPtr create(SessionCoro<void> coro);
 
     void postResume();
-    void pollFrame(Frame& frame, Status& status, int32_t timeout) noexcept;
-    void pushFrame(Frame& frame, Status& status, int32_t timeout) noexcept;
+    void pollFrame(Frame& frame, Status& status, astl::timeout timeout) noexcept;
+    void pushFrame(Frame& frame, Status& status, astl::timeout timeout) noexcept;
     void close();
 private:
     template <typename T>
@@ -66,13 +67,13 @@ namespace impl {
 struct BasicFrameAwaitable {
     CoroSessionHandlerPtr handler;
     Frame* frame;
-    int32_t timeout;
+    astl::timeout timeout;
     Status status;
 
     // never invoked, but allows AwaitableProxy to work
-    BasicFrameAwaitable(const CoroSessionHandlerPtr& h, int32_t t) noexcept : handler(h), frame(nullptr), timeout(t) {}
+    BasicFrameAwaitable(const CoroSessionHandlerPtr& h, astl::timeout t) noexcept : handler(h), frame(nullptr), timeout(t) {}
 
-    BasicFrameAwaitable(const CoroSessionHandlerPtr& h, Frame& f, int32_t t) noexcept : handler(h), frame(&f), timeout(t) {}
+    BasicFrameAwaitable(const CoroSessionHandlerPtr& h, Frame& f, astl::timeout t) noexcept : handler(h), frame(&f), timeout(t) {}
     bool await_ready() const noexcept { return false; }
 };
 
@@ -85,7 +86,7 @@ struct BasicPollAwaitable : public BasicFrameAwaitable {
 
 template <bool E = true>
 struct Poll: public BasicPollAwaitable {
-    Poll(const CoroSessionHandlerPtr& h, int32_t timeout) noexcept : BasicPollAwaitable(h, framev, timeout) {}
+    Poll(const CoroSessionHandlerPtr& h, astl::timeout timeout) noexcept : BasicPollAwaitable(h, framev, timeout) {}
     using BasicPollAwaitable::BasicPollAwaitable; // never invoked, but allows AwaitableProxy to work
     FrameWithStatus await_resume() noexcept(!E) {
         auto ret = FrameWithStatus(std::move(framev), this->status);
@@ -164,9 +165,9 @@ struct CoroAwaitable {
 template <typename A>
 struct AwaitableProxy {
     Frame* frame;
-    int32_t timeout;
-    AwaitableProxy(Frame& f, int32_t t) noexcept : frame(&f), timeout(t) {}
-    AwaitableProxy(int32_t t) noexcept : frame(nullptr), timeout(t) {}
+    astl::timeout timeout;
+    AwaitableProxy(Frame& f, astl::timeout t) noexcept : frame(&f), timeout(t) {}
+    AwaitableProxy(astl::timeout t) noexcept : frame(nullptr), timeout(t) {}
 
     A getAwaitable(const CoroSessionHandlerPtr& handler) noexcept {
         if (frame) {
@@ -177,19 +178,19 @@ struct AwaitableProxy {
 };
 
 template <bool E = true>
-static AwaitableProxy<impl::Poll<E>> pollFrame(int32_t timeout) noexcept {
+static AwaitableProxy<impl::Poll<E>> pollFrame(astl::timeout timeout) noexcept {
     return {timeout};
 }
 template <bool E = true>
-static AwaitableProxy<impl::PollRef<E>> pollFrame(Frame& frame, int32_t timeout) noexcept {
+static AwaitableProxy<impl::PollRef<E>> pollFrame(Frame& frame, astl::timeout timeout) noexcept {
     return {frame, timeout};
 }
 template <bool E = true>
-static AwaitableProxy<impl::Push<E>> pushFrame(Frame& frame, int32_t timeout) {
+static AwaitableProxy<impl::Push<E>> pushFrame(Frame& frame, astl::timeout timeout) {
     return {frame, timeout};
 }
 template <bool E = true>
-static AwaitableProxy<impl::Push<E>> pushFrame(Frame&& frame, int32_t timeout) {
+static AwaitableProxy<impl::Push<E>> pushFrame(Frame&& frame, astl::timeout timeout) {
     return {frame, timeout};
 }
 
