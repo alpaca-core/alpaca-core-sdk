@@ -17,11 +17,23 @@ class LocalBufferedChannel final : public LocalChannel {
     bool m_closed = false;
 
     Status block(Stream::OnBlockedFunc& onBlocked) {
-        assert(!m_notify);
+        Status ret;
+        if (m_notify) {
+            ret.setAborted();
+        }
+
         if (onBlocked) {
             m_notify = onBlocked();
+            assert(m_notify); // no point in returning a null notify func, just use a null onBlocked
         }
-        return Status{}.setBlocked();
+        else {
+            m_notify = {};
+        }
+
+        if (m_notify) {
+            ret.setWaiting();
+        }
+        return ret;
     }
 
 public:
@@ -32,6 +44,7 @@ public:
     Status write(Frame& frame, Stream::OnBlockedFunc onBlocked) override {
         std::unique_lock lock(m_mutex);
         if (m_closed) {
+            assert(!m_notify);
             return Status{}.setClosed();;
         }
         else if (m_queue.size() < m_maxSize) {
@@ -65,6 +78,7 @@ public:
             return Status{}.setSuccess();
         }
         else if (m_closed) {
+            assert(!m_notify);
             return Status{}.setClosed();;
         }
         else {

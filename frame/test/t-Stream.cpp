@@ -17,7 +17,7 @@ public:
             if (onBlocked) {
                 onBlocked()();
             }
-            ret.setBlocked();
+            ret.setWaiting();
         }
         else {
             f.op = "even";
@@ -44,7 +44,7 @@ public:
             if (onBlocked) {
                 onBlocked()();
             }
-            ret.setBlocked();
+            ret.setWaiting();
         }
         ++i;
         return ret;
