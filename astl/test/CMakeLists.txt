@@ -15,6 +15,7 @@ astl_test(u8c)
 astl_test(tuple_util)
 astl_test(version)
 astl_test(sc_queue)
+astl_test(timeout)
 
 icm_add_multiple_build_failure_tests(
     SOURCES
