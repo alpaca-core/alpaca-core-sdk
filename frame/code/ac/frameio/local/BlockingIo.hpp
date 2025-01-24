@@ -11,7 +11,7 @@ namespace ac::frameio {
 
 struct StreamEndpoint;
 
-// faclitaates blocking io, which blocks the current thread until the operation is complete or expires
+// facilitates blocking io, which blocks the current thread until the operation is complete or expires
 class AC_FRAME_EXPORT BlockingIo {
 public:
     explicit BlockingIo(StreamEndpoint ep);

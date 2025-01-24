@@ -5,6 +5,7 @@
 #include <ac/frameio/local/LocalChannelUtil.hpp>
 #include <ac/frameio/local/BlockingIo.hpp>
 #include <ac/frameio/local/SyncIo.hpp>
+#include <ac/frameio/local/BlockingSyncIoWrapper.hpp>
 #include <ac/frameio/SessionHandler.hpp>
 #include <ac/frameio/Io.hpp>
 #include <doctest/doctest.h>
@@ -86,21 +87,23 @@ public:
     }
 };
 
-TEST_CASE("BlockingIo") {
+TEST_CASE("SyncIo") {
     auto [elocal, eremote] = LocalChannel_getEndpoints(
-        LocalBufferedChannel_create(1),
-        LocalBufferedChannel_create(1)
+        LocalBufferedChannel_create(3),
+        LocalBufferedChannel_create(3)
     );
 
     BlockingIo io(std::move(elocal));
-    Session_connectSync(std::make_shared<MultiEcho>(), std::move(eremote));
+    auto progress = Session_connectSync(std::make_shared<MultiEcho>(), std::move(eremote));
 
-    io.push(ac::Frame{"echo", {{"msg", "hello"}, {"count", 3}}}, await_completion);
+    io.push(ac::Frame{"echo", {{"msg", "hello"}, {"count", 5}}}, await_completion);
     io.push(ac::Frame{"echo", {{"msg", "bye"}, {"count", 2}}}, await_completion);
-    for (int i = 0; i < 3; ++i) {
+    progress();
+    for (int i = 0; i < 5; ++i) {
         auto f = io.poll();
         CHECK(f.success());
         CHECK(f.frame.op == "hello");
+        progress();
     }
     for (int i = 0; i < 2; ++i) {
         auto f = io.poll();
@@ -109,4 +112,25 @@ TEST_CASE("BlockingIo") {
     }
     auto f = io.poll(no_wait);
     CHECK(f.blocked());
+}
+
+TEST_CASE("SyncIo Wrapper") {
+    BlockingSyncIoWrapper io(std::make_shared<MultiEcho>());
+    CHECK(io.push(ac::Frame{"echo", {{"msg", "hello"}, {"count", 5}}}).success());
+    for (int i = 0; i < 5; ++i) {
+        auto f = io.poll();
+        CHECK(f.success());
+        CHECK(f.frame.op == "hello");
+    }
+    CHECK(io.push(ac::Frame{"echo", {{"msg", "bye"}, {"count", 2}}}).success());
+    for (int i = 0; i < 2; ++i) {
+        auto f = io.poll();
+        CHECK(f.success());
+        CHECK(f.frame.op == "bye");
+    }
+    auto f = io.poll();
+    CHECK(f.blocked());
+    io.close();
+    f = io.poll();
+    CHECK(f.closed());
 }

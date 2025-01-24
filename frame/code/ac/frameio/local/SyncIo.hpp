@@ -7,8 +7,7 @@
 #include "../SessionHandlerPtr.hpp"
 
 namespace ac::frameio {
-// createa a synchronous session which "hijacks" the thread of its peer for its execution
-// since the only notification from the streams we get is on when they are free for more queries,
-// this can only work with buffers of size exactly 1
-AC_FRAME_EXPORT void Session_connectSync(SessionHandlerPtr handler, StreamEndpoint endpoint);
+// create a synchronous session which can use the thread of its peer for its execution
+// return a function that will execute the pending taasks of the session executor
+AC_FRAME_EXPORT [[nodiscard]] std::function<void()> Session_connectSync(SessionHandlerPtr handler, StreamEndpoint endpoint);
 } // namespace ac::frameio

@@ -53,20 +53,31 @@ struct SyncIo : public BasicStreamIo {
         return FrameRefWithStatus(frame, status);
     }
 
-    void io(Frame& frame, astl::timeout, IoCb cb) {
-        auto status = m_stream->stream(frame, [this, &frame, &cb] {
-            return [this, &frame, cb = std::move(cb)] {
-                auto status = m_stream->stream(frame, nullptr);
-                cb(frame, status);
-                m_taskQueue->execute();
-            };
-        });
-
+    void do_io(Frame& frame, std::chrono::steady_clock::time_point deadline, IoCb cb) {
+        auto status = m_stream->stream(frame, nullptr);
         if (status.complete()) {
-            m_taskQueue->push([this, status, &frame, cb = std::move(cb)] {
-                cb(frame, status);
-            });
+            cb(frame, status);
+            return;
         }
+        if (std::chrono::steady_clock::now() >= deadline) {
+            cb(frame, status.setTimeout());
+            return;
+        }
+        m_taskQueue->push([this, &frame, deadline, cb = std::move(cb)]() mutable {
+            do_io(frame, deadline, std::move(cb));
+        });
+    }
+
+    void io(Frame& frame, astl::timeout timeout, IoCb cb) {
+        std::chrono::steady_clock::time_point deadline;
+        if (timeout.infinite()) {
+            deadline = std::chrono::steady_clock::time_point::max();
+        }
+        else {
+            deadline = std::chrono::steady_clock::now() + timeout.duration;
+        }
+
+        do_io(frame, deadline, std::move(cb));
     }
 };
 
@@ -83,7 +94,7 @@ struct SyncExecutor final : public IoExecutor {
 
 } // namespace
 
-void Session_connectSync(SessionHandlerPtr handler, StreamEndpoint ep) {
+std::function<void()> Session_connectSync(SessionHandlerPtr handler, StreamEndpoint ep) {
     auto tq = std::make_shared<SyncTaskQueue>();
     SessionHandler::init(
         *handler,
@@ -91,7 +102,7 @@ void Session_connectSync(SessionHandlerPtr handler, StreamEndpoint ep) {
         std::make_unique<SyncOutput>(std::move(ep.writeStream), tq),
         std::make_unique<SyncExecutor>(tq)
     );
-    tq->execute();
+    return [tq]() { tq->execute(); };
 }
 
 } // namespace ac::frameio
