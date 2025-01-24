@@ -35,6 +35,11 @@ target_sources(ac-frame
         ac/frameio/Status.hpp
         ac/frameio/Stream.hpp
         ac/frameio/StreamPtr.hpp
+        ac/frameio/StreamEndpoint.hpp
+        ac/frameio/FrameWithStatus.hpp
+        ac/frameio/Io.hpp
+        ac/frameio/IoCommon.hpp
+        ac/frameio/BasicStreamIo.hpp
 
         ac/Session.hpp
         ac/SessionHandler.hpp
@@ -42,6 +47,7 @@ target_sources(ac-frame
         ac/Provider.hpp
     PRIVATE
         ac/frameio/Stream.cpp
+        ac/frameio/Io.cpp
 
         ac/SessionHandler.cpp
 
