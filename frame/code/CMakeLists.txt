@@ -50,6 +50,7 @@ target_sources(ac-frame
         ac/frameio/local/LocalChannel.hpp
         ac/frameio/local/LocalChannelPtr.hpp
         ac/frameio/local/LocalBufferedChannel.hpp
+        ac/frameio/local/BlockingIo.hpp
 
         ac/Session.hpp
         ac/SessionHandler.hpp
@@ -63,6 +64,7 @@ target_sources(ac-frame
 
         ac/frameio/local/LocalChannel.cpp
         ac/frameio/local/LocalBufferedChannel.cpp
+        ac/frameio/local/BlockingIo.cpp
 
         ac/SessionHandler.cpp
 
