@@ -4,6 +4,7 @@ set_target_properties(astl PROPERTIES
     EXPORT_NAME ac::astl
 )
 target_sources(astl INTERFACE FILE_SET HEADERS FILES
+    astl/expected.hpp
     astl/flat_map.hpp
     astl/generator.hpp
     astl/iile.h
@@ -33,6 +34,6 @@ target_sources(astl INTERFACE FILE_SET HEADERS FILES
 # target_link_libraries(astl INTERFACE )
 
 install(TARGETS astl
-    EXPORT ac-local-targets
+    EXPORT ac-frame-targets
     FILE_SET HEADERS
 )
