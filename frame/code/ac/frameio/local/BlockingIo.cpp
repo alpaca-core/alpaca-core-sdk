@@ -102,6 +102,9 @@ BlockingIo::BlockingIo(StreamEndpoint ep)
     : m_impl(std::make_unique<Impl>(std::move(ep)))
 {}
 
+BlockingIo::BlockingIo(BlockingIo&&) noexcept = default;
+BlockingIo& BlockingIo::operator=(BlockingIo&&) noexcept = default;
+
 BlockingIo::~BlockingIo() = default;
 
 FrameWithStatus BlockingIo::poll(astl::timeout timeout) {

@@ -52,6 +52,7 @@ target_sources(ac-frame
         ac/frameio/local/LocalBufferedChannel.hpp
         ac/frameio/local/BlockingIo.hpp
         ac/frameio/local/SyncIo.hpp
+        ac/frameio/local/BlockingSyncIoWrapper.hpp
 
         ac/Session.hpp
         ac/SessionHandler.hpp
@@ -67,6 +68,7 @@ target_sources(ac-frame
         ac/frameio/local/LocalBufferedChannel.cpp
         ac/frameio/local/BlockingIo.cpp
         ac/frameio/local/SyncIo.cpp
+        ac/frameio/local/BlockingSyncIoWrapper.cpp
 
         ac/SessionHandler.cpp
 
