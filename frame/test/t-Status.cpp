@@ -28,7 +28,7 @@ TEST_CASE("Status") {
     s.setAborted();
     CHECK(s.bits.count() == 1);
     CHECK(s.aborted());
-    CHECK_FALSE(s.blocked());
+    CHECK(s.blocked());
     CHECK_FALSE(s.complete());
 
     s.setClosed();
@@ -38,8 +38,7 @@ TEST_CASE("Status") {
     CHECK_FALSE(s.blocked());
     CHECK(s.complete());
 
-    s.setBlocked();
-    CHECK(s.bits.none());
+    s.reset();
 
     s.setClosed();
     CHECK(s.bits.count() == 1);
@@ -49,7 +48,7 @@ TEST_CASE("Status") {
     s.setTimeout();
     CHECK(s.bits.count() == 1);
     CHECK(s.timeout());
-    CHECK_FALSE(s.blocked());
+    CHECK(s.blocked());
     CHECK_FALSE(s.complete());
 
     s.setSuccess();

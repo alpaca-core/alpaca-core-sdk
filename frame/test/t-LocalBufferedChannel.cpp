@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 //
 #include <ac/frameio/local/LocalBufferedChannel.hpp>
-#include <ac/frameio/local/LocalChannel.hpp>
 #include <ac/frameio/local/LocalChannelUtil.hpp>
 #include <ac/frameio/StreamPtr.hpp>
 #include <doctest/doctest.h>
@@ -55,6 +54,7 @@ TEST_CASE("LocalBufferedChannel 1") {
 
     status = readStream->read(frame2, onReadBlocked);
     CHECK(status.blocked());
+    CHECK(status.waiting());
     CHECK(pl.use_count() == 2);
     CHECK(readUnblocked == 0);
 
@@ -67,6 +67,7 @@ TEST_CASE("LocalBufferedChannel 1") {
 
     status = writeStream->write(frame2, onWriteBlocked);
     CHECK(status.blocked());
+    CHECK(status.waiting());
     CHECK(pl.use_count() == 2);
     CHECK(readUnblocked == 1);
     CHECK(writeUnblocked == 0);
