@@ -109,6 +109,7 @@ TEST_CASE("SyncIo") {
         auto f = io.poll();
         CHECK(f.success());
         CHECK(f.frame.op == "bye");
+        progress();
     }
     auto f = io.poll(no_wait);
     CHECK(f.blocked());
