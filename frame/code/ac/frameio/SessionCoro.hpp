@@ -178,23 +178,46 @@ struct AwaitableProxy {
 };
 
 template <bool E = true>
-static AwaitableProxy<impl::Poll<E>> pollFrame(astl::timeout timeout) noexcept {
+static AwaitableProxy<impl::Poll<E>> pollFrame(astl::timeout timeout = astl::timeout::never()) noexcept {
     return {timeout};
 }
 template <bool E = true>
-static AwaitableProxy<impl::PollRef<E>> pollFrame(Frame& frame, astl::timeout timeout) noexcept {
+static AwaitableProxy<impl::PollRef<E>> pollFrame(Frame& frame, astl::timeout timeout = astl::timeout::never()) noexcept {
     return {frame, timeout};
 }
 template <bool E = true>
-static AwaitableProxy<impl::Push<E>> pushFrame(Frame& frame, astl::timeout timeout) {
+static AwaitableProxy<impl::Push<E>> pushFrame(Frame& frame, astl::timeout timeout = astl::timeout::never()) {
     return {frame, timeout};
 }
 template <bool E = true>
-static AwaitableProxy<impl::Push<E>> pushFrame(Frame&& frame, astl::timeout timeout) {
+static AwaitableProxy<impl::Push<E>> pushFrame(Frame&& frame, astl::timeout timeout = astl::timeout::never()) {
     return {frame, timeout};
 }
 
 } // namespace coro
+
+namespace impl {
+template <typename T, typename Self>
+struct SessionCoroPromiseHelper {
+    void return_value(T value) noexcept {
+        auto& self = static_cast<Self&>(*this);
+        if (self.m_result) {
+            *self.m_result = std::move(value);
+        }
+        self.popCoro();
+    }
+};
+template <typename Self>
+struct SessionCoroPromiseHelper<void, Self> {
+    void return_void() noexcept {
+        auto& self = static_cast<Self&>(*this);
+        if (self.m_result) {
+            *self.m_result = {};
+        }
+        self.popCoro();
+    }
+};
+} // namespace impl
 
 
 template <typename T>
@@ -203,7 +226,7 @@ public:
     struct promise_type;
     using Handle = std::coroutine_handle<promise_type>;
 
-    struct promise_type {
+    struct promise_type : public impl::SessionCoroPromiseHelper<T, promise_type> {
         using result_type = T;
 
         SessionCoro get_return_object() noexcept {
@@ -212,18 +235,17 @@ public:
 
         std::suspend_always initial_suspend() noexcept { return {}; }
         std::suspend_never final_suspend() noexcept { return {}; }
-        void return_void() noexcept {
-            if (m_result) {
-                *m_result = {};
-            }
+
+        void popCoro() noexcept {
             m_handler->popCoro<promise_type>();
         }
+
         void unhandled_exception() noexcept {
             if (!m_result) {
                 std::terminate(); // can't throw exceptions from the top coroutine
             }
             *m_result = astl::unexpected(std::current_exception());
-            m_handler->popCoro<promise_type>();
+            popCoro();
         }
 
         CoroSessionHandlerPtr m_handler;
@@ -240,7 +262,7 @@ public:
 
         template <typename U>
         coro::impl::CoroAwaitable<typename SessionCoro<U>::promise_type> await_transform(SessionCoro<U> sc) {
-            auto h = std::exchange(sc.m_handle, nullptr);
+            auto h = sc.takeHandle();
             // somewhat hacky, but pushCoro doesn't resume anything, so we have the stack being wrong
             // for a short while
             // immediately after this function returns, the current coroutine will be suspended and the stack will be
@@ -257,8 +279,11 @@ public:
         }
     }
 
+    Handle takeHandle() {
+        return std::exchange(m_handle, nullptr);
+    }
+
 private:
-    friend class CoroSessionHandler;
     Handle m_handle;
     SessionCoro(Handle handle) noexcept : m_handle(handle) {}
 };

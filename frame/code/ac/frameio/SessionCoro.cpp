@@ -13,7 +13,7 @@ CoroSessionHandler::~CoroSessionHandler() = default;
 
 SessionHandlerPtr CoroSessionHandler::create(SessionCoro<void> coro) {
     auto sh = std::make_shared<CoroSessionHandler>();
-    pushCoro(sh, std::exchange(coro.m_handle, nullptr));
+    pushCoro(sh, coro.takeHandle());
     return sh;
 }
 
