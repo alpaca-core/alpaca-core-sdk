@@ -15,7 +15,7 @@
 
 #include <ac/schema/DispatchHelpers.hpp>
 
-#include <ac/SessionHandler.hpp>
+#include <ac/frameio/SessionCoro.hpp>
 
 #include <astl/move.hpp>
 #include <astl/iile.h>
@@ -28,104 +28,31 @@ namespace ac::local {
 
 namespace {
 
-template <typename Fsm>
-class TFsm {
-protected:
-    TFsm() = default;
-    ~TFsm() = default;
-    TFsm(const TFsm&) = delete;
-    TFsm& operator=(const TFsm&) = delete;
+using Schema = schema::DummyProvider;
 
-    struct State {
-        friend Fsm;
-        Fsm& fsm;
+dummy::Model::Params ModelParams_fromDict(Dict& d) {
+    auto schemaParams = schema::Struct_fromDict<Schema::Params>(std::move(d));
+    dummy::Model::Params ret;
+    ret.path = schemaParams.filePath.valueOr("");
+    ret.splice = astl::move(schemaParams.spliceString.valueOr(""));
+    return ret;
+}
 
-        State(Fsm* fsm) : fsm(*fsm) {}
-        State(const State&) = delete;
-        State& operator=(const State&) = delete;
+static dummy::Instance::InitParams InitParams_fromDict(Dict&& d) {
+    auto schemaParams = schema::Struct_fromDict<Schema::InstanceGeneral::Params>(astl::move(d));
+    dummy::Instance::InitParams ret;
+    ret.cutoff = schemaParams.cutoff;
+    return ret;
+}
 
-        virtual void on(Frame& t) = 0;
-    protected:
-        ~State() = default;
-    };
+using namespace ac::frameio;
 
-    State* m_state = nullptr;
-
-    template <typename NextState, typename... Args>
-    void transitionTo(NextState& ns, Args&&... args) {
-        m_state = &ns;
-        ns.enter(std::forward<Args>(args)...);
-    }
-public:
-    void on(Frame& t) {
-        m_state->on(t);
-    }
-};
-
-class DummySessionHandler final : public TFsm<DummySessionHandler>, public SessionHandler {
-    struct StateInitial final : public State {
-        using State::State;
-
-        using Schema = schema::DummyProvider;
-
-        static dummy::Model::Params ModelParams_fromDict(Dict& d) {
-            auto schemaParams = schema::Struct_fromDict<Schema::Params>(std::move(d));
-            dummy::Model::Params ret;
-            ret.path = schemaParams.filePath.valueOr("");
-            ret.splice = astl::move(schemaParams.spliceString.valueOr(""));
-            return ret;
-        }
-
-        void enter() {}
-        void on(Frame& t) override {
-            if (t.op != "load") {
-                throw_ex{} << "dummy: expected 'load' op, got: " << t.op;
-            }
-            // btodo: abort
-            auto params = ModelParams_fromDict(t.data);
-            fsm.transitionTo(fsm.model, std::make_unique<dummy::Model>(params));
-        }
-    };
-    struct StateModel final : public State {
-        using Schema = schema::DummyProvider;
-        std::unique_ptr<dummy::Model> m_model;
-
-        static dummy::Instance::InitParams InitParams_fromDict(Dict&& d) {
-            auto schemaParams = schema::Struct_fromDict<Schema::InstanceGeneral::Params>(astl::move(d));
-            dummy::Instance::InitParams ret;
-            ret.cutoff = schemaParams.cutoff;
-            return ret;
-        }
-
-        using State::State;
-        void enter(std::unique_ptr<dummy::Model> model) {
-            m_model = std::move(model);
-        }
-        void on(Frame& t) override {
-            if (t.op != "create") {
-                throw_ex{} << "dummy: expected 'create' op, got: " << t.op;
-            }
-            auto params = InitParams_fromDict(astl::move(t.data));
-            fsm.transitionTo(fsm.instance, std::make_unique<dummy::Instance>(*m_model, astl::move(params)));
-        }
-    };
-    struct StateInstance final : public State {
-        std::unique_ptr<dummy::Instance> m_instance;
-
-        using Schema = schema::DummyProvider::InstanceGeneral;
+SessionCoro<void> Dummy_runInstance(std::unique_ptr<dummy::Instance> instance) {
+    struct Runner {
+        dummy::Instance& m_instance;
         schema::OpDispatcherData m_dispatcherData;
-
-        using State::State;
-        void enter(std::unique_ptr<dummy::Instance> instance) {
-            m_instance = std::move(instance);
+        Runner(dummy::Instance& instance) : m_instance(instance) {
             schema::registerHandlers<schema::DummyInterface::Ops>(m_dispatcherData, *this);
-        }
-        void on(Frame& f) override {
-            auto ret = m_dispatcherData.dispatch(f.op, std::move(f.data));
-            if (!ret) {
-                throw_ex{} << "dummy: unknown op: " << f.op;
-            }
-            fsm.writeFrame(Frame{f.op, *ret});
         }
 
         schema::DummyInterface::OpRun::Return on(schema::DummyInterface::OpRun, schema::DummyInterface::OpRun::Params params) {
@@ -133,7 +60,7 @@ class DummySessionHandler final : public TFsm<DummySessionHandler>, public Sessi
             sparams.splice = params.splice;
             sparams.throwOn = params.throwOn;
 
-            auto s = m_instance->newSession(std::move(params.input), sparams);
+            auto s = m_instance.newSession(std::move(params.input), sparams);
 
             schema::DummyInterface::OpRun::Return ret;
             auto& res = ret.result.materialize();
@@ -148,57 +75,63 @@ class DummySessionHandler final : public TFsm<DummySessionHandler>, public Sessi
 
             return ret;
         }
+
+        Frame dispatch(Frame& f) {
+            auto ret = m_dispatcherData.dispatch(f.op, std::move(f.data));
+            if (!ret) {
+                throw_ex{} << "dummy: unknown op: " << f.op;
+            }
+            return {f.op, *ret};
+        }
     };
 
-    StateInitial initial{this};
-    StateModel model{this};
-    StateInstance instance{this};
+    Runner runner(*instance);
 
-    std::deque<Frame> m_outQueue;
+    while (true) {
+        auto f = co_await coro::pollFrame();
+        co_await coro::pushFrame(runner.dispatch(f.frame));
+    }
+}
 
-    void pumpInFrames() {
-        while (true) {
-            auto f = getSessionInFrame();
-            if (!f) break;
-            try {
-                on(*f);
-            }
-            catch (std::exception& e) {
-                writeFrame(Frame{"error", e.what()});
-            }
-        }
-        pollSessionInFramesAvailable();
+SessionCoro<void> Dummy_runModel(std::unique_ptr<dummy::Model> model) {
+    auto f = co_await coro::pollFrame();
+
+    if (f.frame.op != "create") {
+        throw_ex{} << "dummy: expected 'create' op, got: " << f.frame.op;
     }
-    void writeFrame(Frame&& t) {
-        if (sessionAcceptsOutFrames()) {
-            pushSessionOutFrame(astl::move(t));
-            return;
+    auto params = InitParams_fromDict(astl::move(f.frame.data));
+    co_await Dummy_runInstance(std::make_unique<dummy::Instance>(*model, astl::move(params)));
+}
+
+SessionCoro<void> Dummy_runSession() {
+    std::optional<Frame> errorFrame;
+
+    try {
+        auto f = co_await coro::pollFrame();
+        if (f.frame.op != "load") {
+            throw_ex{} << "dummy: expected 'load' op, got: " << f.frame.op;
         }
-        m_outQueue.push_back(std::move(t));
+
+        // btodo: abort
+        auto params = ModelParams_fromDict(f.frame.data);
+        co_await Dummy_runModel(std::make_unique<dummy::Model>(params));
     }
-    void dumpOutQueue() {
-        while (!m_outQueue.empty() && sessionAcceptsOutFrames()) {
-            pushSessionOutFrame(std::move(m_outQueue.front()));
-            m_outQueue.pop_front();
-        }
-        pollSessionOutFramesAccepted();
+    catch (coro::IoClosed&) {
+        co_return;
+    }
+    catch (std::exception& e) {
+        errorFrame = Frame{"error", e.what()};
     }
 
-    virtual void shAttached(const SessionHandlerPtr&) override {
-        transitionTo(initial);
-        pumpInFrames();
+    try {
+        if (errorFrame) {
+            co_await coro::pushFrame(*errorFrame);
+        }
     }
-    virtual void shSessionClosed() override {
-        // for sanity force a crash if touched again
-        m_state = nullptr;
+    catch (coro::IoClosed&) {
+        co_return;
     }
-    virtual void shOnAvailableSessionInFrames() override {
-        pumpInFrames();
-    }
-    virtual void shOnSessionAcceptsOutFrames() override {
-        dumpOutQueue();
-    }
-};
+}
 
 class DummyInstance final : public Instance {
     std::shared_ptr<dummy::Model> m_model;
@@ -318,7 +251,7 @@ public:
     }
 
     virtual SessionHandlerPtr createSessionHandler(std::string_view) {
-        return std::make_shared<DummySessionHandler>();
+        return CoroSessionHandler::create(Dummy_runSession());
     }
 };
 

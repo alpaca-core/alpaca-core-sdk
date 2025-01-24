@@ -7,7 +7,7 @@
 #include "ModelAssetDesc.hpp"
 #include "ProgressCb.hpp"
 #include <ac/Dict.hpp>
-#include <ac/SessionHandlerPtr.hpp>
+#include <ac/frameio/SessionHandlerPtr.hpp>
 
 namespace ac::local {
 
@@ -55,7 +55,7 @@ public:
     /// The returned model is owned by the caller and is not bound to the provider in any way.
     virtual ModelPtr loadModel(ModelAssetDesc desc, Dict params, ProgressCb cb) = 0;
 
-    virtual SessionHandlerPtr createSessionHandler(std::string_view target) = 0;
+    virtual frameio::SessionHandlerPtr createSessionHandler(std::string_view target) = 0;
 };
 
 } // namespace ac::local
