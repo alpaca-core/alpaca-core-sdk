@@ -20,7 +20,7 @@ Info WhisperX{
     .name = "whisper x",
 };
 
-struct TestProvider : public ac::local::Provider {
+struct TestProvider final : public ac::local::Provider {
     const Info& m_info;
     TestProvider(const Info& info) : m_info(info) {}
     virtual const Info& info() const noexcept override { return m_info; }
@@ -30,7 +30,7 @@ struct TestProvider : public ac::local::Provider {
     virtual ac::local::ModelPtr loadModel(ac::local::ModelAssetDesc, ac::Dict, ac::local::ProgressCb) override {
         return {};
     }
-    virtual ac::SessionHandlerPtr createSessionHandler(std::string_view) {
+    virtual ac::frameio::SessionHandlerPtr createSessionHandler(std::string_view) override {
         return {};
     }
 };

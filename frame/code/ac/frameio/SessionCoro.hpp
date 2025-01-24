@@ -63,6 +63,11 @@ private:
 
 namespace coro {
 
+struct AC_FRAME_EXPORT IoClosed : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+    ~IoClosed();
+};
+
 namespace impl {
 struct BasicFrameAwaitable {
     CoroSessionHandlerPtr handler;
@@ -92,7 +97,7 @@ struct Poll: public BasicPollAwaitable {
         auto ret = FrameWithStatus(std::move(framev), this->status);
         if constexpr (E) {
             if (this->status.closed()) {
-                throw std::runtime_error("input closed");
+                throw IoClosed("input closed");
             }
         }
         return ret;
@@ -106,7 +111,7 @@ struct PollRef : public BasicPollAwaitable {
     Status await_resume() noexcept(!E) {
         if constexpr (E) {
             if (this->status.closed()) {
-                throw std::runtime_error("input closed");
+                throw IoClosed("input closed");
             }
         }
         return this->status;
@@ -125,7 +130,7 @@ struct Push : public BasicPushAwaitable {
     Status await_resume() noexcept(!E) {
         if constexpr (E) {
             if (this->status.closed()) {
-                throw std::runtime_error("output closed");
+                throw IoClosed("output closed");
             }
         }
         return this->status;

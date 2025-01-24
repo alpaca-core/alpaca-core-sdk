@@ -53,11 +53,6 @@ target_sources(ac-frame
         ac/frameio/local/BlockingIo.hpp
         ac/frameio/local/SyncIo.hpp
         ac/frameio/local/BlockingSyncIoWrapper.hpp
-
-        ac/Session.hpp
-        ac/SessionHandler.hpp
-
-        ac/Provider.hpp
     PRIVATE
         ac/frameio/Stream.cpp
         ac/frameio/Io.cpp
@@ -69,10 +64,6 @@ target_sources(ac-frame
         ac/frameio/local/BlockingIo.cpp
         ac/frameio/local/SyncIo.cpp
         ac/frameio/local/BlockingSyncIoWrapper.cpp
-
-        ac/SessionHandler.cpp
-
-        ac/Session.cpp
 )
 
 install(TARGETS ac-frame
