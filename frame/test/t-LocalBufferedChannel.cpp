@@ -3,6 +3,7 @@
 //
 #include <ac/frameio/local/LocalBufferedChannel.hpp>
 #include <ac/frameio/local/LocalChannel.hpp>
+#include <ac/frameio/local/LocalChannelUtil.hpp>
 #include <ac/frameio/StreamPtr.hpp>
 #include <doctest/doctest.h>
 
@@ -13,8 +14,7 @@ TEST_CASE("LocalBufferedChannel 1") {
     REQUIRE(channel);
     CHECK_FALSE(channel->closed());
 
-    ReadStreamPtr readStream = std::make_unique<LocalReadStream>(channel);
-    WriteStreamPtr writeStream = std::make_unique<LocalWriteStream>(channel);
+    auto [readStream, writeStream] = LocalChannel_getStreams(channel);
 
     ac::Frame frame;
     ac::Frame frame2;
@@ -101,8 +101,7 @@ TEST_CASE("LocalBufferedChannel 10") {
     REQUIRE(channel);
     CHECK_FALSE(channel->closed());
 
-    ReadStreamPtr readStream = std::make_unique<LocalReadStream>(channel);
-    WriteStreamPtr writeStream = std::make_unique<LocalWriteStream>(channel);
+    auto [readStream, writeStream] = LocalChannel_getStreams(channel);
 
     ac::Frame frame;
     int i = 0;
@@ -155,4 +154,42 @@ TEST_CASE("LocalBufferedChannel 10") {
 
     status = readStream->read(frame, nullptr);
     CHECK(status.closed());
+}
+
+TEST_CASE("local endpoints") {
+    auto a = LocalBufferedChannel_create(3);
+    auto b = LocalBufferedChannel_create(5);
+
+    auto [ab, ba] = LocalChannel_getEndpoints(a, b);
+
+    ac::Frame f0, f1;
+
+    f0.op = "abc";
+    auto status = ab.writeStream->write(f0, nullptr);
+    CHECK(status.success());
+
+    status = ab.readStream->read(f1, nullptr);
+    CHECK(status.blocked());
+
+    status = ba.readStream->read(f1, nullptr);
+    CHECK(status.success());
+    CHECK(f1.op == "abc");
+
+    for (int i = 0; i < 3; ++i) {
+        f0.op = std::to_string(i);
+        status = ba.writeStream->write(f0, nullptr);
+        CHECK(status.success());
+    }
+    status = ba.writeStream->write(f0, nullptr);
+    CHECK(status.blocked());
+
+    f0.op = "foo";
+    status = ab.writeStream->write(f0, nullptr);
+    CHECK(status.success());
+
+    for (int i = 0; i < 3; ++i) {
+        status = ab.readStream->read(f1, nullptr);
+        CHECK(status.success());
+        CHECK(f1.op == std::to_string(i));
+    }
 }
