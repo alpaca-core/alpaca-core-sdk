@@ -65,6 +65,7 @@ target_sources(ac-frame
         ac/frameio/local/BlockingIo.hpp
         ac/frameio/local/SyncIo.hpp
         ac/frameio/local/BlockingSyncIoWrapper.hpp
+        ac/frameio/local/LocalIoCtx.hpp
     PRIVATE
         ac/frameio/Stream.cpp
         ac/frameio/Io.cpp
@@ -76,6 +77,7 @@ target_sources(ac-frame
         ac/frameio/local/BlockingIo.cpp
         ac/frameio/local/SyncIo.cpp
         ac/frameio/local/BlockingSyncIoWrapper.cpp
+        ac/frameio/local/LocalIoCtx.cpp
 )
 
 install(TARGETS ac-frame
