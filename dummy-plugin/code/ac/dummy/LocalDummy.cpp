@@ -250,7 +250,7 @@ public:
         }
     }
 
-    virtual SessionHandlerPtr createSessionHandler(std::string_view) {
+    virtual SessionHandlerPtr createSessionHandler(std::string_view) override {
         return CoroSessionHandler::create(Dummy_runSession());
     }
 };
