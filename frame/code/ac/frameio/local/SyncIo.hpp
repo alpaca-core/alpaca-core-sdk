@@ -9,5 +9,5 @@
 namespace ac::frameio {
 // create a synchronous session which can use the thread of its peer for its execution
 // return a function that will execute the pending taasks of the session executor
-AC_FRAME_EXPORT [[nodiscard]] std::function<void()> Session_connectSync(SessionHandlerPtr handler, StreamEndpoint endpoint);
+[[nodiscard]] AC_FRAME_EXPORT std::function<void()> Session_connectSync(SessionHandlerPtr handler, StreamEndpoint endpoint);
 } // namespace ac::frameio
