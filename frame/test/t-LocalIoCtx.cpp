@@ -19,8 +19,8 @@ ac::Frame frame(std::string str) {
 int A_recSum = 0;
 bool A_done = true;
 
-SessionCoro<void> sideA() {
-    for (int i = 1; i < 10; ++i) {
+SessionCoro<void> sideA(int send) {
+    for (int i = 1; i <= send; ++i) {
         auto res = co_await coro::pollFrame(no_wait);
         if (res.success()) {
             A_recSum += std::stoi(res.frame.op);
@@ -45,8 +45,7 @@ SessionCoro<void> sideA() {
 
 int B_recSum = 0;
 
-SessionCoro<void> sideB() {
-    int send = 15;
+SessionCoro<void> sideB(int send) {
     bool receive = true;
 
     while (send || receive) {
@@ -81,14 +80,16 @@ TEST_CASE("local io") {
         LocalBufferedChannel_create(5)
     );
 
-    ctx.connect(CoroSessionHandler::create(sideA()), std::move(elocal));
-    ctx.connect(CoroSessionHandler::create(sideB()), std::move(eremote));
+    const int asend = 10, bsend = 15;
+
+    ctx.connect(CoroSessionHandler::create(sideA(asend)), std::move(elocal));
+    ctx.connect(CoroSessionHandler::create(sideB(bsend)), std::move(eremote));
 
     ctx.complete();
     a.join();
     b.join();
 
-    CHECK(A_recSum == 15120);
+    CHECK(A_recSum == 1000 * bsend + (bsend * (bsend + 1)) / 2);
     CHECK(A_done);
-    CHECK(B_recSum == 45);
+    CHECK(B_recSum == (asend * (asend + 1)) / 2);
 }
