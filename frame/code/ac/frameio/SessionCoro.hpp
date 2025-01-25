@@ -183,19 +183,19 @@ struct AwaitableProxy {
 };
 
 template <bool E = true>
-static AwaitableProxy<impl::Poll<E>> pollFrame(astl::timeout timeout = astl::timeout::never()) noexcept {
+[[nodiscard]] AwaitableProxy<impl::Poll<E>> pollFrame(astl::timeout timeout = astl::timeout::never()) noexcept {
     return {timeout};
 }
 template <bool E = true>
-static AwaitableProxy<impl::PollRef<E>> pollFrame(Frame& frame, astl::timeout timeout = astl::timeout::never()) noexcept {
+[[nodiscard]] AwaitableProxy<impl::PollRef<E>> pollFrame(Frame& frame, astl::timeout timeout = astl::timeout::never()) noexcept {
     return {frame, timeout};
 }
 template <bool E = true>
-static AwaitableProxy<impl::Push<E>> pushFrame(Frame& frame, astl::timeout timeout = astl::timeout::never()) {
+[[nodiscard]] AwaitableProxy<impl::Push<E>> pushFrame(Frame& frame, astl::timeout timeout = astl::timeout::never()) {
     return {frame, timeout};
 }
 template <bool E = true>
-static AwaitableProxy<impl::Push<E>> pushFrame(Frame&& frame, astl::timeout timeout = astl::timeout::never()) {
+[[nodiscard]] AwaitableProxy<impl::Push<E>> pushFrame(Frame&& frame, astl::timeout timeout = astl::timeout::never()) {
     return {frame, timeout};
 }
 
