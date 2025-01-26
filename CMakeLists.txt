@@ -4,7 +4,7 @@
 cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
 project(ac-local
-    VERSION 0.1.5
+    VERSION 0.1.6
     DESCRIPTION "Alpaca Core Local SDK"
     LANGUAGES C CXX
 )
