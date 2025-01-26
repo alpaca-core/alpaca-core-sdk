@@ -74,8 +74,6 @@ add_subdirectory(jalog)
 add_subdirectory(frame)
 add_subdirectory(local)
 
-add_subdirectory(dummy-plugin)
-
 #################
 # export and install
 configure_file(
