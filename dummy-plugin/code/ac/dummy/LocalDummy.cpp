@@ -47,7 +47,7 @@ static dummy::Instance::InitParams InitParams_fromDict(Dict&& d) {
 
 using namespace ac::frameio;
 
-SessionCoro<void> Dummy_runInstance(std::unique_ptr<dummy::Instance> instance) {
+SessionCoro<void> Dummy_runInstance(coro::Io io, std::unique_ptr<dummy::Instance> instance) {
     struct Runner {
         dummy::Instance& m_instance;
         schema::OpDispatcherData m_dispatcherData;
@@ -88,33 +88,35 @@ SessionCoro<void> Dummy_runInstance(std::unique_ptr<dummy::Instance> instance) {
     Runner runner(*instance);
 
     while (true) {
-        auto f = co_await coro::pollFrame();
-        co_await coro::pushFrame(runner.dispatch(f.frame));
+        auto f = co_await io.pollFrame();
+        co_await io.pushFrame(runner.dispatch(f.frame));
     }
 }
 
-SessionCoro<void> Dummy_runModel(std::unique_ptr<dummy::Model> model) {
-    auto f = co_await coro::pollFrame();
+SessionCoro<void> Dummy_runModel(coro::Io io, std::unique_ptr<dummy::Model> model) {
+    auto f = co_await io.pollFrame();
 
     if (f.frame.op != "create") {
         throw_ex{} << "dummy: expected 'create' op, got: " << f.frame.op;
     }
     auto params = InitParams_fromDict(astl::move(f.frame.data));
-    co_await Dummy_runInstance(std::make_unique<dummy::Instance>(*model, astl::move(params)));
+    co_await Dummy_runInstance(io, std::make_unique<dummy::Instance>(*model, astl::move(params)));
 }
 
 SessionCoro<void> Dummy_runSession() {
     std::optional<Frame> errorFrame;
 
+    auto io = co_await coro::Io{};
+
     try {
-        auto f = co_await coro::pollFrame();
+        auto f = co_await io.pollFrame();
         if (f.frame.op != "load") {
             throw_ex{} << "dummy: expected 'load' op, got: " << f.frame.op;
         }
 
         // btodo: abort
         auto params = ModelParams_fromDict(f.frame.data);
-        co_await Dummy_runModel(std::make_unique<dummy::Model>(params));
+        co_await Dummy_runModel(io, std::make_unique<dummy::Model>(params));
     }
     catch (coro::IoClosed&) {
         co_return;
@@ -125,7 +127,7 @@ SessionCoro<void> Dummy_runSession() {
 
     try {
         if (errorFrame) {
-            co_await coro::pushFrame(*errorFrame);
+            co_await io.pushFrame(*errorFrame);
         }
     }
     catch (coro::IoClosed&) {

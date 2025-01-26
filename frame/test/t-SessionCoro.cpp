@@ -9,23 +9,24 @@
 
 using namespace ac::frameio;
 
-SessionCoro<std::string> add() {
-    auto fin = co_await coro::pollFrame();
+SessionCoro<std::string> add(coro::Io& io) {
+    auto fin = co_await io.pollFrame();
     auto a = std::stoi(fin.frame.op);
-    fin = co_await coro::pollFrame();
+    fin = co_await io.pollFrame();
     auto b = std::stoi(fin.frame.op);
     co_return std::to_string(a + b);
 }
 
 SessionCoro<void> session() {
+    auto io = co_await coro::Io{};
     while (true) {
-        auto fin = co_await coro::pollFrame();
+        auto fin = co_await io.pollFrame();
         std::string result;
         if (fin.frame.op == "echo") {
             result = fin.frame.op;
         }
         else if (fin.frame.op == "add") {
-            result = co_await add();
+            result = co_await add(io);
         }
         else {
             co_return;
@@ -33,7 +34,7 @@ SessionCoro<void> session() {
 
         ac::Frame fout;
         fout.op = result;
-        co_await coro::pushFrame(fout);
+        co_await io.pushFrame(fout);
     }
 }
 

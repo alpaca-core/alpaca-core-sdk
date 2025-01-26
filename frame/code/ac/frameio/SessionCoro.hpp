@@ -75,9 +75,6 @@ struct BasicFrameAwaitable {
     astl::timeout timeout;
     Status status;
 
-    // never invoked, but allows AwaitableProxy to work
-    BasicFrameAwaitable(const CoroSessionHandlerPtr& h, astl::timeout t) noexcept : handler(h), frame(nullptr), timeout(t) {}
-
     BasicFrameAwaitable(const CoroSessionHandlerPtr& h, Frame& f, astl::timeout t) noexcept : handler(h), frame(&f), timeout(t) {}
     bool await_ready() const noexcept { return false; }
 };
@@ -89,10 +86,17 @@ struct BasicPollAwaitable : public BasicFrameAwaitable {
     }
 };
 
+struct BasicPushAwaitable : public BasicFrameAwaitable {
+    using BasicFrameAwaitable::BasicFrameAwaitable;
+    void await_suspend(std::coroutine_handle<>) noexcept {
+        this->handler->pushFrame(*this->frame, this->status, this->timeout);
+    }
+};
+} // namespace impl
+
 template <bool E = true>
-struct Poll: public BasicPollAwaitable {
+struct Poll: public impl::BasicPollAwaitable {
     Poll(const CoroSessionHandlerPtr& h, astl::timeout timeout) noexcept : BasicPollAwaitable(h, framev, timeout) {}
-    using BasicPollAwaitable::BasicPollAwaitable; // never invoked, but allows AwaitableProxy to work
     FrameWithStatus await_resume() noexcept(!E) {
         auto ret = FrameWithStatus(std::move(framev), this->status);
         if constexpr (E) {
@@ -106,7 +110,7 @@ struct Poll: public BasicPollAwaitable {
 };
 
 template <bool E = true>
-struct PollRef : public BasicPollAwaitable {
+struct PollRef : public impl::BasicPollAwaitable {
     using BasicPollAwaitable::BasicPollAwaitable;
     Status await_resume() noexcept(!E) {
         if constexpr (E) {
@@ -118,14 +122,8 @@ struct PollRef : public BasicPollAwaitable {
     }
 };
 
-struct BasicPushAwaitable : public BasicFrameAwaitable {
-    using BasicFrameAwaitable::BasicFrameAwaitable;
-    void await_suspend(std::coroutine_handle<>) noexcept {
-        this->handler->pushFrame(*this->frame, this->status, this->timeout);
-    }
-};
 template <bool E = true>
-struct Push : public BasicPushAwaitable {
+struct Push : public impl::BasicPushAwaitable {
     using BasicPushAwaitable::BasicPushAwaitable;
     Status await_resume() noexcept(!E) {
         if constexpr (E) {
@@ -136,68 +134,6 @@ struct Push : public BasicPushAwaitable {
         return this->status;
     }
 };
-
-template <typename PromiseType>
-struct CoroAwaitable {
-    std::coroutine_handle<PromiseType> coro;
-    using Ret = typename PromiseType::result_type;
-
-    CoroAwaitable(std::coroutine_handle<PromiseType> h) noexcept : coro(h) {}
-
-    // instead of making optional of expected, we can use the value error=nullptr to indicate that
-    // the result is empty (hacky, but works)
-    astl::expected<Ret, std::exception_ptr> result = astl::unexpected();
-
-    bool await_ready() const noexcept { return false; }
-
-    std::coroutine_handle<> await_suspend(std::coroutine_handle<>) noexcept {
-        coro.promise().m_result = &result;
-        return coro;
-    }
-
-    Ret await_resume() noexcept(false) {
-        if (result) {
-            return std::move(result).value();
-        }
-        else {
-            std::rethrow_exception(result.error());
-        }
-    }
-};
-
-} // namespace impl
-
-template <typename A>
-struct AwaitableProxy {
-    Frame* frame;
-    astl::timeout timeout;
-    AwaitableProxy(Frame& f, astl::timeout t) noexcept : frame(&f), timeout(t) {}
-    AwaitableProxy(astl::timeout t) noexcept : frame(nullptr), timeout(t) {}
-
-    A getAwaitable(const CoroSessionHandlerPtr& handler) noexcept {
-        if (frame) {
-            return A(handler, *frame, timeout);
-        }
-        return A(handler, timeout);
-    }
-};
-
-template <bool E = true>
-[[nodiscard]] AwaitableProxy<impl::Poll<E>> pollFrame(astl::timeout timeout = astl::timeout::never()) noexcept {
-    return {timeout};
-}
-template <bool E = true>
-[[nodiscard]] AwaitableProxy<impl::PollRef<E>> pollFrame(Frame& frame, astl::timeout timeout = astl::timeout::never()) noexcept {
-    return {frame, timeout};
-}
-template <bool E = true>
-[[nodiscard]] AwaitableProxy<impl::Push<E>> pushFrame(Frame& frame, astl::timeout timeout = astl::timeout::never()) {
-    return {frame, timeout};
-}
-template <bool E = true>
-[[nodiscard]] AwaitableProxy<impl::Push<E>> pushFrame(Frame&& frame, astl::timeout timeout = astl::timeout::never()) {
-    return {frame, timeout};
-}
 
 } // namespace coro
 
@@ -259,22 +195,6 @@ public:
         // points to the result in the awaitable which is on the stack
         // null if this is the top coroutine
         astl::expected<T, std::exception_ptr>* m_result = nullptr;
-
-        template <typename Awaitable>
-        Awaitable await_transform(coro::AwaitableProxy<Awaitable> proxy) {
-            return proxy.getAwaitable(m_handler);
-        }
-
-        template <typename U>
-        coro::impl::CoroAwaitable<typename SessionCoro<U>::promise_type> await_transform(SessionCoro<U> sc) {
-            auto h = sc.takeHandle();
-            // somewhat hacky, but pushCoro doesn't resume anything, so we have the stack being wrong
-            // for a short while
-            // immediately after this function returns, the current coroutine will be suspended and the stack will be
-            // correct again
-            CoroSessionHandler::pushCoro(m_handler, h);
-            return {h};
-        }
     };
 
     SessionCoro(SessionCoro&& other) noexcept : m_handle(std::exchange(other.m_handle, nullptr)) {}
@@ -288,9 +208,74 @@ public:
         return std::exchange(m_handle, nullptr);
     }
 
+    struct CoroAwaitable {
+        using Ret = T;
+        using PromiseType = typename SessionCoro<T>::promise_type;
+        std::coroutine_handle<PromiseType> coro;
+
+        CoroAwaitable(std::coroutine_handle<PromiseType> h) noexcept : coro(h) {}
+
+        // instead of making optional of expected, we can use the value error=nullptr to indicate that
+        // the result is empty (hacky, but works)
+        astl::expected<Ret, std::exception_ptr> result = astl::unexpected();
+
+        bool await_ready() const noexcept { return false; }
+
+        template <typename CallerPromise>
+        std::coroutine_handle<> await_suspend(std::coroutine_handle<CallerPromise> h) noexcept {
+            coro.promise().m_result = &result;
+            CoroSessionHandler::pushCoro(h.promise().m_handler, coro);
+            return coro;
+        }
+
+        Ret await_resume() noexcept(false) {
+            if (result) {
+                return std::move(result).value();
+            }
+            else {
+                std::rethrow_exception(result.error());
+            }
+        }
+    };
+
+    CoroAwaitable operator co_await() {
+        return {takeHandle()};
+    }
+
 private:
     Handle m_handle;
     SessionCoro(Handle handle) noexcept : m_handle(handle) {}
 };
+
+namespace coro {
+
+struct Io {
+    CoroSessionHandlerPtr handler;
+
+    [[nodiscard]] Poll<> pollFrame(astl::timeout timeout = astl::timeout::never()) noexcept {
+        return {handler, timeout};
+    }
+    [[nodiscard]] PollRef<> pollFrame(Frame& frame, astl::timeout timeout = astl::timeout::never()) noexcept {
+        return {handler, frame, timeout};
+    }
+    [[nodiscard]] Push<> pushFrame(Frame& frame, astl::timeout timeout = astl::timeout::never()) noexcept {
+        return {handler, frame, timeout};
+    }
+    [[nodiscard]] Push<> pushFrame(Frame&& frame, astl::timeout timeout = astl::timeout::never()) noexcept {
+        return {handler, frame, timeout};
+    }
+
+    // awaitable interface
+    bool await_ready() const noexcept { return false; }
+    template <typename PromiseType>
+    bool await_suspend(std::coroutine_handle<PromiseType> h) noexcept {
+        assert(!handler);
+        handler = h.promise().m_handler;
+        return false;
+    }
+    Io await_resume() noexcept { return *this; }
+};
+
+} // namespace coro
 
 } // namespace ac::frameio

@@ -20,19 +20,21 @@ int A_recSum = 0;
 bool A_done = true;
 
 SessionCoro<void> sideA(int send) {
+    auto io = co_await coro::Io{};
+
     for (int i = 1; i <= send; ++i) {
-        auto res = co_await coro::pollFrame(no_wait);
+        auto res = co_await io.pollFrame(no_wait);
         if (res.success()) {
             A_recSum += std::stoi(res.frame.op);
         }
-        co_await coro::pushFrame(frame(std::to_string(i)));
+        co_await io.pushFrame(frame(std::to_string(i)));
     }
 
-    co_await coro::pushFrame(frame("end"));
+    co_await io.pushFrame(frame("end"));
 
     try {
         while (true) {
-            auto res = co_await coro::pollFrame();
+            auto res = co_await io.pollFrame();
             if (res.success()) {
                 A_recSum += std::stoi(res.frame.op);
             }
@@ -48,13 +50,15 @@ int B_recSum = 0;
 SessionCoro<void> sideB(int send) {
     bool receive = true;
 
+    auto io = co_await coro::Io{};
+
     while (send || receive) {
         if (send) {
-            co_await coro::pushFrame(frame(std::to_string(1000 + send)));
+            co_await io.pushFrame(frame(std::to_string(1000 + send)));
             --send;
         }
         if (receive) {
-            auto f = co_await coro::pollFrame(await_completion_for(20ms));
+            auto f = co_await io.pollFrame(await_completion_for(20ms));
             if (f.success()) {
                 if (f.frame.op == "end") {
                     receive = false;
