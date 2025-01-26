@@ -84,7 +84,7 @@ Check out the [contributing guide](CONTRIBUTING.md).
 
 This software is distributed under the MIT Software License. See accompanying file LICENSE or copy [here](https://opensource.org/licenses/MIT).
 
-Copyright &copy; 2024 [Alpaca Core, Inc](https://github.com/alpaca-core)
+Copyright &copy; 2024-2025 [Alpaca Core, Inc](https://github.com/alpaca-core)
 
 ## Third Party Libraries
 

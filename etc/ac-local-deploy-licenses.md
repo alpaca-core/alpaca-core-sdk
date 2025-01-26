@@ -2,7 +2,7 @@
 
 ## alpaca-core/ac-local
 
-Copyright (c) 2024 Alpaca Core
+Copyright (c) 2024-2025 Alpaca Core
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -50,7 +50,7 @@ SOFTWARE.
 
 MIT License
 
-Copyright (c) 2020-2024 Borislav Stanimirov
+Copyright (c) 2020-2025 Borislav Stanimirov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -76,7 +76,7 @@ MIT License
 
 Copyright (c) 2016-2019 Chobolabs Inc.
 
-Copyright (c) 2020-2024 Borislav Stanimirov
+Copyright (c) 2020-2025 Borislav Stanimirov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
