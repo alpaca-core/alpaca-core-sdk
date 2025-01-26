@@ -13,8 +13,6 @@ add_ac_local_plugin(
         ac/dummy/Instance.cpp
         ac/dummy/LocalDummy.hpp
         ac/dummy/LocalDummy.cpp
-    LIBRARIES
-        ac::schema
 )
 
 # install plib and info  to make life easier for external projects

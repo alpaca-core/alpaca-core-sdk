@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include "IOVisitors.hpp"
+#include "SerializeVisitors.hpp"
 #include <concepts>
 
-namespace ac::local::schema {
+namespace ac::schema {
 
 template <typename Dict = ac::Dict>
 struct SchemaVisitor {
@@ -78,5 +78,5 @@ void Struct_toSchema(Dict& out) {
     SchemaVisitor<Dict>::template describeField<T>(out);
 }
 
-} // namespace ac::local::schema
+} // namespace ac::schema
 

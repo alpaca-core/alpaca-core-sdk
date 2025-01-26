@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include "IOVisitors.hpp"
+#include <ac/schema/SchemaVisitor.hpp>
 #include <ac/local/Model.hpp>
 #include <ac/local/Instance.hpp>
 #include <utility>

@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include "IOVisitors.hpp"
+#include <ac/schema/SerializeVisitors.hpp>
 #include <ac/DictFwd.hpp>
 #include <astl/tuple_util.hpp>
 #include <astl/qalgorithm.hpp>
 
-namespace ac::local::schema {
+namespace ac::schema {
 
 struct OpDispatcherData {
     struct HandlerData {
@@ -41,4 +41,4 @@ void registerHandlers(OpDispatcherData& data, Handler& h) {
     });
 }
 
-} // namespace ac::local::schema
+} // namespace ac::schema

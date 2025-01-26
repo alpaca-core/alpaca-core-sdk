@@ -6,6 +6,5 @@ add_executable(${tgt}
     e-gen-dummy-schema.cpp
 )
 target_link_libraries(${tgt}
-    ac::schema
     aclp-dummy-baselib
 )

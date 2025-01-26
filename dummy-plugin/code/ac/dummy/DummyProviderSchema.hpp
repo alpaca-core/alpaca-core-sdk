@@ -5,7 +5,7 @@
 #include "DummyInterface.hpp"
 #include <tuple>
 
-namespace ac::local::schema {
+namespace ac::schema {
 
 struct DummyProvider {
     static inline constexpr std::string_view id = "dummy";
@@ -41,4 +41,4 @@ struct DummyProvider {
     using Instances = std::tuple<InstanceGeneral>;
 };
 
-} // namespace ac::local::schema
+} // namespace ac::schema

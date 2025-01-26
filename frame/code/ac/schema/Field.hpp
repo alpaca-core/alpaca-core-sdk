@@ -6,7 +6,7 @@
 #include <bitset>
 #include <concepts>
 
-namespace ac::local::schema {
+namespace ac::schema {
 
 namespace impl {
 template <typename T>
@@ -138,4 +138,4 @@ private:
     std::bitset<2> m_flags;
 };
 
-} // namespace ac::local::schema
+} // namespace ac::schema

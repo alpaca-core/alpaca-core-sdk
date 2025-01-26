@@ -66,6 +66,12 @@ target_sources(ac-frame
         ac/frameio/local/SyncIo.hpp
         ac/frameio/local/BlockingSyncIoWrapper.hpp
         ac/frameio/local/LocalIoCtx.hpp
+
+        # schema
+        ac/schema/Field.hpp
+        ac/schema/SerializeVisitors.hpp
+        ac/schema/SchemaVisitors.hpp
+
     PRIVATE
         ac/frameio/Stream.cpp
         ac/frameio/Io.cpp

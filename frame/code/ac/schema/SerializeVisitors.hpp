@@ -9,7 +9,7 @@
 #include <optional>
 #include <vector>
 
-namespace ac::local::schema {
+namespace ac::schema {
 
 namespace impl {
 struct DummyVisitor {
@@ -126,4 +126,4 @@ T Struct_fromDict(Dict&& d) {
     return ret;
 }
 
-} // namespace ac::local::schema
+} // namespace ac::schema

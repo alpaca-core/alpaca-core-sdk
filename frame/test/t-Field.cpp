@@ -4,7 +4,7 @@
 #include <ac/schema/Field.hpp>
 #include <doctest/doctest.h>
 
-using namespace ac::local::schema;
+using namespace ac::schema;
 
 struct Person {
     Field<std::string> name;

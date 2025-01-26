@@ -73,7 +73,6 @@ add_subdirectory(jalog)
 
 add_subdirectory(frame)
 add_subdirectory(local)
-add_subdirectory(schema)
 
 add_subdirectory(dummy-plugin)
 

@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include "SchemaVisitor.hpp"
+#include <ac/schema/SchemaVisitor.hpp>
 #include <astl/tuple_util.hpp>
 
-namespace ac::local::schema {
+namespace ac::schema {
 
 template <typename Dict, typename Schema>
 Dict generateProviderSchema() {

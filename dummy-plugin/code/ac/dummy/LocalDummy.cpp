@@ -13,7 +13,7 @@
 #include <ac/local/Model.hpp>
 #include <ac/local/Provider.hpp>
 
-#include <ac/schema/DispatchHelpers.hpp>
+#include <ac/local/schema/DispatchHelpers.hpp>
 
 #include <ac/frameio/SessionCoro.hpp>
 

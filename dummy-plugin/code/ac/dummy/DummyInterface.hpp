@@ -7,7 +7,7 @@
 #include <string>
 #include <tuple>
 
-namespace ac::local::schema {
+namespace ac::schema {
 
 struct DummyInterface {
     static constexpr auto id = "dummy/v1";
@@ -41,4 +41,4 @@ struct DummyInterface {
     using Ops = std::tuple<OpRun>;
 };
 
-} // namespace ac::local::schema
+} // namespace ac::schema

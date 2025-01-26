@@ -45,6 +45,10 @@ target_sources(ac-local
 
         ac/local/ProviderScorer.hpp
         ac/local/CommonProviderScorers.hpp
+
+        ac/local/schema/CallHelpers.hpp
+        ac/local/schema/DispatchHelpers.hpp
+        ac/local/schema/GenerateProviderSchemaDict.hpp
     PRIVATE
         ac/local/Logging.hpp
         ac/local/Logging.cpp

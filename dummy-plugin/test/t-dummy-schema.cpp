@@ -6,7 +6,7 @@
 #include <ac/local/Instance.hpp>
 #include <ac/local/ProviderRegistry.hpp>
 
-#include <ac/schema/CallHelpers.hpp>
+#include <ac/local/schema/CallHelpers.hpp>
 
 #include <ac/local/PluginPlibUtil.inl>
 
@@ -38,10 +38,10 @@ TEST_CASE("dummy schema") {
 
     REQUIRE(!!model);
 
-    using Instance = ac::local::schema::DummyProvider::InstanceGeneral;
+    using Instance = ac::schema::DummyProvider::InstanceGeneral;
     auto instance = Model_createInstance<Instance>(*model, {.cutoff = 2});
 
-    using Interface = ac::local::schema::DummyInterface;
+    using Interface = ac::schema::DummyInterface;
     auto result = Instance_runOp<Interface::OpRun>(*instance,
         {.input = std::vector<std::string>{"a", "b", "c"}}
     );

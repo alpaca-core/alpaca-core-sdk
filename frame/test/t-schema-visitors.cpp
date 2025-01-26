@@ -1,11 +1,11 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include <ac/schema/IOVisitors.hpp>
+#include <ac/schema/SerializeVisitors.hpp>
 #include <ac/schema/SchemaVisitor.hpp>
 #include <doctest/doctest.h>
 
-using namespace ac::local::schema;
+using namespace ac::schema;
 
 struct Person {
     Field<std::string> name;
