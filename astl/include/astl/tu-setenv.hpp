@@ -4,8 +4,10 @@
 #pragma once
 #include <cstdlib>
 
+// test utility: setenv for Windows
+
 #if defined(_WIN32)
-// ::SetEnvironmentVariable doesn't work with std::getenv :(
+// we can't use ::SetEnvironmentVariable as doesn't work with std::getenv :(
 
 #include <vector>
 #include <string_view>

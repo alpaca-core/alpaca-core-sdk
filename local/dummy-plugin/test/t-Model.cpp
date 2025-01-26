@@ -6,7 +6,7 @@
 #include <doctest/doctest.h>
 #include <algorithm>
 
-#include <ac-test-util/JalogFixture.inl>
+#include <ac/jalog/Fixture.inl>
 
 TEST_CASE("simple") {
     ac::dummy::Model model({.path = AC_DUMMY_MODEL_LARGE});

@@ -67,7 +67,6 @@ endmacro()
 # we could do it if there's interest
 
 add_subdirectory(astl)
-add_subdirectory(ac-test-util)
 
 add_subdirectory(jalog)
 

@@ -7,7 +7,7 @@
 #include <ac/local/ProviderRegistry.hpp>
 #include <doctest/doctest.h>
 
-#include <ac-test-util/JalogFixture.inl>
+#include <ac/jalog/Fixture.inl>
 
 struct GlobalFixture {
     GlobalFixture() {

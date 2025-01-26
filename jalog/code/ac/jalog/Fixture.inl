@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT
 //
 
+// fixture which globally initializes jalog with a DefaultSink
+// suitable for tests and examples
+
 // inline file, no include guard
 
 #include <ac/jalog/Instance.hpp>

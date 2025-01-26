@@ -4,7 +4,7 @@
 #include <aclp-dummy-plib.hpp>
 #include <ac/local/ProviderRegistry.hpp>
 
-#include <ac-test-util/JalogFixture.inl>
+#include <ac/jalog/Fixture.inl>
 
 struct DummyRegistry : public ac::local::ProviderRegistry {
     DummyRegistry() {

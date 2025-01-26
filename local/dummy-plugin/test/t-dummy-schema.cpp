@@ -13,7 +13,7 @@
 #include <ac/dummy/LocalDummy.hpp>
 #include <ac/dummy/DummyProviderSchema.hpp>
 
-#include <ac-test-util/JalogFixture.inl>
+#include <ac/jalog/Fixture.inl>
 
 #include <doctest/doctest.h>
 
