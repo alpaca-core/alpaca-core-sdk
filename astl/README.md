@@ -12,6 +12,7 @@ The following files were copied from external repositories:
     * `pp_select.h`
     * `symbol_export.h`
 * [iboB/itlib](https://github.com/iboB/itlib), namespace changed from `itlib` to `astl`:
+    * `expected.hpp`
     * `flat_map.hpp`
     * `generator.hpp`
     * `mem_streambuf.hpp`
