@@ -44,7 +44,6 @@ Model::Model(Params params)
             addDataItem(astl::move(word));
         }
     }
-
 }
 
 Model::~Model() = default;
