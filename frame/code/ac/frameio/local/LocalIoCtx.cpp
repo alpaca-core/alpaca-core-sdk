@@ -60,7 +60,7 @@ struct StrandIo : public BasicStreamIo {
             });
 
             if (status.complete()) {
-                asio::post(m_strand, [this, status, &frame, cb = std::move(cb)]() {
+                asio::post(m_strand, [status, &frame, cb = std::move(cb)]() {
                     cb(frame, status);
                 });
                 return;
