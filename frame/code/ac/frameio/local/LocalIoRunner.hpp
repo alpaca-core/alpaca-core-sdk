@@ -15,17 +15,20 @@ namespace ac::frameio {
 class BlockingIo;
 struct LocalEndpoints;
 
+// ideally this would be a nested type in LocalIoRunner, but then a clang bug is triggered:
+// https://bugs.llvm.org/show_bug.cgi?id=36684
+// to work around this, we have the type external
+struct ChannelBufferSizes {
+    size_t localToRemote = 10;
+    size_t remoteToLocal = 10;
+};
+
 class AC_FRAME_EXPORT LocalIoRunner {
 public:
     explicit LocalIoRunner(uint32_t numThreads = 2);
     LocalIoRunner(const LocalIoRunner&) = delete;
     LocalIoRunner& operator=(const LocalIoRunner&) = delete;
     ~LocalIoRunner();
-
-    struct ChannelBufferSizes {
-        size_t localToRemote = 10;
-        size_t remoteToLocal = 10;
-    };
 
     LocalEndpoints getEndpoints(ChannelBufferSizes bufferSizes = {});
 
