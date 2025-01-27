@@ -252,16 +252,20 @@ namespace coro {
 struct Io {
     CoroSessionHandlerPtr handler;
 
-    [[nodiscard]] Poll<> pollFrame(astl::timeout timeout = astl::timeout::never()) noexcept {
+    template <bool E = true>
+    [[nodiscard]] Poll<E> pollFrame(astl::timeout timeout = astl::timeout::never()) noexcept {
         return {handler, timeout};
     }
-    [[nodiscard]] PollRef<> pollFrame(Frame& frame, astl::timeout timeout = astl::timeout::never()) noexcept {
+    template <bool E = true>
+    [[nodiscard]] PollRef<E> pollFrame(Frame& frame, astl::timeout timeout = astl::timeout::never()) noexcept {
         return {handler, frame, timeout};
     }
-    [[nodiscard]] Push<> pushFrame(Frame& frame, astl::timeout timeout = astl::timeout::never()) noexcept {
+    template <bool E = true>
+    [[nodiscard]] Push<E> pushFrame(Frame& frame, astl::timeout timeout = astl::timeout::never()) noexcept {
         return {handler, frame, timeout};
     }
-    [[nodiscard]] Push<> pushFrame(Frame&& frame, astl::timeout timeout = astl::timeout::never()) noexcept {
+    template <bool E = true>
+    [[nodiscard]] Push<E> pushFrame(Frame&& frame, astl::timeout timeout = astl::timeout::never()) noexcept {
         return {handler, frame, timeout};
     }
 
