@@ -4,6 +4,7 @@
 #include <ac/frameio/local/LocalBufferedChannel.hpp>
 #include <ac/frameio/local/LocalChannelUtil.hpp>
 #include <ac/frameio/local/LocalIoCtx.hpp>
+#include <ac/frameio/local/BlockingIo.hpp>
 #include <ac/frameio/SessionCoro.hpp>
 #include <doctest/doctest.h>
 #include <thread>
@@ -96,4 +97,51 @@ TEST_CASE("local io") {
     CHECK(A_recSum == 1000 * bsend + (bsend * (bsend + 1)) / 2);
     CHECK(A_done);
     CHECK(B_recSum == (asend * (asend + 1)) / 2);
+}
+
+SessionCoro<void> eagerSession() {
+    auto io = co_await coro::Io{};
+
+    auto start = co_await io.pollFrame();
+    CHECK(start.frame.op == "start");
+
+    auto fin = io.getFrame();
+    CHECK(fin.success());
+    auto i = std::stoi(fin.frame.op);
+    while (i) {
+        auto f = frame("hi");
+        while (!io.putFrame(f).success()); // spin
+        --i;
+    }
+}
+
+TEST_CASE("eager") {
+    LocalIoCtx ctx;
+
+    std::thread remoteThread([&ctx]() {
+        ctx.run();
+    });
+
+    auto [elocal, eremote] = LocalChannel_getEndpoints(
+        LocalBufferedChannel_create(3),
+        LocalBufferedChannel_create(3)
+    );
+
+    ctx.connect(CoroSessionHandler::create(eagerSession()), std::move(eremote));
+    BlockingIo localIo(std::move(elocal));
+
+    localIo.push(frame("start"));
+    localIo.push(frame("10"));
+
+    int received = 0;
+    while (true) {
+        auto f = localIo.poll();
+        if (!f.success()) break;
+        CHECK(f.frame.op == "hi");
+        ++received;
+    }
+    CHECK(received == 10);
+
+    ctx.complete();
+    remoteThread.join();
 }
