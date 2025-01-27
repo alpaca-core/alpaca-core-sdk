@@ -1,10 +1,9 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include <ac/frameio/local/LocalBufferedChannel.hpp>
-#include <ac/frameio/local/LocalChannelUtil.hpp>
-#include <ac/frameio/local/LocalIoCtx.hpp>
+#include <ac/frameio/local/LocalIoRunner.hpp>
 #include <ac/frameio/local/BlockingIo.hpp>
+#include <ac/frameio/local/LocalChannelUtil.hpp>
 #include <ac/frameio/SessionCoro.hpp>
 #include <doctest/doctest.h>
 #include <thread>
@@ -73,26 +72,12 @@ SessionCoro<void> sideB(int send) {
 }
 
 TEST_CASE("local io") {
-    LocalIoCtx ctx;
-
-    auto run = [&ctx]() {
-        ctx.run();
-    };
-    std::thread a(run), b(run);
-
-    auto [elocal, eremote] = LocalChannel_getEndpoints(
-        LocalBufferedChannel_create(5),
-        LocalBufferedChannel_create(5)
-    );
+    LocalIoRunner runner(2);
 
     const int asend = 10, bsend = 15;
+    runner.connect(CoroSessionHandler::create(sideA(asend)), CoroSessionHandler::create(sideB(bsend)));
 
-    ctx.connect(CoroSessionHandler::create(sideA(asend)), std::move(elocal));
-    ctx.connect(CoroSessionHandler::create(sideB(bsend)), std::move(eremote));
-
-    ctx.complete();
-    a.join();
-    b.join();
+    runner.join();
 
     CHECK(A_recSum == 1000 * bsend + (bsend * (bsend + 1)) / 2);
     CHECK(A_done);
@@ -113,22 +98,15 @@ SessionCoro<void> eagerSession() {
 }
 
 TEST_CASE("eager") {
-    LocalIoCtx ctx;
+    LocalIoRunner runner(1);
 
-    std::thread remoteThread([&ctx]() {
-        ctx.run();
-    });
-
-    auto [elocal, eremote] = LocalChannel_getEndpoints(
-        LocalBufferedChannel_create(3),
-        LocalBufferedChannel_create(3)
-    );
+    auto [elocal, eremote] = runner.getEndpoints({3, 3});
 
     BlockingIo localIo(std::move(elocal));
 
     localIo.push(frame("10"));
 
-    ctx.connect(CoroSessionHandler::create(eagerSession()), std::move(eremote));
+    runner.ctx().connect(CoroSessionHandler::create(eagerSession()), std::move(eremote));
 
     int received = 0;
     while (true) {
@@ -138,7 +116,4 @@ TEST_CASE("eager") {
         ++received;
     }
     CHECK(received == 10);
-
-    ctx.complete();
-    remoteThread.join();
 }

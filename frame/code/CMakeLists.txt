@@ -66,6 +66,7 @@ target_sources(ac-frame
         ac/frameio/local/SyncIo.hpp
         ac/frameio/local/BlockingSyncIoWrapper.hpp
         ac/frameio/local/LocalIoCtx.hpp
+        ac/frameio/local/LocalIoRunner.hpp
 
         # schema
         ac/schema/Field.hpp
@@ -84,6 +85,7 @@ target_sources(ac-frame
         ac/frameio/local/SyncIo.cpp
         ac/frameio/local/BlockingSyncIoWrapper.cpp
         ac/frameio/local/LocalIoCtx.cpp
+        ac/frameio/local/LocalIoRunner.cpp
 )
 
 install(TARGETS ac-frame

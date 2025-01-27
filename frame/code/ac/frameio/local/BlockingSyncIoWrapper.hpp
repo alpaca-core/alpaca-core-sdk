@@ -8,7 +8,7 @@
 
 namespace ac::frameio {
 
-// wraps blocknd and sync io to make local testing and experimentation easier
+// wraps blocking and sync io to make local testing and experimentation easier
 class AC_FRAME_EXPORT BlockingSyncIoWrapper {
 public:
     explicit BlockingSyncIoWrapper(SessionHandlerPtr handler);
