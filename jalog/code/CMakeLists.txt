@@ -1,7 +1,7 @@
 # Copyright (c) Borislav Stanimirov
 # SPDX-License-Identifier: MIT
 #
-add_ac_local_lib(ac-jalog AC_JALOG)
+add_ac_lib(ac-jalog AC_JALOG)
 add_library(ac::jalog ALIAS ac-jalog)
 set_target_properties(ac-jalog PROPERTIES
     EXPORT_NAME ac::jalog

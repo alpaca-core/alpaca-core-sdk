@@ -1,7 +1,7 @@
 # Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
-add_ac_local_lib(ac-local AC_LOCAL)
+add_ac_lib(ac-local AC_LOCAL)
 add_library(ac::local ALIAS ac-local)
 set_target_properties(ac-local PROPERTIES
     EXPORT_NAME ac::local

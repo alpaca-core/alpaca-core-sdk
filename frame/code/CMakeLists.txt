@@ -1,7 +1,7 @@
 # Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
 #
-add_ac_local_lib(ac-frame AC_FRAME)
+add_ac_lib(ac-frame AC_FRAME)
 add_library(ac::frame ALIAS ac-frame)
 set_target_properties(ac-frame PROPERTIES
     EXPORT_NAME ac::frame

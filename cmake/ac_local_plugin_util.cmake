@@ -3,7 +3,7 @@
 #
 include_guard(GLOBAL)
 
-include(ac_local_lib)
+include(ac_lib)
 
 function(add_ac_local_plugin)
     cmake_parse_arguments(ARG "" "NAME;PUBLIC_SUFFIX" "SOURCES;PLUGIN_SOURCES;PLIB_SOURCES;LIBRARIES" ${ARGN})
@@ -125,7 +125,7 @@ const std::vector<ac::local::ProviderPtr>& get_@nameSym@_model_providers() {
 }
 ]=]
     )
-    add_ac_local_lib(${plibTargetName} ACLPLIB_${nameSym})
+    add_ac_lib(${plibTargetName} ACLPLIB_${nameSym})
     target_sources(${plibTargetName}
         PUBLIC FILE_SET HEADERS
         BASE_DIRS "${CMAKE_CURRENT_BINARY_DIR}"
