@@ -26,8 +26,9 @@ const ac::local::ModelAssetDesc Model_Desc = {
 using Session = ac::frameio::BlockingSyncIoWrapper;
 
 Session createTestSession(DummyRegistry& d) {
-    REQUIRE(d.providers().size() == 1);
-    return ac::frameio::BlockingSyncIoWrapper(d.providers().front().provider->createSessionHandler({}));
+    auto h = d.createSessionHandler("dummy");
+    REQUIRE(h);
+    return ac::frameio::BlockingSyncIoWrapper(std::move(h));
 }
 
 void checkError(Session& s, const std::string_view msg) {

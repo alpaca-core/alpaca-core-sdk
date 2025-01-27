@@ -80,4 +80,13 @@ ModelPtr ProviderRegistry::loadModel(ModelAssetDesc desc, Dict params, ProgressC
     return loadModel(CanLoadScorer{}, astl::move(desc), astl::move(params), astl::move(cb));
 }
 
+frameio::SessionHandlerPtr ProviderRegistry::createSessionHandler(std::string_view matchName) {
+    for (auto& [provider, _] : m_providers) {
+        if (provider->info().name.find(matchName) != std::string::npos) {
+            return provider->createSessionHandler({});
+        }
+    }
+    ac::throw_ex{} << "No provider found for: " << matchName;
+}
+
 } // namespace ac::local

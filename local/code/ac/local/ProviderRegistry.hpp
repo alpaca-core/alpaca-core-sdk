@@ -6,6 +6,7 @@
 #include "ModelPtr.hpp"
 #include "ModelAssetDesc.hpp"
 #include "ProgressCb.hpp"
+#include <ac/frameio/SessionHandlerPtr.hpp>
 #include <ac/Dict.hpp>
 #include <vector>
 #include <optional>
@@ -47,6 +48,9 @@ public:
 
     // load model with a scorer to select the best provider
     ModelPtr loadModel(const ProviderScorer& scorer, ModelAssetDesc desc, Dict params, ProgressCb cb = {}) const;
+
+    // load model with the first provider whose name matches matchName
+    frameio::SessionHandlerPtr createSessionHandler(std::string_view matchName);
 private:
     std::string m_name;
     std::vector<ProviderData> m_providers;

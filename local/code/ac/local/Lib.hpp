@@ -8,6 +8,7 @@
 #include "ProgressCb.hpp"
 #include "LoadPluginCb.hpp"
 #include <ac/DictFwd.hpp>
+#include <ac/frameio/SessionHandlerPtr.hpp>
 #include <string>
 #include <string_view>
 
@@ -36,6 +37,8 @@ struct AC_LOCAL_EXPORT Lib {
     static const PluginInfo* loadPlugin(const std::string& path);
     static void loadPlugins(LoadPluginCb cb = {});
     static void loadAllPlugins() { return loadPlugins({}); }
+
+    frameio::SessionHandlerPtr createSessionHandler(std::string_view matchName);
 };
 
 } // namespace ac::local

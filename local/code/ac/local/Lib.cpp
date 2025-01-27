@@ -51,4 +51,8 @@ void Lib::loadPlugins(LoadPluginCb cb) {
     g_pluginManager.loadPlugins(astl::move(cb));
 }
 
+frameio::SessionHandlerPtr Lib::createSessionHandler(std::string_view matchName) {
+    return g_providerRegistry.createSessionHandler(matchName);
+}
+
 } // namespace ac::local

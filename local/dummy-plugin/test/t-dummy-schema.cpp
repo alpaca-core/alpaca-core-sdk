@@ -34,7 +34,7 @@ TEST_CASE("dummy schema") {
     auto model = ac::local::Lib::loadModel({
         .type = "dummy",
         .name = "synthetic"
-        }, {});
+    }, {});
 
     REQUIRE(!!model);
 
