@@ -102,9 +102,6 @@ TEST_CASE("local io") {
 SessionCoro<void> eagerSession() {
     auto io = co_await coro::Io{};
 
-    auto start = co_await io.pollFrame();
-    CHECK(start.frame.op == "start");
-
     auto fin = io.getFrame();
     CHECK(fin.success());
     auto i = std::stoi(fin.frame.op);
@@ -127,11 +124,11 @@ TEST_CASE("eager") {
         LocalBufferedChannel_create(3)
     );
 
-    ctx.connect(CoroSessionHandler::create(eagerSession()), std::move(eremote));
     BlockingIo localIo(std::move(elocal));
 
-    localIo.push(frame("start"));
     localIo.push(frame("10"));
+
+    ctx.connect(CoroSessionHandler::create(eagerSession()), std::move(eremote));
 
     int received = 0;
     while (true) {
