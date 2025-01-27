@@ -26,10 +26,9 @@ struct PendingIo {
 
     explicit operator bool() const noexcept { return !!m_frame; }
 
-    FrameRefWithStatus syncIo(Frame& f) {
+    Status syncIo(Frame& f) {
         assert(!m_frame);
-        auto status = stream->stream(f, nullptr);
-        return FrameRefWithStatus(f, status);
+        return stream->stream(f, nullptr);
     }
 
     void reset(Frame* f, astl::timeout timeout, IoCb&& c) {
@@ -124,7 +123,7 @@ class SyncIo {
 public:
     SyncIo(ExecutorPtr executor, PendingIo& pendingIo) : m_executor(executor), m_pendingIo(pendingIo) {}
 
-    FrameRefWithStatus io(Frame& frame) {
+    Status io(Frame& frame) {
         return m_pendingIo.syncIo(frame);
     }
     void io(Frame& frame, astl::timeout timeout, IoCb&& cb) {

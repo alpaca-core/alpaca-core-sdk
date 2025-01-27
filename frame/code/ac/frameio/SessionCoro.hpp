@@ -27,9 +27,9 @@ public:
     static SessionHandlerPtr create(SessionCoro<void> coro);
 
     void postResume() noexcept;
-    FrameRefWithStatus getFrame(Frame& frame) noexcept;
+    Status getFrame(Frame& frame) noexcept;
     void pollFrame(Frame& frame, Status& status, astl::timeout timeout) noexcept;
-    FrameRefWithStatus putFrame(Frame& frame) noexcept;
+    Status putFrame(Frame& frame) noexcept;
     void pushFrame(Frame& frame, Status& status, astl::timeout timeout) noexcept;
     void close() noexcept;
 private:
@@ -262,10 +262,10 @@ struct Io {
     // sync (eager) operations
 
     template <bool E = true>
-    [[nodiscard]] FrameRefWithStatus getFrame(Frame& frame) noexcept(E) {
+    [[nodiscard]] Status getFrame(Frame& frame) noexcept(E) {
         auto ret = handler->getFrame(frame);
         if constexpr (E) {
-            IoClosed::throwInputIfClosed(ret.status());
+            IoClosed::throwInputIfClosed(ret);
         }
         return ret;
     }
@@ -276,16 +276,16 @@ struct Io {
         return ret;
     }
     template <bool E = true>
-    [[nodiscard]] FrameRefWithStatus putFrame(Frame& frame) noexcept(E) {
+    [[nodiscard]] Status putFrame(Frame& frame) noexcept(E) {
         auto ret = handler->putFrame(frame);
         if constexpr (E) {
-            IoClosed::throwOutputIfClosed(ret.status());
+            IoClosed::throwOutputIfClosed(ret);
         }
         return ret;
     }
     template <bool E = true>
     [[nodiscard]] Status putFrame(Frame&& frame) noexcept(E) {
-        return putFrame<E>(frame); // slice
+        return putFrame<E>(frame);
     }
 
     // async (suspending) operations

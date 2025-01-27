@@ -45,9 +45,8 @@ struct StrandIo : public BasicStreamIo {
         , m_timer(strand)
     {}
 
-    FrameRefWithStatus io(Frame& frame) {
-        auto status = m_stream->stream(frame, nullptr);
-        return FrameRefWithStatus(frame, status);
+    Status io(Frame& frame) {
+        return m_stream->stream(frame, nullptr);
     }
 
     void io(Frame& frame, astl::timeout timeout, IoCb cb) {

@@ -37,7 +37,7 @@ FrameWithStatus BlockingSyncIoWrapper::poll() {
     return m_impl->blockingIo.poll(no_wait);
 }
 
-FrameRefWithStatus BlockingSyncIoWrapper::poll(Frame& frame) {
+Status BlockingSyncIoWrapper::poll(Frame& frame) {
     m_impl->runTasks();
     return m_impl->blockingIo.poll(frame, no_wait);
 }
@@ -48,7 +48,7 @@ Status BlockingSyncIoWrapper::push(Frame&& frame) {
     return ret;
 }
 
-FrameRefWithStatus BlockingSyncIoWrapper::push(Frame& frame) {
+Status BlockingSyncIoWrapper::push(Frame& frame) {
     auto ret = m_impl->blockingIo.push(frame, no_wait);
     m_impl->runTasks();
     return ret;

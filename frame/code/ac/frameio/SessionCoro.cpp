@@ -23,7 +23,7 @@ void CoroSessionHandler::postResume() noexcept {
     });
 }
 
-FrameRefWithStatus CoroSessionHandler::getFrame(Frame& frame) noexcept {
+Status CoroSessionHandler::getFrame(Frame& frame) noexcept {
     return shInput().get(frame);
 }
 void CoroSessionHandler::pollFrame(Frame& frame, Status& status, astl::timeout timeout) noexcept {
@@ -32,7 +32,7 @@ void CoroSessionHandler::pollFrame(Frame& frame, Status& status, astl::timeout t
         m_currentCoro.resume();
     });
 }
-FrameRefWithStatus CoroSessionHandler::putFrame(Frame& frame) noexcept {
+Status CoroSessionHandler::putFrame(Frame& frame) noexcept {
     return shOutput().put(frame);
 }
 void CoroSessionHandler::pushFrame(Frame& frame, Status& status, astl::timeout timeout) noexcept {

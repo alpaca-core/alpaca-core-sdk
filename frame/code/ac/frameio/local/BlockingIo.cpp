@@ -24,9 +24,8 @@ bool waitFor(std::future<void>& f, astl::timeout timeout) {
 struct BlockingFrameIo : public BasicStreamIo {
     using BasicStreamIo::BasicStreamIo;
 
-    FrameRefWithStatus io(Frame& frame) {
-        auto status = m_stream->stream(frame, nullptr);
-        return { frame, status };
+    Status io(Frame& frame) {
+        return m_stream->stream(frame, nullptr);
     }
 
     void io(Frame& frame, astl::timeout timeout, IoCb cb) {
@@ -113,20 +112,16 @@ FrameWithStatus BlockingIo::poll(astl::timeout timeout) {
     return ret;
 }
 
-FrameRefWithStatus BlockingIo::poll(Frame& frame, astl::timeout timeout) {
-    FrameRefWithStatus ret(frame);
-    ret.status() = m_impl->poll(frame, timeout);
-    return ret;
+Status BlockingIo::poll(Frame& frame, astl::timeout timeout) {
+    return m_impl->poll(frame, timeout);
 }
 
 Status BlockingIo::push(Frame&& frame, astl::timeout timeout) {
     return m_impl->push(frame, timeout);
 }
 
-FrameRefWithStatus BlockingIo::push(Frame& frame, astl::timeout timeout) {
-    FrameRefWithStatus ret(frame);
-    ret.status() = m_impl->push(frame, timeout);
-    return ret;
+Status BlockingIo::push(Frame& frame, astl::timeout timeout) {
+    return m_impl->push(frame, timeout);
 }
 
 void BlockingIo::close() {
