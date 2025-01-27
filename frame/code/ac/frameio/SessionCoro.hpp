@@ -26,10 +26,12 @@ public:
 
     static SessionHandlerPtr create(SessionCoro<void> coro);
 
-    void postResume();
+    void postResume() noexcept;
+    FrameRefWithStatus getFrame(Frame& frame) noexcept;
     void pollFrame(Frame& frame, Status& status, astl::timeout timeout) noexcept;
+    FrameRefWithStatus putFrame(Frame& frame) noexcept;
     void pushFrame(Frame& frame, Status& status, astl::timeout timeout) noexcept;
-    void close();
+    void close() noexcept;
 private:
     template <typename T>
     friend struct SessionCoro;
@@ -39,14 +41,14 @@ private:
     std::coroutine_handle<> m_currentCoro;
 
     template <typename P>
-    static std::coroutine_handle<> pushCoro(const CoroSessionHandlerPtr& self, std::coroutine_handle<P> next) {
+    static std::coroutine_handle<> pushCoro(const CoroSessionHandlerPtr& self, std::coroutine_handle<P> next) noexcept {
         next.promise().m_handler = self;
         next.promise().m_prev = self->m_currentCoro;
         return std::exchange(self->m_currentCoro, next);
     }
 
     template <typename P>
-    void popCoro() {
+    void popCoro() noexcept {
         auto cur = std::coroutine_handle<P>::from_address(m_currentCoro.address());
         m_currentCoro = cur.promise().m_prev;
 
@@ -66,6 +68,17 @@ namespace coro {
 struct AC_FRAME_EXPORT IoClosed : public std::runtime_error {
     using std::runtime_error::runtime_error;
     ~IoClosed();
+
+    static void throwInputIfClosed(const Status& status) {
+        if (status.closed()) {
+            throw IoClosed("input closed");
+        }
+    }
+    static void throwOutputIfClosed(const Status& status) {
+        if (status.closed()) {
+            throw IoClosed("output closed");
+        }
+    }
 };
 
 namespace impl {
@@ -100,9 +113,7 @@ struct Poll: public impl::BasicPollAwaitable {
     FrameWithStatus await_resume() noexcept(!E) {
         auto ret = FrameWithStatus(std::move(framev), this->status);
         if constexpr (E) {
-            if (this->status.closed()) {
-                throw IoClosed("input closed");
-            }
+            IoClosed::throwInputIfClosed(this->status);
         }
         return ret;
     }
@@ -114,9 +125,7 @@ struct PollRef : public impl::BasicPollAwaitable {
     using BasicPollAwaitable::BasicPollAwaitable;
     Status await_resume() noexcept(!E) {
         if constexpr (E) {
-            if (this->status.closed()) {
-                throw IoClosed("input closed");
-            }
+            IoClosed::throwInputIfClosed(this->status);
         }
         return this->status;
     }
@@ -127,9 +136,7 @@ struct Push : public impl::BasicPushAwaitable {
     using BasicPushAwaitable::BasicPushAwaitable;
     Status await_resume() noexcept(!E) {
         if constexpr (E) {
-            if (this->status.closed()) {
-                throw IoClosed("output closed");
-            }
+            IoClosed::throwOutputIfClosed(this->status);
         }
         return this->status;
     }
@@ -251,6 +258,37 @@ namespace coro {
 
 struct Io {
     CoroSessionHandlerPtr handler;
+
+    // sync (eager) operations
+
+    template <bool E = true>
+    [[nodiscard]] FrameRefWithStatus getFrame(Frame& frame) noexcept(E) {
+        auto ret = handler->getFrame(frame);
+        if constexpr (E) {
+            IoClosed::throwInputIfClosed(ret.status());
+        }
+        return ret;
+    }
+    template <bool E = true>
+    [[nodiscard]] FrameWithStatus getFrame() noexcept(E) {
+        FrameWithStatus ret;
+        ret.status() = getFrame<E>(ret.frame);
+        return ret;
+    }
+    template <bool E = true>
+    [[nodiscard]] FrameRefWithStatus putFrame(Frame& frame) noexcept(E) {
+        auto ret = handler->putFrame(frame);
+        if constexpr (E) {
+            IoClosed::throwOutputIfClosed(ret.status());
+        }
+        return ret;
+    }
+    template <bool E = true>
+    [[nodiscard]] Status putFrame(Frame&& frame) noexcept(E) {
+        return putFrame<E>(frame); // slice
+    }
+
+    // async (suspending) operations
 
     template <bool E = true>
     [[nodiscard]] Poll<E> pollFrame(astl::timeout timeout = astl::timeout::never()) noexcept {

@@ -8,7 +8,7 @@
 
 namespace ac::frameio {
 
-SessionHandler::SessionHandler() = default;
+SessionHandler::SessionHandler() noexcept = default;
 SessionHandler::~SessionHandler() = default;
 
 void SessionHandler::shConnected() noexcept {}

@@ -15,7 +15,7 @@ public:
     SessionHandler& operator=(const SessionHandler&) = delete;
 
 protected:
-    SessionHandler();
+    SessionHandler() noexcept;
     // intentionally not virtual. Objects are not owned through this, but instead through shared pointers
     ~SessionHandler();
 
