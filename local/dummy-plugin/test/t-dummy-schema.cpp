@@ -2,11 +2,9 @@
 // SPDX-License-Identifier: MIT
 //
 #include <ac/local/Lib.hpp>
-#include <ac/local/Model.hpp>
-#include <ac/local/Instance.hpp>
-#include <ac/local/ProviderRegistry.hpp>
-
-#include <ac/local/schema/CallHelpers.hpp>
+#include <ac/frameio/local/LocalIoRunner.hpp>
+#include <ac/frameio/local/BlockingIo.hpp>
+#include <ac/schema/FrameHelpers.hpp>
 
 #include <ac/local/PluginPlibUtil.inl>
 
@@ -16,8 +14,6 @@
 #include <ac/jalog/Fixture.inl>
 
 #include <doctest/doctest.h>
-
-#include <ac-test-data-dummy-models.h>
 
 struct LoadDummyFixture {
     PlibHelper helper;
@@ -31,19 +27,20 @@ struct LoadDummyFixture {
 LoadDummyFixture loadDummyFixture;
 
 TEST_CASE("dummy schema") {
-    auto model = ac::local::Lib::loadModel({
-        .type = "dummy",
-        .name = "synthetic"
-    }, {});
+    ac::frameio::LocalIoRunner io;
+    auto dummyHandler = ac::local::Lib::createSessionHandler("dummy");
+    auto dummy = io.connectBlocking(std::move(dummyHandler));
 
-    REQUIRE(!!model);
+    using Run = ac::schema::DummyInterface::OpRun;
 
-    using Instance = ac::schema::DummyProvider::InstanceGeneral;
-    auto instance = Model_createInstance<Instance>(*model, {.cutoff = 2});
+    CHECK(dummy.push({"load_model", {}}).success());
+    CHECK(dummy.push({"create_instance", {{"cutoff", 2}}}).success());
+    CHECK(dummy.push(Frame_fromOpParams(Run{}, {
+        .input = std::vector<std::string>{"a", "b", "c"}
+    })).success());
 
-    using Interface = ac::schema::DummyInterface;
-    auto result = Instance_runOp<Interface::OpRun>(*instance,
-        {.input = std::vector<std::string>{"a", "b", "c"}}
-    );
+    auto result = Frame_toOpReturn(Run{}, dummy.poll().frame);
     CHECK(result.result == "a one b two c one");
+
+    dummy.close();
 }

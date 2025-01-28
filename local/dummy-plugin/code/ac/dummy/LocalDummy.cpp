@@ -97,7 +97,7 @@ SessionCoro<void> Dummy_runModel(coro::Io io, std::unique_ptr<dummy::Model> mode
     auto f = co_await io.pollFrame();
 
     if (f.frame.op != "create_instance") {
-        throw_ex{} << "dummy: expected 'create' op, got: " << f.frame.op;
+        throw_ex{} << "dummy: expected 'create_instance' op, got: " << f.frame.op;
     }
     auto params = InitParams_fromDict(astl::move(f.frame.data));
     co_await Dummy_runInstance(io, std::make_unique<dummy::Instance>(*model, astl::move(params)));
@@ -110,8 +110,8 @@ SessionCoro<void> Dummy_runSession() {
 
     try {
         auto f = co_await io.pollFrame();
-        if (f.frame.op != "load") {
-            throw_ex{} << "dummy: expected 'load' op, got: " << f.frame.op;
+        if (f.frame.op != "load_model") {
+            throw_ex{} << "dummy: expected 'load_model' op, got: " << f.frame.op;
         }
 
         // btodo: abort

@@ -60,7 +60,7 @@ TEST_CASE("bad model") {
 
     {
         auto s = createTestSession(d);
-        s.push({"load", {{"file_path", "nope"}}});
+        s.push({"load_model", {{"file_path", "nope"}}});
         checkError(s, "Failed to open file: nope");
     }
 }
@@ -69,7 +69,7 @@ TEST_CASE("bad instance") {
     DummyRegistry d;
     auto s = createTestSession(d);
 
-    s.push({"load", {{"file_path", AC_DUMMY_MODEL_SMALL}}});
+    s.push({"load_model", {{"file_path", AC_DUMMY_MODEL_SMALL}}});
     CHECK(s.poll().blocked());
 
     SUBCASE("bad op") {
@@ -87,7 +87,7 @@ TEST_CASE("general") {
 
     auto s = createTestSession(d);
 
-    s.push({"load", {{"file_path", AC_DUMMY_MODEL_SMALL}}});
+    s.push({"load_model", {{"file_path", AC_DUMMY_MODEL_SMALL}}});
     CHECK(s.poll().blocked());
 
     s.push({"create_instance", {}});
@@ -119,7 +119,7 @@ TEST_CASE("general cutoff") {
 
     auto s = createTestSession(d);
 
-    s.push({"load", {{"file_path", AC_DUMMY_MODEL_SMALL}}});
+    s.push({"load_model", {{"file_path", AC_DUMMY_MODEL_SMALL}}});
     CHECK(s.poll().blocked());
 
     s.push({"create_instance", {{"cutoff", 2}}});
@@ -133,7 +133,7 @@ TEST_CASE("synthetic") {
     DummyRegistry d;
     auto s = createTestSession(d);
 
-    s.push({"load", {}});
+    s.push({"load_model", {}});
     CHECK(s.poll().blocked());
 
     s.push({"create_instance", {}});
