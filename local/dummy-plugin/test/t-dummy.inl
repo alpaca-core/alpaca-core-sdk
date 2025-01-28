@@ -11,6 +11,7 @@
 #include <ac/local/Instance.hpp>
 
 #include <ac/frameio/local/BlockingSyncIoWrapper.hpp>
+#include <ac/FrameUtil.hpp>
 
 #include <doctest/doctest.h>
 
@@ -47,11 +48,19 @@ void checkRunResult(Session& s, const std::string_view msg) {
     CHECK(frame.data.at("result").get<std::string>() == msg);
 }
 
+void checkStateChange(Session& s, std::string_view expectedState) {
+    auto res = s.poll();
+    CHECK(res.success());
+    CHECK(Frame_isStateChange(res.frame));
+    CHECK(Frame_getStateChange(res.frame) == expectedState);
+}
+
 TEST_CASE("bad model") {
     DummyRegistry d;
 
     auto s = createTestSession(d);
-    CHECK(s.poll().blocked());
+    checkStateChange(s, "dummy");
+
     s.push({"nope", {}});
     checkError(s, "dummy: unknown op: nope");
 
@@ -63,8 +72,11 @@ TEST_CASE("bad instance") {
     DummyRegistry d;
     auto s = createTestSession(d);
 
+    checkStateChange(s, "dummy");
+
     s.push({"load_model", {{"file_path", AC_DUMMY_MODEL_SMALL}}});
     CHECK(s.poll().success());
+    checkStateChange(s, "model_loaded");
 
     s.push({"nope", {}});
     checkError(s, "dummy: unknown op: nope");
@@ -80,11 +92,15 @@ TEST_CASE("instance") {
     {
         auto s = createTestSession(d);
 
+        checkStateChange(s, "dummy");
+
         s.push({"load_model", {{"file_path", AC_DUMMY_MODEL_SMALL}}});
         CHECK(s.poll().success());
+        checkStateChange(s, "model_loaded");
 
         s.push({"create_instance", {}});
         CHECK(s.poll().success());
+        checkStateChange(s, "instance");
 
         s.push({"nope", {}});
         checkError(s, "dummy: unknown op: nope");
@@ -106,11 +122,15 @@ TEST_CASE("instance") {
     {
         auto s = createTestSession(d);
 
+        checkStateChange(s, "dummy");
+
         s.push({"load_model", {{"file_path", AC_DUMMY_MODEL_SMALL}}});
         CHECK(s.poll().success());
+        checkStateChange(s, "model_loaded");
 
         s.push({"create_instance", {{"cutoff", 2}}});
         CHECK(s.poll().success());
+        checkStateChange(s, "instance");
 
         s.push({ "run", {{"input", {"a", "b", "c"}}} });
         checkRunResult(s, "a soco b bate c soco");
@@ -120,11 +140,15 @@ TEST_CASE("instance") {
     {
         auto s = createTestSession(d);
 
+        checkStateChange(s, "dummy");
+
         s.push({"load_model", {}});
         CHECK(s.poll().success());
+        checkStateChange(s, "model_loaded");
 
         s.push({"create_instance", {}});
         CHECK(s.poll().success());
+        checkStateChange(s, "instance");
 
         s.push({"run", {{"input", {"a", "b"}}}});
         checkRunResult(s, "a one b two");

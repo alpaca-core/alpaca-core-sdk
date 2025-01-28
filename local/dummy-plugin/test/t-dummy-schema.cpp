@@ -33,9 +33,12 @@ TEST_CASE("dummy schema") {
 
     using Run = ac::schema::StateInstance::OpRun;
 
+    CHECK(dummy.poll().success());
     CHECK(dummy.push({"load_model", {}}).success());
     CHECK(dummy.poll().success());
+    CHECK(dummy.poll().success());
     CHECK(dummy.push({"create_instance", {{"cutoff", 2}}}).success());
+    CHECK(dummy.poll().success());
     CHECK(dummy.poll().success());
     CHECK(dummy.push(Frame_fromOpParams(Run{}, {
         .input = std::vector<std::string>{"a", "b", "c"}

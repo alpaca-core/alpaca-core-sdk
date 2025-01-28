@@ -16,6 +16,7 @@
 #include <ac/schema/OpDispatchHelpers.hpp>
 
 #include <ac/frameio/SessionCoro.hpp>
+#include <ac/FrameUtil.hpp>
 
 #include <astl/move.hpp>
 #include <astl/iile.h>
@@ -53,9 +54,9 @@ struct BasicRunner {
 };
 
 SessionCoro<void> Dummy_runInstance(coro::Io io, std::unique_ptr<dummy::Instance> instance) {
-    struct Runner : public BasicRunner {
-        using Schema = sc::StateInstance;
+    using Schema = sc::StateInstance;
 
+    struct Runner : public BasicRunner {
         dummy::Instance& m_instance;
 
         explicit Runner(dummy::Instance& instance) : m_instance(instance) {
@@ -83,6 +84,8 @@ SessionCoro<void> Dummy_runInstance(coro::Io io, std::unique_ptr<dummy::Instance
         }
     };
 
+    co_await io.pushFrame(Frame_stateChange(Schema::id));
+
     Runner runner(*instance);
 
     while (true) {
@@ -92,9 +95,9 @@ SessionCoro<void> Dummy_runInstance(coro::Io io, std::unique_ptr<dummy::Instance
 }
 
 SessionCoro<void> Dummy_runModel(coro::Io io, std::unique_ptr<dummy::Model> model) {
-    struct Runner : public BasicRunner {
-        using Schema = sc::StateModelLoaded;
+    using Schema = sc::StateModelLoaded;
 
+    struct Runner : public BasicRunner {
         dummy::Model& model;
 
         explicit Runner(dummy::Model& m) : model(m) {
@@ -115,6 +118,8 @@ SessionCoro<void> Dummy_runModel(coro::Io io, std::unique_ptr<dummy::Model> mode
         }
     };
 
+    co_await io.pushFrame(Frame_stateChange(Schema::id));
+
     Runner runner(*model);
 
     while (true) {
@@ -127,9 +132,9 @@ SessionCoro<void> Dummy_runModel(coro::Io io, std::unique_ptr<dummy::Model> mode
 }
 
 SessionCoro<void> Dummy_runSession() {
-    struct Runner : public BasicRunner {
-        using Schema = sc::StateInitial;
+    using Schema = sc::StateInitial;
 
+    struct Runner : public BasicRunner {
         Runner() {
             schema::registerHandlers<Schema::Ops>(m_dispatcherData, *this);
         }
@@ -151,6 +156,8 @@ SessionCoro<void> Dummy_runSession() {
 
     try {
         auto io = co_await coro::Io{};
+
+        co_await io.pushFrame(Frame_stateChange(Schema::id));
 
         Runner runner;
 
