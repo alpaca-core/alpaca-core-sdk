@@ -97,22 +97,24 @@ struct StateInstance {
     static constexpr auto id = "instance";
     static constexpr auto desc = "Dummy instance";
 
+    struct InferenceParams {
+        Field<std::vector<std::string>> input;
+        Field<bool> splice = Default(true);
+        Field<int> throwOn = Default(-1);
+
+        template <typename Visitor>
+        void visitFields(Visitor& v) {
+            v(input, "input", "Input items");
+            v(splice, "splice", "Splice input with model data (otherwise append model data to input)");
+            v(throwOn, "throw_on", "Throw exception on n-th token (or don't throw if -1)");
+        }
+    };
+
     struct OpRun {
         static constexpr auto id = "run";
         static constexpr auto desc = "Run the dummy inference and produce some output";
 
-        struct Params {
-            Field<std::vector<std::string>> input;
-            Field<bool> splice = Default(true);
-            Field<int> throwOn = Default(-1);
-
-            template <typename Visitor>
-            void visitFields(Visitor& v) {
-                v(input, "input", "Input items");
-                v(splice, "splice", "Splice input with model data (otherwise append model data to input)");
-                v(throwOn, "throw_on", "Throw exception on n-th token (or don't throw if -1)");
-            }
-        };
+        using Params = InferenceParams;
         struct Return {
             Field<std::string> result;
 
@@ -121,6 +123,14 @@ struct StateInstance {
                 v(result, "result", "Output text (tokens joined with space)");
             }
         };
+    };
+
+    struct OpStream {
+        static constexpr auto id = "stream";
+        static constexpr auto desc = "Run the dummy inference and stream the output";
+
+        using Params = InferenceParams;
+        using Return = nullptr_t;
     };
 
     using Ops = std::tuple<OpRun>;
