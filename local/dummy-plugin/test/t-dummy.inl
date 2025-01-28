@@ -77,7 +77,7 @@ TEST_CASE("bad instance") {
         checkError(s, "dummy: expected 'create' op, got: nope");
     }
     SUBCASE("bad params") {
-        s.push({ "create", {{"cutoff", 40}} });
+        s.push({"create_instance", {{"cutoff", 40}}});
         checkError(s, "Cutoff 40 greater than model size 3");
     }
 }
@@ -90,7 +90,7 @@ TEST_CASE("general") {
     s.push({"load", {{"file_path", AC_DUMMY_MODEL_SMALL}}});
     CHECK(s.poll().blocked());
 
-    s.push({"create", {}});
+    s.push({"create_instance", {}});
     CHECK(s.poll().blocked());
 
     SUBCASE("bad op") {
@@ -119,10 +119,10 @@ TEST_CASE("general cutoff") {
 
     auto s = createTestSession(d);
 
-    s.push({ "load", {{"file_path", AC_DUMMY_MODEL_SMALL}} });
+    s.push({"load", {{"file_path", AC_DUMMY_MODEL_SMALL}}});
     CHECK(s.poll().blocked());
 
-    s.push({ "create", {{"cutoff", 2}} });
+    s.push({"create_instance", {{"cutoff", 2}}});
     CHECK(s.poll().blocked());
 
     s.push({ "run", {{"input", {"a", "b", "c"}}} });
@@ -136,7 +136,7 @@ TEST_CASE("synthetic") {
     s.push({"load", {}});
     CHECK(s.poll().blocked());
 
-    s.push({"create", {}});
+    s.push({"create_instance", {}});
     CHECK(s.poll().blocked());
 
     s.push({"run", {{"input", {"a", "b"}}}});

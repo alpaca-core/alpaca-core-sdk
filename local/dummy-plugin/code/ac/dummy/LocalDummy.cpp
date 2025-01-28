@@ -96,7 +96,7 @@ SessionCoro<void> Dummy_runInstance(coro::Io io, std::unique_ptr<dummy::Instance
 SessionCoro<void> Dummy_runModel(coro::Io io, std::unique_ptr<dummy::Model> model) {
     auto f = co_await io.pollFrame();
 
-    if (f.frame.op != "create") {
+    if (f.frame.op != "create_instance") {
         throw_ex{} << "dummy: expected 'create' op, got: " << f.frame.op;
     }
     auto params = InitParams_fromDict(astl::move(f.frame.data));
