@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #include "LocalDummy.hpp"
-#include "DummyProviderSchema.hpp"
+#include "DummyInterface.hpp"
 
 #include "Instance.hpp"
 #include "Model.hpp"
@@ -13,7 +13,7 @@
 #include <ac/local/Model.hpp>
 #include <ac/local/Provider.hpp>
 
-#include <ac/local/schema/DispatchHelpers.hpp>
+#include <ac/schema/OpDispatchHelpers.hpp>
 
 #include <ac/frameio/SessionCoro.hpp>
 
@@ -28,41 +28,47 @@ namespace ac::local {
 
 namespace {
 
-using Schema = schema::DummyProvider;
-
-dummy::Model::Params ModelParams_fromDict(Dict& d) {
-    auto schemaParams = schema::Struct_fromDict<Schema::Params>(std::move(d));
-    dummy::Model::Params ret;
-    ret.path = schemaParams.filePath.valueOr("");
-    ret.splice = astl::move(schemaParams.spliceString.valueOr(""));
-    return ret;
-}
-
-static dummy::Instance::InitParams InitParams_fromDict(Dict&& d) {
-    auto schemaParams = schema::Struct_fromDict<Schema::InstanceGeneral::Params>(astl::move(d));
-    dummy::Instance::InitParams ret;
-    ret.cutoff = schemaParams.cutoff;
-    return ret;
-}
+namespace sc = schema::dummy;
 
 using namespace ac::frameio;
 
-SessionCoro<void> Dummy_runInstance(coro::Io io, std::unique_ptr<dummy::Instance> instance) {
-    struct Runner {
-        dummy::Instance& m_instance;
-        schema::OpDispatcherData m_dispatcherData;
-        Runner(dummy::Instance& instance) : m_instance(instance) {
-            schema::registerHandlers<schema::DummyInterface::Ops>(m_dispatcherData, *this);
-        }
+struct BasicRunner {
+    schema::OpDispatcherData m_dispatcherData;
 
-        schema::DummyInterface::OpRun::Return on(schema::DummyInterface::OpRun, schema::DummyInterface::OpRun::Params params) {
+    Frame dispatch(Frame& f) {
+        try {
+            auto ret = m_dispatcherData.dispatch(f.op, std::move(f.data));
+            if (!ret) {
+                throw_ex{} << "dummy: unknown op: " << f.op;
+            }
+            return {f.op, *ret};
+        }
+        catch (coro::IoClosed&) {
+            throw;
+        }
+        catch (std::exception& e) {
+            return {"error", e.what()};
+        }
+    }
+};
+
+SessionCoro<void> Dummy_runInstance(coro::Io io, std::unique_ptr<dummy::Instance> instance) {
+    struct Runner : public BasicRunner {
+        using Schema = sc::StateInstance;
+
+        dummy::Instance& m_instance;
+
+        explicit Runner(dummy::Instance& instance) : m_instance(instance) {
+            schema::registerHandlers<Schema::Ops>(m_dispatcherData, *this);
+        }
+        Schema::OpRun::Return on(Schema::OpRun, Schema::OpRun::Params params) {
             dummy::Instance::SessionParams sparams;
             sparams.splice = params.splice;
             sparams.throwOn = params.throwOn;
 
             auto s = m_instance.newSession(std::move(params.input), sparams);
 
-            schema::DummyInterface::OpRun::Return ret;
+            Schema::OpRun::Return ret;
             auto& res = ret.result.materialize();
             for (auto& w : s) {
                 res += w;
@@ -75,14 +81,6 @@ SessionCoro<void> Dummy_runInstance(coro::Io io, std::unique_ptr<dummy::Instance
 
             return ret;
         }
-
-        Frame dispatch(Frame& f) {
-            auto ret = m_dispatcherData.dispatch(f.op, std::move(f.data));
-            if (!ret) {
-                throw_ex{} << "dummy: unknown op: " << f.op;
-            }
-            return {f.op, *ret};
-        }
     };
 
     Runner runner(*instance);
@@ -94,125 +92,80 @@ SessionCoro<void> Dummy_runInstance(coro::Io io, std::unique_ptr<dummy::Instance
 }
 
 SessionCoro<void> Dummy_runModel(coro::Io io, std::unique_ptr<dummy::Model> model) {
-    auto f = co_await io.pollFrame();
+    struct Runner : public BasicRunner {
+        using Schema = sc::StateModelLoaded;
 
-    if (f.frame.op != "create_instance") {
-        throw_ex{} << "dummy: expected 'create_instance' op, got: " << f.frame.op;
+        dummy::Model& model;
+
+        explicit Runner(dummy::Model& m) : model(m) {
+            schema::registerHandlers<Schema::Ops>(m_dispatcherData, *this);
+        }
+
+        std::unique_ptr<dummy::Instance> instance;
+
+        static dummy::Instance::InitParams InitParams_fromSchema(sc::StateModelLoaded::OpCreateInstance::Params schemaParams) {
+            dummy::Instance::InitParams ret;
+            ret.cutoff = schemaParams.cutoff;
+            return ret;
+        }
+
+        Schema::OpCreateInstance::Return on(Schema::OpCreateInstance, Schema::OpCreateInstance::Params params) {
+            instance = std::make_unique<dummy::Instance>(model, InitParams_fromSchema(params));
+            return {};
+        }
+    };
+
+    Runner runner(*model);
+
+    while (true) {
+        auto f = co_await io.pollFrame();
+        co_await io.pushFrame(runner.dispatch(f.frame));
+        if (runner.instance) {
+            co_await Dummy_runInstance(io, astl::move(runner.instance));
+        }
     }
-    auto params = InitParams_fromDict(astl::move(f.frame.data));
-    co_await Dummy_runInstance(io, std::make_unique<dummy::Instance>(*model, astl::move(params)));
 }
 
 SessionCoro<void> Dummy_runSession() {
-    std::optional<Frame> errorFrame;
+    struct Runner : public BasicRunner {
+        using Schema = sc::StateInitial;
 
-    auto io = co_await coro::Io{};
-
-    try {
-        auto f = co_await io.pollFrame();
-        if (f.frame.op != "load_model") {
-            throw_ex{} << "dummy: expected 'load_model' op, got: " << f.frame.op;
+        Runner() {
+            schema::registerHandlers<Schema::Ops>(m_dispatcherData, *this);
         }
 
-        // btodo: abort
-        auto params = ModelParams_fromDict(f.frame.data);
-        co_await Dummy_runModel(io, std::make_unique<dummy::Model>(params));
-    }
-    catch (coro::IoClosed&) {
-        co_return;
-    }
-    catch (std::exception& e) {
-        errorFrame = Frame{"error", e.what()};
-    }
+        std::unique_ptr<dummy::Model> model;
+
+        static dummy::Model::Params ModelParams_fromSchema(sc::StateInitial::OpLoadModel::Params schemaParams) {
+            dummy::Model::Params ret;
+            ret.path = schemaParams.filePath.valueOr("");
+            ret.splice = astl::move(schemaParams.spliceString.valueOr(""));
+            return ret;
+        }
+
+        Schema::OpLoadModel::Return on(Schema::OpLoadModel, Schema::OpLoadModel::Params params) {
+            model = std::make_unique<dummy::Model>(ModelParams_fromSchema(params));
+            return {};
+        }
+    };
 
     try {
-        if (errorFrame) {
-            co_await io.pushFrame(*errorFrame);
+        auto io = co_await coro::Io{};
+
+        Runner runner;
+
+        while (true) {
+            auto f = co_await io.pollFrame();
+            co_await io.pushFrame(runner.dispatch(f.frame));
+            if (runner.model) {
+                co_await Dummy_runModel(io, astl::move(runner.model));
+            }
         }
     }
     catch (coro::IoClosed&) {
         co_return;
     }
 }
-
-class DummyInstance final : public Instance {
-    std::shared_ptr<dummy::Model> m_model;
-    dummy::Instance m_instance;
-    schema::OpDispatcherData m_dispatcherData;
-public:
-    using Schema = schema::DummyProvider::InstanceGeneral;
-
-    static dummy::Instance::InitParams InitParams_fromDict(Dict&& d) {
-        auto schemaParams = schema::Struct_fromDict<Schema::Params>(astl::move(d));
-        dummy::Instance::InitParams ret;
-        ret.cutoff = schemaParams.cutoff;
-        return ret;
-    }
-
-    DummyInstance(std::shared_ptr<dummy::Model> model, Dict&& params)
-        : m_model(astl::move(model))
-        , m_instance(*m_model, InitParams_fromDict(astl::move(params)))
-    {
-        schema::registerHandlers<schema::DummyInterface::Ops>(m_dispatcherData, *this);
-    }
-
-    schema::DummyInterface::OpRun::Return on(schema::DummyInterface::OpRun, schema::DummyInterface::OpRun::Params params) {
-        dummy::Instance::SessionParams sparams;
-        sparams.splice = params.splice;
-        sparams.throwOn = params.throwOn;
-
-        auto s = m_instance.newSession(std::move(params.input), sparams);
-
-        schema::DummyInterface::OpRun::Return ret;
-        auto& res = ret.result.materialize();
-        for (auto& w : s) {
-            res += w;
-            res += ' ';
-        }
-        if (!res.empty()) {
-            // remove last space
-            res.pop_back();
-        }
-
-        return ret;
-    }
-
-    virtual Dict runOp(std::string_view op, Dict params, ProgressCb) override {
-        auto ret = m_dispatcherData.dispatch(op, astl::move(params));
-        if (!ret) {
-            throw_ex{} << "dummy: unknown op: " << op;
-        }
-        return *ret;
-    }
-};
-
-class DummyModel final : public Model {
-    std::shared_ptr<dummy::Model> m_model;
-public:
-    using Schema = schema::DummyProvider;
-
-    static dummy::Model::Params ModelParams_fromDict(Dict& d) {
-        auto schemaParams = schema::Struct_fromDict<Schema::Params>(std::move(d));
-        dummy::Model::Params ret;
-        ret.path = schemaParams.filePath.valueOr("");
-        ret.splice = astl::move(schemaParams.spliceString.valueOr(""));
-        return ret;
-    }
-
-    DummyModel(Dict& params)
-        : m_model(std::make_shared<dummy::Model>(ModelParams_fromDict(params)))
-    {}
-
-    virtual std::unique_ptr<Instance> createInstance(std::string_view type, Dict params) override {
-        if (type == "general") {
-            return std::make_unique<DummyInstance>(m_model, astl::move(params));
-        }
-        else {
-            throw_ex{} << "dummy: unknown instance type: " << type;
-            MSVC_WO_10766806();
-        }
-    }
-};
 
 class DummyProvider final : public Provider {
 public:
@@ -224,32 +177,12 @@ public:
         return i;
     }
 
-    virtual bool canLoadModel(const ModelAssetDesc& desc, const Dict&) const noexcept override {
-        return desc.type == "dummy";
+    virtual bool canLoadModel(const ModelAssetDesc&, const Dict&) const noexcept override {
+        return false;
     }
 
-    virtual ModelPtr loadModel(ModelAssetDesc desc, Dict params, ProgressCb pcb) override {
-        if (desc.assets.size() > 1) throw_ex{} << "dummy: expected one or zero assets";
-
-        if (desc.assets.empty()) {
-            // synthetic model
-            if (pcb) {
-                if (!pcb("synthetic", 0.5f)) {
-                    throw_ex{} << "dummy: loading model aborted";
-                }
-            }
-            return std::make_shared<DummyModel>(params);
-        }
-        else {
-            auto& fname = desc.assets.front().path;
-            params["file_path"] = fname;
-            if (pcb) {
-                if (!pcb(fname, 0.1f)) {
-                    throw_ex{} << "dummy: loading model aborted";
-                }
-            }
-            return std::make_shared<DummyModel>(params);
-        }
+    virtual ModelPtr loadModel(ModelAssetDesc, Dict, ProgressCb) override {
+        return {};
     }
 
     virtual SessionHandlerPtr createSessionHandler(std::string_view) override {

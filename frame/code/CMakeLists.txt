@@ -72,6 +72,8 @@ target_sources(ac-frame
         ac/schema/Field.hpp
         ac/schema/SerializeVisitors.hpp
         ac/schema/SchemaVisitors.hpp
+        ac/schema/FrameHelpers.hpp
+        ac/schema/OpDispatchHelpers.hpp
 
     PRIVATE
         ac/frameio/Stream.cpp

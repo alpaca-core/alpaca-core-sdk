@@ -9,7 +9,7 @@
 #include <ac/local/PluginPlibUtil.inl>
 
 #include <ac/dummy/LocalDummy.hpp>
-#include <ac/dummy/DummyProviderSchema.hpp>
+#include <ac/dummy/DummyInterface.hpp>
 
 #include <ac/jalog/Fixture.inl>
 
@@ -31,10 +31,12 @@ TEST_CASE("dummy schema") {
     auto dummyHandler = ac::local::Lib::createSessionHandler("dummy");
     auto dummy = io.connectBlocking(std::move(dummyHandler));
 
-    using Run = ac::schema::DummyInterface::OpRun;
+    using Run = ac::schema::StateInstance::OpRun;
 
     CHECK(dummy.push({"load_model", {}}).success());
+    CHECK(dummy.poll().success());
     CHECK(dummy.push({"create_instance", {{"cutoff", 2}}}).success());
+    CHECK(dummy.poll().success());
     CHECK(dummy.push(Frame_fromOpParams(Run{}, {
         .input = std::vector<std::string>{"a", "b", "c"}
     })).success());

@@ -17,7 +17,6 @@ Frame Frame_fromOpParams(Op, typename Op::Params p) {
 
 template <typename Op>
 typename Op::Return Frame_toOpReturn(Op, Frame f) {
-    assert(f.op == Op::id);
     return schema::Struct_fromDict<typename Op::Return>(std::move(f.data));
 }
 
