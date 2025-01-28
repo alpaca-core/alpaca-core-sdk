@@ -46,15 +46,13 @@ void ProviderRegistry::removeProvider(Provider& provider) {
     astl::erase_first_if(m_providers, [&](const auto& data) { return data.provider == &provider; });
 }
 
-Provider* ProviderRegistry::findBestProvider(
-    const ProviderScorer& scorer, const ModelAssetDesc& desc, const Dict& params
-) const {
+Provider* ProviderRegistry::findBestProvider(const ProviderScorer& scorer) const noexcept {
     Provider* best = nullptr;
     auto bestScore = scorer.denyScore();
     auto acceptScore = scorer.acceptScore();
 
     for (const auto& data : m_providers) {
-        auto score = scorer.score(*data.provider, data.plugin, desc, params);
+        auto score = scorer.score(*data.provider, data.plugin);
         if (score > bestScore) {
             best = data.provider;
             bestScore = score;
@@ -65,19 +63,6 @@ Provider* ProviderRegistry::findBestProvider(
     }
 
     return best;
-}
-
-ModelPtr ProviderRegistry::loadModel(const ProviderScorer& scorer, ModelAssetDesc desc, Dict params, ProgressCb cb) const {
-    if (auto provider = findBestProvider(scorer, desc, params)) {
-        return provider->loadModel(astl::move(desc), astl::move(params), astl::move(cb));
-    }
-
-    ac::throw_ex{} << "No provider found for: " << desc.name;
-    MSVC_WO_10766806();
-}
-
-ModelPtr ProviderRegistry::loadModel(ModelAssetDesc desc, Dict params, ProgressCb cb) const {
-    return loadModel(CanLoadScorer{}, astl::move(desc), astl::move(params), astl::move(cb));
 }
 
 frameio::SessionHandlerPtr ProviderRegistry::createSessionHandler(std::string_view matchName) {

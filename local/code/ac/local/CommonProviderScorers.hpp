@@ -11,13 +11,4 @@ struct AC_LOCAL_EXPORT BooleanScorer : public ProviderScorer {
     score_t acceptScore() const noexcept override final { return 1; }
 };
 
-struct AC_LOCAL_EXPORT CanLoadScorer final : public BooleanScorer {
-    score_t score(
-        const Provider& provider,
-        const PluginInfo* info,
-        const ModelAssetDesc& model,
-        const Dict& params
-    ) const noexcept override;
-};
-
 } // namespace ac::local

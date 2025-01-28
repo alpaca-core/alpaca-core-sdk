@@ -3,9 +3,6 @@
 //
 #pragma once
 #include "export.h"
-#include "ModelPtr.hpp"
-#include "ModelAssetDesc.hpp"
-#include "ProgressCb.hpp"
 #include <ac/frameio/SessionHandlerPtr.hpp>
 #include <ac/Dict.hpp>
 #include <vector>
@@ -37,17 +34,9 @@ public:
     void addProvider(Provider& provider, PluginInfo* plugin = nullptr);
     void removeProvider(Provider& provider);
 
-    // find the best provider for the given model description and parameters
+    // find the best provider
     // returns nullptr if all providers rank equal or lower then the denyScore of the scorer
-    Provider* findBestProvider(const ProviderScorer& scorer, const ModelAssetDesc& desc, const Dict& params) const;
-
-    // utliity functions to directly load the model
-
-    // load model with the first provider which can load it
-    ModelPtr loadModel(ModelAssetDesc desc, Dict params, ProgressCb cb = {}) const;
-
-    // load model with a scorer to select the best provider
-    ModelPtr loadModel(const ProviderScorer& scorer, ModelAssetDesc desc, Dict params, ProgressCb cb = {}) const;
+    Provider* findBestProvider(const ProviderScorer& scorer) const noexcept;
 
     // load model with the first provider whose name matches matchName
     frameio::SessionHandlerPtr createSessionHandler(std::string_view matchName);

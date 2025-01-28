@@ -7,22 +7,12 @@
 
 #include "ac-test-data-dummy-models.h"
 
-#include <ac/local/Model.hpp>
-#include <ac/local/Instance.hpp>
-
 #include <ac/frameio/local/BlockingSyncIoWrapper.hpp>
 #include <ac/FrameUtil.hpp>
 
 #include <doctest/doctest.h>
 
 #include <astl/move.hpp>
-
-const ac::local::ModelAssetDesc Model_Desc = {
-    .type = "dummy",
-    .assets = {
-        {.path = AC_DUMMY_MODEL_SMALL}
-    }
-};
 
 using Session = ac::frameio::BlockingSyncIoWrapper;
 

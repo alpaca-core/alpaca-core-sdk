@@ -4,7 +4,6 @@
 #include "Lib.hpp"
 #include "ProviderRegistry.hpp"
 #include "PluginManager.hpp"
-#include "ModelAssetDesc.hpp"
 #include <ac/Dict.hpp>
 #include <astl/move.hpp>
 
@@ -21,14 +20,6 @@ ProviderRegistry& Lib::providerRegistry() {
 
 void Lib::addProvider(Provider& provider) {
     g_providerRegistry.addProvider(provider);
-}
-
-ModelPtr Lib::loadModel(ModelAssetDesc desc, Dict params, ProgressCb cb) {
-    return g_providerRegistry.loadModel(astl::move(desc), astl::move(params), astl::move(cb));
-}
-
-ModelPtr Lib::loadModel(const ProviderScorer& scorer, ModelAssetDesc desc, Dict params, ProgressCb cb) {
-    return g_providerRegistry.loadModel(scorer, astl::move(desc), astl::move(params), astl::move(cb));
 }
 
 PluginManager& Lib::pluginManager() {

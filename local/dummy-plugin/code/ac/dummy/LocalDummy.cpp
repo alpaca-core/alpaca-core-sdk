@@ -180,14 +180,6 @@ public:
         return i;
     }
 
-    virtual bool canLoadModel(const ModelAssetDesc&, const Dict&) const noexcept override {
-        return false;
-    }
-
-    virtual ModelPtr loadModel(ModelAssetDesc, Dict, ProgressCb) override {
-        return {};
-    }
-
     virtual SessionHandlerPtr createSessionHandler(std::string_view) override {
         return CoroSessionHandler::create(Dummy_runSession());
     }

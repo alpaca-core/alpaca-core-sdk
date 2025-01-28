@@ -3,9 +3,6 @@
 //
 #pragma once
 #include "export.h"
-#include "ModelPtr.hpp"
-#include "ModelAssetDesc.hpp"
-#include "ProgressCb.hpp"
 #include <ac/Dict.hpp>
 #include <ac/frameio/SessionHandlerPtr.hpp>
 
@@ -44,16 +41,6 @@ public:
 
     /// Info of the provider.
     virtual const Info& info() const noexcept = 0;
-
-    /// Check if the model can be loaded
-    /// This function is used by `ProviderRegistry` to check if the model should be loaded by this provider.
-    /// Keep it as lightweight as possible.
-    virtual bool canLoadModel(const ModelAssetDesc& desc, const Dict& params) const noexcept = 0;
-
-    /// Load a model based on the provided description and parameters.
-    /// The progress callback is optional and can be used to report the progress of the loading process.
-    /// The returned model is owned by the caller and is not bound to the provider in any way.
-    virtual ModelPtr loadModel(ModelAssetDesc desc, Dict params, ProgressCb cb) = 0;
 
     virtual frameio::SessionHandlerPtr createSessionHandler(std::string_view target) = 0;
 };

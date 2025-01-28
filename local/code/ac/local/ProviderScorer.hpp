@@ -3,14 +3,12 @@
 //
 #pragma once
 #include "export.h"
-#include <ac/DictFwd.hpp>
 #include <limits>
 
 namespace ac::local {
 
 class Provider;
 struct PluginInfo;
-struct ModelAssetDesc;
 
 class AC_LOCAL_EXPORT ProviderScorer {
 public:
@@ -30,9 +28,7 @@ public:
 
     virtual score_t score(
         const Provider& provider,
-        const PluginInfo* providerPlugin,
-        const ModelAssetDesc& model,
-        const Dict& params
+        const PluginInfo* providerPlugin
     ) const noexcept = 0;
 };
 

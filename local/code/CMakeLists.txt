@@ -26,12 +26,6 @@ target_sources(ac-local
         ac/local/export.h
         ac/local/version.h
 
-        ac/local/ModelDesc.hpp
-        ac/local/ProgressCb.hpp
-        ac/local/ModelPtr.hpp
-        ac/local/Model.hpp
-        ac/local/Instance.hpp
-
         ac/local/Provider.hpp
         ac/local/ProviderPtr.hpp
         ac/local/ProviderRegistry.hpp
@@ -45,10 +39,6 @@ target_sources(ac-local
 
         ac/local/ProviderScorer.hpp
         ac/local/CommonProviderScorers.hpp
-
-        ac/local/schema/CallHelpers.hpp
-        ac/local/schema/DispatchHelpers.hpp
-        ac/local/schema/GenerateProviderSchemaDict.hpp
     PRIVATE
         ac/local/Logging.hpp
         ac/local/Logging.cpp
