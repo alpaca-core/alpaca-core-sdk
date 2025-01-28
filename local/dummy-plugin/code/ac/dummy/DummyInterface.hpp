@@ -34,8 +34,8 @@ struct StateInitial {
     };
 
     using Ops = std::tuple<OpLoadModel>;
-    using InputStreams = std::tuple<>;
-    using OutputStreams = std::tuple<>;
+    using Ins = std::tuple<>;
+    using Outs = std::tuple<>;
 };
 
 struct StateLoadingModel {
@@ -49,18 +49,23 @@ struct StateLoadingModel {
         using Return = nullptr_t;
     };
 
-    struct OutProgress {
-        Field<int> progress;
+    struct StreamProgress {
+        static constexpr auto id = "progress";
+        static constexpr auto desc = "Progress stream";
 
-        template <typename Visitor>
-        void visitFields(Visitor& v) {
-            v(progress, "progress", "Progress from 0 to 1");
+        struct Type {
+            Field<int> progress;
+
+            template <typename Visitor>
+            void visitFields(Visitor& v) {
+                v(progress, "progress", "Progress from 0 to 1");
+            };
         };
     };
 
     using Ops = std::tuple<OpAbort>;
-    using InputStreams = std::tuple<>;
-    using OutputStreams = std::tuple<OutProgress>;
+    using Ins = std::tuple<>;
+    using Outs = std::tuple<StreamProgress>;
 };
 
 struct StateModelLoaded {
@@ -84,8 +89,8 @@ struct StateModelLoaded {
     };
 
     using Ops = std::tuple<OpCreateInstance>;
-    using InputStreams = std::tuple<>;
-    using OutputStreams = std::tuple<>;
+    using Ins = std::tuple<>;
+    using Outs = std::tuple<>;
 };
 
 struct StateInstance {
@@ -119,8 +124,8 @@ struct StateInstance {
     };
 
     using Ops = std::tuple<OpRun>;
-    using InputStreams = std::tuple<>;
-    using OutputStreams = std::tuple<>;
+    using Ins = std::tuple<>;
+    using Outs = std::tuple<>;
 };
 
 struct Interface {
