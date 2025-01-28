@@ -16,15 +16,38 @@ public:
 
     frameio::BlockingIo& io() { return m_io; }
 
+    static void pollStatusCheck(const frameio::Status& s) {
+        if (!s.success()) {
+            throw_ex{} << "poll failed: " << s.bits;
+        }
+    }
+
+    static void frameErrorCheck(const Frame& frame) {
+        if (Frame_isError(frame)) {
+            throw_ex{} << "error: " << Frame_getError(frame);
+        }
+    }
+
     template <typename State>
     void expectState() {
         auto res = m_io.poll();
-        if (!res.success()) {
-            throw_ex{} << "poll failed: " << res.bits;
-        }
+        pollStatusCheck(res);
         auto state = Frame_getStateChange(res.frame);
         if (state != State::id) {
             throw_ex{} << "unexpected state: " << state;
+        }
+    }
+
+    template <typename State>
+    void awaitState() {
+        while (true) {
+            auto res = m_io.poll();
+            pollStatusCheck(res);
+            frameErrorCheck(res.frame);
+            auto state = Frame_getStateChange(res.frame);
+            if (state == State::id) {
+                return;
+            }
         }
     }
 
@@ -35,12 +58,8 @@ public:
             throw_ex{} << "push failed: " << status.bits;
         }
         auto res = m_io.poll();
-        if (!res.success()) {
-            throw_ex{} << "poll failed";
-        }
-        if (Frame_isError(res.frame)) {
-            throw_ex{} << "error: " << Frame_getError(res.frame);
-        }
+        pollStatusCheck(res);
+        frameErrorCheck(res.frame);
         return Frame_toOpReturn(Op{}, std::move(res.frame));
     }
 
