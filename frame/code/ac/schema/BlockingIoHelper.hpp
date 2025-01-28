@@ -1,0 +1,51 @@
+// Copyright (c) Alpaca Core
+// SPDX-License-Identifier: MIT
+//
+#pragma once
+#include "FrameHelpers.hpp"
+#include "../frameio/local/BlockingIo.hpp"
+#include "../FrameUtil.hpp"
+#include <astl/throw_stdex.hpp>
+
+namespace ac::schema {
+
+class BlockingIoHelper {
+    frameio::BlockingIo m_io;
+public:
+    explicit BlockingIoHelper(frameio::BlockingIo io) : m_io(std::move(io)) {}
+
+    frameio::BlockingIo& io() { return m_io; }
+
+    template <typename State>
+    void expectState() {
+        auto res = m_io.poll();
+        if (!res.success()) {
+            throw_ex{} << "poll failed: " << res.bits;
+        }
+        auto state = Frame_getStateChange(res.frame);
+        if (state != State::id) {
+            throw_ex{} << "unexpected state: " << state;
+        }
+    }
+
+    template <typename Op>
+    typename Op::Return call(typename Op::Params p) {
+        auto status = m_io.push(Frame_fromOpParams(Op{}, std::move(p)));
+        if (!status.success()) {
+            throw_ex{} << "push failed: " << status.bits;
+        }
+        auto res = m_io.poll();
+        if (!res.success()) {
+            throw_ex{} << "poll failed";
+        }
+        if (Frame_isError(res.frame)) {
+            throw_ex{} << "error: " << Frame_getError(res.frame);
+        }
+        return Frame_toOpReturn(Op{}, std::move(res.frame));
+    }
+
+    void close() { m_io.close(); }
+};
+
+
+} // namespace ac::schema

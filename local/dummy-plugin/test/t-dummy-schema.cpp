@@ -3,7 +3,7 @@
 //
 #include <ac/local/Lib.hpp>
 #include <ac/frameio/local/LocalIoRunner.hpp>
-#include <ac/frameio/local/BlockingIo.hpp>
+#include <ac/schema/BlockingIoHelper.hpp>
 #include <ac/schema/FrameHelpers.hpp>
 
 #include <ac/local/PluginPlibUtil.inl>
@@ -26,25 +26,30 @@ struct LoadDummyFixture {
 
 LoadDummyFixture loadDummyFixture;
 
-TEST_CASE("dummy schema") {
+TEST_CASE("blocking io") {
     ac::frameio::LocalIoRunner io;
+
     auto dummyHandler = ac::local::Lib::createSessionHandler("dummy");
-    auto dummy = io.connectBlocking(std::move(dummyHandler));
+    ac::schema::BlockingIoHelper dummy(io.connectBlocking(std::move(dummyHandler)));
 
-    using Run = ac::schema::StateInstance::OpRun;
+    namespace schema = ac::schema::dummy;
 
-    CHECK(dummy.poll().success());
-    CHECK(dummy.push({"load_model", {}}).success());
-    CHECK(dummy.poll().success());
-    CHECK(dummy.poll().success());
-    CHECK(dummy.push({"create_instance", {{"cutoff", 2}}}).success());
-    CHECK(dummy.poll().success());
-    CHECK(dummy.poll().success());
-    CHECK(dummy.push(Frame_fromOpParams(Run{}, {
+    dummy.expectState<schema::StateInitial>();
+    dummy.call<schema::StateInitial::OpLoadModel>({});
+
+    dummy.expectState<schema::StateModelLoaded>();
+
+    CHECK_THROWS_WITH(
+        dummy.call<schema::StateModelLoaded::OpCreateInstance>({.cutoff = 1000}),
+        "error: Cutoff 1000 greater than model size 22"
+    );
+
+    dummy.call<schema::StateModelLoaded::OpCreateInstance>({.cutoff = 2});
+
+    dummy.expectState<schema::StateInstance>();
+    auto result = dummy.call<schema::StateInstance::OpRun>({
         .input = std::vector<std::string>{"a", "b", "c"}
-    })).success());
-
-    auto result = Frame_toOpReturn(Run{}, dummy.poll().frame);
+    });
     CHECK(result.result == "a one b two c one");
 
     dummy.close();

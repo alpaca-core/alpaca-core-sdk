@@ -74,6 +74,8 @@ target_sources(ac-frame
         ac/schema/SchemaVisitors.hpp
         ac/schema/FrameHelpers.hpp
         ac/schema/OpDispatchHelpers.hpp
+        ac/schema/FrameHelpers.hpp
+        ac/schema/BlockingIoHelper.hpp
 
     PRIVATE
         ac/frameio/Stream.cpp

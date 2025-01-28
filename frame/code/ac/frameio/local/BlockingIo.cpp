@@ -75,6 +75,10 @@ public:
         , m_out(std::move(ep.writeStream))
     {}
 
+    ~Impl() {
+        close();
+    }
+
     Status io(BlockingFrameIo& q, Frame& frame, astl::timeout timeout) {
         Status ret;
         q.io(frame, timeout, [&](Frame&, Status status) {
