@@ -42,9 +42,7 @@ ac::Frame frame(std::string str) {
     return ac::Frame{ str, {} };
 }
 
-TEST_CASE("SessionCoro") {
-    BlockingSyncIoWrapper io(CoroSessionHandler::create(session()));
-
+void testSession(BlockingSyncIoWrapper& io) {
     io.push(frame("echo"));
     auto f = io.poll();
     CHECK(f.success());
@@ -72,4 +70,62 @@ TEST_CASE("SessionCoro") {
     io.push(frame("nope"));
     f = io.poll();
     CHECK(f.closed());
+}
+
+TEST_CASE("SessionCoro") {
+    BlockingSyncIoWrapper io(CoroSessionHandler::create(session()));
+    testSession(io);
+}
+
+SessionCoro<SessionHandlerPtr> successorSession() {
+    auto io = co_await coro::Io{};
+    int i = 0;
+    while (true) {
+        auto fin = co_await io.pollFrame();
+        auto& op = fin.frame.op;
+        if (op == "goto echo") {
+            co_return CoroSessionHandler::create(session());
+        }
+        else if (op == "i") {
+            co_await io.pushFrame(frame(std::to_string(i++)));
+        }
+        else {
+            co_return nullptr;
+        }
+    }
+}
+
+TEST_CASE("successor session") {
+    {
+        BlockingSyncIoWrapper io(CoroSessionHandler::create(successorSession()));
+        io.push(frame("i"));
+        auto f = io.poll();
+        CHECK(f.success());
+        CHECK(f.frame.op == "0");
+
+        io.push(frame("i"));
+        f = io.poll();
+        CHECK(f.success());
+        CHECK(f.frame.op == "1");
+
+        io.push(frame("nope"));
+        f = io.poll();
+        CHECK(f.closed());
+    }
+
+    {
+        BlockingSyncIoWrapper io(CoroSessionHandler::create(successorSession()));
+        io.push(frame("i"));
+        auto f = io.poll();
+        CHECK(f.success());
+        CHECK(f.frame.op == "0");
+
+        io.push(frame("i"));
+        f = io.poll();
+        CHECK(f.success());
+        CHECK(f.frame.op == "1");
+
+        io.push(frame("goto echo"));
+        testSession(io);
+    }
 }

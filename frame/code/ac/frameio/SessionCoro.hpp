@@ -3,7 +3,6 @@
 //
 #pragma once
 #include "../export.h"
-#include "SessionHandlerPtr.hpp"
 #include "SessionHandler.hpp"
 #include "FrameWithStatus.hpp"
 #include <astl/expected.hpp>
@@ -30,6 +29,7 @@ public:
     ~CoroSessionHandler();
 
     static SessionHandlerPtr create(SessionCoro<void> coro);
+    static SessionHandlerPtr create(SessionCoro<SessionHandlerPtr> coro);
 
     void postResume() noexcept;
     Status getFrame(Frame& frame) noexcept;
@@ -43,11 +43,16 @@ private:
 
     std::coroutine_handle<> m_currentCoro;
 
+    coro::Result<SessionHandlerPtr> m_sucessorResult;
+
     std::coroutine_handle<> setCoro(std::coroutine_handle<> coro) noexcept {
         return std::exchange(m_currentCoro, coro);
     }
 
     virtual void shConnected() noexcept override;
+
+    template <typename PromiseType>
+    static CoroSessionHandlerPtr doCreate(std::coroutine_handle<PromiseType> h);
 };
 
 namespace coro {
@@ -136,9 +141,8 @@ template <typename T, typename Self>
 struct SessionCoroPromiseHelper {
     void return_value(T value) noexcept {
         auto& self = static_cast<Self&>(*this);
-        if (self.m_result) {
-            *self.m_result = std::move(value);
-        }
+        assert(self.m_result); // can't return value without a result to store it in
+        *self.m_result = std::move(value);
         self.popCoro();
     }
 };
@@ -147,6 +151,7 @@ struct SessionCoroPromiseHelper<void, Self> {
     void return_void() noexcept {
         auto& self = static_cast<Self&>(*this);
         if (self.m_result) {
+            // m_result may be null in the root coroutine if it's void
             *self.m_result = {};
         }
         self.popCoro();
@@ -176,9 +181,6 @@ public:
 
             if (m_prev) {
                 m_handler->postResume();
-            }
-            else {
-                m_handler->close();
             }
         }
 

@@ -9,14 +9,38 @@
 
 namespace ac::frameio {
 
-CoroSessionHandler::~CoroSessionHandler() = default;
+CoroSessionHandler::~CoroSessionHandler() {
+    if (m_sucessorResult.has_error()) {
+        // can't propagate the exception to the caller
+        std::terminate();
+    }
+    auto s = std::move(m_sucessorResult.value());
 
-SessionHandlerPtr CoroSessionHandler::create(SessionCoro<void> coro) {
+    if (s) {
+        setSuccessor(std::move(s));
+    }
+    else {
+        close();
+    }
+}
+
+template <typename PromiseType>
+CoroSessionHandlerPtr CoroSessionHandler::doCreate(std::coroutine_handle<PromiseType> h) {
     auto sh = std::make_shared<CoroSessionHandler>();
-    auto h = coro.takeHandle();
     h.promise().m_handler = sh;
     sh->setCoro(h);
     return sh;
+}
+
+SessionHandlerPtr CoroSessionHandler::create(SessionCoro<void> coro) {
+    return doCreate(coro.takeHandle());
+}
+
+SessionHandlerPtr CoroSessionHandler::create(SessionCoro<SessionHandlerPtr> coro) {
+    auto h = coro.takeHandle();
+    auto self = doCreate(h);
+    h.promise().m_result = &self->m_sucessorResult;
+    return self;
 }
 
 void CoroSessionHandler::postResume() noexcept {
