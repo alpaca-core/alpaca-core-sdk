@@ -150,11 +150,12 @@ struct SyncExecutor final : public IoExecutor {
 std::function<void()> Session_connectSync(SessionHandlerPtr handler, StreamEndpoint ep) {
     auto tq = std::make_shared<Executor>(std::move(ep.readStream), std::move(ep.writeStream));
     SessionHandler::init(
-        *handler,
+        handler,
         std::make_unique<SyncInput>(tq, tq->pendingInput),
         std::make_unique<SyncOutput>(tq, tq->pendingOutput),
         std::make_unique<SyncExecutor>(tq)
     );
+    tq->execute(); // connect
     return [tq]() { tq->execute(); };
 }
 

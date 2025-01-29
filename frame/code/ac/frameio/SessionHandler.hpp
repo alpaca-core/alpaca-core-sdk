@@ -3,6 +3,7 @@
 //
 #pragma once
 #include "../export.h"
+#include "SessionHandlerPtr.hpp"
 #include "IoPtr.hpp"
 #include <astl/shared_from.hpp>
 #include <memory>
@@ -31,7 +32,9 @@ private:
     IoExecutorPtr m_executor;
 
 public:
-    static void init(SessionHandler& self,
+    // initializes the session handler with the given input, output, and executor
+    // will post a shConnected event to the session handler via the executor
+    static void init(const SessionHandlerPtr& handler,
         InputPtr in,
         OutputPtr out,
         IoExecutorPtr executor

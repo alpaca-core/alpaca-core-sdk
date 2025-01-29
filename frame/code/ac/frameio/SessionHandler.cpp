@@ -13,16 +13,19 @@ SessionHandler::~SessionHandler() = default;
 
 void SessionHandler::shConnected() noexcept {}
 
-void SessionHandler::init(SessionHandler& self,
+void SessionHandler::init(const SessionHandlerPtr& pself,
     InputPtr in,
     OutputPtr out,
     IoExecutorPtr executor
 ) noexcept {
+    auto& self = *pself;
     assert(!self.m_in && !self.m_out && !self.m_executor);
     self.m_in = std::move(in);
     self.m_out = std::move(out);
     self.m_executor = std::move(executor);
-    self.shConnected();
+    self.m_executor->post([pself] {
+        pself->shConnected();
+    });
 }
 
 } // namespace ac::frameio

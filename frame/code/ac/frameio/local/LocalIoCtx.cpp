@@ -142,14 +142,12 @@ void LocalIoCtx::complete() {
 
 void LocalIoCtx::connect(SessionHandlerPtr handler, StreamEndpoint ep) {
     Strand strand(m_impl->m_ctx.get_executor());
-    asio::post(strand, [strand, handler, ep = std::move(ep)]() mutable {
-        SessionHandler::init(
-            *handler,
-            std::make_unique<StrandInput>(std::move(ep.readStream), strand),
-            std::make_unique<StrandOutput>(std::move(ep.writeStream), strand),
-            std::make_unique<StrandExecutor>(strand)
-        );
-    });
+    SessionHandler::init(
+        handler,
+        std::make_unique<StrandInput>(std::move(ep.readStream), strand),
+        std::make_unique<StrandOutput>(std::move(ep.writeStream), strand),
+        std::make_unique<StrandExecutor>(strand)
+    );
 }
 
 } // namespace ac::frameio
