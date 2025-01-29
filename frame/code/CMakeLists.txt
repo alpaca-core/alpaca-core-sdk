@@ -7,15 +7,7 @@ set_target_properties(ac-frame PROPERTIES
     EXPORT_NAME ac::frame
 )
 
-if(NOT TARGET Boost::boost)
-    # only add boost if not added from the outside
-    CPMAddPackage(gh:iboB/boost-trim@1.85.0)
-endif()
-
-if(NOT TARGET Boost::asio)
-    # asio is header only, so this is fine
-    add_library(Boost::asio ALIAS Boost::boost)
-endif()
+ac_dep(boost)
 
 target_link_libraries(ac-frame
     PUBLIC

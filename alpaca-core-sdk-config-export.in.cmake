@@ -32,3 +32,4 @@ endif()
 # also add cmake lib
 list(APPEND CMAKE_MODULE_PATH "@CMAKE_CURRENT_SOURCE_DIR@/cmake")
 include(ac_local_plugin_util)
+include(ac_dep)

@@ -28,6 +28,7 @@ include(icm_option)
 
 include(ac_lib)
 include(ac_local_plugin_util)
+include(ac_dep)
 
 #################
 # cfg
