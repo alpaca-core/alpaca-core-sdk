@@ -16,6 +16,11 @@ namespace ac::frameio {
 template <typename T>
 struct SessionCoro;
 
+namespace coro {
+template <typename T>
+using Result = astl::expected<T, std::exception_ptr>;
+} // namespace coro
+
 class CoroSessionHandler;
 using CoroSessionHandlerPtr = std::shared_ptr<CoroSessionHandler>;
 
@@ -36,28 +41,10 @@ private:
     template <typename T>
     friend struct SessionCoro;
 
-    using CoroResult = astl::expected<std::any, std::exception_ptr>;
-
     std::coroutine_handle<> m_currentCoro;
 
-    template <typename P>
-    static std::coroutine_handle<> pushCoro(const CoroSessionHandlerPtr& self, std::coroutine_handle<P> next) noexcept {
-        next.promise().m_handler = self;
-        next.promise().m_prev = self->m_currentCoro;
-        return std::exchange(self->m_currentCoro, next);
-    }
-
-    template <typename P>
-    void popCoro() noexcept {
-        auto cur = std::coroutine_handle<P>::from_address(m_currentCoro.address());
-        m_currentCoro = cur.promise().m_prev;
-
-        if (m_currentCoro) {
-            postResume();
-        }
-        else {
-            close();
-        }
+    std::coroutine_handle<> setCoro(std::coroutine_handle<> coro) noexcept {
+        return std::exchange(m_currentCoro, coro);
     }
 
     virtual void shConnected() noexcept override;
@@ -185,7 +172,14 @@ public:
         std::suspend_never final_suspend() noexcept { return {}; }
 
         void popCoro() noexcept {
-            m_handler->popCoro<promise_type>();
+            m_handler->setCoro(m_prev);
+
+            if (m_prev) {
+                m_handler->postResume();
+            }
+            else {
+                m_handler->close();
+            }
         }
 
         void unhandled_exception() noexcept {
@@ -201,7 +195,7 @@ public:
 
         // points to the result in the awaitable which is on the stack
         // null if this is the top coroutine
-        astl::expected<T, std::exception_ptr>* m_result = nullptr;
+        coro::Result<T>* m_result = nullptr;
     };
 
     SessionCoro(SessionCoro&& other) noexcept : m_handle(std::exchange(other.m_handle, nullptr)) {}
@@ -224,14 +218,18 @@ public:
 
         // instead of making optional of expected, we can use the value error=nullptr to indicate that
         // the result is empty (hacky, but works)
-        astl::expected<Ret, std::exception_ptr> result = astl::unexpected();
+        coro::Result<Ret> result = astl::unexpected();
 
         bool await_ready() const noexcept { return false; }
 
         template <typename CallerPromise>
-        std::coroutine_handle<> await_suspend(std::coroutine_handle<CallerPromise> h) noexcept {
+        std::coroutine_handle<> await_suspend(std::coroutine_handle<CallerPromise> caller) noexcept {
+            auto handler = caller.promise().m_handler;
+            assert(handler->m_currentCoro = caller);
             coro.promise().m_result = &result;
-            CoroSessionHandler::pushCoro(h.promise().m_handler, coro);
+            coro.promise().m_handler = handler;
+            coro.promise().m_prev = caller;
+            handler->setCoro(coro);
             return coro;
         }
 
