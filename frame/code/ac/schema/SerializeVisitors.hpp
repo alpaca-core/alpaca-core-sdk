@@ -40,16 +40,16 @@ struct ToDictVisitor {
     }
 
     template <typename T>
-    static void writeToDict(Dict& out, Blob& value) {
-        out = ac::Dict::binary(std::move(value));
-    }
-
-    template <typename T>
     static void writeToDict(Dict& out, std::vector<T>& value) {
         out = Dict::array();
         for (auto& v : value) {
             writeToDict(out.emplace_back(), v);
         }
+    }
+
+    template <>
+    static void writeToDict(Dict& out, Blob& value) {
+        out = ac::Dict::binary(std::move(value));
     }
 
     template <typename T>
@@ -92,16 +92,16 @@ struct FromDictVisitor {
         value = astl::move(in.get_ref<std::string&>());
     }
 
-    static void readFromDict(Dict& in, Blob& value) {
-        value = Blob{std::move(in.get_binary())};
-    }
-
     template <typename T>
     static void readFromDict(Dict& in, std::vector<T>& value) {
         value.clear();
         for (auto& v : in) {
             readFromDict(v, value.emplace_back());
         }
+    }
+
+    static void readFromDict(Dict& in, Blob& value) {
+        value = Blob{std::move(in.get_binary())};
     }
 
     template <typename T>
