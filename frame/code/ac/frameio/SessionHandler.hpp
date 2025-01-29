@@ -26,10 +26,17 @@ protected:
     Output& shOutput() const noexcept { return *m_out; }
     IoExecutor& shExecutor() const noexcept { return *m_executor; }
 
+    // sets a handler which will succeed (be attached to) this one's io once this is destroyed
+    void setSuccessor(SessionHandlerPtr successor) noexcept {
+        m_successor = std::move(successor);
+    }
+
 private:
     InputPtr m_in;
     OutputPtr m_out;
     IoExecutorPtr m_executor;
+
+    SessionHandlerPtr m_successor;
 
 public:
     // initializes the session handler with the given input, output, and executor

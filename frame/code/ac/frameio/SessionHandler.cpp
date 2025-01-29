@@ -9,7 +9,17 @@
 namespace ac::frameio {
 
 SessionHandler::SessionHandler() noexcept = default;
-SessionHandler::~SessionHandler() = default;
+SessionHandler::~SessionHandler() {
+    if (m_successor) {
+        assert(m_in && m_out && m_executor);
+        init(
+            m_successor,
+            std::move(m_in),
+            std::move(m_out),
+            std::move(m_executor)
+        );
+    }
+}
 
 void SessionHandler::shConnected() noexcept {}
 
