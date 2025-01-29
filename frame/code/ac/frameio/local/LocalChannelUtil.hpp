@@ -7,13 +7,13 @@
 
 namespace ac::frameio {
 
-struct LocalStreams {
+struct LocalChannelStreams {
     ReadStreamPtr in;
     WriteStreamPtr out;
 };
 
-inline LocalStreams LocalChannel_getStreams(const LocalChannelPtr& channel) {
-    LocalStreams streams;
+inline LocalChannelStreams LocalChannel_getStreams(const LocalChannelPtr& channel) {
+    LocalChannelStreams streams;
     streams.in = std::make_unique<LocalReadStream>(channel);
     streams.out = std::make_unique<LocalWriteStream>(channel);
     return streams;
