@@ -157,3 +157,59 @@ TEST_CASE("schema") {
   ]
 })json");
 }
+
+struct Resource {
+    Field<std::string> mimeType;
+    Field<ac::Blob> data;
+
+    template <typename V>
+    void visitFields(V& v) {
+        v(mimeType, "mimeType", "MIME type of the resource");
+        v(data, "data", "Binary data of the resource");
+    }
+};
+
+TEST_CASE("blob") {
+    ac::Dict dict;
+    {
+        Resource r = {
+            .mimeType = "application/octet-stream",
+            .data = ac::Blob{1, 2, 3, 4, 5}
+        };
+        dict = Struct_toDict(std::move(r));
+    }
+
+    CHECK(dict["data"].is_binary());
+
+    auto rr = Struct_fromDict<Resource>(std::move(dict));
+    CHECK(rr.mimeType == "application/octet-stream");
+    CHECK(rr.data->size() == 5);
+    CHECK(rr.data->at(0) == 1);
+    CHECK(rr.data->at(1) == 2);
+    CHECK(rr.data->at(2) == 3);
+    CHECK(rr.data->at(3) == 4);
+    CHECK(rr.data->at(4) == 5);
+}
+
+TEST_CASE("blob schema") {
+    acnl::ordered_json dict;
+    Struct_toSchema<Resource>(dict);
+    auto schema = dict.dump(2);
+    CHECK(schema == R"json({
+  "type": "object",
+  "properties": {
+    "mimeType": {
+      "type": "string",
+      "description": "MIME type of the resource"
+    },
+    "data": {
+      "type": "binary",
+      "description": "Binary data of the resource"
+    }
+  },
+  "required": [
+    "mimeType",
+    "data"
+  ]
+})json");
+}
