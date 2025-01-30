@@ -8,7 +8,4 @@ if(AC_BUILD_TESTS OR AC_BUILD_EXAMPLES)
 endif()
 
 ac_add_test_subdir()
-
-if(AC_BUILD_EXAMPLES)
-    add_subdirectory(example)
-endif()
+ac_add_example_subdir()

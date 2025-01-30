@@ -27,6 +27,8 @@ include(icm_build_failure_testing)
 include(icm_option)
 
 include(ac_lib)
+include(ac_lib_subdirs)
+
 include(ac_local_plugin_util)
 include(ac_dep)
 
@@ -45,17 +47,8 @@ mark_as_advanced(AC_BUILD_TESTS AC_BUILD_EXAMPLES)
 # global packages
 
 if(AC_BUILD_TESTS)
-    CPMAddPackage(gh:iboB/doctest-util@0.1.3)
-    set_target_properties(doctest PROPERTIES FOLDER test)
-    set_target_properties(doctest-main PROPERTIES FOLDER test)
-    enable_testing()
+    ac_dep(doctest-util)
 endif()
-
-macro(ac_add_test_subdir)
-    if(AC_BUILD_TESTS)
-        add_subdirectory(test)
-    endif()
-endmacro()
 
 #################
 # subdirs/targets
@@ -63,7 +56,7 @@ endmacro()
 # we thought about allowing finer-grain config from here
 # motivating examples would be:
 # - build only astl and jalog
-# - build only dict
+# - build only frame
 # - don't build dummy
 # we could do it if there's interest
 
