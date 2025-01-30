@@ -6,12 +6,17 @@
 
 using namespace ac::schema;
 
+struct Vec {
+    int x = 0, y = 0;
+};
+
 struct Person {
     Field<std::string> name;
     Field<int> age = std::nullopt;
     Field<bool> isChild = Default(false);
     Field<std::string> address = Default();
     Field<int> height = std::nullopt;
+    Field<Vec> pos = Default(Vec{1, 2});
 };
 
 TEST_CASE("field") {
@@ -43,4 +48,8 @@ TEST_CASE("field") {
 
     i = p.height.materialize();
     CHECK(i == 0);
+
+    CHECK(p.pos.hasValue());
+    CHECK(p.pos->x == 1);
+    CHECK(p.pos->y == 2);
 }
