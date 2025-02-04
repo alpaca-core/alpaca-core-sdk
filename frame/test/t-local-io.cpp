@@ -40,7 +40,7 @@ SessionCoro<void> sideA(int send) {
             }
         }
     }
-    catch (const coro::IoClosed&) {
+    catch (const IoClosed&) {
         A_done = true;
     }
 }

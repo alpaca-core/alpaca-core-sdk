@@ -5,6 +5,7 @@
 #include "../export.h"
 #include "SessionHandler.hpp"
 #include "FrameWithStatus.hpp"
+#include "IoException.hpp"
 #include <astl/expected.hpp>
 #include <astl/timeout.hpp>
 #include <coroutine>
@@ -56,22 +57,6 @@ private:
 };
 
 namespace coro {
-
-struct AC_FRAME_EXPORT IoClosed : public std::runtime_error {
-    using std::runtime_error::runtime_error;
-    ~IoClosed();
-
-    static void throwInputIfClosed(const Status& status) {
-        if (status.closed()) {
-            throw IoClosed("input closed");
-        }
-    }
-    static void throwOutputIfClosed(const Status& status) {
-        if (status.closed()) {
-            throw IoClosed("output closed");
-        }
-    }
-};
 
 namespace impl {
 struct BasicFrameAwaitable {

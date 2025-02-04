@@ -40,7 +40,7 @@ struct BasicRunner {
             }
             return {f.op, *ret};
         }
-        catch (coro::IoClosed&) {
+        catch (IoClosed&) {
             throw;
         }
         catch (std::exception& e) {
@@ -165,7 +165,7 @@ SessionCoro<void> Dummy_runSession() {
             }
         }
     }
-    catch (coro::IoClosed&) {
+    catch (IoClosed&) {
         co_return;
     }
 }

@@ -77,9 +77,4 @@ void CoroSessionHandler::shConnected() noexcept {
     m_currentCoro.resume();
 }
 
-namespace coro {
-// export the vtable
-IoClosed::~IoClosed() = default;
-}
-
 } // namespace ac::frameio
