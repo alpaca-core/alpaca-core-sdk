@@ -30,7 +30,7 @@ public:
     LocalIoRunner& operator=(const LocalIoRunner&) = delete;
     ~LocalIoRunner();
 
-    LocalEndpoints getEndpoints(ChannelBufferSizes bufferSizes = {});
+    static LocalEndpoints getEndpoints(ChannelBufferSizes bufferSizes = {});
 
     BlockingIo connectBlocking(SessionHandlerPtr remoteHandler, ChannelBufferSizes bufferSizes = {});
     void connect(SessionHandlerPtr local, SessionHandlerPtr remote, ChannelBufferSizes bufferSizes = {});

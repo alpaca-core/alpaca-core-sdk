@@ -100,7 +100,7 @@ SessionCoro<void> eagerSession() {
 TEST_CASE("eager") {
     LocalIoRunner runner(1);
 
-    auto [elocal, eremote] = runner.getEndpoints({3, 3});
+    auto [elocal, eremote] = LocalIoRunner::getEndpoints({3, 3});
 
     BlockingIo localIo(std::move(elocal));
 

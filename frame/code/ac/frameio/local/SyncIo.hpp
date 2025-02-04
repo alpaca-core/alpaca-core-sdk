@@ -7,7 +7,6 @@
 #include "../SessionHandlerPtr.hpp"
 
 namespace ac::frameio {
-// create a synchronous session which can use the thread of its peer for its execution
-// return a function that will execute the pending tasks of the session executor
+// create a session which exports its executor to the caller
 [[nodiscard]] AC_FRAME_EXPORT std::function<void()> Session_connectSync(SessionHandlerPtr handler, StreamEndpoint endpoint);
 } // namespace ac::frameio
