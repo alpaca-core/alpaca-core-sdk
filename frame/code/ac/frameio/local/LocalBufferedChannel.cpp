@@ -49,8 +49,7 @@ public:
         }
         else if (m_queue.size() < m_maxSize) {
             assert(m_queue.empty() || !m_notify);
-            std::function<void()> onPushFirst;
-            std::swap(onPushFirst, m_notify);
+            auto onPushFirst = std::exchange(m_notify, nullptr);
             m_queue.push_back(std::move(frame));
             lock.unlock();
             if (onPushFirst) {
@@ -67,8 +66,7 @@ public:
         std::unique_lock lock(m_mutex);
         if (!m_queue.empty()) {
             assert(m_queue.size() == m_maxSize || !m_notify);
-            std::function<void()> onFree;
-            std::swap(onFree, m_notify);
+            auto onFree = std::exchange(m_notify, nullptr);
             frame = std::move(m_queue.front());
             m_queue.pop_front();
             lock.unlock();
@@ -87,10 +85,9 @@ public:
     }
 
     void close() override {
-        std::function<void()> notify;
         std::unique_lock lock(m_mutex);
         m_closed = true;
-        std::swap(notify, m_notify);
+        auto notify = std::exchange(m_notify, nullptr);
         lock.unlock();
 
         if (notify) {
