@@ -10,3 +10,8 @@ if(NOT TARGET Boost::asio)
     # asio is header only, so this is fine
     add_library(Boost::asio ALIAS Boost::boost)
 endif()
+
+if(NOT TARGET Boost::asio)
+    # asio is header only, so this is fine
+    add_library(Boost::asio ALIAS Boost::boost)
+endif()
