@@ -136,10 +136,10 @@ struct SyncExecutor : public IoExecutor, public astl::enable_shared_from {
         };
 
         astl::erase_all_if(m_pendingInputs, tryComplete);
-
         while (executeTasks());
 
         astl::erase_all_if(m_pendingOutputs, tryComplete);
+        while (executeTasks());
     }
 };
 
