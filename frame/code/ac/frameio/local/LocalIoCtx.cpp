@@ -3,12 +3,11 @@
 //
 #include "LocalIoCtx.hpp"
 #include "../SessionHandler.hpp"
-#include "../IoExecutor.hpp"
 #include "../FrameWithStatus.hpp"
-#include "../Io.hpp"
 #include "../BasicStreamIo.hpp"
 #include "../IoCommon.hpp"
 #include "../StreamEndpoint.hpp"
+#include "../IoExecutor.hpp"
 
 #include <boost/asio/strand.hpp>
 #include <boost/asio/steady_timer.hpp>
@@ -93,6 +92,12 @@ struct StrandExecutor final : public IoExecutor {
     {}
     virtual void post(std::function<void()> task) override {
         asio::post(m_strand, std::move(task));
+    }
+    virtual InputPtr attachInput(ReadStreamPtr stream) override {
+        return std::make_unique<StrandInput>(std::move(stream), m_strand);
+    }
+    virtual OutputPtr attachOutput(WriteStreamPtr stream) override {
+        return std::make_unique<StrandOutput>(std::move(stream), m_strand);
     }
 };
 
