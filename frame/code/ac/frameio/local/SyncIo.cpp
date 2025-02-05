@@ -18,60 +18,79 @@ namespace {
 using Clock = std::chrono::steady_clock;
 using TimePoint = Clock::time_point;
 
-struct PendingIo {
-    StreamPtr stream;
+struct SyncExecutor;
+using SyncExecutorPtr = std::shared_ptr<SyncExecutor>;
 
-    PendingIo(StreamPtr s) : stream(std::move(s)) {}
+struct SyncExecutor : public IoExecutor, public astl::enable_shared_from {
+    struct PendingIo {
+        StreamPtr stream;
 
-    Frame* m_frame = nullptr;
-    TimePoint m_deadline;
-    IoCb m_cb;
+        Frame* m_frame = nullptr;
+        TimePoint m_deadline;
+        IoCb m_cb;
 
-    explicit operator bool() const noexcept { return !!m_frame; }
+        SyncExecutorPtr m_executor;
+        std::vector<PendingIo*>& m_queue;
 
-    Status syncIo(Frame& f) {
-        assert(!m_frame);
-        return stream->stream(f, nullptr);
-    }
+        PendingIo(StreamPtr s, SyncExecutorPtr executor, std::vector<PendingIo*>& queue)
+            : stream(std::move(s))
+            , m_executor(executor)
+            , m_queue(queue)
+        {}
 
-    void reset(Frame* f, astl::timeout timeout, IoCb&& c) {
-        assert(!m_frame);
-        if (timeout.infinite()) {
-            m_deadline = TimePoint::max();
-        }
-        else {
-            m_deadline = Clock::now() + timeout.duration;
-        }
-        m_frame = f;
-        m_cb = std::move(c);
-    }
+        explicit operator bool() const noexcept { return !!m_frame; }
 
-    void complete(Status status) {
-        assert(m_frame);
-        auto frame = std::exchange(m_frame, nullptr);
-        auto cb = std::exchange(m_cb, nullptr);
-
-        cb(*frame, status);
-    }
-
-    std::optional<Status> tryComplete() {
-        assert(m_frame);
-        assert(m_cb);
-
-        auto status = stream->stream(*m_frame, nullptr);
-
-        if (status.complete()) {
-            return status;
-        }
-        if (std::chrono::steady_clock::now() >= m_deadline) {
-            return status.setTimeout();
+        Status io(Frame& f) {
+            assert(!m_frame);
+            return stream->stream(f, nullptr);
         }
 
-        return {};
-    }
-};
+        void io(Frame& f, astl::timeout timeout, IoCb&& c) {
+            assert(!m_frame);
+            if (timeout.infinite()) {
+                m_deadline = TimePoint::max();
+            }
+            else {
+                m_deadline = Clock::now() + timeout.duration;
+            }
+            m_frame = &f;
+            m_cb = std::move(c);
 
-struct Executor {
+            m_queue.push_back(this);
+        }
+
+        void close() {
+            stream->close();
+        }
+
+        void complete(Status status) {
+            assert(m_frame);
+            auto frame = std::exchange(m_frame, nullptr);
+            auto cb = std::exchange(m_cb, nullptr);
+
+            cb(*frame, status);
+        }
+
+        std::optional<Status> tryComplete() {
+            assert(m_frame);
+            assert(m_cb);
+
+            auto status = stream->stream(*m_frame, nullptr);
+
+            if (status.complete()) {
+                return status;
+            }
+            if (std::chrono::steady_clock::now() >= m_deadline) {
+                return status.setTimeout();
+            }
+
+            return {};
+        }
+    };
+
+    using SyncInput = InputCommon<PendingIo>;
+    using SyncOutput = OutputCommon<PendingIo>;
+
     std::vector<std::function<void()>> m_executingTasks;
 
     std::vector<PendingIo*> m_pendingInputs, m_pendingOutputs;
@@ -79,9 +98,16 @@ struct Executor {
     std::mutex m_taskMutex;
     std::vector<std::function<void()>> m_tasks;
 
-    void pushTask(std::function<void()> task) {
+    void post(std::function<void()> task) override {
         std::lock_guard lock(m_taskMutex);
         m_tasks.push_back(std::move(task));
+    }
+
+    virtual InputPtr attachInput(ReadStreamPtr stream) override {
+        return std::make_unique<SyncInput>(std::move(stream), shared_from(this), m_pendingInputs);
+    }
+    virtual OutputPtr attachOutput(WriteStreamPtr stream) override {
+        return std::make_unique<SyncOutput>(std::move(stream), shared_from(this), m_pendingOutputs);
     }
 
     // return number of tasks executed
@@ -101,7 +127,7 @@ struct Executor {
     void execute() {
         auto tryComplete = [this](PendingIo* pendingIo) {
             if (auto status = pendingIo->tryComplete()) {
-                pushTask([pendingIo, status]() {
+                post([pendingIo, status]() {
                     pendingIo->complete(*status);
                 });
                 return true;
@@ -117,58 +143,15 @@ struct Executor {
     }
 };
 
-using ExecutorPtr = std::shared_ptr<Executor>;
-
-class SyncIo {
-    PendingIo m_pendingIo;
-    ExecutorPtr m_executor;
-    std::vector<PendingIo*>& m_queue;
-
-public:
-    SyncIo(StreamPtr stream, ExecutorPtr executor, std::vector<PendingIo*>& queue)
-        : m_pendingIo(std::move(stream))
-        , m_executor(executor)
-        , m_queue(queue)
-    {}
-
-    Status io(Frame& frame) {
-        return m_pendingIo.syncIo(frame);
-    }
-    void io(Frame& frame, astl::timeout timeout, IoCb&& cb) {
-        m_pendingIo.reset(&frame, timeout, std::move(cb));
-        m_queue.push_back(&m_pendingIo);
-    }
-    void close() {
-        m_pendingIo.stream->close();
-    }
-};
-
-using SyncInput = InputCommon<SyncIo>;
-using SyncOutput = OutputCommon<SyncIo>;
-
-struct SyncExecutor final : public IoExecutor {
-    SyncExecutor(const ExecutorPtr& tq) : m_tq(tq) {}
-    ExecutorPtr m_tq;
-    virtual void post(std::function<void()> task) {
-        m_tq->pushTask(std::move(task));
-    }
-    virtual InputPtr attachInput(ReadStreamPtr stream) override {
-        return std::make_unique<SyncInput>(std::move(stream), m_tq, m_tq->m_pendingInputs);
-    }
-    virtual OutputPtr attachOutput(WriteStreamPtr stream) override {
-        return std::make_unique<SyncOutput>(std::move(stream), m_tq, m_tq->m_pendingOutputs);
-    }
-};
-
 } // namespace
 
 std::function<void()> Session_connectSync(SessionHandlerPtr handler, StreamEndpoint ep) {
-    auto tq = std::make_shared<Executor>();
+    auto tq = std::make_shared<SyncExecutor>();
     SessionHandler::init(
         handler,
-        std::make_unique<SyncInput>(std::move(ep.readStream), tq, tq->m_pendingInputs),
-        std::make_unique<SyncOutput>(std::move(ep.writeStream), tq, tq->m_pendingOutputs),
-        std::make_unique<SyncExecutor>(tq)
+        tq->attachInput(std::move(ep.readStream)),
+        tq->attachOutput(std::move(ep.writeStream)),
+        tq
     );
     tq->execute(); // connect
     return [tq]() { tq->execute(); };

@@ -87,7 +87,7 @@ using StrandOutput = OutputCommon<StrandIo>;
 
 struct StrandExecutor final : public IoExecutor {
     Strand m_strand;
-    StrandExecutor(const Strand& strand)
+    explicit StrandExecutor(const Strand& strand)
         : m_strand(strand)
     {}
     virtual void post(std::function<void()> task) override {
@@ -147,11 +147,12 @@ void LocalIoCtx::complete() {
 
 void LocalIoCtx::connect(SessionHandlerPtr handler, StreamEndpoint ep) {
     Strand strand(m_impl->m_ctx.get_executor());
+    auto executor = std::make_shared<StrandExecutor>(strand);
     SessionHandler::init(
         handler,
-        std::make_unique<StrandInput>(std::move(ep.readStream), strand),
-        std::make_unique<StrandOutput>(std::move(ep.writeStream), strand),
-        std::make_unique<StrandExecutor>(strand)
+        executor->attachInput(std::move(ep.readStream)),
+        executor->attachOutput(std::move(ep.writeStream)),
+        executor
     );
 }
 

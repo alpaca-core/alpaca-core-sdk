@@ -10,5 +10,5 @@ using InputPtr = std::unique_ptr<Input>;
 class Output;
 using OutputPtr = std::unique_ptr<Output>;
 class IoExecutor;
-using IoExecutorPtr = std::unique_ptr<IoExecutor>;
+using IoExecutorPtr = std::shared_ptr<IoExecutor>;
 } // namespace ac::frameio
