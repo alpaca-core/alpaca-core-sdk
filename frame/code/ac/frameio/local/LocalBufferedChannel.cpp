@@ -41,6 +41,15 @@ public:
         : m_maxSize(maxSize)
     {}
 
+    void unlockNotify(std::unique_lock<std::mutex>& lock) {
+        auto notify = std::exchange(m_notify, nullptr);
+        lock.unlock();
+
+        if (notify) {
+            notify();
+        }
+    }
+
     Status write(Frame& frame, Stream::OnBlockedFunc onBlocked) override {
         std::unique_lock lock(m_mutex);
         if (m_closed) {
@@ -49,12 +58,8 @@ public:
         }
         else if (m_queue.size() < m_maxSize) {
             assert(m_queue.empty() || !m_notify);
-            auto onPushFirst = std::exchange(m_notify, nullptr);
             m_queue.push_back(std::move(frame));
-            lock.unlock();
-            if (onPushFirst) {
-                onPushFirst();
-            }
+            unlockNotify(lock);
             return Status{}.setSuccess();
         }
         else {
@@ -62,17 +67,21 @@ public:
         }
     }
 
+    void cancelWriteBlock() override {
+        std::unique_lock lock(m_mutex);
+        if (m_queue.size() == m_maxSize) {
+            // if queue is not full, there is no write notification pending
+            unlockNotify(lock);
+        }
+    }
+
     Status read(Frame& frame, Stream::OnBlockedFunc onBlocked) override {
         std::unique_lock lock(m_mutex);
         if (!m_queue.empty()) {
             assert(m_queue.size() == m_maxSize || !m_notify);
-            auto onFree = std::exchange(m_notify, nullptr);
             frame = std::move(m_queue.front());
             m_queue.pop_front();
-            lock.unlock();
-            if (onFree) {
-                onFree();
-            }
+            unlockNotify(lock);
             return Status{}.setSuccess();
         }
         else if (m_closed) {
@@ -84,15 +93,18 @@ public:
         }
     }
 
+    void cancelReadBlock() override {
+        std::unique_lock lock(m_mutex);
+        if (m_queue.empty()) {
+            // if queue is not empty, there is no read notification pending
+            unlockNotify(lock);
+        }
+    }
+
     void close() override {
         std::unique_lock lock(m_mutex);
         m_closed = true;
-        auto notify = std::exchange(m_notify, nullptr);
-        lock.unlock();
-
-        if (notify) {
-            notify();
-        }
+        unlockNotify(lock);
     }
 
     bool closed() override {
