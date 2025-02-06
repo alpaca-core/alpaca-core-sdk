@@ -36,6 +36,9 @@ public:
 class LocalReadStream final : public impl::LocalStream, public ReadStream {
 public:
     using impl::LocalStream::LocalStream;
+    ~LocalReadStream() {
+        close();
+    }
     Status read(Frame& f, OnBlockedFunc onBlocked) override {
         return m_channel->read(f, std::move(onBlocked));
     }
@@ -47,6 +50,9 @@ public:
 class LocalWriteStream final : public impl::LocalStream, public WriteStream {
 public:
     using impl::LocalStream::LocalStream;
+    ~LocalWriteStream() {
+        close();
+    }
     Status write(Frame& f, OnBlockedFunc onBlocked) override {
         return m_channel->write(f, std::move(onBlocked));
     }
