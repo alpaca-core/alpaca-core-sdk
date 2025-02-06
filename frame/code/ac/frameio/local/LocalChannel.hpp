@@ -11,9 +11,7 @@ class AC_FRAME_EXPORT LocalChannel {
 public:
     virtual ~LocalChannel();
     virtual Status read(Frame& f, Stream::OnBlockedFunc onBlocked) = 0;
-    virtual void cancelReadBlock() = 0;
     virtual Status write(Frame& f, Stream::OnBlockedFunc onBlocked) = 0;
-    virtual void cancelWriteBlock() = 0;
     virtual void close() = 0;
 };
 

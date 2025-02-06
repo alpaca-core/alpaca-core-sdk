@@ -17,6 +17,19 @@ public:
     virtual ~Stream();
     virtual Status stream(Frame& f, OnBlockedFunc onBlocked) = 0;
     virtual void close() = 0;
+
+    // possible functions which are not implemented
+    // they would only make sense if a stream is used from multiple threads
+    // there is no use case for that yet
+    //
+    // allow a stream op to take over the wait state of the stream
+    // optionally trigger a spurious wakeup of the previous waiter if any
+    // default arg is equivalent to current implementation
+    // virtual Status stream(Frame& f, OnBlockedFunc onBlocked, bool callPrevious = false) = 0;
+    //
+    // take over the waiting state of the stream without a stream op
+    // optionally trigger a spurious wakeup of the previous waiter if any
+    // virtual Status replaceWaiter(OnBlockedFunc onBlocked, bool callPrevious = false) = 0;
 };
 
 class AC_FRAME_EXPORT ReadStream : public Stream {

@@ -68,14 +68,6 @@ public:
         }
     }
 
-    void cancelWriteBlock() override {
-        std::unique_lock lock(m_mutex);
-        if (m_queue.size() == m_maxSize) {
-            // if queue is not full, there is no write notification pending
-            unlockNotify(lock);
-        }
-    }
-
     Status read(Frame& frame, Stream::OnBlockedFunc onBlocked) override {
         std::unique_lock lock(m_mutex);
         if (!m_queue.empty()) {
@@ -91,14 +83,6 @@ public:
         }
         else {
             return block(onBlocked);
-        }
-    }
-
-    void cancelReadBlock() override {
-        std::unique_lock lock(m_mutex);
-        if (m_queue.empty()) {
-            // if queue is not empty, there is no read notification pending
-            unlockNotify(lock);
         }
     }
 
