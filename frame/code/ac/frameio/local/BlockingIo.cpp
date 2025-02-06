@@ -26,10 +26,6 @@ struct BlockingFrameIo {
 
 
     Status io(Frame& frame, astl::timeout timeout) {
-        if (timeout.is_zero()) {
-            return m_stream->stream(frame, nullptr);
-        }
-
         std::promise<void> promise;
         auto f = promise.get_future();
 
