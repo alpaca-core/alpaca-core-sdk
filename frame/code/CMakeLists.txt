@@ -47,7 +47,7 @@ target_sources(ac-frame
         ac/frameio/IoCommon.hpp
         ac/frameio/BasicStreamIo.hpp
         ac/frameio/SessionHandler.hpp
-        ac/frameio/SessionHandlerPtr.hpp                
+        ac/frameio/SessionHandlerPtr.hpp
         ac/frameio/IoException.hpp
         ac/frameio/SessionCoro.hpp
 
@@ -75,7 +75,7 @@ target_sources(ac-frame
         ac/frameio/Io.cpp
         ac/frameio/SessionHandler.cpp
         ac/frameio/IoException.cpp
-        ac/frameio/SessionCoro.cpp        
+        ac/frameio/SessionCoro.cpp
 
         ac/frameio/local/LocalChannel.cpp
         ac/frameio/local/LocalBufferedChannel.cpp
