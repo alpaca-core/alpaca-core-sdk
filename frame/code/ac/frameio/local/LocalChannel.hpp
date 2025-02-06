@@ -3,7 +3,6 @@
 //
 #pragma once
 #include "../Stream.hpp"
-#include "LocalChannelPtr.hpp"
 
 namespace ac::frameio {
 
@@ -14,6 +13,8 @@ public:
     virtual Status write(Frame& f, Stream::OnBlockedFunc onBlocked) = 0;
     virtual void close() = 0;
 };
+
+using LocalChannelPtr = std::unique_ptr<LocalChannel>;
 
 namespace impl {
 using LocalChannelSharedPtr = std::shared_ptr<LocalChannel>;
