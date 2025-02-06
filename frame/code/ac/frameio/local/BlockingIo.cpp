@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 //
 #include "BlockingIo.hpp"
-#include "../IoCommon.hpp"
-#include "../BasicStreamIo.hpp"
 #include "../StreamEndpoint.hpp"
 #include <future>
 
@@ -21,14 +19,16 @@ bool waitFor(std::future<void>& f, astl::timeout timeout) {
     }
 }
 
-struct BlockingFrameIo : public BasicStreamIo {
-    using BasicStreamIo::BasicStreamIo;
+struct BlockingFrameIo {
+    StreamPtr m_stream;
+
+    BlockingFrameIo(StreamPtr stream) : m_stream(std::move(stream)) {}
 
     Status io(Frame& frame) {
         return m_stream->stream(frame, nullptr);
     }
 
-    void io(Frame& frame, astl::timeout timeout, IoCb cb) {
+    Status io(Frame& frame, astl::timeout timeout) {
         std::promise<void> promise;
         auto f = promise.get_future();
 
@@ -40,7 +40,7 @@ struct BlockingFrameIo : public BasicStreamIo {
             });
 
             if (status.complete()) {
-                return cb(frame, status);
+                return status;
             }
         }
 
@@ -53,19 +53,20 @@ struct BlockingFrameIo : public BasicStreamIo {
         }
 
         status |= m_stream->stream(frame, nullptr);
-        cb(frame, status);
+        return status;
+    }
+
+    void close() {
+        m_stream->close();
     }
 };
-
-using BlockingFrameInput = InputCommon<BlockingFrameIo>;
-using BlockingFrameOutput = OutputCommon<BlockingFrameIo>;
 
 } // namespace
 
 class BlockingIo::Impl {
 public:
-    BlockingFrameInput m_in;
-    BlockingFrameOutput m_out;
+    BlockingFrameIo m_in;
+    BlockingFrameIo m_out;
     //
 
     bool m_connected = true;
@@ -79,20 +80,12 @@ public:
         close();
     }
 
-    Status io(BlockingFrameIo& q, Frame& frame, astl::timeout timeout) {
-        Status ret;
-        q.io(frame, timeout, [&](Frame&, Status status) {
-            ret = status;
-        });
-        return ret;
-    }
-
     Status poll(Frame& frame, astl::timeout timeout) {
-        return io(m_in, frame, timeout);
+        return m_in.io(frame, timeout);
     }
 
     Status push(Frame& frame, astl::timeout timeout) {
-        return io(m_out, frame, timeout);
+        return m_out.io(frame, timeout);
     }
 
     void close() {
