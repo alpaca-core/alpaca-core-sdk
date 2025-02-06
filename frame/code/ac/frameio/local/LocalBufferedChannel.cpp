@@ -42,6 +42,7 @@ public:
     {}
 
     void unlockNotify(std::unique_lock<std::mutex>& lock) {
+        assert(lock.owns_lock());
         auto notify = std::exchange(m_notify, nullptr);
         lock.unlock();
 
