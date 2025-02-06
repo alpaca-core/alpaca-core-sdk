@@ -9,11 +9,7 @@
 using namespace ac::frameio;
 
 TEST_CASE("LocalBufferedChannel 1") {
-    auto channel = LocalBufferedChannel_create(1);
-    REQUIRE(channel);
-    CHECK_FALSE(channel->closed());
-
-    auto [readStream, writeStream] = LocalChannel_getStreams(channel);
+    auto [readStream, writeStream] = LocalChannel_getStreams(LocalBufferedChannel_create(1));
 
     ac::Frame frame;
     ac::Frame frame2;
@@ -84,7 +80,6 @@ TEST_CASE("LocalBufferedChannel 1") {
     CHECK(status.success());
 
     readStream->close();
-    CHECK(channel->closed());
 
     status = writeStream->write(frame2, nullptr);
     CHECK(status.closed());
@@ -98,11 +93,7 @@ TEST_CASE("LocalBufferedChannel 1") {
 }
 
 TEST_CASE("LocalBufferedChannel 10") {
-    auto channel = LocalBufferedChannel_create(10);
-    REQUIRE(channel);
-    CHECK_FALSE(channel->closed());
-
-    auto [readStream, writeStream] = LocalChannel_getStreams(channel);
+    auto [readStream, writeStream] = LocalChannel_getStreams(LocalBufferedChannel_create(10));
 
     ac::Frame frame;
     int i = 0;
@@ -158,10 +149,10 @@ TEST_CASE("LocalBufferedChannel 10") {
 }
 
 TEST_CASE("local endpoints") {
-    auto a = LocalBufferedChannel_create(3);
-    auto b = LocalBufferedChannel_create(5);
-
-    auto [ab, ba] = LocalChannel_getEndpoints(a, b);
+    auto [ab, ba] = LocalChannel_getEndpoints(
+        LocalBufferedChannel_create(3),
+        LocalBufferedChannel_create(5)
+    );
 
     ac::Frame f0, f1;
 

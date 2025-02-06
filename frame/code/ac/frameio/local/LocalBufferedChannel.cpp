@@ -116,7 +116,7 @@ public:
 } // namespace
 
 LocalChannelPtr LocalBufferedChannel_create(size_t size) {
-    return std::make_shared<LocalBufferedChannel>(size);
+    return std::make_unique<LocalBufferedChannel>(size);
 }
 
 } // namespace ac::frameio

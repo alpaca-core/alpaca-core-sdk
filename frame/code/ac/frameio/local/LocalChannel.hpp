@@ -19,15 +19,16 @@ public:
 };
 
 namespace impl {
+using LocalChannelSharedPtr = std::shared_ptr<LocalChannel>;
 class LocalStream {
 protected:
-    LocalChannelPtr m_channel;
+    LocalChannelSharedPtr m_channel;
     ~LocalStream() = default;
 public:
     LocalStream() = default;
 
     // intentionally implicit
-    LocalStream(LocalChannelPtr channel) : m_channel(std::move(channel)) {}
+    LocalStream(LocalChannelSharedPtr channel) : m_channel(std::move(channel)) {}
 
     explicit operator bool() const { return !!m_channel; }
 };
@@ -54,5 +55,21 @@ public:
         m_channel->close();
     }
 };
+
+using LocalReadStreamPtr = std::unique_ptr<LocalReadStream>;
+using LocalWriteStreamPtr = std::unique_ptr<LocalWriteStream>;
+
+struct LocalChannelStreams {
+    LocalReadStreamPtr in;
+    LocalWriteStreamPtr out;
+};
+
+inline LocalChannelStreams LocalChannel_getStreams(LocalChannelPtr channel) {
+    impl::LocalChannelSharedPtr sharedChannel = std::move(channel);
+    LocalChannelStreams streams;
+    streams.in = std::make_unique<LocalReadStream>(sharedChannel);
+    streams.out = std::make_unique<LocalWriteStream>(sharedChannel);
+    return streams;
+}
 
 } // namespace ac::frameio

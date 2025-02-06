@@ -21,10 +21,10 @@ LocalIoRunner::~LocalIoRunner() {
 }
 
 LocalEndpoints LocalIoRunner::getEndpoints(ChannelBufferSizes bufferSizes) {
-    auto cl2r = LocalBufferedChannel_create(bufferSizes.localToRemote);
-    auto cr2l = LocalBufferedChannel_create(bufferSizes.remoteToLocal);
-
-    return LocalChannel_getEndpoints(cl2r, cr2l);
+    return LocalChannel_getEndpoints(
+        LocalBufferedChannel_create(bufferSizes.localToRemote),
+        LocalBufferedChannel_create(bufferSizes.remoteToLocal)
+    );
 }
 
 BlockingIo LocalIoRunner::connectBlocking(SessionHandlerPtr remoteHandler, ChannelBufferSizes bufferSizes) {

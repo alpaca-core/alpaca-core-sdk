@@ -6,5 +6,5 @@
 
 namespace ac::frameio {
 class LocalChannel;
-using LocalChannelPtr = std::shared_ptr<LocalChannel>;
+using LocalChannelPtr = std::unique_ptr<LocalChannel>;
 } // namespace ac::frameio
