@@ -15,7 +15,6 @@ public:
     virtual Status write(Frame& f, Stream::OnBlockedFunc onBlocked) = 0;
     virtual void cancelWriteBlock() = 0;
     virtual void close() = 0;
-    virtual bool closed() = 0;
 };
 
 namespace impl {

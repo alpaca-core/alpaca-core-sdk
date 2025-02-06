@@ -106,11 +106,6 @@ public:
         m_closed = true;
         unlockNotify(lock);
     }
-
-    bool closed() override {
-        std::lock_guard lock(m_mutex);
-        return m_closed;
-    }
 };
 
 } // namespace
