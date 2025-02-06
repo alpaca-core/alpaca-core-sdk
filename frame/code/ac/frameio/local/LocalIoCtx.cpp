@@ -25,7 +25,7 @@ class ETimer : public asio::steady_timer {
 public:
     using asio::steady_timer::basic_waitable_timer;
     void expires_after_ms(astl::timeout timeout) {
-        if (timeout.infinite()) {
+        if (timeout.is_infinite()) {
             expires_at(asio::steady_timer::time_point::max());
         }
         else {

@@ -10,7 +10,7 @@ namespace ac::frameio {
 namespace {
 
 bool waitFor(std::future<void>& f, astl::timeout timeout) {
-    if (timeout.infinite()) {
+    if (timeout.is_infinite()) {
         f.wait();
         return true;
     }
@@ -24,11 +24,12 @@ struct BlockingFrameIo {
 
     BlockingFrameIo(StreamPtr stream) : m_stream(std::move(stream)) {}
 
-    Status io(Frame& frame) {
-        return m_stream->stream(frame, nullptr);
-    }
 
     Status io(Frame& frame, astl::timeout timeout) {
+        if (timeout.is_zero()) {
+            return m_stream->stream(frame, nullptr);
+        }
+
         std::promise<void> promise;
         auto f = promise.get_future();
 

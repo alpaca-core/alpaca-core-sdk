@@ -9,43 +9,43 @@ TEST_CASE("timeout") {
     {
         timeout t(std::chrono::milliseconds(42));
         CHECK(t.ms() == 42);
-        CHECK_FALSE(t.infinite());
-        CHECK_FALSE(t.zero());
+        CHECK_FALSE(t.is_infinite());
+        CHECK_FALSE(t.is_zero());
     }
 
     {
         auto t = timeout::after(std::chrono::milliseconds(12));
         CHECK(t.ms() == 12);
-        CHECK_FALSE(t.infinite());
-        CHECK_FALSE(t.zero());
+        CHECK_FALSE(t.is_infinite());
+        CHECK_FALSE(t.is_zero());
     }
 
     {
         auto t = timeout::after_ms(8);
         CHECK(t.ms() == 8);
-        CHECK_FALSE(t.infinite());
-        CHECK_FALSE(t.zero());
+        CHECK_FALSE(t.is_infinite());
+        CHECK_FALSE(t.is_zero());
     }
 
     {
         auto t = timeout::never();
         CHECK(t.ms() < 0);
-        CHECK(t.infinite());
-        CHECK_FALSE(t.zero());
+        CHECK(t.is_infinite());
+        CHECK_FALSE(t.is_zero());
     }
 
     {
         auto t = timeout::now();
         CHECK(t.ms() == 0);
-        CHECK_FALSE(t.infinite());
-        CHECK(t.zero());
+        CHECK_FALSE(t.is_infinite());
+        CHECK(t.is_zero());
     }
 
     {
         auto t = timeout::immediately();
         CHECK(t.ms() == 0);
-        CHECK_FALSE(t.infinite());
-        CHECK(t.zero());
+        CHECK_FALSE(t.is_infinite());
+        CHECK(t.is_zero());
     }
 }
 
@@ -63,16 +63,16 @@ TEST_CASE("chrono") {
     CHECK(t.ms() == 2000);
 
     t = timeout::after(-3min);
-    CHECK(t.infinite());
+    CHECK(t.is_infinite());
 
     t = timeout::after(0ms);
-    CHECK(t.zero());
+    CHECK(t.is_zero());
 }
 
 TEST_CASE("vals") {
     using namespace astl::timeout_vals;
     CHECK(await_completion_for(std::chrono::milliseconds(53)).ms() == 53);
-    CHECK(await_completion.infinite());
-    CHECK(no_wait.zero());
-    CHECK(proceed_immediately.zero());
+    CHECK(await_completion.is_infinite());
+    CHECK(no_wait.is_zero());
+    CHECK(proceed_immediately.is_zero());
 }

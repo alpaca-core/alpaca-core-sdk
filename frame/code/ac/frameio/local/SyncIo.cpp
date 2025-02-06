@@ -47,7 +47,7 @@ struct SyncExecutor : public IoExecutor, public astl::enable_shared_from {
 
         void io(Frame& f, astl::timeout timeout, IoCb&& c) {
             assert(!m_frame);
-            if (timeout.infinite()) {
+            if (timeout.is_infinite()) {
                 m_deadline = TimePoint::max();
             }
             else {

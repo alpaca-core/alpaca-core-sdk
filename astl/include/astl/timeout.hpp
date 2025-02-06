@@ -24,14 +24,14 @@ struct t_timeout {
     static constexpr t_timeout immediately() { return now(); }
 
     constexpr rep_t ms() const { return duration.count(); };
-    constexpr bool infinite() const { return ms() < 0; }
-    constexpr bool zero() const { return ms() == 0; }
+    constexpr bool is_infinite() const { return ms() < 0; }
+    constexpr bool is_zero() const { return ms() == 0; }
 };
 
 // we don't expect huge timeouts, so no point in wasting bits by default
 using timeout = t_timeout<int32_t>;
 
-namespace timeout_vals {
+inline namespace timeout_vals {
 inline constexpr timeout await_completion_for(std::chrono::milliseconds d) { return timeout::after(d); }
 inline constexpr timeout await_completion = timeout::never();
 inline constexpr timeout no_wait = timeout::now();
