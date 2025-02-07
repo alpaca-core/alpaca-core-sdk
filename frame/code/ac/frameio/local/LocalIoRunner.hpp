@@ -32,6 +32,8 @@ public:
 
     static LocalEndpoints getEndpoints(ChannelBufferSizes bufferSizes = {});
 
+    void connect(SessionHandlerPtr remoteHandler, StreamEndpoint ep);
+    StreamEndpoint connect(SessionHandlerPtr remoteHandler, ChannelBufferSizes bufferSizes = {});
     BlockingIo connectBlocking(SessionHandlerPtr remoteHandler, ChannelBufferSizes bufferSizes = {});
     void connect(SessionHandlerPtr local, SessionHandlerPtr remote, ChannelBufferSizes bufferSizes = {});
 

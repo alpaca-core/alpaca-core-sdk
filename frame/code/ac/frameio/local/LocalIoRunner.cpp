@@ -27,10 +27,18 @@ LocalEndpoints LocalIoRunner::getEndpoints(ChannelBufferSizes bufferSizes) {
     );
 }
 
-BlockingIo LocalIoRunner::connectBlocking(SessionHandlerPtr remoteHandler, ChannelBufferSizes bufferSizes) {
+void LocalIoRunner::connect(SessionHandlerPtr remoteHandler, StreamEndpoint ep) {
+    m_ctx.connect(remoteHandler, std::move(ep));
+}
+
+StreamEndpoint LocalIoRunner::connect(SessionHandlerPtr remoteHandler, ChannelBufferSizes bufferSizes) {
     auto [local, remote] = getEndpoints(bufferSizes);
     m_ctx.connect(remoteHandler, std::move(remote));
-    return BlockingIo(std::move(local));
+    return std::move(local);
+}
+
+BlockingIo LocalIoRunner::connectBlocking(SessionHandlerPtr remoteHandler, ChannelBufferSizes bufferSizes) {
+    return BlockingIo(connect(remoteHandler, bufferSizes));
 }
 
 void LocalIoRunner::connect(SessionHandlerPtr local, SessionHandlerPtr remote, ChannelBufferSizes bufferSizes) {
