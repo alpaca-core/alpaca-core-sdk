@@ -4,6 +4,9 @@
 #include <ac/frameio/local/BlockingSyncIoWrapper.hpp>
 #include <ac/frameio/SessionHandler.hpp>
 #include <ac/frameio/SessionCoro.hpp>
+#include <ac/frameio/StreamEndpoint.hpp>
+#include <ac/frameio/local/LocalIoRunner.hpp>
+#include <ac/frameio/local/BlockingIo.hpp>
 #include <doctest/doctest.h>
 #include <string>
 
@@ -38,8 +41,8 @@ SessionCoro<void> session() {
     }
 }
 
-ac::Frame frame(std::string str) {
-    return ac::Frame{ str, {} };
+ac::Frame frame(std::string str, ac::Dict data = {}) {
+    return ac::Frame{str, std::move(data)};
 }
 
 void testSession(BlockingSyncIoWrapper& io) {
@@ -128,4 +131,57 @@ TEST_CASE("successor session") {
         io.push(frame("goto echo"));
         testSession(io);
     }
+}
+
+SessionCoro<void> proxy(StreamEndpoint ep) {
+    auto client = co_await coro::Io{};
+    auto server = client.attach(std::move(ep));
+
+    while (true) {
+        auto fin = co_await client.pollFrame();
+        if (fin.frame.op == "done") {
+            co_return;
+        }
+        fin.frame.op += " (proxied)";
+        co_await server.pushFrame(fin.frame);
+        auto fout = co_await server.pollFrame();
+        co_await client.pushFrame(fout.frame);
+    }
+}
+
+SessionCoro<void> server() {
+    auto io = co_await coro::Io{};
+    while (true) try {
+        auto fin = co_await io.pollFrame();
+        auto i = fin.frame.data.get<int>();
+        ac::Frame fout;
+        fout.op = "ret";
+        fout.data = i + 1;
+        co_await io.pushFrame(fout);
+    }
+    catch (IoClosed&) {
+        co_return;
+    }
+}
+
+TEST_CASE("proxy") {
+    LocalIoRunner ctx;
+    auto ep = ctx.connect(CoroSessionHandler::create(server()));
+    auto io = ctx.connectBlocking(CoroSessionHandler::create(proxy(std::move(ep))));
+
+    io.push(frame("xx", 1));
+    auto f = io.poll();
+    CHECK(f.success());
+    CHECK(f.frame.op == "ret");
+    CHECK(f.frame.data.get<int>() == 2);
+
+    io.push(frame("yy", 32));
+    f = io.poll();
+    CHECK(f.success());
+    CHECK(f.frame.op == "ret");
+    CHECK(f.frame.data.get<int>() == 33);
+
+    io.push(frame("done"));
+    f = io.poll();
+    CHECK(f.closed());
 }
