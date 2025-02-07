@@ -3,8 +3,9 @@
 //
 #include "SessionCoro.hpp"
 #include "SessionHandler.hpp"
-#include "Io.hpp"
 #include "IoExecutor.hpp"
+#include "StreamEndpoint.hpp"
+#include "Io.hpp"
 #include <cassert>
 
 namespace ac::frameio {
@@ -49,20 +50,20 @@ void CoroSessionHandler::postResume() noexcept {
     });
 }
 
-Status CoroSessionHandler::getFrame(Frame& frame) noexcept {
-    return shInput().get(frame);
+Status CoroSessionHandler::getFrame(Input& in, Frame& frame) noexcept {
+    return in.get(frame);
 }
-void CoroSessionHandler::pollFrame(Frame& frame, Status& status, astl::timeout timeout) noexcept {
-    shInput().poll(frame, timeout, [this, &status, pl = shared_from_this()](Frame&, Status s) {
+void CoroSessionHandler::pollFrame(Input& in, Frame& frame, Status& status, astl::timeout timeout) noexcept {
+    in.poll(frame, timeout, [this, &status, pl = shared_from_this()](Frame&, Status s) {
         status = s;
         m_currentCoro.resume();
     });
 }
-Status CoroSessionHandler::putFrame(Frame& frame) noexcept {
-    return shOutput().put(frame);
+Status CoroSessionHandler::putFrame(Output& out, Frame& frame) noexcept {
+    return out.put(frame);
 }
-void CoroSessionHandler::pushFrame(Frame& frame, Status& status, astl::timeout timeout) noexcept {
-    shOutput().push(frame, timeout, [this, &status, pl = shared_from_this()](Frame&, Status s) {
+void CoroSessionHandler::pushFrame(Output& out, Frame& frame, Status& status, astl::timeout timeout) noexcept {
+    out.push(frame, timeout, [this, &status, pl = shared_from_this()](Frame&, Status s) {
         status = s;
         m_currentCoro.resume();
     });
@@ -76,5 +77,27 @@ void CoroSessionHandler::shConnected() noexcept {
     assert(m_currentCoro);
     m_currentCoro.resume();
 }
+
+namespace coro {
+
+AttachedIo::AttachedIo(CoroSessionHandlerPtr handler, StreamEndpoint ep) {
+    m_handler = std::move(handler);
+    m_inputPl = m_handler->shExecutor().attachInput(std::move(ep.readStream));
+    m_input = m_inputPl.get();
+    m_outputPl = m_handler->shExecutor().attachOutput(std::move(ep.writeStream));
+    m_output = m_outputPl.get();
+}
+
+AttachedIo::~AttachedIo() = default;
+
+AttachedIo::AttachedIo(AttachedIo&&) noexcept = default;
+AttachedIo& AttachedIo::operator=(AttachedIo&&) noexcept = default;
+
+AttachedIo Io::attach(StreamEndpoint ep) {
+    assert(m_handler);
+    return AttachedIo(m_handler, std::move(ep));
+}
+
+} // namespace coro
 
 } // namespace ac::frameio

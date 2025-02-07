@@ -13,6 +13,8 @@
 
 namespace ac::frameio {
 
+struct StreamEndpoint;
+
 template <typename T>
 struct SessionCoro;
 
@@ -33,10 +35,10 @@ public:
     static SessionHandlerPtr create(SessionCoro<SessionHandlerPtr> coro);
 
     void postResume() noexcept;
-    Status getFrame(Frame& frame) noexcept;
-    void pollFrame(Frame& frame, Status& status, astl::timeout timeout) noexcept;
-    Status putFrame(Frame& frame) noexcept;
-    void pushFrame(Frame& frame, Status& status, astl::timeout timeout) noexcept;
+    Status getFrame(Input& in, Frame& frame) noexcept;
+    void pollFrame(Input& in, Frame& frame, Status& status, astl::timeout timeout) noexcept;
+    Status putFrame(Output& out, Frame& frame) noexcept;
+    void pushFrame(Output& out, Frame& frame, Status& status, astl::timeout timeout) noexcept;
     void close() noexcept;
 private:
     template <typename T>
@@ -59,34 +61,38 @@ private:
 namespace coro {
 
 namespace impl {
+template <typename Io>
 struct BasicFrameAwaitable {
     CoroSessionHandlerPtr handler;
+    Io& io;
     Frame* frame;
     astl::timeout timeout;
     Status status;
 
-    BasicFrameAwaitable(const CoroSessionHandlerPtr& h, Frame& f, astl::timeout t) noexcept : handler(h), frame(&f), timeout(t) {}
+    BasicFrameAwaitable(const CoroSessionHandlerPtr& h, Io& io, Frame& f, astl::timeout t) noexcept
+        : handler(h), io(io), frame(&f), timeout(t)
+    {}
     bool await_ready() const noexcept { return false; }
 };
 
-struct BasicPollAwaitable : public BasicFrameAwaitable {
-    using BasicFrameAwaitable::BasicFrameAwaitable;
+struct BasicPollAwaitable : public BasicFrameAwaitable<Input> {
+    using BasicFrameAwaitable<Input>::BasicFrameAwaitable;
     void await_suspend(std::coroutine_handle<>) noexcept {
-        this->handler->pollFrame(*this->frame, this->status, this->timeout);
+        this->handler->pollFrame(this->io, *this->frame, this->status, this->timeout);
     }
 };
 
-struct BasicPushAwaitable : public BasicFrameAwaitable {
-    using BasicFrameAwaitable::BasicFrameAwaitable;
+struct BasicPushAwaitable : public BasicFrameAwaitable<Output> {
+    using BasicFrameAwaitable<Output>::BasicFrameAwaitable;
     void await_suspend(std::coroutine_handle<>) noexcept {
-        this->handler->pushFrame(*this->frame, this->status, this->timeout);
+        this->handler->pushFrame(this->io, *this->frame, this->status, this->timeout);
     }
 };
 } // namespace impl
 
 template <bool E = true>
 struct Poll: public impl::BasicPollAwaitable {
-    Poll(const CoroSessionHandlerPtr& h, astl::timeout timeout) noexcept : BasicPollAwaitable(h, framev, timeout) {}
+    Poll(const CoroSessionHandlerPtr& h, Input& in, astl::timeout timeout) noexcept : BasicPollAwaitable(h, in, framev, timeout) {}
     FrameWithStatus await_resume() noexcept(!E) {
         auto ret = FrameWithStatus(std::move(framev), this->status);
         if constexpr (E) {
@@ -241,14 +247,20 @@ private:
 
 namespace coro {
 
-struct Io {
-    CoroSessionHandlerPtr handler;
+namespace impl {
+class BasicIo {
+protected:
+    CoroSessionHandlerPtr m_handler;
+
+    Input* m_input = nullptr;
+    Output* m_output = nullptr;
+public:
 
     // sync (eager) operations
 
     template <bool E = true>
     [[nodiscard]] Status getFrame(Frame& frame) noexcept(E) {
-        auto ret = handler->getFrame(frame);
+        auto ret = m_handler->getFrame(*m_input, frame);
         if constexpr (E) {
             IoClosed::throwInputIfClosed(ret);
         }
@@ -262,7 +274,7 @@ struct Io {
     }
     template <bool E = true>
     [[nodiscard]] Status putFrame(Frame& frame) noexcept(E) {
-        auto ret = handler->putFrame(frame);
+        auto ret = m_handler->putFrame(*m_output, frame);
         if constexpr (E) {
             IoClosed::throwOutputIfClosed(ret);
         }
@@ -277,30 +289,50 @@ struct Io {
 
     template <bool E = true>
     [[nodiscard]] Poll<E> pollFrame(astl::timeout timeout = astl::timeout::never()) noexcept {
-        return {handler, timeout};
+        return {m_handler, *m_input, timeout};
     }
     template <bool E = true>
     [[nodiscard]] PollRef<E> pollFrame(Frame& frame, astl::timeout timeout = astl::timeout::never()) noexcept {
-        return {handler, frame, timeout};
+        return {m_handler, *m_input, frame, timeout};
     }
     template <bool E = true>
     [[nodiscard]] Push<E> pushFrame(Frame& frame, astl::timeout timeout = astl::timeout::never()) noexcept {
-        return {handler, frame, timeout};
+        return {m_handler, *m_output, frame, timeout};
     }
     template <bool E = true>
     [[nodiscard]] Push<E> pushFrame(Frame&& frame, astl::timeout timeout = astl::timeout::never()) noexcept {
-        return {handler, frame, timeout};
+        return {m_handler, *m_output, frame, timeout};
     }
+};
+} // namespace impl
+
+class AC_FRAME_EXPORT AttachedIo : public impl::BasicIo {
+    // optional input/ouput payload (will be null if pointing within the session)
+    InputPtr m_inputPl;
+    OutputPtr m_outputPl;
+public:
+    AttachedIo(CoroSessionHandlerPtr handler, StreamEndpoint ep);
+    ~AttachedIo();
+
+    AttachedIo(AttachedIo&&) noexcept;
+    AttachedIo& operator=(AttachedIo&&) noexcept;
+};
+
+class Io : public impl::BasicIo {
+public:
+    [[nodiscard]] AC_FRAME_EXPORT AttachedIo attach(StreamEndpoint ep);
 
     // awaitable interface
     bool await_ready() const noexcept { return false; }
     template <typename PromiseType>
     bool await_suspend(std::coroutine_handle<PromiseType> h) noexcept {
-        assert(!handler);
-        handler = h.promise().m_handler;
+        assert(!m_handler);
+        m_handler = h.promise().m_handler;
+        m_input = &m_handler->shInput();
+        m_output = &m_handler->shOutput();
         return false;
     }
-    Io await_resume() noexcept { return *this; }
+    Io await_resume() noexcept { return std::move(*this); }
 };
 
 } // namespace coro

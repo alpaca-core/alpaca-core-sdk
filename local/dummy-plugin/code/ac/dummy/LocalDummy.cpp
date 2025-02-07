@@ -49,7 +49,7 @@ struct BasicRunner {
     }
 };
 
-SessionCoro<void> Dummy_runInstance(coro::Io io, std::unique_ptr<dummy::Instance> instance) {
+SessionCoro<void> Dummy_runInstance(coro::Io& io, std::unique_ptr<dummy::Instance> instance) {
     using Schema = sc::StateInstance;
 
     struct Runner : public BasicRunner {
@@ -90,7 +90,7 @@ SessionCoro<void> Dummy_runInstance(coro::Io io, std::unique_ptr<dummy::Instance
     }
 }
 
-SessionCoro<void> Dummy_runModel(coro::Io io, std::unique_ptr<dummy::Model> model) {
+SessionCoro<void> Dummy_runModel(coro::Io& io, std::unique_ptr<dummy::Model> model) {
     using Schema = sc::StateModelLoaded;
 
     struct Runner : public BasicRunner {

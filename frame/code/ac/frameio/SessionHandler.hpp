@@ -15,16 +15,16 @@ public:
     SessionHandler(const SessionHandler&) = delete;
     SessionHandler& operator=(const SessionHandler&) = delete;
 
+    Input& shInput() const noexcept { return *m_in; }
+    Output& shOutput() const noexcept { return *m_out; }
+    IoExecutor& shExecutor() const noexcept { return *m_executor; }
+
 protected:
     SessionHandler() noexcept;
     // intentionally not virtual. Objects are not owned through this, but instead through shared pointers
     ~SessionHandler();
 
     virtual void shConnected() noexcept;
-
-    Input& shInput() const noexcept { return *m_in; }
-    Output& shOutput() const noexcept { return *m_out; }
-    IoExecutor& shExecutor() const noexcept { return *m_executor; }
 
     // sets a handler which will succeed (be attached to) this one's io once this is destroyed
     void setSuccessor(SessionHandlerPtr successor) noexcept {
