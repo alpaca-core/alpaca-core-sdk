@@ -9,12 +9,8 @@
 namespace ac::frameio {
 
 LocalIoRunner::LocalIoRunner(uint32_t numThreads)
-    : m_threads(numThreads)
-{
-    for (auto& t : m_threads) {
-        t = std::thread([this] { m_ctx.run(); });
-    }
-}
+    : m_threads(m_ctx, numThreads)
+{}
 
 LocalIoRunner::~LocalIoRunner() {
     join();
@@ -57,10 +53,7 @@ void LocalIoRunner::join(bool forceStop) {
         m_ctx.complete();
     }
 
-    for (auto& t : m_threads) {
-        t.join();
-    }
-    m_threads.clear();
+    m_threads.join();
 }
 
 } // namespace ac::frameio

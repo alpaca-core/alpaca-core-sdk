@@ -6,8 +6,7 @@
 #include "LocalIoCtx.hpp"
 #include "../SessionHandlerPtr.hpp"
 
-#include <thread>
-#include <vector>
+#include <astl/multi_thread_runner.hpp>
 #include <cstdint>
 
 namespace ac::frameio {
@@ -43,7 +42,7 @@ public:
 
 private:
     LocalIoCtx m_ctx;
-    std::vector<std::thread> m_threads;
+    astl::multi_thread_runner<LocalIoCtx> m_threads;
 };
 
 } // namespace ac::frameio
