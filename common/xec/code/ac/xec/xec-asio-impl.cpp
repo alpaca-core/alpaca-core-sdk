@@ -113,7 +113,7 @@ public:
         return m_timer.expiry();
     }
 
-    virtual void add_wait_cb(cb_t cb) override {
+    virtual void add_wait_cb(wait_func cb) override {
         m_timer.async_wait(std::move(cb));
     }
 };

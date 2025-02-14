@@ -4,11 +4,10 @@
 #pragma once
 #include "api.h"
 #include "strand.hpp"
-#include "ufunc.hpp"
+#include "wait_func.hpp"
 #include "timer_ptr.hpp"
 #include <chrono>
 #include <cstddef>
-#include <system_error>
 
 namespace ac::xec {
 
@@ -32,8 +31,7 @@ public:
 
     virtual time_point expiry() const = 0;
 
-    using cb_t = ufunc<void(const std::error_code& cancelled)>;
-    virtual void add_wait_cb(cb_t cb) = 0;
+    virtual void add_wait_cb(wait_func cb) = 0;
 
     static timer_ptr create(const strand& s);
 private:
