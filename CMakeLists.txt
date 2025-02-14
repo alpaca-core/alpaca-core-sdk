@@ -60,9 +60,7 @@ endif()
 # - don't build dummy
 # we could do it if there's interest
 
-add_subdirectory(astl)
-
-add_subdirectory(jalog)
+add_subdirectory(common)
 
 add_subdirectory(frame)
 add_subdirectory(local)
