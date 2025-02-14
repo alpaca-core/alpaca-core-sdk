@@ -74,6 +74,7 @@ configure_file(
 )
 
 # export
+export(EXPORT ac-common-targets)
 export(EXPORT ac-frame-targets)
 export(EXPORT ac-local-targets)
 configure_file(
@@ -83,6 +84,9 @@ configure_file(
 )
 
 # install
+install(EXPORT ac-common-targets
+    DESTINATION share/cmake
+)
 install(EXPORT ac-frame-targets
     DESTINATION share/cmake
 )

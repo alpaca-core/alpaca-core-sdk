@@ -34,6 +34,6 @@ target_sources(astl INTERFACE FILE_SET HEADERS FILES
 # target_link_libraries(astl INTERFACE )
 
 install(TARGETS astl
-    EXPORT ac-frame-targets
+    EXPORT ac-common-targets
     FILE_SET HEADERS
 )

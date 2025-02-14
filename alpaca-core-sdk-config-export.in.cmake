@@ -1,6 +1,7 @@
 # Copyright (c) Alpaca Core
 # SPDX-License-Identifier: MIT
-#
+
+include("${CMAKE_CURRENT_LIST_DIR}/ac-common-targets.cmake")#
 include("${CMAKE_CURRENT_LIST_DIR}/ac-frame-targets.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/ac-local-targets.cmake")
 message(STATUS "alpaca-core-sdk @PROJECT_VERSION@ @CMAKE_BUILD_TYPE@ found in ${CMAKE_CURRENT_LIST_DIR}")
