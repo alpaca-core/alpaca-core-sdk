@@ -39,6 +39,11 @@ public:
         m_timer->expire_at(t);
         m_timer->add_wait_cb(std::move(cb));
     }
+
+    void wait(astl::timeout t, wait_func cb) {
+        m_timer->set_timeout(t);
+        m_timer->add_wait_cb(std::move(cb));
+    }
 };
 
 } // namespace ac::xec

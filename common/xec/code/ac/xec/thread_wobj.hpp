@@ -63,6 +63,15 @@ public:
         }
         call_cb(cb, notified);
     }
+
+    void wait(astl::timeout t, wait_func cb) {
+        if (t.is_infinite()) {
+            wait(std::move(cb));
+        }
+        else {
+            wait_for(t.duration, std::move(cb));
+        }
+    }
 };
 
 } // namespace ac::xec

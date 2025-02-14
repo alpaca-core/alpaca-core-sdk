@@ -6,6 +6,7 @@
 #include "strand.hpp"
 #include "wait_func.hpp"
 #include "timer_ptr.hpp"
+#include <astl/timeout.hpp>
 #include <chrono>
 #include <cstddef>
 
@@ -25,6 +26,13 @@ public:
     virtual size_t expire_after(duration t_from_now) = 0;
     virtual size_t expire_at(time_point t) = 0;
     virtual size_t expire_never() = 0;
+
+    size_t set_timeout(astl::timeout t) {
+        if (t.is_infinite()) {
+            return expire_never();
+        }
+        return expire_after(t.duration);
+    }
 
     virtual size_t cancel() = 0;
     virtual size_t cancel_one() = 0;
