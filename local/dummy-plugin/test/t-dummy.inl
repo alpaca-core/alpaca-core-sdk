@@ -25,7 +25,7 @@ Session createTestSession(DummyRegistry& d) {
 void checkError(Session& s, const std::string_view msg) {
     auto res = s.poll();
     CHECK(res.success());
-    auto& frame = res.frame;
+    auto& frame = res.value;
     CHECK(frame.op == "error");
     CHECK(frame.data.get<std::string_view>() == msg);
 }
@@ -33,7 +33,7 @@ void checkError(Session& s, const std::string_view msg) {
 void checkRunResult(Session& s, const std::string_view msg) {
     auto res = s.poll();
     CHECK(res.success());
-    auto& frame = res.frame;
+    auto& frame = res.value;
     CHECK(frame.op == "run");
     CHECK(frame.data.at("result").get<std::string>() == msg);
 }
@@ -41,8 +41,8 @@ void checkRunResult(Session& s, const std::string_view msg) {
 void checkStateChange(Session& s, std::string_view expectedState) {
     auto res = s.poll();
     CHECK(res.success());
-    CHECK(Frame_isStateChange(res.frame));
-    CHECK(Frame_getStateChange(res.frame) == expectedState);
+    CHECK(Frame_isStateChange(res.value));
+    CHECK(Frame_getStateChange(res.value) == expectedState);
 }
 
 TEST_CASE("bad model") {

@@ -33,15 +33,15 @@ TEST_CASE("BlockingIo") {
 
     auto f = remote.poll();
     CHECK(f.success());
-    CHECK(f.frame.op == "a");
+    CHECK(f.value.op == "a");
     f = remote.poll();
     CHECK(f.success());
-    CHECK(f.frame.op == "b");
+    CHECK(f.value.op == "b");
     f = remote.poll();
     CHECK(f.success());
-    CHECK(f.frame.op == "c");
+    CHECK(f.value.op == "c");
     f = remote.poll(await_completion_for(10ms));
-    CHECK(f.frame.op.empty());
+    CHECK(f.value.op.empty());
     CHECK(f.timeout());
     CHECK(f.aborted());
     CHECK_FALSE(f.waiting());

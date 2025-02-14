@@ -1,7 +1,7 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include <ac/io/status.hpp>
+#include <ac/io/value_with_status.hpp>
 #include <doctest/doctest.h>
 
 TEST_CASE("status") {
@@ -54,4 +54,24 @@ TEST_CASE("status") {
     CHECK(s.success());
     CHECK_FALSE(s.blocked());
     CHECK(s.complete());
+}
+
+TEST_CASE("value with status") {
+    ac::io::value_with_status<int> v;
+    CHECK(v.value == 0);
+    v.value = 432;
+    v.reset();
+    CHECK(v.value == 0);
+    v.reset(42);
+    CHECK(v.value == 42);
+
+    ac::io::status& s = v;
+    s.set_aborted();
+    CHECK(v.aborted());
+
+    ac::io::value_with_status<int> v2(42);
+    CHECK(v2.value == 42);
+
+    v2.s() = s;
+    CHECK(v2.aborted());
 }

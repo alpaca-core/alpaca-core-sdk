@@ -101,7 +101,7 @@ BlockingIo::~BlockingIo() = default;
 
 FrameWithStatus BlockingIo::poll(astl::timeout timeout) {
     FrameWithStatus ret;
-    ret.status() = m_impl->poll(ret.frame, timeout);
+    ret.s() = m_impl->poll(ret.value , timeout);
     return ret;
 }
 

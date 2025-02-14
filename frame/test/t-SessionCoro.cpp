@@ -14,9 +14,9 @@ using namespace ac::frameio;
 
 SessionCoro<std::string> add(coro::Io& io) {
     auto fin = co_await io.pollFrame();
-    auto a = std::stoi(fin.frame.op);
+    auto a = std::stoi(fin.value.op);
     fin = co_await io.pollFrame();
-    auto b = std::stoi(fin.frame.op);
+    auto b = std::stoi(fin.value.op);
     co_return std::to_string(a + b);
 }
 
@@ -25,10 +25,10 @@ SessionCoro<void> session() {
     while (true) {
         auto fin = co_await io.pollFrame();
         std::string result;
-        if (fin.frame.op == "echo") {
-            result = fin.frame.op;
+        if (fin.value.op == "echo") {
+            result = fin.value.op;
         }
-        else if (fin.frame.op == "add") {
+        else if (fin.value.op == "add") {
             result = co_await add(io);
         }
         else {
@@ -49,26 +49,26 @@ void testSession(BlockingSyncIoWrapper& io) {
     io.push(frame("echo"));
     auto f = io.poll();
     CHECK(f.success());
-    CHECK(f.frame.op == "echo");
+    CHECK(f.value.op == "echo");
 
     io.push(frame("add"));
     io.push(frame("1"));
     io.push(frame("2"));
     f = io.poll();
     CHECK(f.success());
-    CHECK(f.frame.op == "3");
+    CHECK(f.value.op == "3");
 
     io.push(frame("add"));
     io.push(frame("3"));
     io.push(frame("4"));
     f = io.poll();
     CHECK(f.success());
-    CHECK(f.frame.op == "7");
+    CHECK(f.value.op == "7");
 
     io.push(frame("echo"));
     f = io.poll();
     CHECK(f.success());
-    CHECK(f.frame.op == "echo");
+    CHECK(f.value.op == "echo");
 
     io.push(frame("nope"));
     f = io.poll();
@@ -85,7 +85,7 @@ SessionCoro<SessionHandlerPtr> successorSession() {
     int i = 0;
     while (true) {
         auto fin = co_await io.pollFrame();
-        auto& op = fin.frame.op;
+        auto& op = fin.value.op;
         if (op == "goto echo") {
             co_return CoroSessionHandler::create(session());
         }
@@ -104,12 +104,12 @@ TEST_CASE("successor session") {
         io.push(frame("i"));
         auto f = io.poll();
         CHECK(f.success());
-        CHECK(f.frame.op == "0");
+        CHECK(f.value.op == "0");
 
         io.push(frame("i"));
         f = io.poll();
         CHECK(f.success());
-        CHECK(f.frame.op == "1");
+        CHECK(f.value.op == "1");
 
         io.push(frame("nope"));
         f = io.poll();
@@ -121,12 +121,12 @@ TEST_CASE("successor session") {
         io.push(frame("i"));
         auto f = io.poll();
         CHECK(f.success());
-        CHECK(f.frame.op == "0");
+        CHECK(f.value.op == "0");
 
         io.push(frame("i"));
         f = io.poll();
         CHECK(f.success());
-        CHECK(f.frame.op == "1");
+        CHECK(f.value.op == "1");
 
         io.push(frame("goto echo"));
         testSession(io);
@@ -139,13 +139,13 @@ SessionCoro<void> proxy(StreamEndpoint ep) {
 
     while (true) {
         auto fin = co_await client.pollFrame();
-        if (fin.frame.op == "done") {
+        if (fin.value.op == "done") {
             co_return;
         }
-        fin.frame.op += " (proxied)";
-        co_await server.pushFrame(fin.frame);
+        fin.value.op += " (proxied)";
+        co_await server.pushFrame(fin.value);
         auto fout = co_await server.pollFrame();
-        co_await client.pushFrame(fout.frame);
+        co_await client.pushFrame(fout.value);
     }
 }
 
@@ -153,7 +153,7 @@ SessionCoro<void> server() {
     auto io = co_await coro::Io{};
     while (true) try {
         auto fin = co_await io.pollFrame();
-        auto i = fin.frame.data.get<int>();
+        auto i = fin.value.data.get<int>();
         ac::Frame fout;
         fout.op = "ret";
         fout.data = i + 1;
@@ -172,14 +172,14 @@ TEST_CASE("proxy") {
     io.push(frame("xx", 1));
     auto f = io.poll();
     CHECK(f.success());
-    CHECK(f.frame.op == "ret");
-    CHECK(f.frame.data.get<int>() == 2);
+    CHECK(f.value.op == "ret");
+    CHECK(f.value.data.get<int>() == 2);
 
     io.push(frame("yy", 32));
     f = io.poll();
     CHECK(f.success());
-    CHECK(f.frame.op == "ret");
-    CHECK(f.frame.data.get<int>() == 33);
+    CHECK(f.value.op == "ret");
+    CHECK(f.value.data.get<int>() == 33);
 
     io.push(frame("done"));
     f = io.poll();

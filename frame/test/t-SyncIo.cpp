@@ -103,13 +103,13 @@ TEST_CASE("SyncIo") {
     for (int i = 0; i < 5; ++i) {
         auto f = io.poll();
         CHECK(f.success());
-        CHECK(f.frame.op == "hello");
+        CHECK(f.value.op == "hello");
         progress();
     }
     for (int i = 0; i < 2; ++i) {
         auto f = io.poll();
         CHECK(f.success());
-        CHECK(f.frame.op == "bye");
+        CHECK(f.value.op == "bye");
         progress();
     }
     auto f = io.poll(no_wait);
@@ -125,13 +125,13 @@ TEST_CASE("SyncIo Wrapper") {
     for (int i = 0; i < 5; ++i) {
         auto f = io.poll();
         CHECK(f.success());
-        CHECK(f.frame.op == "hello");
+        CHECK(f.value.op == "hello");
     }
     CHECK(io.push(ac::Frame{"echo", {{"msg", "bye"}, {"count", 2}}}).success());
     for (int i = 0; i < 2; ++i) {
         auto f = io.poll();
         CHECK(f.success());
-        CHECK(f.frame.op == "bye");
+        CHECK(f.value.op == "bye");
     }
     auto f = io.poll();
     CHECK(f.blocked());

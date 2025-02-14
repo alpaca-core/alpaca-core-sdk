@@ -269,7 +269,7 @@ public:
     template <bool E = true>
     [[nodiscard]] FrameWithStatus getFrame() noexcept(E) {
         FrameWithStatus ret;
-        ret.status() = getFrame<E>(ret.frame);
+        ret.s() = getFrame<E>(ret.value);
         return ret;
     }
     template <bool E = true>

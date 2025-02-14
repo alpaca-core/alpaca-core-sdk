@@ -25,7 +25,7 @@ SessionCoro<void> sideA(int send) {
     for (int i = 1; i <= send; ++i) {
         auto res = co_await io.pollFrame(no_wait);
         if (res.success()) {
-            A_recSum += std::stoi(res.frame.op);
+            A_recSum += std::stoi(res.value.op);
         }
         co_await io.pushFrame(frame(std::to_string(i)));
     }
@@ -36,7 +36,7 @@ SessionCoro<void> sideA(int send) {
         while (true) {
             auto res = co_await io.pollFrame();
             if (res.success()) {
-                A_recSum += std::stoi(res.frame.op);
+                A_recSum += std::stoi(res.value.op);
             }
         }
     }
@@ -60,11 +60,11 @@ SessionCoro<void> sideB(int send) {
         if (receive) {
             auto f = co_await io.pollFrame(await_completion_for(20ms));
             if (f.success()) {
-                if (f.frame.op == "end") {
+                if (f.value.op == "end") {
                     receive = false;
                 }
                 else {
-                    B_recSum += std::stoi(f.frame.op);
+                    B_recSum += std::stoi(f.value.op);
                 }
             }
         }
@@ -89,7 +89,7 @@ SessionCoro<void> eagerSession() {
 
     auto fin = io.getFrame();
     CHECK(fin.success());
-    auto i = std::stoi(fin.frame.op);
+    auto i = std::stoi(fin.value.op);
     while (i) {
         auto f = frame("hi");
         while (!io.putFrame(f).success()); // spin
@@ -112,7 +112,7 @@ TEST_CASE("eager") {
     while (true) {
         auto f = localIo.poll();
         if (!f.success()) break;
-        CHECK(f.frame.op == "hi");
+        CHECK(f.value.op == "hi");
         ++received;
     }
     CHECK(received == 10);

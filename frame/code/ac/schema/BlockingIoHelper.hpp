@@ -32,7 +32,7 @@ public:
     void expectState() {
         auto res = m_io.poll();
         pollStatusCheck(res);
-        auto state = Frame_getStateChange(res.frame);
+        auto state = Frame_getStateChange(res.value);
         if (state != State::id) {
             throw_ex{} << "unexpected state: " << state;
         }
@@ -43,8 +43,8 @@ public:
         while (true) {
             auto res = m_io.poll();
             pollStatusCheck(res);
-            frameErrorCheck(res.frame);
-            auto state = Frame_getStateChange(res.frame);
+            frameErrorCheck(res.value);
+            auto state = Frame_getStateChange(res.value);
             if (state == State::id) {
                 return;
             }
@@ -59,8 +59,8 @@ public:
         }
         auto res = m_io.poll();
         pollStatusCheck(res);
-        frameErrorCheck(res.frame);
-        return Frame_toOpReturn(Op{}, std::move(res.frame));
+        frameErrorCheck(res.value);
+        return Frame_toOpReturn(Op{}, std::move(res.value));
     }
 
     void close() { m_io.close(); }
