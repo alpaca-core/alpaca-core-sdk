@@ -3,4 +3,5 @@
 #
 add_subdirectory(astl)
 add_subdirectory(xec)
+add_subdirectory(io)
 add_subdirectory(jalog)

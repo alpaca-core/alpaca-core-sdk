@@ -4,7 +4,7 @@
 #pragma once
 #include "../export.h"
 #include "../Frame.hpp"
-#include "Status.hpp"
+#include <ac/io/status.hpp>
 #include <functional>
 
 namespace ac::frameio {
@@ -15,7 +15,7 @@ public:
     using OnBlockedFunc = std::function<NotifyCb()>;
 
     virtual ~Stream();
-    virtual Status stream(Frame& f, OnBlockedFunc onBlocked) = 0;
+    virtual io::status stream(Frame& f, OnBlockedFunc onBlocked) = 0;
     virtual void close() = 0;
 
     // possible functions which are not implemented
@@ -25,19 +25,19 @@ public:
     // allow a stream op to take over the wait state of the stream
     // optionally trigger a spurious wakeup of the previous waiter if any
     // default arg is equivalent to current implementation
-    // virtual Status stream(Frame& f, OnBlockedFunc onBlocked, bool callPrevious = false) = 0;
+    // virtual io::status stream(Frame& f, OnBlockedFunc onBlocked, bool callPrevious = false) = 0;
     //
     // take over the waiting state of the stream without a stream op
     // optionally trigger a spurious wakeup of the previous waiter if any
-    // virtual Status replaceWaiter(OnBlockedFunc onBlocked, bool callPrevious = false) = 0;
+    // virtual io::status replaceWaiter(OnBlockedFunc onBlocked, bool callPrevious = false) = 0;
 };
 
 class AC_FRAME_EXPORT ReadStream : public Stream {
 public:
     virtual ~ReadStream();
-    virtual Status read(Frame& f, OnBlockedFunc onBlocked) = 0;
+    virtual io::status read(Frame& f, OnBlockedFunc onBlocked) = 0;
 
-    Status stream(Frame& f, OnBlockedFunc onBlocked) final override {
+    io::status stream(Frame& f, OnBlockedFunc onBlocked) final override {
         return read(f, std::move(onBlocked));
     }
 };
@@ -45,9 +45,9 @@ public:
 class AC_FRAME_EXPORT WriteStream : public Stream {
 public:
     virtual ~WriteStream();
-    virtual Status write(Frame& f, OnBlockedFunc onBlocked) = 0;
+    virtual io::status write(Frame& f, OnBlockedFunc onBlocked) = 0;
 
-    Status stream(Frame& f, OnBlockedFunc onBlocked) final override {
+    io::status stream(Frame& f, OnBlockedFunc onBlocked) final override {
         return write(f, std::move(onBlocked));
     }
 };

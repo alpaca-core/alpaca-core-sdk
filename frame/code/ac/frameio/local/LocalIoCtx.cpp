@@ -44,7 +44,7 @@ struct StrandIo : public BasicStreamIo {
         , m_timer(strand)
     {}
 
-    Status io(Frame& frame) {
+    io::status io(Frame& frame) {
         return m_stream->stream(frame, nullptr);
     }
 
@@ -71,10 +71,10 @@ struct StrandIo : public BasicStreamIo {
             auto status = m_stream->stream(frame, nullptr);
 
             if (ec == asio::error::operation_aborted) {
-                status.setAborted();
+                status.set_aborted();
             }
             else {
-                status.setTimeout();
+                status.set_timeout();
             }
 
             cb(frame, status);

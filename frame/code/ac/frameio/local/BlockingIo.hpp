@@ -22,10 +22,10 @@ public:
     ~BlockingIo();
 
     FrameWithStatus poll(astl::timeout timeout = astl::timeout::never());
-    Status poll(Frame& frame, astl::timeout timeout = astl::timeout::never());
+    io::status poll(Frame& frame, astl::timeout timeout = astl::timeout::never());
 
-    Status push(Frame&& frame, astl::timeout timeout = astl::timeout::never());
-    Status push(Frame& frame, astl::timeout timeout = astl::timeout::never());
+    io::status push(Frame&& frame, astl::timeout timeout = astl::timeout::never());
+    io::status push(Frame& frame, astl::timeout timeout = astl::timeout::never());
 
     void close();
 

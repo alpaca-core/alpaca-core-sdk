@@ -40,7 +40,7 @@ struct SyncExecutor : public IoExecutor, public astl::enable_shared_from {
 
         explicit operator bool() const noexcept { return !!m_frame; }
 
-        Status io(Frame& f) {
+        io::status io(Frame& f) {
             assert(!m_frame);
             return stream->stream(f, nullptr);
         }
@@ -63,7 +63,7 @@ struct SyncExecutor : public IoExecutor, public astl::enable_shared_from {
             stream->close();
         }
 
-        void complete(Status status) {
+        void complete(io::status status) {
             assert(m_frame);
             auto frame = std::exchange(m_frame, nullptr);
             auto cb = std::exchange(m_cb, nullptr);
@@ -71,7 +71,7 @@ struct SyncExecutor : public IoExecutor, public astl::enable_shared_from {
             cb(*frame, status);
         }
 
-        std::optional<Status> tryComplete() {
+        std::optional<io::status> tryComplete() {
             assert(m_frame);
             assert(m_cb);
 
@@ -81,7 +81,7 @@ struct SyncExecutor : public IoExecutor, public astl::enable_shared_from {
                 return status;
             }
             if (std::chrono::steady_clock::now() >= m_deadline) {
-                return status.setTimeout();
+                return status.set_timeout();
             }
 
             return {};

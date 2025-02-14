@@ -12,6 +12,7 @@ ac_dep(boost)
 target_link_libraries(ac-frame
     PUBLIC
         ac::astl
+        ac::io
     PRIVATE
         Boost::asio
 )
@@ -36,7 +37,6 @@ target_sources(ac-frame
         ac/Frame.hpp
 
         # frameio
-        ac/frameio/Status.hpp
         ac/frameio/Stream.hpp
         ac/frameio/StreamPtr.hpp
         ac/frameio/StreamEndpoint.hpp

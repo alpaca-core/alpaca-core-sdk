@@ -9,8 +9,8 @@ namespace ac::frameio {
 class AC_FRAME_EXPORT LocalChannel {
 public:
     virtual ~LocalChannel();
-    virtual Status read(Frame& f, Stream::OnBlockedFunc onBlocked) = 0;
-    virtual Status write(Frame& f, Stream::OnBlockedFunc onBlocked) = 0;
+    virtual io::status read(Frame& f, Stream::OnBlockedFunc onBlocked) = 0;
+    virtual io::status write(Frame& f, Stream::OnBlockedFunc onBlocked) = 0;
     virtual void close() = 0;
 };
 
@@ -38,7 +38,7 @@ public:
     ~LocalReadStream() {
         close();
     }
-    Status read(Frame& f, OnBlockedFunc onBlocked) override {
+    io::status read(Frame& f, OnBlockedFunc onBlocked) override {
         return m_channel->read(f, std::move(onBlocked));
     }
     void close() override {
@@ -52,7 +52,7 @@ public:
     ~LocalWriteStream() {
         close();
     }
-    Status write(Frame& f, OnBlockedFunc onBlocked) override {
+    io::status write(Frame& f, OnBlockedFunc onBlocked) override {
         return m_channel->write(f, std::move(onBlocked));
     }
     void close() override {

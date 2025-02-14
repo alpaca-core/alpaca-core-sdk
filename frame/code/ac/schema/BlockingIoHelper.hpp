@@ -16,7 +16,7 @@ public:
 
     frameio::BlockingIo& io() { return m_io; }
 
-    static void pollStatusCheck(const frameio::Status& s) {
+    static void pollStatusCheck(const io::status& s) {
         if (!s.success()) {
             throw_ex{} << "poll failed: " << s.bits;
         }

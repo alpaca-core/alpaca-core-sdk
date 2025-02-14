@@ -35,10 +35,10 @@ public:
     static SessionHandlerPtr create(SessionCoro<SessionHandlerPtr> coro);
 
     void postResume() noexcept;
-    Status getFrame(Input& in, Frame& frame) noexcept;
-    void pollFrame(Input& in, Frame& frame, Status& status, astl::timeout timeout) noexcept;
-    Status putFrame(Output& out, Frame& frame) noexcept;
-    void pushFrame(Output& out, Frame& frame, Status& status, astl::timeout timeout) noexcept;
+    io::status getFrame(Input& in, Frame& frame) noexcept;
+    void pollFrame(Input& in, Frame& frame, io::status& status, astl::timeout timeout) noexcept;
+    io::status putFrame(Output& out, Frame& frame) noexcept;
+    void pushFrame(Output& out, Frame& frame, io::status& status, astl::timeout timeout) noexcept;
     void close() noexcept;
 private:
     template <typename T>
@@ -67,7 +67,7 @@ struct BasicFrameAwaitable {
     Io& io;
     Frame* frame;
     astl::timeout timeout;
-    Status status;
+    io::status status;
 
     BasicFrameAwaitable(const CoroSessionHandlerPtr& h, Io& io, Frame& f, astl::timeout t) noexcept
         : handler(h), io(io), frame(&f), timeout(t)
@@ -106,7 +106,7 @@ struct Poll: public impl::BasicPollAwaitable {
 template <bool E = true>
 struct PollRef : public impl::BasicPollAwaitable {
     using BasicPollAwaitable::BasicPollAwaitable;
-    Status await_resume() noexcept(!E) {
+    io::status await_resume() noexcept(!E) {
         if constexpr (E) {
             IoClosed::throwInputIfClosed(this->status);
         }
@@ -117,7 +117,7 @@ struct PollRef : public impl::BasicPollAwaitable {
 template <bool E = true>
 struct Push : public impl::BasicPushAwaitable {
     using BasicPushAwaitable::BasicPushAwaitable;
-    Status await_resume() noexcept(!E) {
+    io::status await_resume() noexcept(!E) {
         if constexpr (E) {
             IoClosed::throwOutputIfClosed(this->status);
         }
@@ -259,7 +259,7 @@ public:
     // sync (eager) operations
 
     template <bool E = true>
-    [[nodiscard]] Status getFrame(Frame& frame) noexcept(E) {
+    [[nodiscard]] io::status getFrame(Frame& frame) noexcept(E) {
         auto ret = m_handler->getFrame(*m_input, frame);
         if constexpr (E) {
             IoClosed::throwInputIfClosed(ret);
@@ -273,7 +273,7 @@ public:
         return ret;
     }
     template <bool E = true>
-    [[nodiscard]] Status putFrame(Frame& frame) noexcept(E) {
+    [[nodiscard]] io::status putFrame(Frame& frame) noexcept(E) {
         auto ret = m_handler->putFrame(*m_output, frame);
         if constexpr (E) {
             IoClosed::throwOutputIfClosed(ret);
@@ -281,7 +281,7 @@ public:
         return ret;
     }
     template <bool E = true>
-    [[nodiscard]] Status putFrame(Frame&& frame) noexcept(E) {
+    [[nodiscard]] io::status putFrame(Frame&& frame) noexcept(E) {
         return putFrame<E>(frame);
     }
 

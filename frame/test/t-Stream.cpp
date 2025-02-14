@@ -6,22 +6,23 @@
 #include <doctest/doctest.h>
 
 using namespace ac::frameio;
+using namespace ac;
 
 class TestReadStream final : public ReadStream {
 public:
     int i = 0;
-    virtual Status read(ac::Frame& f, OnBlockedFunc onBlocked) override {
-        Status ret;
+    virtual io::status read(ac::Frame& f, OnBlockedFunc onBlocked) override {
+        io::status ret;
         if (i & 1) {
             f.op = "odd";
             if (onBlocked) {
                 onBlocked()();
             }
-            ret.setWaiting();
+            ret.set_waiting();
         }
         else {
             f.op = "even";
-            ret.setSuccess();
+            ret.set_success();
         }
         ++i;
         return ret;
@@ -32,19 +33,19 @@ public:
 class TestWriteStream final : public WriteStream {
 public:
     int i = 0;
-    virtual Status write(ac::Frame& f, OnBlockedFunc onBlocked) override {
-        Status ret;
+    virtual io::status write(ac::Frame& f, OnBlockedFunc onBlocked) override {
+        io::status ret;
         if (i & 1) {
             CHECK(f.op == "odd");
             f.op.clear();
-            ret.setSuccess();
+            ret.set_success();
         }
         else {
             CHECK(f.op == "even");
             if (onBlocked) {
                 onBlocked()();
             }
-            ret.setWaiting();
+            ret.set_waiting();
         }
         ++i;
         return ret;

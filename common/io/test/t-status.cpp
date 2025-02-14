@@ -1,13 +1,11 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include <ac/frameio/Status.hpp>
+#include <ac/io/status.hpp>
 #include <doctest/doctest.h>
 
-TEST_CASE("Status") {
-    using namespace ac::frameio;
-
-    Status s;
+TEST_CASE("status") {
+    ac::io::status s;
     CHECK(s.bits.none());
     CHECK_FALSE(s.success());
     CHECK_FALSE(s.timeout());
@@ -16,7 +14,7 @@ TEST_CASE("Status") {
     CHECK(s.blocked());
     CHECK_FALSE(s.complete());
 
-    s.setSuccess();
+    s.set_success();
     CHECK(s.bits.count() == 1);
     CHECK(s.success());
     CHECK_FALSE(s.blocked());
@@ -25,13 +23,13 @@ TEST_CASE("Status") {
     s.reset();
     CHECK(s.bits.none());
 
-    s.setAborted();
+    s.set_aborted();
     CHECK(s.bits.count() == 1);
     CHECK(s.aborted());
     CHECK(s.blocked());
     CHECK_FALSE(s.complete());
 
-    s.setClosed();
+    s.set_closed();
     CHECK(s.bits.count() == 2);
     CHECK(s.aborted());
     CHECK(s.closed());
@@ -40,18 +38,18 @@ TEST_CASE("Status") {
 
     s.reset();
 
-    s.setClosed();
+    s.set_closed();
     CHECK(s.bits.count() == 1);
     CHECK(s.complete());
 
     s.reset();
-    s.setTimeout();
+    s.set_timeout();
     CHECK(s.bits.count() == 1);
     CHECK(s.timeout());
     CHECK(s.blocked());
     CHECK_FALSE(s.complete());
 
-    s.setSuccess();
+    s.set_success();
     CHECK(s.bits.count() == 2);
     CHECK(s.success());
     CHECK_FALSE(s.blocked());

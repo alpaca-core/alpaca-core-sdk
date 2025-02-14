@@ -50,20 +50,20 @@ void CoroSessionHandler::postResume() noexcept {
     });
 }
 
-Status CoroSessionHandler::getFrame(Input& in, Frame& frame) noexcept {
+io::status CoroSessionHandler::getFrame(Input& in, Frame& frame) noexcept {
     return in.get(frame);
 }
-void CoroSessionHandler::pollFrame(Input& in, Frame& frame, Status& status, astl::timeout timeout) noexcept {
-    in.poll(frame, timeout, [this, &status, pl = shared_from_this()](Frame&, Status s) {
+void CoroSessionHandler::pollFrame(Input& in, Frame& frame, io::status& status, astl::timeout timeout) noexcept {
+    in.poll(frame, timeout, [this, &status, pl = shared_from_this()](Frame&, io::status s) {
         status = s;
         m_currentCoro.resume();
     });
 }
-Status CoroSessionHandler::putFrame(Output& out, Frame& frame) noexcept {
+io::status CoroSessionHandler::putFrame(Output& out, Frame& frame) noexcept {
     return out.put(frame);
 }
-void CoroSessionHandler::pushFrame(Output& out, Frame& frame, Status& status, astl::timeout timeout) noexcept {
-    out.push(frame, timeout, [this, &status, pl = shared_from_this()](Frame&, Status s) {
+void CoroSessionHandler::pushFrame(Output& out, Frame& frame, io::status& status, astl::timeout timeout) noexcept {
+    out.push(frame, timeout, [this, &status, pl = shared_from_this()](Frame&, io::status s) {
         status = s;
         m_currentCoro.resume();
     });

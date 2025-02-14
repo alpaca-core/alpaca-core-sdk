@@ -8,12 +8,12 @@
 
 namespace ac::frameio {
 
-using IoCb = std::function<void(Frame&, Status)>;
+using IoCb = std::function<void(Frame&, io::status)>;
 
 class AC_FRAME_EXPORT Input {
 public:
     virtual ~Input();
-    virtual Status get(Frame& frame) = 0;
+    virtual io::status get(Frame& frame) = 0;
     virtual void poll(Frame& frame, astl::timeout timeout, IoCb cb) = 0;
     virtual void close() = 0;
 };
@@ -21,7 +21,7 @@ public:
 class AC_FRAME_EXPORT Output {
 public:
     virtual ~Output();
-    virtual Status put(Frame& frame) = 0;
+    virtual io::status put(Frame& frame) = 0;
     virtual void push(Frame& frame, astl::timeout timeout, IoCb cb) = 0;
     virtual void close() = 0;
 };

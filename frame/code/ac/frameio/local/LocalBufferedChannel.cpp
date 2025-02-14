@@ -16,10 +16,10 @@ class LocalBufferedChannel final : public LocalChannel {
     Stream::NotifyCb m_notify;
     bool m_closed = false;
 
-    Status block(Stream::OnBlockedFunc& onBlocked) {
-        Status ret;
+    io::status block(Stream::OnBlockedFunc& onBlocked) {
+        io::status ret;
         if (m_notify) {
-            ret.setAborted();
+            ret.set_aborted();
         }
 
         if (onBlocked) {
@@ -31,7 +31,7 @@ class LocalBufferedChannel final : public LocalChannel {
         }
 
         if (m_notify) {
-            ret.setWaiting();
+            ret.set_waiting();
         }
         return ret;
     }
@@ -39,7 +39,8 @@ class LocalBufferedChannel final : public LocalChannel {
 public:
     LocalBufferedChannel(size_t maxSize)
         : m_maxSize(maxSize)
-    {}
+    {
+    }
 
     void unlockNotify(std::unique_lock<std::mutex>& lock) {
         assert(lock.owns_lock());
@@ -51,35 +52,35 @@ public:
         }
     }
 
-    Status write(Frame& frame, Stream::OnBlockedFunc onBlocked) override {
+    io::status write(Frame& frame, Stream::OnBlockedFunc onBlocked) override {
         std::unique_lock lock(m_mutex);
         if (m_closed) {
             assert(!m_notify);
-            return Status{}.setClosed();;
+            return io::status{}.set_closed();;
         }
         else if (m_queue.size() < m_maxSize) {
             assert(m_queue.empty() || !m_notify);
             m_queue.push_back(std::move(frame));
             unlockNotify(lock);
-            return Status{}.setSuccess();
+            return io::status{}.set_success();
         }
         else {
             return block(onBlocked);
         }
     }
 
-    Status read(Frame& frame, Stream::OnBlockedFunc onBlocked) override {
+    io::status read(Frame& frame, Stream::OnBlockedFunc onBlocked) override {
         std::unique_lock lock(m_mutex);
         if (!m_queue.empty()) {
             assert(m_queue.size() == m_maxSize || !m_notify);
             frame = std::move(m_queue.front());
             m_queue.pop_front();
             unlockNotify(lock);
-            return Status{}.setSuccess();
+            return io::status{}.set_success();
         }
         else if (m_closed) {
             assert(!m_notify);
-            return Status{}.setClosed();;
+            return io::status{}.set_closed();;
         }
         else {
             return block(onBlocked);

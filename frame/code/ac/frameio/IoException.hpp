@@ -3,7 +3,7 @@
 //
 #pragma once
 #include "../export.h"
-#include "Status.hpp"
+#include <ac/io/status.hpp>
 #include <stdexcept>
 
 namespace ac::frameio {
@@ -17,12 +17,12 @@ struct AC_FRAME_EXPORT IoClosed : public IoException {
     using IoException::IoException;
     ~IoClosed();
 
-    static void throwInputIfClosed(const Status& status) {
+    static void throwInputIfClosed(const io::status& status) {
         if (status.closed()) {
             throw IoClosed("input closed");
         }
     }
-    static void throwOutputIfClosed(const Status& status) {
+    static void throwOutputIfClosed(const io::status& status) {
         if (status.closed()) {
             throw IoClosed("output closed");
         }

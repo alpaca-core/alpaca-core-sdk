@@ -19,10 +19,10 @@ public:
     ~BlockingSyncIoWrapper();
 
     FrameWithStatus poll();
-    Status poll(Frame& frame);
+    io::status poll(Frame& frame);
 
-    Status push(Frame&& frame);
-    Status push(Frame& frame);
+    io::status push(Frame&& frame);
+    io::status push(Frame& frame);
 
     void close();
 

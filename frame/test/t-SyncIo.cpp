@@ -11,6 +11,7 @@
 #include <doctest/doctest.h>
 #include <deque>
 
+using namespace ac;
 using namespace ac::frameio;
 using namespace astl::timeout_vals;
 
@@ -30,7 +31,7 @@ public:
     }
 
     void poll() {
-        shInput().poll(m_inFrame, await_completion, [this, pl = shared_from_this()](ac::Frame&, Status status) {
+        shInput().poll(m_inFrame, await_completion, [this, pl = shared_from_this()](ac::Frame&, io::status status) {
             if (status.closed()) {
                 // done
                 return;
@@ -61,7 +62,7 @@ public:
 
     void writeCur() {
         m_outFrame = m_cur->frame;
-        shOutput().push(m_outFrame, await_completion, [this, pl = shared_from_this()](ac::Frame&, Status status) {
+        shOutput().push(m_outFrame, await_completion, [this, pl = shared_from_this()](ac::Frame&, io::status status) {
             if (!status.complete()) {
                 // retry
                 writeCur();

@@ -24,8 +24,7 @@ struct BlockingFrameIo {
 
     BlockingFrameIo(StreamPtr stream) : m_stream(std::move(stream)) {}
 
-
-    Status io(Frame& frame, astl::timeout timeout) {
+    io::status io(Frame& frame, astl::timeout timeout) {
         std::promise<void> promise;
         auto f = promise.get_future();
 
@@ -41,12 +40,12 @@ struct BlockingFrameIo {
             }
         }
 
-        Status status;
+        io::status status;
         if (waitFor(f, timeout)) {
-            status.setAborted();
+            status.set_aborted();
         }
         else {
-            status.setTimeout();
+            status.set_timeout();
         }
 
         status |= m_stream->stream(frame, nullptr);
@@ -77,11 +76,11 @@ public:
         close();
     }
 
-    Status poll(Frame& frame, astl::timeout timeout) {
+    io::status poll(Frame& frame, astl::timeout timeout) {
         return m_in.io(frame, timeout);
     }
 
-    Status push(Frame& frame, astl::timeout timeout) {
+    io::status push(Frame& frame, astl::timeout timeout) {
         return m_out.io(frame, timeout);
     }
 
@@ -106,15 +105,15 @@ FrameWithStatus BlockingIo::poll(astl::timeout timeout) {
     return ret;
 }
 
-Status BlockingIo::poll(Frame& frame, astl::timeout timeout) {
+io::status BlockingIo::poll(Frame& frame, astl::timeout timeout) {
     return m_impl->poll(frame, timeout);
 }
 
-Status BlockingIo::push(Frame&& frame, astl::timeout timeout) {
+io::status BlockingIo::push(Frame&& frame, astl::timeout timeout) {
     return m_impl->push(frame, timeout);
 }
 
-Status BlockingIo::push(Frame& frame, astl::timeout timeout) {
+io::status BlockingIo::push(Frame& frame, astl::timeout timeout) {
     return m_impl->push(frame, timeout);
 }
 
