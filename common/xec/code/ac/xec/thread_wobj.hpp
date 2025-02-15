@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include "wait_func.hpp"
+#include "wait_func_invoke.hpp"
 #include <condition_variable>
 #include <atomic>
+#include <mutex>
 
 namespace ac::xec {
 
@@ -19,7 +20,8 @@ class thread_wobj {
         return m_flag.exchange(false, std::memory_order_acquire);
     }
 
-    void call_cb(wait_func& cb, bool notified) {
+    template <typename Cb>
+    void call_cb(Cb& cb, bool notified) {
         if (notified) {
             wait_func_invoke_cancelled(cb);
         }
@@ -38,7 +40,8 @@ public:
         m_cvar.notify_one();
     }
 
-    void wait(wait_func cb) {
+    template <typename Cb>
+    void wait(Cb&& cb) {
         {
             std::unique_lock lock(m_mutex);
             m_cvar.wait(lock, wait_pred);
@@ -46,7 +49,8 @@ public:
         call_cb(cb, true);
     }
 
-    void wait_for(timer::duration d, wait_func cb) {
+    template <typename Cb>
+    void wait_for(timer::duration d, Cb&& cb) {
         bool notified;
         {
             std::unique_lock lock(m_mutex);
@@ -55,7 +59,8 @@ public:
         call_cb(cb, notified);
     }
 
-    void wait_until(timer::time_point t, wait_func cb) {
+    template <typename Cb>
+    void wait_until(timer::time_point t, Cb&& cb) {
         bool notified;
         {
             std::unique_lock lock(m_mutex);
@@ -64,12 +69,13 @@ public:
         call_cb(cb, notified);
     }
 
-    void wait(astl::timeout t, wait_func cb) {
+    template <typename Cb>
+    void wait(astl::timeout t, Cb&& cb) {
         if (t.is_infinite()) {
-            wait(std::move(cb));
+            wait(std::forward<Cb>(cb));
         }
         else {
-            wait_for(t.duration, std::move(cb));
+            wait_for(t.duration, std::forward<Cb>(cb));
         }
     }
 };

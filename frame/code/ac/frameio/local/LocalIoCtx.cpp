@@ -9,11 +9,10 @@
 #include "../StreamEndpoint.hpp"
 #include "../IoExecutor.hpp"
 
+#include <ac/xec/timer_wobj.hpp>
 #include <ac/xec/strand.hpp>
-#include <ac/xec/timer.hpp>
 #include <ac/xec/context.hpp>
 #include <ac/xec/context_work_guard.hpp>
-#include <ac/xec/post.hpp>
 
 namespace ac::frameio {
 
@@ -21,12 +20,12 @@ namespace {
 
 struct StrandIo : public BasicStreamIo {
     xec::strand m_strand;
-    xec::timer_ptr m_timer;
+    xec::timer_wobj m_wobj;
 
     StrandIo(StreamPtr&& stream, const xec::strand& strand)
         : BasicStreamIo(std::move(stream))
         , m_strand(strand)
-        , m_timer(xec::timer::create(strand))
+        , m_wobj(strand)
     {}
 
     io::status io(Frame& frame) {
@@ -37,9 +36,7 @@ struct StrandIo : public BasicStreamIo {
         {
             auto status = m_stream->stream(frame, [this]() {
                 return [this]() {
-                    post(m_strand, [this]() {
-                        m_timer->cancel();
-                    });
+                    m_wobj.notify_all();
                 };
             });
 
@@ -51,8 +48,7 @@ struct StrandIo : public BasicStreamIo {
             }
         }
 
-        m_timer->set_timeout(timeout);
-        m_timer->add_wait_cb([this, &frame, cb = std::move(cb)](const std::error_code& ec) {
+        m_wobj.wait(timeout, [this, &frame, cb = std::move(cb)](const std::error_code& ec) {
             auto status = m_stream->stream(frame, nullptr);
 
             if (ec) {

@@ -4,6 +4,7 @@
 #pragma once
 #include "timer.hpp"
 #include "post.hpp"
+#include "wait_func.hpp"
 
 namespace ac::xec {
 
@@ -11,7 +12,7 @@ class timer_wobj {
     strand m_strand;
     timer_ptr m_timer;
 public:
-    timer_wobj(strand& s) : m_strand(s), m_timer(timer::create(s)) {}
+    explicit timer_wobj(const strand& s) : m_strand(s), m_timer(timer::create(s)) {}
 
     void notify_all() {
         post(m_strand, [this] {
@@ -43,6 +44,10 @@ public:
     void wait(astl::timeout t, wait_func cb) {
         m_timer->set_timeout(t);
         m_timer->add_wait_cb(std::move(cb));
+    }
+
+    const strand& get_strand() const {
+        return m_strand;
     }
 };
 
