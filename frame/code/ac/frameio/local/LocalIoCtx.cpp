@@ -9,39 +9,24 @@
 #include "../StreamEndpoint.hpp"
 #include "../IoExecutor.hpp"
 
-#include <boost/asio/strand.hpp>
-#include <boost/asio/steady_timer.hpp>
-#include <boost/asio/io_context.hpp>
-
-namespace asio = boost::asio;
+#include <ac/xec/strand.hpp>
+#include <ac/xec/timer.hpp>
+#include <ac/xec/context.hpp>
+#include <ac/xec/context_work_guard.hpp>
+#include <ac/xec/post.hpp>
 
 namespace ac::frameio {
 
 namespace {
 
-using Strand = asio::strand<asio::io_context::executor_type>;
-
-class ETimer : public asio::steady_timer {
-public:
-    using asio::steady_timer::basic_waitable_timer;
-    void expires_after_ms(astl::timeout timeout) {
-        if (timeout.is_infinite()) {
-            expires_at(asio::steady_timer::time_point::max());
-        }
-        else {
-            expires_after(timeout.duration);
-        }
-    }
-};
-
 struct StrandIo : public BasicStreamIo {
-    Strand m_strand;
-    ETimer m_timer;
+    xec::strand m_strand;
+    xec::timer_ptr m_timer;
 
-    StrandIo(StreamPtr&& stream, const Strand& strand)
+    StrandIo(StreamPtr&& stream, const xec::strand& strand)
         : BasicStreamIo(std::move(stream))
         , m_strand(strand)
-        , m_timer(strand)
+        , m_timer(xec::timer::create(strand))
     {}
 
     io::status io(Frame& frame) {
@@ -52,25 +37,25 @@ struct StrandIo : public BasicStreamIo {
         {
             auto status = m_stream->stream(frame, [this]() {
                 return [this]() {
-                    asio::post(m_strand, [this]() {
-                        m_timer.cancel();
+                    post(m_strand, [this]() {
+                        m_timer->cancel();
                     });
                 };
             });
 
             if (status.complete()) {
-                asio::post(m_strand, [status, &frame, cb = std::move(cb)]() {
+                post(m_strand, [status, &frame, cb = std::move(cb)]() {
                     cb(frame, status);
                 });
                 return;
             }
         }
 
-        m_timer.expires_after_ms(timeout);
-        m_timer.async_wait([this, &frame, cb = std::move(cb)](const boost::system::error_code& ec) {
+        m_timer->set_timeout(timeout);
+        m_timer->add_wait_cb([this, &frame, cb = std::move(cb)](const std::error_code& ec) {
             auto status = m_stream->stream(frame, nullptr);
 
-            if (ec == asio::error::operation_aborted) {
+            if (ec) {
                 status.set_aborted();
             }
             else {
@@ -86,12 +71,12 @@ using StrandInput = InputCommon<StrandIo>;
 using StrandOutput = OutputCommon<StrandIo>;
 
 struct StrandExecutor final : public IoExecutor {
-    Strand m_strand;
-    explicit StrandExecutor(const Strand& strand)
+    xec::strand m_strand;
+    explicit StrandExecutor(const xec::strand& strand)
         : m_strand(strand)
     {}
     virtual void post(std::function<void()> task) override {
-        asio::post(m_strand, std::move(task));
+        xec::post(m_strand, std::move(task));
     }
     virtual InputPtr attachInput(ReadStreamPtr stream) override {
         return std::make_unique<StrandInput>(std::move(stream), m_strand);
@@ -105,11 +90,11 @@ struct StrandExecutor final : public IoExecutor {
 
 class LocalIoCtx::Impl {
 public:
-    asio::io_context m_ctx;
-    asio::executor_work_guard<asio::io_context::executor_type> m_workGuard;
+    xec::context m_ctx;
+    xec::context_work_guard m_workGuard;
 
     Impl()
-        : m_workGuard(asio::make_work_guard(m_ctx))
+        : m_workGuard(m_ctx)
     {}
 
     void run() {
@@ -121,7 +106,7 @@ public:
     }
 
     void complete() {
-        m_ctx.post([this]() {
+        post(m_ctx, [this]() {
             m_workGuard.reset();
         });
     }
@@ -146,7 +131,7 @@ void LocalIoCtx::complete() {
 }
 
 void LocalIoCtx::connect(SessionHandlerPtr handler, StreamEndpoint ep) {
-    Strand strand(m_impl->m_ctx.get_executor());
+    auto strand = m_impl->m_ctx.make_strand();
     auto executor = std::make_shared<StrandExecutor>(strand);
     SessionHandler::init(
         handler,

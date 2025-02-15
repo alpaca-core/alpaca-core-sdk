@@ -12,9 +12,8 @@ ac_dep(boost)
 target_link_libraries(ac-frame
     PUBLIC
         ac::astl
+        ac::xec
         ac::io
-    PRIVATE
-        Boost::asio
 )
 
 configure_file(
