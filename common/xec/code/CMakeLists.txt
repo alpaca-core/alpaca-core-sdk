@@ -27,8 +27,11 @@ target_sources(ac-xec
         ac/xec/task.hpp
         ac/xec/timer.hpp
         ac/xec/ufunc.hpp
+
+        ac/xec/notifiable.hpp
     PRIVATE
         ac/xec/xec-asio-impl.cpp
+        ac/xec/notifiable.cpp
 )
 
 install(TARGETS ac-xec

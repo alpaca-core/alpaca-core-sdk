@@ -2,25 +2,26 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
+#include "notifiable.hpp"
 #include "timer.hpp"
 #include "post.hpp"
 #include "wait_func.hpp"
 
 namespace ac::xec {
 
-class timer_wobj {
+class timer_wobj final : public notifiable {
     strand m_strand;
     timer_ptr m_timer;
 public:
     explicit timer_wobj(const strand& s) : m_strand(s), m_timer(timer::create(s)) {}
 
-    void notify_all() {
+    void notify_all() override {
         post(m_strand, [this] {
             m_timer->cancel();
         });
     }
 
-    void notify_one() {
+    void notify_one() override {
         post(m_strand, [this] {
             m_timer->cancel_one();
         });
