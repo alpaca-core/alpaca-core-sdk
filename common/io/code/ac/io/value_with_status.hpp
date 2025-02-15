@@ -3,6 +3,7 @@
 //
 #pragma once
 #include "status.hpp"
+#include "status_builder.hpp"
 
 namespace ac::io {
 
@@ -22,6 +23,11 @@ struct value_with_status : public status {
     void reset(T v = {}) {
         status::reset();
         value = std::move(v);
+    }
+
+    template <typename ...Args>
+    static status_builder<value_with_status<T>> build(Args&&... args) {
+        return status_builder<value_with_status<T>>(std::forward<Args>(args)...);
     }
 };
 

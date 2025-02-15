@@ -1,3 +1,6 @@
+# Copyright (c) Borislav Stanimirov
+# SPDX-License-Identifier: MIT
+#
 add_library(ac-io INTERFACE)
 add_library(ac::io ALIAS ac-io)
 set_target_properties(ac-io PROPERTIES

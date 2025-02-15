@@ -75,3 +75,14 @@ TEST_CASE("value with status") {
     v2.s() = s;
     CHECK(v2.aborted());
 }
+
+ac::io::value_with_status<int> func() {
+    return ac::io::value_with_status<int>::build(213).set_aborted().set_closed();
+}
+
+TEST_CASE("value with status builder") {
+    auto v = func();
+    CHECK(v.value == 213);
+    CHECK(v.aborted());
+    CHECK(v.closed());
+}
