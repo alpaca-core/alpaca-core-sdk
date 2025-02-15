@@ -28,7 +28,7 @@ struct value_with_status : public status {
 template <typename T>
 struct value_ref_with_status : public status {
     explicit value_ref_with_status(T& val) : value(val) {}
-    value_ref_with_status(T& val, status status) : status(status), value(val) {}
+    value_ref_with_status(T& val, status s) : status(s), value(val) {}
 
     status& s() { return *this; }
     const status& s() const { return *this; }
