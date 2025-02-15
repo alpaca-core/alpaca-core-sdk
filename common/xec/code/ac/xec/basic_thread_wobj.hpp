@@ -9,7 +9,7 @@
 
 namespace ac::xec {
 
-class thread_wobj {
+class basic_thread_wobj {
     alignas(std::hardware_destructive_interference_size)
         std::atomic_bool m_flag;
 

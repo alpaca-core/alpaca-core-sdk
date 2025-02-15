@@ -46,7 +46,8 @@ public:
         m_timer->add_wait_cb(std::move(cb));
     }
 
-    const strand& get_strand() const {
+    using executor_type = strand;
+    const strand& get_executor() const {
         return m_strand;
     }
 };
