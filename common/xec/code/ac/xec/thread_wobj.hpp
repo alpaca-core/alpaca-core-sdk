@@ -3,12 +3,16 @@
 //
 #pragma once
 #include "notifiable.hpp"
+#include <astl/warnings.h>
 #include <condition_variable>
 #include <chrono>
 #include <atomic>
 #include <mutex>
 
 namespace ac::xec {
+
+PRAGMA_WARNING_PUSH
+DISABLE_MSVC_WARNING(4324) // structure was padded due to alignment specifier
 
 class thread_wobj : public notifiable {
     alignas(std::hardware_destructive_interference_size)
@@ -56,5 +60,7 @@ public:
         }
     }
 };
+
+PRAGMA_WARNING_POP
 
 } // namespace ac::xec
