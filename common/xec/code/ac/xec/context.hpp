@@ -18,7 +18,10 @@ public:
     context(const context&) = delete;
     context& operator=(const context&) = delete;
 
-    void run();
+    size_t run();
+
+    size_t poll();
+
     void stop();
     bool stopped() const;
     void restart();

@@ -47,8 +47,12 @@ context::context()
 
 context::~context() = default;
 
-void context::run() {
-    m_impl->ctx.run();
+size_t context::run() {
+    return m_impl->ctx.run();
+}
+
+size_t context::poll() {
+    return m_impl->ctx.poll();
 }
 
 void context::stop() {
