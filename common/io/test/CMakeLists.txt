@@ -6,3 +6,7 @@ macro(add_io_test test)
 endmacro()
 
 add_io_test(status)
+add_io_test(buffered_channel)
+add_io_test(channel_stream)
+add_io_test(blocking_io)
+add_io_test(sync-io)

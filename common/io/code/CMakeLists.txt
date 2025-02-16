@@ -9,6 +9,10 @@ set_target_properties(ac-io PROPERTIES
 target_sources(ac-io INTERFACE FILE_SET HEADERS FILES
     ac/io/status.hpp
 )
+target_link_libraries(ac-io INTERFACE
+    ac::astl
+    ac::xec
+)
 
 install(TARGETS ac-io
     EXPORT ac-common-targets
