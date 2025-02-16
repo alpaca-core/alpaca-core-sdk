@@ -79,11 +79,11 @@ strand make_strand(context& ctx) {
     return ctx.make_strand();
 }
 
-void post(const strand& s, ufunc<void()> f) {
+void post(const strand& s, task f) {
     asio::post(s->strand, std::move(f));
 }
 
-void post(context& ctx, ufunc<void()> f) {
+void post(context& ctx, task f) {
     asio::post(ctx._impl().ctx, std::move(f));
 }
 
