@@ -15,8 +15,9 @@ PRAGMA_WARNING_PUSH
 DISABLE_MSVC_WARNING(4324) // structure was padded due to alignment specifier
 
 class thread_wobj : public notifiable {
-    alignas(std::hardware_destructive_interference_size)
-        std::atomic_bool m_flag;
+    // align to prevent false sharing
+    // can't use std::hardware_destructive_interference_size as this is a part of public ABI
+    alignas(64) std::atomic_bool m_flag;
 
     std::mutex m_mutex;
     std::condition_variable m_cvar;
