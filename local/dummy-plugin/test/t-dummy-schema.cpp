@@ -30,7 +30,7 @@ TEST_CASE("blocking io") {
     ac::frameio::LocalIoRunner io;
 
     auto dummyHandler = ac::local::Lib::createSessionHandler("dummy");
-    ac::schema::BlockingIoHelper dummy(io.connectBlocking(std::move(dummyHandler)));
+    ac::schema::BlockingIoHelper dummy(io.connect(std::move(dummyHandler)));
 
     namespace schema = ac::schema::dummy;
 

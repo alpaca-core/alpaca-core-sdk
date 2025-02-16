@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #include "LocalIoRunner.hpp"
-#include "BlockingIo.hpp"
-#include "LocalBufferedChannel.hpp"
-#include "LocalChannelUtil.hpp"
+#include "BufferedChannelStream.hpp"
 
 namespace ac::frameio {
 
@@ -17,10 +15,10 @@ LocalIoRunner::~LocalIoRunner() {
     join();
 }
 
-LocalEndpoints LocalIoRunner::getEndpoints(ChannelBufferSizes bufferSizes) {
-    return LocalChannel_getEndpoints(
-        LocalBufferedChannel_create(bufferSizes.localToRemote),
-        LocalBufferedChannel_create(bufferSizes.remoteToLocal)
+ChannelEndpoints LocalIoRunner::getEndpoints(ChannelBufferSizes bufferSizes) {
+    return BufferedChannel_getEndpoints(
+        BufferedChannel_create(bufferSizes.localToRemote),
+        BufferedChannel_create(bufferSizes.remoteToLocal)
     );
 }
 
@@ -32,10 +30,6 @@ StreamEndpoint LocalIoRunner::connect(SessionHandlerPtr remoteHandler, ChannelBu
     auto [local, remote] = getEndpoints(bufferSizes);
     m_ctx.connect(remoteHandler, std::move(remote));
     return std::move(local);
-}
-
-BlockingIo LocalIoRunner::connectBlocking(SessionHandlerPtr remoteHandler, ChannelBufferSizes bufferSizes) {
-    return BlockingIo(connect(remoteHandler, bufferSizes));
 }
 
 void LocalIoRunner::connect(SessionHandlerPtr local, SessionHandlerPtr remote, ChannelBufferSizes bufferSizes) {

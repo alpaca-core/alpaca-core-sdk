@@ -2,13 +2,10 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
+#include "Io.hpp"
 #include <memory>
 
 namespace ac::frameio {
-class Input;
 using InputPtr = std::unique_ptr<Input>;
-class Output;
 using OutputPtr = std::unique_ptr<Output>;
-class IoExecutor;
-using IoExecutorPtr = std::shared_ptr<IoExecutor>;
 } // namespace ac::frameio

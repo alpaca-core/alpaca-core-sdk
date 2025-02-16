@@ -167,7 +167,7 @@ SessionCoro<void> server() {
 TEST_CASE("proxy") {
     LocalIoRunner ctx;
     auto ep = ctx.connect(CoroSessionHandler::create(server()));
-    auto io = ctx.connectBlocking(CoroSessionHandler::create(proxy(std::move(ep))));
+    BlockingIo io(ctx.connect(CoroSessionHandler::create(proxy(std::move(ep)))));
 
     io.push(frame("xx", 1));
     auto f = io.poll();

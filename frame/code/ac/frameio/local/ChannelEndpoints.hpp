@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include "../../export.h"
-#include "LocalChannel.hpp"
+#include "../StreamEndpoint.hpp"
 
 namespace ac::frameio {
-AC_FRAME_EXPORT LocalChannelPtr LocalBufferedChannel_create(size_t size);
+struct ChannelEndpoints {
+    StreamEndpoint ab;
+    StreamEndpoint ba;
+};
 } // namespace ac::frameio

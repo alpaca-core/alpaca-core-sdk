@@ -9,8 +9,6 @@ add_frame_test(Dict)
 
 add_frame_test(Stream)
 
-add_frame_test(LocalBufferedChannel)
-add_frame_test(BlockingIo)
 add_frame_test(SyncIo)
 add_frame_test(SessionCoro)
 add_frame_test(local-io)

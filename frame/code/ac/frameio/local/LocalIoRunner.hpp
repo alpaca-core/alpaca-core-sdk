@@ -12,8 +12,7 @@
 
 namespace ac::frameio {
 
-class BlockingIo;
-struct LocalEndpoints;
+struct ChannelEndpoints;
 
 // ideally this would be a nested type in LocalIoRunner, but then a clang bug is triggered:
 // https://bugs.llvm.org/show_bug.cgi?id=36684
@@ -30,11 +29,10 @@ public:
     LocalIoRunner& operator=(const LocalIoRunner&) = delete;
     ~LocalIoRunner();
 
-    static LocalEndpoints getEndpoints(ChannelBufferSizes bufferSizes = {});
+    static ChannelEndpoints getEndpoints(ChannelBufferSizes bufferSizes = {});
 
     void connect(SessionHandlerPtr remoteHandler, StreamEndpoint ep);
     StreamEndpoint connect(SessionHandlerPtr remoteHandler, ChannelBufferSizes bufferSizes = {});
-    BlockingIo connectBlocking(SessionHandlerPtr remoteHandler, ChannelBufferSizes bufferSizes = {});
     void connect(SessionHandlerPtr local, SessionHandlerPtr remote, ChannelBufferSizes bufferSizes = {});
 
     void join(bool forceStop = false);

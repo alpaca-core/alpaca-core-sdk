@@ -51,11 +51,9 @@ target_sources(ac-frame
         ac/frameio/SessionCoro.hpp
 
         # frameio-local
-        ac/frameio/local/LocalChannel.hpp
-        ac/frameio/local/LocalChannelPtr.hpp
-        ac/frameio/local/LocalBufferedChannel.hpp
+        ac/frameio/local/BufferedChannel.hpp
+        ac/frameio/local/BufferedChannelStream.hpp
         ac/frameio/local/BlockingIo.hpp
-        ac/frameio/local/SyncIo.hpp
         ac/frameio/local/BlockingSyncIoWrapper.hpp
         ac/frameio/local/LocalIoCtx.hpp
         ac/frameio/local/LocalIoRunner.hpp
@@ -71,15 +69,10 @@ target_sources(ac-frame
 
     PRIVATE
         ac/frameio/Stream.cpp
-        ac/frameio/Io.cpp
         ac/frameio/SessionHandler.cpp
         ac/frameio/IoException.cpp
         ac/frameio/SessionCoro.cpp
 
-        ac/frameio/local/LocalChannel.cpp
-        ac/frameio/local/LocalBufferedChannel.cpp
-        ac/frameio/local/BlockingIo.cpp
-        ac/frameio/local/SyncIo.cpp
         ac/frameio/local/BlockingSyncIoWrapper.cpp
         ac/frameio/local/LocalIoCtx.cpp
         ac/frameio/local/LocalIoRunner.cpp

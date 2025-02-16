@@ -4,6 +4,7 @@
 #pragma once
 #include "FrameHelpers.hpp"
 #include "../frameio/local/BlockingIo.hpp"
+#include "../frameio/StreamEndpoint.hpp"
 #include "../FrameUtil.hpp"
 #include <astl/throw_stdex.hpp>
 
@@ -12,7 +13,7 @@ namespace ac::schema {
 class BlockingIoHelper {
     frameio::BlockingIo m_io;
 public:
-    explicit BlockingIoHelper(frameio::BlockingIo io) : m_io(std::move(io)) {}
+    explicit BlockingIoHelper(frameio::StreamEndpoint ep) : m_io(std::move(ep)) {}
 
     frameio::BlockingIo& io() { return m_io; }
 

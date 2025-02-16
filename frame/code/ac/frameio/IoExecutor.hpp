@@ -5,18 +5,28 @@
 #include "../export.h"
 #include "StreamPtr.hpp"
 #include "IoPtr.hpp"
-#include <functional>
+#include <ac/xec/post.hpp>
 #include <memory>
 
 namespace ac::frameio {
 
-class AC_FRAME_EXPORT IoExecutor {
+class IoExecutor {
 public:
-    virtual ~IoExecutor();
-    virtual void post(std::function<void()> task) = 0;
+    ac::xec::strand strand;
 
-    virtual InputPtr attachInput(ReadStreamPtr stream) = 0;
-    virtual OutputPtr attachOutput(WriteStreamPtr stream) = 0;
+    IoExecutor() = default;
+    explicit IoExecutor(ac::xec::strand s) : strand(std::move(s)) {}
+
+    void post(xec::task task) const {
+        ac::xec::post(strand, std::move(task));
+    }
+
+    InputPtr attachInput(ReadStreamPtr stream) const {
+        return std::make_unique<Input>(std::move(stream), strand);
+    }
+    OutputPtr attachOutput(WriteStreamPtr stream) const {
+        return std::make_unique<Output>(std::move(stream), strand);
+    }
 };
 
 } // namespace ac::frameio

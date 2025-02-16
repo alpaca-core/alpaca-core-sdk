@@ -1,10 +1,9 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include <ac/frameio/local/LocalBufferedChannel.hpp>
-#include <ac/frameio/local/LocalChannelUtil.hpp>
+#include <ac/frameio/local/BufferedChannel.hpp>
+#include <ac/frameio/local/BufferedChannelStream.hpp>
 #include <ac/frameio/local/BlockingIo.hpp>
-#include <ac/frameio/local/SyncIo.hpp>
 #include <ac/frameio/local/BlockingSyncIoWrapper.hpp>
 #include <ac/frameio/SessionHandler.hpp>
 #include <ac/frameio/Io.hpp>
@@ -87,37 +86,6 @@ public:
         }
     }
 };
-
-TEST_CASE("SyncIo") {
-    auto [elocal, eremote] = LocalChannel_getEndpoints(
-        LocalBufferedChannel_create(3),
-        LocalBufferedChannel_create(3)
-    );
-
-    BlockingIo io(std::move(elocal));
-    auto progress = Session_connectSync(std::make_shared<MultiEcho>(), std::move(eremote));
-
-    io.push(ac::Frame{"echo", {{"msg", "hello"}, {"count", 5}}}, await_completion);
-    io.push(ac::Frame{"echo", {{"msg", "bye"}, {"count", 2}}}, await_completion);
-    progress();
-    for (int i = 0; i < 5; ++i) {
-        auto f = io.poll();
-        CHECK(f.success());
-        CHECK(f.value.op == "hello");
-        progress();
-    }
-    for (int i = 0; i < 2; ++i) {
-        auto f = io.poll();
-        CHECK(f.success());
-        CHECK(f.value.op == "bye");
-        progress();
-    }
-    auto f = io.poll(no_wait);
-    CHECK(f.blocked());
-
-    io.close();
-    progress();
-}
 
 TEST_CASE("SyncIo Wrapper") {
     BlockingSyncIoWrapper io(std::make_shared<MultiEcho>());

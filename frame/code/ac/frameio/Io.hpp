@@ -3,27 +3,13 @@
 //
 #pragma once
 #include "../export.h"
-#include "FrameWithStatus.hpp"
-#include <astl/timeout.hpp>
+#include "Stream.hpp"
+#include <ac/io/xio.hpp>
+#include <ac/xec/timer_wobj.hpp>
 
 namespace ac::frameio {
 
-using IoCb = std::function<void(Frame&, io::status)>;
-
-class AC_FRAME_EXPORT Input {
-public:
-    virtual ~Input();
-    virtual io::status get(Frame& frame) = 0;
-    virtual void poll(Frame& frame, astl::timeout timeout, IoCb cb) = 0;
-    virtual void close() = 0;
-};
-
-class AC_FRAME_EXPORT Output {
-public:
-    virtual ~Output();
-    virtual io::status put(Frame& frame) = 0;
-    virtual void push(Frame& frame, astl::timeout timeout, IoCb cb) = 0;
-    virtual void close() = 0;
-};
+using Input = io::xinput<ReadStream, xec::timer_wobj>;
+using Output = io::xoutput<WriteStream, xec::timer_wobj>;
 
 } // namespace ac::frameio

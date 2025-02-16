@@ -82,9 +82,9 @@ namespace coro {
 
 AttachedIo::AttachedIo(CoroSessionHandlerPtr handler, StreamEndpoint ep) {
     m_handler = std::move(handler);
-    m_inputPl = m_handler->shExecutor().attachInput(std::move(ep.readStream));
+    m_inputPl = m_handler->shExecutor().attachInput(std::move(ep.read_stream));
     m_input = m_inputPl.get();
-    m_outputPl = m_handler->shExecutor().attachOutput(std::move(ep.writeStream));
+    m_outputPl = m_handler->shExecutor().attachOutput(std::move(ep.write_stream));
     m_output = m_outputPl.get();
 }
 

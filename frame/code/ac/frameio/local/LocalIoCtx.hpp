@@ -4,11 +4,10 @@
 #pragma once
 #include "../../export.h"
 #include "../SessionHandlerPtr.hpp"
+#include "../StreamEndpoint.hpp"
 #include <ac/xec/context.hpp>
 
 namespace ac::frameio {
-
-struct StreamEndpoint;
 
 class AC_FRAME_EXPORT LocalIoCtx : public xec::context {
 public:

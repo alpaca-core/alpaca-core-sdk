@@ -6,14 +6,13 @@
 #include "SessionHandler.hpp"
 #include "FrameWithStatus.hpp"
 #include "IoException.hpp"
+#include "StreamEndpoint.hpp"
 #include <astl/expected.hpp>
 #include <astl/timeout.hpp>
 #include <coroutine>
 #include <stdexcept>
 
 namespace ac::frameio {
-
-struct StreamEndpoint;
 
 template <typename T>
 struct SessionCoro;

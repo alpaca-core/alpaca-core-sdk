@@ -5,6 +5,7 @@
 #include "../export.h"
 #include "SessionHandlerPtr.hpp"
 #include "IoPtr.hpp"
+#include "IoExecutor.hpp"
 #include <astl/shared_from.hpp>
 #include <memory>
 
@@ -17,7 +18,7 @@ public:
 
     Input& shInput() const noexcept { return *m_in; }
     Output& shOutput() const noexcept { return *m_out; }
-    IoExecutor& shExecutor() const noexcept { return *m_executor; }
+    const IoExecutor& shExecutor() const noexcept { return m_executor; }
 
 protected:
     SessionHandler() noexcept;
@@ -34,7 +35,7 @@ protected:
 private:
     InputPtr m_in;
     OutputPtr m_out;
-    IoExecutorPtr m_executor;
+    IoExecutor m_executor;
 
     SessionHandlerPtr m_successor;
 
@@ -44,7 +45,7 @@ public:
     static void init(const SessionHandlerPtr& handler,
         InputPtr in,
         OutputPtr out,
-        IoExecutorPtr executor
+        IoExecutor executor
     ) noexcept;
 };
 

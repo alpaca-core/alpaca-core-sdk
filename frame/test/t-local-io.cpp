@@ -3,7 +3,7 @@
 //
 #include <ac/frameio/local/LocalIoRunner.hpp>
 #include <ac/frameio/local/BlockingIo.hpp>
-#include <ac/frameio/local/LocalChannelUtil.hpp>
+#include <ac/frameio/local/BufferedChannelStream.hpp>
 #include <ac/frameio/SessionCoro.hpp>
 #include <doctest/doctest.h>
 #include <thread>
