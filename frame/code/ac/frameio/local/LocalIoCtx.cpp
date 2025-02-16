@@ -84,50 +84,8 @@ struct StrandExecutor final : public IoExecutor {
 
 } // namespace
 
-class LocalIoCtx::Impl {
-public:
-    xec::context m_ctx;
-    xec::context_work_guard m_workGuard;
-
-    Impl()
-        : m_workGuard(m_ctx)
-    {}
-
-    void run() {
-        m_ctx.run();
-    }
-
-    void forceStop() {
-        m_ctx.stop();
-    }
-
-    void complete() {
-        post(m_ctx, [this]() {
-            m_workGuard.reset();
-        });
-    }
-};
-
-LocalIoCtx::LocalIoCtx()
-    : m_impl(std::make_unique<Impl>())
-{}
-
-LocalIoCtx::~LocalIoCtx() = default;
-
-void LocalIoCtx::run() {
-    m_impl->run();
-}
-
-void LocalIoCtx::forceStop() {
-    m_impl->forceStop();
-}
-
-void LocalIoCtx::complete() {
-    m_impl->complete();
-}
-
 void LocalIoCtx::connect(SessionHandlerPtr handler, StreamEndpoint ep) {
-    auto strand = m_impl->m_ctx.make_strand();
+    auto strand = make_strand();
     auto executor = std::make_shared<StrandExecutor>(strand);
     SessionHandler::init(
         handler,

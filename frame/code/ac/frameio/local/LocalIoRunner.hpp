@@ -6,6 +6,7 @@
 #include "LocalIoCtx.hpp"
 #include "../SessionHandlerPtr.hpp"
 
+#include <ac/xec/context_work_guard.hpp>
 #include <astl/multi_thread_runner.hpp>
 #include <cstdint>
 
@@ -42,6 +43,7 @@ public:
 
 private:
     LocalIoCtx m_ctx;
+    ac::xec::context_work_guard m_guard;
     astl::multi_thread_runner<LocalIoCtx> m_threads;
 };
 

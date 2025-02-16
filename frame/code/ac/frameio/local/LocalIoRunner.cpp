@@ -9,7 +9,8 @@
 namespace ac::frameio {
 
 LocalIoRunner::LocalIoRunner(uint32_t numThreads)
-    : m_threads(m_ctx, numThreads)
+    : m_guard(m_ctx)
+    , m_threads(m_ctx, numThreads)
 {}
 
 LocalIoRunner::~LocalIoRunner() {
@@ -46,11 +47,10 @@ void LocalIoRunner::connect(SessionHandlerPtr local, SessionHandlerPtr remote, C
 void LocalIoRunner::join(bool forceStop) {
     if (m_threads.empty()) return;
 
+    m_guard.reset();
+
     if (forceStop) {
-        m_ctx.forceStop();
-    }
-    else {
-        m_ctx.complete();
+        m_ctx.stop();
     }
 
     m_threads.join();

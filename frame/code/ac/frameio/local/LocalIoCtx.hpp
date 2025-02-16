@@ -4,26 +4,15 @@
 #pragma once
 #include "../../export.h"
 #include "../SessionHandlerPtr.hpp"
+#include <ac/xec/context.hpp>
 
 namespace ac::frameio {
 
 struct StreamEndpoint;
 
-class AC_FRAME_EXPORT LocalIoCtx {
+class AC_FRAME_EXPORT LocalIoCtx : public xec::context {
 public:
-    LocalIoCtx();
-    LocalIoCtx(const LocalIoCtx&) = delete;
-    LocalIoCtx& operator=(const LocalIoCtx&) = delete;
-    ~LocalIoCtx();
-
-    void run();
-    void forceStop();
-    void complete();
-
     void connect(SessionHandlerPtr handler, StreamEndpoint ep);
-private:
-    class Impl;
-    std::unique_ptr<Impl> m_impl;
 };
 
 } // namespace ac::frameio
