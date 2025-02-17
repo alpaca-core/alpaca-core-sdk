@@ -17,14 +17,16 @@ template <stream_class Stream, xec::basic_wait_object_class Wobj>
 class basic_xio {
 public:
     template <typename ...Args>
-    explicit basic_xio(Args&&... args)
-        : m_wobj(std::forward<Args>(args)...)
+    explicit basic_xio(std::unique_ptr<Stream> stream, Args&&... args)
+        requires std::constructible_from<Wobj, Args...>
+        : m_stream(std::move(stream))
+        , m_wobj(std::forward<Args>(args)...)
     {}
 
     template <typename ...Args>
-    explicit basic_xio(std::unique_ptr<Stream> stream, Args&&... args)
-        : m_stream(std::move(stream))
-        , m_wobj(std::forward<Args>(args)...)
+    explicit basic_xio(Args&&... args)
+        requires std::constructible_from<Wobj, Args...>
+        : basic_xio(std::unique_ptr<Stream>{}, std::forward<Args>(args)...)
     {}
 
     using stream_type = Stream;
