@@ -17,15 +17,30 @@ template <stream_class Stream, xec::basic_wait_object_class Wobj>
 class basic_xio {
 public:
     template <typename ...Args>
-    basic_xio(std::unique_ptr<Stream> stream, Args&&... args)
+    explicit basic_xio(Args&&... args)
+        : m_wobj(std::forward<Args>(args)...)
+    {}
+
+    template <typename ...Args>
+    explicit basic_xio(std::unique_ptr<Stream> stream, Args&&... args)
         : m_stream(std::move(stream))
         , m_wobj(std::forward<Args>(args)...)
-    {
-    }
+    {}
 
     using stream_type = Stream;
     using value_type = typename stream_type::value_type;
     using executor_type = typename Wobj::executor_type;
+
+    bool attached() const noexcept { return !!m_stream; }
+    explicit operator bool() const noexcept { return attached(); }
+
+    std::unique_ptr<Stream> attach(std::unique_ptr<Stream> stream) {
+        return std::exchange(m_stream, std::move(stream));
+    }
+
+    std::unique_ptr<Stream> detach() {
+        return attach(nullptr);
+    }
 
     const executor_type& get_executor() const {
         return m_wobj.get_executor();
@@ -71,10 +86,6 @@ public:
 
     void close() {
         m_stream->close();
-    }
-
-    std::unique_ptr<Stream> detach_stream() {
-        return std::move(m_stream);
     }
 
 protected:
