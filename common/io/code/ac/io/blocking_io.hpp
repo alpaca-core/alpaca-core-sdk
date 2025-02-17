@@ -22,7 +22,7 @@ struct blocking_wobj : public xec::thread_wobj {
         return {};
     }
 
-    template <typename Cb>
+    template <xec::wait_func_class Cb>
     void wait(astl::timeout to, Cb&& cb) {
         auto notified = xec::thread_wobj::wait(to);
         if (notified) {

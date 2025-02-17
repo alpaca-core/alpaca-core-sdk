@@ -4,14 +4,16 @@
 #pragma once
 #include "status.hpp"
 #include "stream_op.hpp"
-#include "concepts/wait_object.hpp"
+#include "concepts/xio_cb.hpp"
+#include <ac/xec/wobj_concept.hpp>
 #include <astl/timeout.hpp>
 #include <memory>
+#include <cassert>
 #include <system_error>
 
 namespace ac::io {
 
-template <stream_class Stream, wait_object_class Wobj>
+template <stream_class Stream, xec::basic_wait_object_class Wobj>
 class basic_xio {
 public:
     template <typename ...Args>
@@ -33,16 +35,24 @@ public:
         return stream_op(*m_stream, value, nullptr);
     }
 
-    template <typename Cb>
-    void async_io(value_type& value, astl::timeout to, Cb&& cb) {
-        {
-            status s = stream_op(*m_stream, value, &m_wobj);
-            if (s.complete()) {
-                post(m_wobj.get_executor(), [cb = std::forward<Cb>(cb), &value, s]() mutable {
-                    cb(value, s);
-                });
-                return;
-            }
+    template <xio_cb_class<value_type> Cb>
+    void async_io(value_type& value, Cb&& cb) requires xec::wait_object_class<Wobj> {
+        if (init_async_io(value, std::forward<Cb>(cb))) {
+            return;
+        }
+
+        m_wobj.wait([this, &value, cb = std::forward<Cb>(cb)]([[maybe_unused]] const std::error_code& ec) {
+            status s = stream_op(*m_stream, value, nullptr);
+            assert(ec);
+            s.set_aborted();
+            cb(value, s);
+        });
+    }
+
+    template <xio_cb_class<value_type> Cb>
+    void async_io(value_type& value, astl::timeout to, Cb&& cb) requires xec::timeout_wait_object_class<Wobj> {
+        if (init_async_io(value, std::forward<Cb>(cb))) {
+            return;
         }
 
         m_wobj.wait(to, [this, &value, cb = std::forward<Cb>(cb)](const std::error_code& ec) {
@@ -70,11 +80,23 @@ public:
 protected:
     ~basic_xio() = default;
 private:
+    template <xio_cb_class<value_type> Cb>
+    bool init_async_io(value_type& value, Cb&& cb) {
+        status s = stream_op(*m_stream, value, &m_wobj);
+        if (s.complete()) {
+            post(m_wobj.get_executor(), [cb = std::forward<Cb>(cb), &value, s]() mutable {
+                cb(value, s);
+            });
+            return true;
+        }
+        return false;
+    }
+
     std::unique_ptr<Stream> m_stream;
     Wobj m_wobj;
 };
 
-template <read_stream_class ReadStream, wait_object_class Wobj>
+template <read_stream_class ReadStream, xec::basic_wait_object_class Wobj>
 class xinput final : public basic_xio<ReadStream, Wobj> {
 public:
     using super = basic_xio<ReadStream, Wobj>;
@@ -88,13 +110,18 @@ public:
         return super::sync_io(value);
     }
 
-    template <typename Cb>
-    void poll(value_type& value, astl::timeout to, Cb&& cb) {
+    template <xio_cb_class<value_type> Cb>
+    void poll(value_type& value, Cb&& cb) requires xec::wait_object_class<Wobj> {
+        super::async_io(value, std::forward<Cb>(cb));
+    }
+
+    template <xio_cb_class<value_type> Cb>
+    void poll(value_type& value, astl::timeout to, Cb&& cb) requires xec::timeout_wait_object_class<Wobj> {
         super::async_io(value, to, std::forward<Cb>(cb));
     }
 };
 
-template <write_stream_class WriteStream, wait_object_class Wobj>
+template <write_stream_class WriteStream, xec::basic_wait_object_class Wobj>
 class xoutput final : public basic_xio<WriteStream, Wobj> {
 public:
     using super = basic_xio<WriteStream, Wobj>;
@@ -108,8 +135,13 @@ public:
         return super::sync_io(value);
     }
 
-    template <typename Cb>
-    void push(value_type& value, astl::timeout to, Cb&& cb) {
+    template <xio_cb_class<value_type> Cb>
+    void push(value_type& value, Cb&& cb) requires xec::wait_object_class<Wobj> {
+        super::async_io(value, std::forward<Cb>(cb));
+    }
+
+    template <xio_cb_class<value_type> Cb>
+    void push(value_type& value, astl::timeout to, Cb&& cb) requires xec::timeout_wait_object_class<Wobj> {
         super::async_io(value, to, std::forward<Cb>(cb));
     }
 };

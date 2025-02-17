@@ -1,8 +1,9 @@
-// Copyright (c) Alpaca Core
-// SPDX-License-Identifier: MIT
-//
-#pragma once
+    // Copyright (c) Alpaca Core
+    // SPDX-License-Identifier: MIT
+    //
+    #pragma once
 #include "concepts/channel.hpp"
+#include "concepts/stream.hpp"
 #include <memory>
 
 namespace ac::io {
