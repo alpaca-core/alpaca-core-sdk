@@ -3,11 +3,8 @@
 //
 #pragma once
 #include "value_with_status.hpp"
-
-namespace ac::xec {
-class notifiable;
-}
+#include <ac/xec/task.hpp>
 
 namespace ac::io {
-using stream_result = value_with_status<xec::notifiable*>;
+using stream_result = value_with_status<xec::task>;
 } // namespace ac::io

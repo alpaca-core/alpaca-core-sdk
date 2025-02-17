@@ -6,45 +6,56 @@
 #include <doctest/doctest.h>
 #include <string>
 
-struct test_nobj final : public ac::xec::notifiable {
-    int all = 0;
-    int one = 0;
-    void notify_all() override { ++all; }
-    void notify_one() override { ++one; }
-};
-
 static_assert(ac::io::channel_class<ac::io::buffered_channel<std::string>>);
 
 TEST_CASE("buffered_channel 1") {
-    test_nobj read_nobj, read_nobj2, write_nobj;
+    int read_ns = 0, read_ns2 = 0, write_ns = 0;
+
+    std::function<void()>
+        read_notify = [&]() {
+            ++read_ns;
+        },
+        read_notify2 = [&]() {
+            ++read_ns2;
+        },
+        write_notify = [&]() {
+            ++write_ns;
+        }
+    ;
+
+    auto on_rb = [&]() { return read_notify; };
+    auto on_rb2 = [&]() { return read_notify2; };
+    auto on_wb = [&]() { return write_notify; };
 
     ac::io::buffered_channel<std::string> channel(1);
 
-    auto* nobj = channel.exchange_read_nobj(nullptr);
-    CHECK(nobj == nullptr);
+    auto notify = channel.exchange_read_notify_cb(nullptr);
+    CHECK_FALSE(notify);
 
-    nobj = channel.exchange_write_nobj(nullptr);
-    CHECK(nobj == nullptr);
+    notify = channel.exchange_write_notify_cb(nullptr);
+    CHECK_FALSE(notify);
 
     std::string str;
     auto result = channel.read(str, nullptr);
     CHECK(result.blocked());
-    CHECK(result.value == nullptr);
+    CHECK_FALSE(result.value);
     CHECK_FALSE(result.aborted());
     CHECK_FALSE(result.waiting());
     CHECK(str.empty());
 
-    result = channel.read(str, &read_nobj);
-    CHECK(result.value == nullptr);
+    result = channel.read(str, on_rb);
+    CHECK_FALSE(result.value);
     CHECK(result.blocked());
     CHECK(str.empty());
-    CHECK(read_nobj.one == 0);
+    CHECK(read_ns == 0);
 
-    nobj = channel.exchange_write_nobj(nullptr);
-    CHECK(nobj == nullptr);
+    notify = channel.exchange_write_notify_cb(nullptr);
+    CHECK_FALSE(notify);
 
-    nobj = channel.exchange_read_nobj(nullptr);
-    CHECK(nobj == &read_nobj);
+    notify = channel.exchange_read_notify_cb(nullptr);
+    REQUIRE(notify);
+    notify();
+    CHECK(read_ns == 1);
 
     str = "test";
     result = channel.write(str, nullptr);
@@ -61,52 +72,58 @@ TEST_CASE("buffered_channel 1") {
     CHECK(str == "test");
 
     str.clear();
-    result = channel.read(str, &read_nobj);
-    CHECK(result.value == nullptr);
+    result = channel.read(str, on_rb);
+    CHECK_FALSE(result.value);
     CHECK(result.blocked());
     CHECK(result.waiting());
     CHECK(str.empty());
 
     str = "yep";
-    result = channel.write(str, &write_nobj);
-    CHECK(result.value == nullptr);
+    result = channel.write(str, on_wb);
+    CHECK_FALSE(result.value);
     CHECK(result.success());
-    CHECK(read_nobj.one == 1);
+    CHECK(read_ns == 2);
     CHECK(str.empty());
 
     str = "nope again";
-    result = channel.write(str, &write_nobj);
-    CHECK(result.value == nullptr);
+    result = channel.write(str, on_wb);
+    CHECK_FALSE(result.value);
     CHECK(result.blocked());
     CHECK(result.waiting());
     CHECK(str == "nope again");
 
-    result = channel.read(str, &read_nobj);
-    CHECK(result.value == nullptr);
+    result = channel.read(str, on_rb);
+    CHECK_FALSE(result.value);
     CHECK(result.success());
     CHECK(str == "yep");
-    CHECK(read_nobj.one == 1);
+    CHECK(read_ns == 2);
 
     str.clear();
-    result = channel.read(str, &read_nobj);
-    CHECK(result.value == nullptr);
+    result = channel.read(str, on_rb);
+    CHECK_FALSE(result.value);
     CHECK(result.blocked());
     CHECK(result.waiting());
     CHECK(str.empty());
 
-    result = channel.read(str, &read_nobj2);
-    CHECK(result.value == &read_nobj);
+    result = channel.read(str, on_rb2);
     CHECK(result.blocked());
     CHECK(result.waiting());
     CHECK(result.aborted());
     CHECK(str.empty());
+    REQUIRE(result.value);
+    CHECK(read_ns == 2);
+    result.value();
+    CHECK(read_ns == 3);
 
     result = channel.read(str, nullptr);
-    CHECK(result.value == &read_nobj2);
     CHECK(result.blocked());
     CHECK_FALSE(result.waiting());
     CHECK(result.aborted());
     CHECK(str.empty());
+    REQUIRE(result.value);
+    CHECK(read_ns2 == 0);
+    result.value();
+    CHECK(read_ns2 == 1);
 
     str = "hello";
     result = channel.write(str, nullptr);
@@ -125,13 +142,6 @@ TEST_CASE("buffered_channel 1") {
 
     result = channel.read(str, nullptr);
     CHECK(result.closed());
-
-    CHECK(read_nobj.all == 0);
-    CHECK(read_nobj.one == 1);
-    CHECK(read_nobj2.all == 0);
-    CHECK(read_nobj2.one == 0);
-    CHECK(write_nobj.all == 0);
-    CHECK(write_nobj.one == 1);
 }
 
 TEST_CASE("buffered_channel 10") {

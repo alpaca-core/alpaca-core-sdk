@@ -4,38 +4,28 @@
 #include <ac/io/channel_stream.hpp>
 #include <ac/io/stream_result.hpp>
 #include <ac/io/channel_endpoints.hpp>
-#include <ac/xec/notifiable.hpp>
 #include <doctest/doctest.h>
-
-struct test_nobj final : public ac::xec::notifiable {
-    void notify_all() override {}
-    void notify_one() override {}
-};
 
 struct test_channel {
     using read_value_type = int;
     using write_value_type = int;
 
-    ac::xec::notifiable* nobj = nullptr;
     int val = 0;
 
-    ac::io::stream_result write(int& t, ac::xec::notifiable* n) {
+    ac::io::stream_result write(int& t, ac::xec::task(*)()) {
         val = t;
         t = 0;
-        nobj = n;
-        return ac::io::stream_result::build(nobj).set_success();
+        return ac::io::stream_result::build().set_success();
     }
 
-    ac::io::stream_result read(int& t, ac::xec::notifiable* n) {
+    ac::io::stream_result read(int& t, ac::xec::task(*)()) {
         t = val;
         val = 0;
-        nobj = n;
-        return ac::io::stream_result::build(nobj).set_success();
+        return ac::io::stream_result::build().set_success();
     }
 
     void close() {
         val = -1;
-        nobj = nullptr;
     }
 };
 

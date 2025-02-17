@@ -24,8 +24,9 @@ public:
     ~channel_read_stream() {
         close();
     }
-    stream_result read(read_value_type& value, xec::notifiable* notify) {
-        return m_channel->read(value, notify);
+    template <on_blocked_cb_class OnBlocked>
+    stream_result read(read_value_type& value, OnBlocked&& on_blocked) {
+        return m_channel->read(value, std::forward<OnBlocked>(on_blocked));
     }
     void close() {
         m_channel->close();
@@ -46,8 +47,9 @@ public:
     ~channel_write_stream() {
         close();
     }
-    stream_result write(write_value_type& value, xec::notifiable* notify) {
-        return m_channel->write(value, notify);
+    template <on_blocked_cb_class OnBlocked>
+    stream_result write(write_value_type& value, OnBlocked&& on_blocked) {
+        return m_channel->write(value, std::forward<OnBlocked>(on_blocked));
     }
     void close() {
         m_channel->close();
