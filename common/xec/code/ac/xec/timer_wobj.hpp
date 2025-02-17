@@ -6,6 +6,7 @@
 #include "timer.hpp"
 #include "post.hpp"
 #include "wait_func.hpp"
+#include "coro_wobj.hpp"
 
 namespace ac::xec {
 
@@ -48,8 +49,16 @@ public:
     }
 
     using executor_type = strand;
-    const strand& get_executor() const {
+    [[nodiscard]] const strand& get_executor() const {
         return m_strand;
+    }
+
+    // corouitne interface implemented in coro_wobj.hpp
+    [[nodiscard]] wait_awaitable<timer_wobj> wait() {
+        return wait_awaitable(*this);
+    }
+    [[nodiscard]] timeout_awaitable<timer_wobj> wait(astl::timeout to) {
+        return timeout_awaitable(*this, to);
     }
 };
 
