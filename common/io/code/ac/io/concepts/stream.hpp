@@ -19,7 +19,7 @@ concept on_blocked_cb_class =
     };
 
 template <typename T>
-concept close_class = requires(T s) {
+concept close_class = requires(T& s) {
     { s.close() };
 };
 
@@ -29,7 +29,7 @@ concept read_class =
     && requires {
         typename T::read_value_type;
     }
-    && requires(T s, typename T::read_value_type& val, xec::task (*on_blocked)()) {
+    && requires(T& s, typename T::read_value_type& val, xec::task (*on_blocked)()) {
         { s.read(val, on_blocked) } -> std::same_as<stream_result>;
         { s.read(val, nullptr) } -> std::same_as<stream_result>;
     };
@@ -40,7 +40,7 @@ concept write_class =
     && requires {
         typename T::write_value_type;
     }
-    && requires(T s, typename T::write_value_type& val, xec::task (*on_blocked)()) {
+    && requires(T& s, typename T::write_value_type& val, xec::task (*on_blocked)()) {
         { s.write(val, on_blocked) } -> std::same_as<stream_result>;
         { s.write(val, nullptr) } -> std::same_as<stream_result>;
     };
