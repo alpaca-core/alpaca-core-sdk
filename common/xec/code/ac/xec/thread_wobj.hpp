@@ -17,7 +17,12 @@ DISABLE_MSVC_WARNING(4324) // structure was padded due to alignment specifier
 class thread_wobj : public notifiable {
     // align to prevent false sharing
     // can't use std::hardware_destructive_interference_size as this is a part of public ABI
-    alignas(64) std::atomic_bool m_flag;
+#if !defined(_MSC_VER)
+    // temporarily disable this for msvc until tehre's a resolution on
+    // https://developercommunity.microsoft.com/t/Address-sanitizer-bug-when-deducing-temp/10852062
+    alignas(64)
+#endif
+        std::atomic_bool m_flag;
 
     std::mutex m_mutex;
     std::condition_variable m_cvar;
