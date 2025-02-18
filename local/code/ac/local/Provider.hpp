@@ -8,6 +8,8 @@
 
 namespace ac::local {
 
+struct SessionContext;
+
 /// Base class for local inference providers.
 /// Providers are responsible for creating and managing stateful sessions. They are typically
 /// facades for an underlying inference library. While providers can be used on their own, they are typically used
@@ -43,6 +45,8 @@ public:
     virtual const Info& info() const noexcept = 0;
 
     virtual frameio::SessionHandlerPtr createSessionHandler(std::string_view target) = 0;
+
+    virtual void createSession(SessionContext context) = 0;
 };
 
 } // namespace ac::local
