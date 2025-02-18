@@ -14,6 +14,9 @@ if(WIN32 AND CMAKE_RUNTIME_OUTPUT_DIRECTORY)
         file(MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
         execute_process(
             COMMAND ${CMAKE_COMMAND} -E create_symlink
+                "${CMAKE_CURRENT_LIST_DIR}/bin/ac-xec.dll"
+                "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/ac-xec.dll"
+            COMMAND ${CMAKE_COMMAND} -E create_symlink
                 "${CMAKE_CURRENT_LIST_DIR}/bin/ac-frame.dll"
                 "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/ac-frame.dll"
             COMMAND ${CMAKE_COMMAND} -E create_symlink
