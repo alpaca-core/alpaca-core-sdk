@@ -96,7 +96,7 @@ private:
         return std::exchange(m_notify, on_blocked());
     }
 
-    xec::task exchange_notify_l(nullptr_t) {
+    xec::task exchange_notify_l(std::nullptr_t) {
         return std::exchange(m_notify, nullptr);
     }
 

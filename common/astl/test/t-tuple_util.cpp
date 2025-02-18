@@ -38,7 +38,7 @@ struct identity {
     constexpr T& operator()(T& t) const {
         return t;
     }
-    int& operator()(nullptr_t) const {
+    int& operator()(std::nullptr_t) const {
         throw 0;
     }
 };

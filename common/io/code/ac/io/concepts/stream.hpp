@@ -13,7 +13,7 @@ namespace ac::io {
 
 template <typename T>
 concept on_blocked_cb_class =
-    std::same_as<T, nullptr_t>
+    std::same_as<T, std::nullptr_t>
     || requires(T f) {
         { std::invoke(f) } -> std::convertible_to<xec::task>;
     };
