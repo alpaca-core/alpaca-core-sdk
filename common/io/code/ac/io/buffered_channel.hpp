@@ -88,6 +88,11 @@ public:
 private:
     template <typename OnBlocked>
     xec::task exchange_notify_l(OnBlocked&& on_blocked) {
+        if constexpr (std::is_constructible_v<bool, OnBlocked>) {
+            if (!on_blocked) {
+                return std::exchange(m_notify, nullptr);
+            }
+        }
         return std::exchange(m_notify, on_blocked());
     }
 

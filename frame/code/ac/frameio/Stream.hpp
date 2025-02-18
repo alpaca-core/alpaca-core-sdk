@@ -4,15 +4,16 @@
 #pragma once
 #include "../export.h"
 #include "../Frame.hpp"
-#include <ac/io/value_with_status.hpp>
 #include <ac/io/stream_result.hpp>
 
 namespace ac::frameio {
 
 class AC_FRAME_EXPORT Stream {
 public:
+    using OnBlockedFunc = astl::ufunction<xec::task()>;
+
     virtual ~Stream();
-    virtual io::stream_result stream(Frame& f, xec::notifiable* nobj) = 0;
+    virtual io::stream_result stream(Frame& f, OnBlockedFunc onBlocked) = 0;
     virtual void close() = 0;
 };
 
@@ -22,10 +23,10 @@ public:
     using value_type = Frame;
 
     virtual ~ReadStream();
-    virtual io::stream_result read(Frame& f, xec::notifiable* nobj) = 0;
+    virtual io::stream_result read(Frame& f, OnBlockedFunc onBlocked) = 0;
 
-    io::stream_result stream(Frame& f, xec::notifiable* nobj) final override {
-        return read(f, nobj);
+    io::stream_result stream(Frame& f, OnBlockedFunc onBlocked) final override {
+        return read(f, std::move(onBlocked));
     }
 };
 
@@ -35,10 +36,10 @@ public:
     using value_type = Frame;
 
     virtual ~WriteStream();
-    virtual io::stream_result write(Frame& f, xec::notifiable* nobj) = 0;
+    virtual io::stream_result write(Frame& f, OnBlockedFunc onBlocked) = 0;
 
-    io::stream_result stream(Frame& f, xec::notifiable* nobj) final override {
-        return write(f, nobj);
+    io::stream_result stream(Frame& f, OnBlockedFunc onBlocked) final override {
+        return write(f, std::move(onBlocked));
     }
 };
 

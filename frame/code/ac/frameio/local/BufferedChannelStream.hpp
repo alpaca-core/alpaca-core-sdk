@@ -23,8 +23,8 @@ public:
         : m_stream(channel)
     {}
 
-    virtual io::stream_result read(Frame& f, xec::notifiable* nobj) override {
-        return m_stream.read(f, nobj);
+    virtual io::stream_result read(Frame& f, OnBlockedFunc onBlocked) override {
+        return m_stream.read(f, std::move(onBlocked));
     }
 
     virtual void close() override {
@@ -40,8 +40,8 @@ public:
         : m_stream(channel)
     {}
 
-    virtual io::stream_result write(Frame& f, xec::notifiable* nobj) override {
-        return m_stream.write(f, nobj);
+    virtual io::stream_result write(Frame& f, OnBlockedFunc onBlocked) override {
+        return m_stream.write(f, std::move(onBlocked));
     }
 
     virtual void close() override {
