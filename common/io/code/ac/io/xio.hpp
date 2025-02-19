@@ -150,7 +150,7 @@ private:
 };
 
 template <read_stream_class ReadStream, xec::basic_wait_object_class Wobj>
-class xinput final : public basic_xio<ReadStream, Wobj> {
+class xinput : public basic_xio<ReadStream, Wobj> {
 public:
     using super = basic_xio<ReadStream, Wobj>;
     using super::basic_xio;
@@ -210,7 +210,7 @@ public:
 };
 
 template <write_stream_class WriteStream, xec::basic_wait_object_class Wobj>
-class xoutput final : public basic_xio<WriteStream, Wobj> {
+class xoutput : public basic_xio<WriteStream, Wobj> {
 public:
     using super = basic_xio<WriteStream, Wobj>;
     using super::basic_xio;
@@ -258,7 +258,7 @@ public:
     };
 
     template <bool E = true>
-    async_awaitable<E> push(value_type&& value, astl::timeout to = astl::timeout::never()) {
+    push_value_awaitable<E> push(value_type&& value, astl::timeout to = astl::timeout::never()) {
         return push_value_awaitable<E>(std::forward<value_type>(value), *this, to);
     }
 };

@@ -7,7 +7,7 @@
 
 namespace ac::io {
 
-template <class ReadStream, class WriteStream, class Wobj, bool Except = true>
+template <class ReadStream, class WriteStream, class Wobj>
 struct xio_endpoint : private xinput<ReadStream, Wobj>, private xoutput<WriteStream, Wobj>
 {
     using input_type = xinput<ReadStream, Wobj>;
@@ -18,7 +18,7 @@ struct xio_endpoint : private xinput<ReadStream, Wobj>, private xoutput<WriteStr
     using executor_type = typename Wobj::executor_type;
 
     template <typename... Args>
-    xio_endpoint(stream_endpoint_type sep, Args&&... args)
+    explicit xio_endpoint(stream_endpoint_type sep, Args&&... args)
         requires std::constructible_from<Wobj, Args...>
         : input_type(std::move(sep.read_stream), args...)
         , output_type(std::move(sep.write_stream), args...)
@@ -27,10 +27,15 @@ struct xio_endpoint : private xinput<ReadStream, Wobj>, private xoutput<WriteStr
     }
 
     template <typename... Args>
-    xio_endpoint(Args&&... args)
+    explicit xio_endpoint(Args&&... args)
         requires std::constructible_from<Wobj, Args...>
         : xio_endpoint(stream_endpoint_type{}, std::forward<Args>(args)...)
     {}
+
+    xio_endpoint(const xio_endpoint&) = delete;
+    xio_endpoint& operator=(const xio_endpoint&) = delete;
+    xio_endpoint(xio_endpoint&&) noexcept = default;
+    xio_endpoint& operator=(xio_endpoint&&) noexcept = default;
 
     input_type& input() { return *this; }
     const input_type& input() const { return *this; }
