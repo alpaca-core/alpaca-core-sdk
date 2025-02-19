@@ -36,6 +36,8 @@ struct ret_promise_helper<void, Self> {
     }
 };
 
+} // namespace impl
+
 struct coro_state {
     strand executor;
     std::coroutine_handle<> current_coro;
@@ -51,8 +53,7 @@ struct coro_state {
     }
 };
 
-using state_ptr = std::shared_ptr<coro_state>;
-}
+using coro_state_ptr = std::shared_ptr<coro_state>;
 
 template <typename Ret>
 struct coro {
@@ -87,7 +88,7 @@ struct coro {
             pop_coro();
         }
 
-        impl::state_ptr m_state;
+        coro_state_ptr m_state;
         std::coroutine_handle<> m_prev = nullptr;
 
         // points to the result in the awaitable which is on the stack
@@ -163,7 +164,7 @@ struct executor {
 };
 
 inline void co_spawn(strand ex, coro<void> c) {
-    auto state = std::make_shared<impl::coro_state>();
+    auto state = std::make_shared<coro_state>();
     state->executor = std::move(ex);
     auto h = c.take_handle();
     state->set_coro(h);
