@@ -251,14 +251,15 @@ public:
     struct [[nodiscard]] push_value_awaitable : public async_awaitable<E> {
         value_type value;
 
-        push_value_awaitable(xoutput& io, astl::timeout to)
+        push_value_awaitable(value_type&& val, xoutput& io, astl::timeout to)
             : super::template async_awaitable<E>(io, value, to)
+            , value(std::forward<value_type>(val))
         {}
     };
 
     template <bool E = true>
     async_awaitable<E> push(value_type&& value, astl::timeout to = astl::timeout::never()) {
-        return push_value_awaitable<E>(*this, to);
+        return push_value_awaitable<E>(std::forward<value_type>(value), *this, to);
     }
 };
 
