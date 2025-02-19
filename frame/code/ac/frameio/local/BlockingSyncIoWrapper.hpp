@@ -5,6 +5,7 @@
 #include "../../export.h"
 #include "../FrameWithStatus.hpp"
 #include "../SessionHandlerPtr.hpp"
+#include <ac/xec/strand.hpp>
 
 namespace ac::frameio {
 
@@ -17,6 +18,8 @@ public:
     BlockingSyncIoWrapper(BlockingSyncIoWrapper&&) noexcept;
     BlockingSyncIoWrapper& operator=(BlockingSyncIoWrapper&&) noexcept;
     ~BlockingSyncIoWrapper();
+
+    xec::strand makeSyncStrand();
 
     FrameWithStatus poll();
     io::status poll(Frame& frame);

@@ -42,6 +42,10 @@ BlockingSyncIoWrapper::~BlockingSyncIoWrapper() {
     close();
 }
 
+xec::strand BlockingSyncIoWrapper::makeSyncStrand() {
+    return m_impl->syncCtx.make_strand();
+}
+
 using namespace astl::timeout_vals;
 
 FrameWithStatus BlockingSyncIoWrapper::poll() {
