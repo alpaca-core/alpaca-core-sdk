@@ -2,15 +2,17 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include "status.hpp"
+#include "value_with_status.hpp"
 #include "stream_op.hpp"
 #include "notify_on_blocked.hpp"
+#include "exception.hpp"
 #include "concepts/xio_cb.hpp"
 #include <ac/xec/wobj_concept.hpp>
 #include <astl/timeout.hpp>
 #include <memory>
 #include <cassert>
 #include <system_error>
+#include <coroutine>
 
 namespace ac::io {
 
@@ -49,8 +51,13 @@ public:
         return m_wobj.get_executor();
     }
 
+    template <bool E = true>
     status sync_io(value_type& value) {
-        return stream_op(*m_stream, value, nullptr);
+        auto ret = stream_op(*m_stream, value, nullptr);
+        if constexpr (E) {
+            stream_closed_error::throw_if_closed(ret);
+        }
+        return ret;
     }
 
     template <xio_cb_class<value_type> Cb>
@@ -91,6 +98,38 @@ public:
         m_stream->close();
     }
 
+    template <bool E>
+    struct [[nodiscard]] async_awaitable {
+        basic_xio& io;
+        value_type& value;
+        astl::timeout to;
+        status s;
+        std::coroutine_handle<> hcoro;
+
+        async_awaitable(basic_xio& io, value_type& value, astl::timeout to) noexcept
+            : io(io)
+            , value(value)
+            , to(to)
+        {}
+
+        bool await_ready() noexcept { return false; }
+
+        void await_suspend(std::coroutine_handle<> coro) {
+            hcoro = coro;
+            io.async_io(value, to, [this](value_type&, status s) {
+                this->s = s;
+                hcoro.resume();
+            });
+        }
+
+        status await_resume() noexcept(!E) {
+            if constexpr (E) {
+                stream_closed_error::throw_if_closed(s);
+            }
+            return s;
+        }
+    };
+
 protected:
     ~basic_xio() = default;
 private:
@@ -120,8 +159,19 @@ public:
     using typename super::value_type;
     using typename super::executor_type;
 
+    template <bool E>
+    using async_awaitable = typename super::template async_awaitable<E>;
+
+    template <bool E = true>
     status get(value_type& value) {
-        return super::sync_io(value);
+        return super::sync_io<E>(value);
+    }
+
+    template <bool E = true>
+    value_with_status<value_type> get() {
+        value_with_status<value_type> ret;
+        ret.s() = get<E>(ret.value);
+        return ret;
     }
 
     template <xio_cb_class<value_type> Cb>
@@ -132,6 +182,30 @@ public:
     template <xio_cb_class<value_type> Cb>
     void poll(value_type& value, astl::timeout to, Cb&& cb) requires xec::timeout_wait_object_class<Wobj> {
         super::async_io(value, to, std::forward<Cb>(cb));
+    }
+
+    template <bool E = true>
+    async_awaitable<E> poll(value_type& value, astl::timeout to = astl::timeout::never()) {
+        return super::template async_awaitable<E>(*this, value, to);
+    }
+
+    template <bool E>
+    struct [[nodiscard]] poll_value_awaitable : public async_awaitable<E> {
+        value_with_status<value_type> result;
+
+        poll_value_awaitable(xinput& io, astl::timeout to)
+            : super::template async_awaitable<E>(io, result.value, to)
+        {}
+
+        value_with_status<value_type> await_resume() {
+            result.s() = async_awaitable::await_resume();
+            return std::move(result);
+        }
+    };
+
+    template <bool E = true>
+    poll_value_awaitable<E> poll(astl::timeout to = astl::timeout::never()) {
+        return poll_value_awaitable<E>(*this, to);
     }
 };
 
@@ -145,8 +219,17 @@ public:
     using typename super::value_type;
     using typename super::executor_type;
 
+    template <bool E>
+    using async_awaitable = typename super::template async_awaitable<E>;
+
+    template <bool E = true>
     status put(value_type& value) {
-        return super::sync_io(value);
+        return super::sync_io<E>(value);
+    }
+
+    template <bool E = true>
+    status put(value_type&& value) {
+        return put<E>(value);
     }
 
     template <xio_cb_class<value_type> Cb>
@@ -157,6 +240,25 @@ public:
     template <xio_cb_class<value_type> Cb>
     void push(value_type& value, astl::timeout to, Cb&& cb) requires xec::timeout_wait_object_class<Wobj> {
         super::async_io(value, to, std::forward<Cb>(cb));
+    }
+
+    template <bool E = true>
+    async_awaitable<E> push(value_type& value, astl::timeout to = astl::timeout::never()) {
+        return async_awaitable(*this, value, to);
+    }
+
+    template <bool E>
+    struct [[nodiscard]] push_value_awaitable : public async_awaitable<E> {
+        value_type value;
+
+        push_value_awaitable(xoutput& io, astl::timeout to)
+            : super::template async_awaitable<E>(io, value, to)
+        {}
+    };
+
+    template <bool E = true>
+    async_awaitable<E> push(value_type&& value, astl::timeout to = astl::timeout::never()) {
+        return push_value_awaitable<E>(*this, to);
     }
 };
 

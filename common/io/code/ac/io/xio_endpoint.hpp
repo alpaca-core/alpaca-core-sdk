@@ -7,21 +7,21 @@
 
 namespace ac::io {
 
-template <read_stream_class ReadStream, write_stream_class WriteStream, xec::basic_wait_object_class Wobj>
-struct xio_endpoint {
+template <class ReadStream, class WriteStream, class Wobj, bool Except = true>
+struct xio_endpoint : private xinput<ReadStream, Wobj>, private xoutput<WriteStream, Wobj>
+{
     using input_type = xinput<ReadStream, Wobj>;
+    using input_value_type = typename input_type::value_type;
     using output_type = xoutput<WriteStream, Wobj>;
+    using output_value_type = typename output_type::value_type;
     using stream_endpoint_type = stream_endpoint<ReadStream, WriteStream>;
     using executor_type = typename Wobj::executor_type;
-
-    input_type input;
-    output_type output;
 
     template <typename... Args>
     xio_endpoint(stream_endpoint_type sep, Args&&... args)
         requires std::constructible_from<Wobj, Args...>
-        : input(std::move(sep.read_stream), args...)
-        , output(std::move(sep.write_stream), args...)
+        : input_type(std::move(sep.read_stream), args...)
+        , output_type(std::move(sep.write_stream), args...)
     {
         assert(input.get_executor() == output.get_executor());
     }
@@ -31,6 +31,11 @@ struct xio_endpoint {
         requires std::constructible_from<Wobj, Args...>
         : xio_endpoint(stream_endpoint_type{}, std::forward<Args>(args)...)
     {}
+
+    input_type& input() { return *this; }
+    const input_type& input() const { return *this; }
+    output_type& output() { return *this; }
+    const output_type& output() const { return *this; }
 
     stream_endpoint_type attach(stream_endpoint_type sep) {
         return {
@@ -51,6 +56,12 @@ struct xio_endpoint {
     const executor_type& get_executor() const {
         return input.get_executor();
     }
+
+    using input_type::get;
+    using input_type::poll;
+
+    using output_type::put;
+    using output_type::push;
 };
 
 } // namespace ac::io
