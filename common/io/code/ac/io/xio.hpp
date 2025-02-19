@@ -47,7 +47,7 @@ public:
         return attach(nullptr);
     }
 
-    const executor_type& get_executor() const {
+    executor_type get_executor() const {
         return m_wobj.get_executor();
     }
 

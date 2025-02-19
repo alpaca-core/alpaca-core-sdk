@@ -4,7 +4,7 @@
 #pragma once
 #include "stream_endpoint.hpp"
 #include "value_with_status.hpp"
-#include "xio.hpp"
+#include "xio_endpoint.hpp"
 #include <ac/xec/thread_wobj.hpp>
 #include <ac/xec/wait_func_invoke.hpp>
 #include <ac/xec/task.hpp>
@@ -12,7 +12,9 @@
 namespace ac::io {
 
 namespace impl {
-class immediate_executor {};
+struct immediate_executor {
+    bool operator==(const immediate_executor&) const { return true; }
+};
 void post(immediate_executor, xec::task t) {
     t();
 }
@@ -39,8 +41,7 @@ template <read_stream_class RS, write_stream_class WS>
 class blocking_io {
 public:
     explicit blocking_io(stream_endpoint<RS, WS> endpoint)
-        : m_input(std::move(endpoint.read_stream))
-        , m_output(std::move(endpoint.write_stream))
+        : m_io(std::move(endpoint))
     {}
 
     using input_value_type = typename RS::read_value_type;
@@ -48,7 +49,7 @@ public:
 
     status poll(input_value_type& val, astl::timeout timeout = astl::timeout::never()) {
         status ret;
-        m_input.poll(val, timeout, [&](input_value_type&, status s) {
+        m_io.poll(val, timeout, [&](input_value_type&, status s) {
             ret = s;
         });
         return ret;
@@ -61,7 +62,7 @@ public:
 
     status push(output_value_type& val, astl::timeout timeout = astl::timeout::never()) {
         status ret;
-        m_output.push(val, timeout, [&](output_value_type&, status s) {
+        m_io.push(val, timeout, [&](output_value_type&, status s) {
             ret = s;
         });
         return ret;
@@ -72,13 +73,11 @@ public:
     }
 
     void close() {
-        m_input.close();
-        m_output.close();
+        m_io.close();
     }
 
 private:
-    xinput<RS, impl::blocking_wobj> m_input;
-    xoutput<WS, impl::blocking_wobj> m_output;
+    xio_endpoint<RS, WS, impl::blocking_wobj> m_io;
 };
 
 } // namespace ac::io

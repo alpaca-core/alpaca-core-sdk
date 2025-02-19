@@ -58,7 +58,7 @@ struct xio_endpoint : private xinput<ReadStream, Wobj>, private xoutput<WriteStr
         output().close();
     }
 
-    const executor_type& get_executor() const {
+    executor_type get_executor() const {
         return input().get_executor();
     }
 
