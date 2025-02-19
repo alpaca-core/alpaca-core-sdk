@@ -24,7 +24,7 @@ TEST_CASE("multi thread runner") {
 
 TEST_CASE("multi thread runner start/stop") {
     fake_ctx ctx;
-    astl::multi_thread_runner<fake_ctx> runner;
+    astl::multi_thread_runner runner;
     CHECK(runner.num_threads() == 0);
     CHECK(runner.empty());
 

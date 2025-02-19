@@ -9,12 +9,12 @@
 // run an asio-like context in multiple threads
 
 namespace astl {
-template <typename Ctx>
 class multi_thread_runner {
     std::vector<std::thread> m_threads; // would use jthread, but apple clang still doesn't support them
 public:
     multi_thread_runner() = default;
 
+    template <typename Ctx>
     void start(Ctx& ctx, size_t n) {
         assert(m_threads.empty());
         if (!m_threads.empty()) return; // rescue
@@ -33,6 +33,7 @@ public:
         m_threads.clear();
     }
 
+    template <typename Ctx>
     multi_thread_runner(Ctx& ctx, size_t n) {
         start(ctx, n);
     }

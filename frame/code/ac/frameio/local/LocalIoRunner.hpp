@@ -42,7 +42,7 @@ public:
 private:
     LocalIoCtx m_ctx;
     ac::xec::context_work_guard m_guard;
-    astl::multi_thread_runner<LocalIoCtx> m_threads;
+    astl::multi_thread_runner m_threads;
 };
 
 } // namespace ac::frameio
