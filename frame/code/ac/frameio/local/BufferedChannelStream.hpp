@@ -6,7 +6,7 @@
 #include "ChannelEndpoints.hpp"
 #include "../StreamEndpoint.hpp"
 #include "../StreamPtr.hpp"
-#include <ac/io/channel_stream.hpp>
+#include <ac/io/buffered_channel_endpoints.hpp>
 
 namespace ac::frameio {
 
@@ -49,16 +49,18 @@ public:
     }
 };
 
-inline ChannelEndpoints BufferedChannel_getEndpoints(std::unique_ptr<BufferedChannel> a, std::unique_ptr<BufferedChannel> b) {
-    auto as = io::make_channel_streams<BufferedChannel, BufferedChannelReadStream, BufferedChannelWriteStream>(std::move(a));
-    auto bs = io::make_channel_streams<BufferedChannel, BufferedChannelReadStream, BufferedChannelWriteStream>(std::move(b));
+inline ChannelEndpoints BufferedChannel_getEndpoints(BufferedChannelPtr a, BufferedChannelPtr b) {
+    return make_channel_endpoints<Frame, BufferedChannelReadStream, BufferedChannelWriteStream>(
+        std::move(a),
+        std::move(b)
+    );
+}
 
-    ChannelEndpoints ret;
-    ret.ab.read_stream = std::move(as.out);
-    ret.ab.write_stream = std::move(bs.in);
-    ret.ba.read_stream = std::move(bs.out);
-    ret.ba.write_stream = std::move(as.in);
-    return ret;
+inline ChannelEndpoints BufferedChannel_getEndpoints(size_t sa, size_t sb) {
+    return ac::io::make_buffered_channel_endpoints<Frame, BufferedChannelReadStream, BufferedChannelWriteStream>(
+        sa,
+        sb
+    );
 }
 
 } // namespace ac::frameio

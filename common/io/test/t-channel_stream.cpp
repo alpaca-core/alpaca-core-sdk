@@ -30,9 +30,9 @@ struct test_channel {
 };
 
 TEST_CASE("channel_stream") {
-    auto [ab, ba] = ac::io::make_channel_endpoints(
-        std::make_unique<test_channel>(),
-        std::make_unique<test_channel>()
+    auto [ab, ba] = make_channel_endpoints(
+        ac::io::make_channel_streams(std::make_unique<test_channel>()),
+        ac::io::make_channel_streams(std::make_unique<test_channel>())
     );
     int r = 6, w = 0;
 

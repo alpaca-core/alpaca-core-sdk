@@ -25,10 +25,7 @@ struct BlockingSyncIoWrapper::Impl {
 };
 
 BlockingSyncIoWrapper::BlockingSyncIoWrapper(SessionHandlerPtr handler) {
-    auto [elocal, eremote] = BufferedChannel_getEndpoints(
-        BufferedChannel_create(1),
-        BufferedChannel_create(1)
-    );
+    auto [elocal, eremote] = BufferedChannel_getEndpoints(1, 1);
 
     m_impl = std::make_unique<Impl>(std::move(elocal));
 

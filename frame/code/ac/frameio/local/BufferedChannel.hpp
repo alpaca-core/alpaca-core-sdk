@@ -10,7 +10,9 @@ namespace ac::frameio {
 
 using BufferedChannel = ac::io::buffered_channel<Frame>;
 
-inline std::unique_ptr<BufferedChannel> BufferedChannel_create(size_t maxSize) {
+using BufferedChannelPtr = std::unique_ptr<BufferedChannel>;
+
+inline BufferedChannelPtr BufferedChannel_create(size_t maxSize) {
     return std::make_unique<BufferedChannel>(maxSize);
 }
 

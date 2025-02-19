@@ -1,6 +1,7 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
+#pragma once
 #include "stream_result.hpp"
 #include "concepts/stream.hpp"
 #include <ac/xec/notifiable.hpp>

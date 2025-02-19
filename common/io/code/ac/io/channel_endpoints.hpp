@@ -7,16 +7,27 @@
 
 namespace ac::io {
 
-template <channel_class CA, channel_class CB>
+template <
+    read_stream_class ReadStreamA,
+    write_stream_class WriteStreamA,
+    read_stream_class ReadStreamB = ReadStreamA,
+    write_stream_class WriteStreamB = WriteStreamA
+>
 struct channel_endpoints {
-    stream_endpoint<channel_read_stream<CA>, channel_write_stream<CB>> ab;
-    stream_endpoint<channel_read_stream<CB>, channel_write_stream<CA>> ba;
+    stream_endpoint<ReadStreamA, WriteStreamB> ab;
+    stream_endpoint<ReadStreamB, WriteStreamA> ba;
 };
 
-template <channel_class CA, channel_class CB>
-channel_endpoints<CA, CB> make_channel_endpoints(std::unique_ptr<CA> a, std::unique_ptr<CB> b) {
-    auto as = make_channel_streams(std::move(a));
-    auto bs = make_channel_streams(std::move(b));
+template <
+    read_stream_class ReadStreamA,
+    write_stream_class WriteStreamA,
+    read_stream_class ReadStreamB = ReadStreamA,
+    write_stream_class WriteStreamB = WriteStreamA
+>
+channel_endpoints<ReadStreamA, WriteStreamB, ReadStreamB, WriteStreamA> make_channel_endpoints(
+    channel_streams<ReadStreamA, WriteStreamA> as,
+    channel_streams<ReadStreamB, WriteStreamB> bs
+) {
     return {
         {std::move(as.out), std::move(bs.in)},
         {std::move(bs.out), std::move(as.in)}

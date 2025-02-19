@@ -17,8 +17,8 @@ LocalIoRunner::~LocalIoRunner() {
 
 ChannelEndpoints LocalIoRunner::getEndpoints(ChannelBufferSizes bufferSizes) {
     return BufferedChannel_getEndpoints(
-        BufferedChannel_create(bufferSizes.localToRemote),
-        BufferedChannel_create(bufferSizes.remoteToLocal)
+        bufferSizes.localToRemote,
+        bufferSizes.remoteToLocal
     );
 }
 

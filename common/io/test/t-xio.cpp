@@ -4,7 +4,7 @@
 #include <ac/io/xio_endpoint.hpp>
 #include <ac/io/buffered_channel.hpp>
 #include <ac/io/channel_stream.hpp>
-#include <ac/io/channel_endpoints.hpp>
+#include <ac/io/buffered_channel_endpoints.hpp>
 #include <ac/io/blocking_io.hpp>
 
 #include <ac/xec/timer_wobj.hpp>
@@ -36,11 +36,8 @@ struct t_io {
     using t_ep = xep<ac::xec::timer_wobj>;
     using s_ep = xep<ac::xec::strand_wobj>;
 
-    static ac::io::channel_endpoints<channel, channel> make_channel_endpoints(size_t ab, size_t ba) {
-        return ac::io::make_channel_endpoints(
-            std::make_unique<channel>(ab),
-            std::make_unique<channel>(ba)
-        );
+    static auto make_channel_endpoints(size_t ab, size_t ba) {
+        return ac::io::make_buffered_channel_endpoints<Frame>(ab, ba);
     }
 };
 

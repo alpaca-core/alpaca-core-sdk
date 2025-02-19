@@ -4,7 +4,7 @@
 #include <ac/io/blocking_io.hpp>
 #include <ac/io/buffered_channel.hpp>
 #include <ac/io/channel_stream.hpp>
-#include <ac/io/channel_endpoints.hpp>
+#include <ac/io/buffered_channel_endpoints.hpp>
 #include <ac/xec/context.hpp>
 #include <ac/xec/timer_wobj.hpp>
 #include <doctest/doctest.h>
@@ -108,10 +108,7 @@ public:
 };
 
 TEST_CASE("sync io") {
-    auto [elocal, eremote] = ac::io::make_channel_endpoints(
-        std::make_unique<ac::io::buffered_channel<frame>>(3),
-        std::make_unique<ac::io::buffered_channel<frame>>(3)
-    );
+    auto [elocal, eremote] = ac::io::make_buffered_channel_endpoints<frame>(3, 3);
 
     ac::io::blocking_io local(std::move(elocal));
 
