@@ -14,12 +14,12 @@ struct SessionContext {
         xec::strand gpu;
         // intentionally leaving system and io outside of the context
         // it is not the session's job to deal with those
-    } executors;
+    } executor;
 
     struct Endpoints {
         frameio::StreamEndpoint session;
         frameio::StreamEndpoint system;
-    } endpoints;
+    } endpoint;
 };
 
 } // namespace ac::local

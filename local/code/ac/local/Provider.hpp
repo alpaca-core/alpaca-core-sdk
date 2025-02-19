@@ -46,7 +46,7 @@ public:
 
     virtual frameio::SessionHandlerPtr createSessionHandler(std::string_view target) = 0;
 
-    virtual void createSession(SessionContext context) = 0;
+    //virtual void createSession(SessionContext context) = 0;
 };
 
 } // namespace ac::local
