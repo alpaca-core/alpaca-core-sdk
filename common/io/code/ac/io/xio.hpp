@@ -164,7 +164,7 @@ public:
 
     template <bool E = true>
     status get(value_type& value) {
-        return super::sync_io<E>(value);
+        return super::template sync_io<E>(value);
     }
 
     template <bool E = true>
@@ -198,7 +198,7 @@ public:
         {}
 
         value_with_status<value_type> await_resume() {
-            result.s() = async_awaitable::await_resume();
+            result.s() = async_awaitable<E>::await_resume();
             return std::move(result);
         }
     };
@@ -224,7 +224,7 @@ public:
 
     template <bool E = true>
     status put(value_type& value) {
-        return super::sync_io<E>(value);
+        return super::template sync_io<E>(value);
     }
 
     template <bool E = true>
@@ -244,7 +244,7 @@ public:
 
     template <bool E = true>
     async_awaitable<E> push(value_type& value, astl::timeout to = astl::timeout::never()) {
-        return async_awaitable(*this, value, to);
+        return async_awaitable<E>(*this, value, to);
     }
 
     template <bool E>

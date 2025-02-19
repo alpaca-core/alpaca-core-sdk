@@ -23,7 +23,7 @@ struct xio_endpoint : private xinput<ReadStream, Wobj>, private xoutput<WriteStr
         : input_type(std::move(sep.read_stream), args...)
         , output_type(std::move(sep.write_stream), args...)
     {
-        assert(input.get_executor() == output.get_executor());
+        assert(input().get_executor() == output().get_executor());
     }
 
     template <typename... Args>
@@ -39,8 +39,8 @@ struct xio_endpoint : private xinput<ReadStream, Wobj>, private xoutput<WriteStr
 
     stream_endpoint_type attach(stream_endpoint_type sep) {
         return {
-            input.attach(std::move(sep.read_stream)),
-            output.attach(std::move(sep.write_stream))
+            input().attach(std::move(sep.read_stream)),
+            output().attach(std::move(sep.write_stream))
         };
     }
 
@@ -49,12 +49,12 @@ struct xio_endpoint : private xinput<ReadStream, Wobj>, private xoutput<WriteStr
     }
 
     void close() {
-        input.close();
-        output.close();
+        input().close();
+        output().close();
     }
 
     const executor_type& get_executor() const {
-        return input.get_executor();
+        return input().get_executor();
     }
 
     using input_type::get;
