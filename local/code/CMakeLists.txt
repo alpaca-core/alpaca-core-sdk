@@ -41,6 +41,7 @@ target_sources(ac-local
         ac/local/CommonProviderScorers.hpp
 
         ac/local/IoCtx.hpp
+        ac/local/BlockingSyncIoHelper.hpp
     PRIVATE
         ac/local/Logging.hpp
         ac/local/Logging.cpp
@@ -55,6 +56,7 @@ target_sources(ac-local
         ac/local/CommonProviderScorers.cpp
 
         ac/local/IoCtx.cpp
+        ac/local/BlockingSyncIoHelper.cpp
 )
 
 install(TARGETS ac-local

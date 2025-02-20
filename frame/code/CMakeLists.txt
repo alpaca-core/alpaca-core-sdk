@@ -54,7 +54,6 @@ target_sources(ac-frame
         ac/frameio/local/BufferedChannel.hpp
         ac/frameio/local/BufferedChannelStream.hpp
         ac/frameio/local/BlockingIo.hpp
-        ac/frameio/local/BlockingSyncIoWrapper.hpp
 
         # schema
         ac/schema/Field.hpp
@@ -70,8 +69,6 @@ target_sources(ac-frame
         ac/frameio/SessionHandler.cpp
         ac/frameio/IoException.cpp
         ac/frameio/SessionCoro.cpp
-
-        ac/frameio/local/BlockingSyncIoWrapper.cpp
 )
 
 install(TARGETS ac-frame
