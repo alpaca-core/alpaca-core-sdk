@@ -46,15 +46,15 @@ void ProviderRegistry::removeProvider(Provider& provider) {
     astl::erase_first_if(m_providers, [&](const auto& data) { return data.provider == &provider; });
 }
 
-Provider* ProviderRegistry::findBestProvider(const ProviderScorer& scorer) const noexcept {
-    Provider* best = nullptr;
+ProviderRegistry::ProviderData ProviderRegistry::findBestProvider(const ProviderScorer& scorer) const noexcept {
+    ProviderData best = {};
     auto bestScore = scorer.denyScore();
     auto acceptScore = scorer.acceptScore();
 
     for (const auto& data : m_providers) {
         auto score = scorer.score(*data.provider, data.plugin);
         if (score > bestScore) {
-            best = data.provider;
+            best = data;
             bestScore = score;
         }
         if (score >= acceptScore) {
@@ -63,6 +63,15 @@ Provider* ProviderRegistry::findBestProvider(const ProviderScorer& scorer) const
     }
 
     return best;
+}
+
+ProviderRegistry::ProviderData ProviderRegistry::findProvider(std::string_view name) const noexcept {
+    for (const auto& data : m_providers) {
+        if (data.provider->info().name == name) {
+            return data;
+        }
+    }
+    return {};
 }
 
 frameio::SessionHandlerPtr ProviderRegistry::createSessionHandler(std::string_view matchName) {

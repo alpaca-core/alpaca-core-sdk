@@ -26,7 +26,8 @@ public:
 
     struct ProviderData {
         Provider* provider; // never null
-        PluginInfo* plugin; // may be null for providers that have been added directly
+        const PluginInfo* plugin; // may be null for providers that have been added directly
+        explicit operator bool() const noexcept { return !!provider; }
     };
 
     const std::vector<ProviderData>& providers() const noexcept { return m_providers; }
@@ -36,7 +37,9 @@ public:
 
     // find the best provider
     // returns nullptr if all providers rank equal or lower then the denyScore of the scorer
-    Provider* findBestProvider(const ProviderScorer& scorer) const noexcept;
+    ProviderData findBestProvider(const ProviderScorer& scorer) const noexcept;
+
+    ProviderData findProvider(std::string_view name) const noexcept;
 
     // load model with the first provider whose name matches matchName
     frameio::SessionHandlerPtr createSessionHandler(std::string_view matchName);
