@@ -7,19 +7,18 @@
 
 #include "ac-test-data-dummy-models.h"
 
-#include <ac/frameio/local/BlockingSyncIoWrapper.hpp>
+#include <ac/local/BlockingSyncIoHelper.hpp>
 #include <ac/FrameUtil.hpp>
 
 #include <doctest/doctest.h>
 
 #include <astl/move.hpp>
 
-using Session = ac::frameio::BlockingSyncIoWrapper;
+using Session = ac::local::BlockingSyncIoHelper;
 
 Session createTestSession(DummyRegistry& d) {
-    auto h = d.createSessionHandler("dummy");
-    REQUIRE(h);
-    return ac::frameio::BlockingSyncIoWrapper(std::move(h));
+    auto& provider = d.getProvider("dummy");
+    return ac::local::BlockingSyncIoHelper(provider);
 }
 
 void checkError(Session& s, const std::string_view msg) {

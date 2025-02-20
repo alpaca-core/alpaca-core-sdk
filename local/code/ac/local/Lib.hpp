@@ -6,7 +6,6 @@
 #include "Version.hpp"
 #include "LoadPluginCb.hpp"
 #include <ac/DictFwd.hpp>
-#include <ac/frameio/SessionHandlerPtr.hpp>
 #include <string>
 #include <string_view>
 
@@ -32,9 +31,7 @@ struct AC_LOCAL_EXPORT Lib {
     static void loadPlugins(LoadPluginCb cb = {});
     static void loadAllPlugins() { return loadPlugins({}); }
 
-    static frameio::SessionHandlerPtr createSessionHandler(std::string_view matchName);
-
-    Provider& getProvider(std::string_view nameMatch);
+    static Provider& getProvider(std::string_view nameMatch);
 };
 
 } // namespace ac::local

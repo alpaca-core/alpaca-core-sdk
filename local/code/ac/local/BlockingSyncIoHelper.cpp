@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: MIT
 //
 #include "BlockingSyncIoHelper.hpp"
+#include "Provider.hpp"
+#include "ProviderSessionContext.hpp"
 #include <ac/frameio/local/BufferedChannel.hpp>
 #include <ac/frameio/local/BufferedChannelStream.hpp>
 #include <ac/frameio/local/BlockingIo.hpp>
-#include <ac/frameio/SessionHandler.hpp>
-#include <ac/frameio/IoExecutor.hpp>
+
 #include <ac/xec/context.hpp>
 
 namespace ac::local {
@@ -26,18 +27,24 @@ struct BlockingSyncIoHelper::Impl {
     }
 };
 
-BlockingSyncIoHelper::BlockingSyncIoHelper(SessionHandlerPtr handler) {
+BlockingSyncIoHelper::BlockingSyncIoHelper(Provider& provider) {
     auto [elocal, eremote] = BufferedChannel_getEndpoints(1, 1);
 
     m_impl = std::make_unique<Impl>(std::move(elocal));
 
-    IoExecutor ex(m_impl->syncCtx.make_strand());
-    SessionHandler::init(
-        handler,
-        ex.attachInput(std::move(eremote.read_stream)),
-        ex.attachOutput(std::move(eremote.write_stream)),
-        ex
-    );
+    ProviderSessionContext ctx = {
+        .executor = {
+            .dispatch = m_impl->syncCtx.make_strand(),
+            .cpu = m_impl->syncCtx.make_strand(),
+            .gpu = m_impl->syncCtx.make_strand(),
+        },
+        .endpoint = {
+            .session = std::move(eremote),
+            .system = {},
+        },
+    };
+
+    provider.createSession(std::move(ctx));
 }
 
 BlockingSyncIoHelper::~BlockingSyncIoHelper() {

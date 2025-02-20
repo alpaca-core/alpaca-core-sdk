@@ -4,11 +4,10 @@
 #pragma once
 #include "export.h"
 #include <ac/Dict.hpp>
-#include <ac/frameio/SessionHandlerPtr.hpp>
 
 namespace ac::local {
 
-struct SessionContext;
+struct ProviderSessionContext;
 
 /// Base class for local inference providers.
 /// Providers are responsible for creating and managing stateful sessions. They are typically
@@ -44,9 +43,7 @@ public:
     /// Info of the provider.
     virtual const Info& info() const noexcept = 0;
 
-    virtual frameio::SessionHandlerPtr createSessionHandler(std::string_view target) = 0;
-
-    //virtual void createSession(SessionContext context) = 0;
+    virtual void createSession(ProviderSessionContext context) = 0;
 };
 
 } // namespace ac::local

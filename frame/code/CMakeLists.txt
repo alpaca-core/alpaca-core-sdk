@@ -41,14 +41,8 @@ target_sources(ac-frame
         ac/frameio/StreamEndpoint.hpp
         ac/frameio/FrameWithStatus.hpp
         ac/frameio/Io.hpp
-        ac/frameio/IoExecutor.hpp
-        ac/frameio/IoPtr.hpp
-        ac/frameio/IoCommon.hpp
+        ac/frameio/IoEndpoint.hpp
         ac/frameio/BasicStreamIo.hpp
-        ac/frameio/SessionHandler.hpp
-        ac/frameio/SessionHandlerPtr.hpp
-        ac/frameio/IoException.hpp
-        ac/frameio/SessionCoro.hpp
 
         # frameio-local
         ac/frameio/local/BufferedChannel.hpp
@@ -66,9 +60,6 @@ target_sources(ac-frame
 
     PRIVATE
         ac/frameio/Stream.cpp
-        ac/frameio/SessionHandler.cpp
-        ac/frameio/IoException.cpp
-        ac/frameio/SessionCoro.cpp
 )
 
 install(TARGETS ac-frame

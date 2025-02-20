@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include <xec/strand.hpp>
+#include <ac/xec/strand.hpp>
 #include <ac/frameio/StreamEndpoint.hpp>
 
 namespace ac::local {
 
-struct SessionContext {
+struct ProviderSessionContext {
     struct Executors {
         xec::strand dispatch;
         xec::strand cpu;

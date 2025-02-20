@@ -10,11 +10,15 @@
 #include "aclp-dummy-version.h"
 
 #include <ac/local/Provider.hpp>
+#include <ac/local/ProviderSessionContext.hpp>
 
 #include <ac/schema/OpDispatchHelpers.hpp>
 
-#include <ac/frameio/SessionCoro.hpp>
 #include <ac/FrameUtil.hpp>
+#include <ac/frameio/IoEndpoint.hpp>
+
+#include <ac/xec/coro.hpp>
+#include <ac/io/exception.hpp>
 
 #include <astl/move.hpp>
 #include <astl/throw_stdex.hpp>
@@ -40,7 +44,7 @@ struct BasicRunner {
             }
             return {f.op, *ret};
         }
-        catch (IoClosed&) {
+        catch (io::stream_closed_error&) {
             throw;
         }
         catch (std::exception& e) {
@@ -49,7 +53,7 @@ struct BasicRunner {
     }
 };
 
-SessionCoro<void> Dummy_runInstance(coro::Io& io, std::unique_ptr<dummy::Instance> instance) {
+xec::coro<void> Dummy_runInstance(IoEndpoint& io, std::unique_ptr<dummy::Instance> instance) {
     using Schema = sc::StateInstance;
 
     struct Runner : public BasicRunner {
@@ -80,17 +84,17 @@ SessionCoro<void> Dummy_runInstance(coro::Io& io, std::unique_ptr<dummy::Instanc
         }
     };
 
-    co_await io.pushFrame(Frame_stateChange(Schema::id));
+    co_await io.push(Frame_stateChange(Schema::id));
 
     Runner runner(*instance);
 
     while (true) {
-        auto f = co_await io.pollFrame();
-        co_await io.pushFrame(runner.dispatch(f.value));
+        auto f = co_await io.poll();
+        co_await io.push(runner.dispatch(f.value));
     }
 }
 
-SessionCoro<void> Dummy_runModel(coro::Io& io, std::unique_ptr<dummy::Model> model) {
+xec::coro<void> Dummy_runModel(IoEndpoint& io, std::unique_ptr<dummy::Model> model) {
     using Schema = sc::StateModelLoaded;
 
     struct Runner : public BasicRunner {
@@ -114,20 +118,20 @@ SessionCoro<void> Dummy_runModel(coro::Io& io, std::unique_ptr<dummy::Model> mod
         }
     };
 
-    co_await io.pushFrame(Frame_stateChange(Schema::id));
+    co_await io.push(Frame_stateChange(Schema::id));
 
     Runner runner(*model);
 
     while (true) {
-        auto f = co_await io.pollFrame();
-        co_await io.pushFrame(runner.dispatch(f.value));
+        auto f = co_await io.poll();
+        co_await io.push(runner.dispatch(f.value));
         if (runner.instance) {
             co_await Dummy_runInstance(io, astl::move(runner.instance));
         }
     }
 }
 
-SessionCoro<void> Dummy_runSession() {
+xec::coro<void> Dummy_runSession(StreamEndpoint ep) {
     using Schema = sc::StateInitial;
 
     struct Runner : public BasicRunner {
@@ -151,21 +155,22 @@ SessionCoro<void> Dummy_runSession() {
     };
 
     try {
-        auto io = co_await coro::Io{};
+        auto ex = co_await xec::executor{};
+        IoEndpoint io(std::move(ep), ex);
 
-        co_await io.pushFrame(Frame_stateChange(Schema::id));
+        co_await io.push(Frame_stateChange(Schema::id));
 
         Runner runner;
 
         while (true) {
-            auto f = co_await io.pollFrame();
-            co_await io.pushFrame(runner.dispatch(f.value));
+            auto f = co_await io.poll();
+            co_await io.push(runner.dispatch(f.value));
             if (runner.model) {
                 co_await Dummy_runModel(io, astl::move(runner.model));
             }
         }
     }
-    catch (IoClosed&) {
+    catch (io::stream_closed_error&) {
         co_return;
     }
 }
@@ -180,8 +185,8 @@ public:
         return i;
     }
 
-    virtual SessionHandlerPtr createSessionHandler(std::string_view) override {
-        return CoroSessionHandler::create(Dummy_runSession());
+    virtual void createSession(ProviderSessionContext ctx) override {
+        co_spawn(ctx.executor.cpu, Dummy_runSession(std::move(ctx.endpoint.session)));
     }
 };
 

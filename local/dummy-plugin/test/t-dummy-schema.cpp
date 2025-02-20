@@ -29,8 +29,8 @@ LoadDummyFixture loadDummyFixture;
 TEST_CASE("blocking io") {
     ac::local::IoCtx io;
 
-    auto dummyHandler = ac::local::Lib::createSessionHandler("dummy");
-    ac::schema::BlockingIoHelper dummy(io.connect(std::move(dummyHandler)));
+    auto& dummyProvider = ac::local::Lib::getProvider("dummy");
+    ac::schema::BlockingIoHelper dummy(io.connect(dummyProvider));
 
     namespace schema = ac::schema::dummy;
 

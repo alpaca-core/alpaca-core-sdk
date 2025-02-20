@@ -4,15 +4,16 @@
 #pragma once
 #include "export.h"
 #include <ac/frameio/FrameWithStatus.hpp>
-#include <ac/frameio/SessionHandlerPtr.hpp>
 #include <ac/xec/strand.hpp>
 
 namespace ac::local {
 
+class Provider;
+
 // wraps blocking and sync io to make local testing and experimentation easier
 class AC_LOCAL_EXPORT BlockingSyncIoHelper {
 public:
-    explicit BlockingSyncIoHelper(frameio::SessionHandlerPtr handler);
+    explicit BlockingSyncIoHelper(Provider& provider);
     BlockingSyncIoHelper(const BlockingSyncIoHelper&) = delete;
     BlockingSyncIoHelper& operator=(const BlockingSyncIoHelper&) = delete;
     BlockingSyncIoHelper(BlockingSyncIoHelper&&) noexcept;

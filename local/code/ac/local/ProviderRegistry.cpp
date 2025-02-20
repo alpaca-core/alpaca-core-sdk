@@ -82,13 +82,4 @@ Provider& ProviderRegistry::getProvider(std::string_view matchName) const {
     return *f.provider;
 }
 
-frameio::SessionHandlerPtr ProviderRegistry::createSessionHandler(std::string_view matchName) {
-    for (auto& [provider, _] : m_providers) {
-        if (provider->info().name.find(matchName) != std::string::npos) {
-            return provider->createSessionHandler({});
-        }
-    }
-    ac::throw_ex{} << "No provider found for: " << matchName;
-}
-
 } // namespace ac::local
