@@ -74,20 +74,7 @@ struct echo_session_handler : public astl::enable_shared_from {
     }
 };
 
-TEST_CASE("echo session handler") {
-    ac::xec::context ctx;
-    auto wg = ctx.make_work_guard();
-    astl::multi_thread_runner runner(ctx, 2);
-
-    auto [local, remote] = string_io::make_channel_endpoints(3, 3);
-
-    {
-        auto sh = std::make_shared<echo_session_handler>(ctx.make_strand());
-        sh->run(std::move(remote));
-    }
-
-    ac::io::blocking_io io(std::move(local));
-
+void test_echo(ac::io::blocking_io<string_io::read_stream, string_io::write_stream>& io) {
     io.push("hello");
     auto r = io.poll();
     CHECK(r.success());
@@ -105,6 +92,23 @@ TEST_CASE("echo session handler") {
     r = io.poll();
     CHECK(r.success());
     CHECK(r.value == long_str + " echo");
+}
+
+TEST_CASE("echo session handler") {
+    ac::xec::context ctx;
+    auto wg = ctx.make_work_guard();
+    astl::multi_thread_runner runner(ctx, 2);
+
+    auto [local, remote] = string_io::make_channel_endpoints(3, 3);
+
+    {
+        auto sh = std::make_shared<echo_session_handler>(ctx.make_strand());
+        sh->run(std::move(remote));
+    }
+
+    ac::io::blocking_io io(std::move(local));
+
+    test_echo(io);
 
     wg.reset();
 }
@@ -196,15 +200,20 @@ TEST_CASE("multi echo session handler") {
     wg.reset();
 }
 
+ac::xec::coro<int> do_addition(int_io::t_ep& io) {
+    auto a = co_await io.poll();
+    auto b = co_await io.poll();
+    co_return a.value + b.value;
+}
+
 ac::xec::coro<void> addition_service(int_io::stream_endpoint ep) {
     auto ex = co_await ac::xec::executor{};
     int_io::t_ep io(std::move(ep), ex);
 
     try {
         while (true) {
-            auto a = co_await io.poll();
-            auto b = co_await io.poll();
-            co_await io.push(a.value + b.value);
+            auto sum = co_await do_addition(io);
+            co_await io.push(sum);
         }
     }
     catch (ac::io::stream_closed_error&) {
@@ -293,4 +302,187 @@ TEST_CASE("coro multi") {
     CHECK(r.value == "22");
 
     here.push("exit");
+}
+
+int a_rec_sum = 0;
+bool a_done = true;
+
+ac::xec::coro<void> side_a(string_io::stream_endpoint ep, int send) {
+    using namespace astl::timeout_vals;
+
+    auto ex = co_await ac::xec::executor{};
+    string_io::t_ep io(std::move(ep), ex);
+
+    for (int i = 1; i <= send; ++i) {
+        auto res = co_await io.poll(no_wait);
+        if (res.success()) {
+            a_rec_sum += std::stoi(res.value);
+        }
+        co_await io.push(std::to_string(i));
+    }
+
+    co_await io.push("end");
+
+    try {
+        while (true) {
+            auto res = co_await io.poll();
+            if (res.success()) {
+                a_rec_sum += std::stoi(res.value);
+            }
+        }
+    }
+    catch (const ac::io::stream_closed_error&) {
+        a_done = true;
+    }
+}
+
+int b_rec_sum = 0;
+
+ac::xec::coro<void> side_b(string_io::stream_endpoint ep, int send) {
+    using namespace astl::timeout_vals;
+    using namespace std::chrono_literals;
+
+    bool receive = true;
+
+    auto ex = co_await ac::xec::executor{};
+    string_io::t_ep io(std::move(ep), ex);
+
+    while (send || receive) {
+        if (send) {
+            co_await io.push(std::to_string(1000 + send));
+            --send;
+        }
+        if (receive) {
+            auto f = co_await io.poll(await_completion_for(20ms));
+            if (f.success()) {
+                if (f.value == "end") {
+                    receive = false;
+                }
+                else {
+                    b_rec_sum += std::stoi(f.value);
+                }
+            }
+        }
+    }
+}
+
+TEST_CASE("coro two-side") {
+    auto [e_a, e_b] = ac::io::make_channel_endpoints(
+        std::make_unique<string_io::channel>(5),
+        std::make_unique<string_io::channel>(5)
+    );
+
+    ac::xec::context ctx;
+
+    const int asend = 10, bsend = 15;
+    co_spawn(ctx, side_a(std::move(e_a), asend));
+    co_spawn(ctx, side_b(std::move(e_b), bsend));
+
+    astl::multi_thread_runner(ctx, 3);
+
+    CHECK(a_rec_sum == 1000 * bsend + (bsend * (bsend + 1)) / 2);
+    CHECK(a_done);
+    CHECK(b_rec_sum == (asend * (asend + 1)) / 2);
+}
+
+ac::xec::coro<void> eager(string_io::stream_endpoint ep) {
+    auto ex = co_await ac::xec::executor{};
+    string_io::t_ep io(std::move(ep), ex);
+
+    auto fin = io.get();
+    CHECK(fin.success());
+    auto i = std::stoi(fin.value);
+    while (i) {
+        std::string f = "hi";
+        while (!io.put(f).success()); // spin
+        --i;
+    }
+}
+
+TEST_CASE("coro eager") {
+    auto [local, remote] = string_io::make_channel_endpoints(3, 3);
+
+    ac::xec::context ctx;
+    co_spawn(ctx, eager(std::move(remote)));
+    astl::multi_thread_runner runner(ctx, 2);
+
+    ac::io::blocking_io io(std::move(local));
+    io.push("10");
+
+    int received = 0;
+    while (true) {
+        auto f = io.poll();
+        if (!f.success()) break;
+        CHECK(f.value == "hi");
+        ++received;
+    }
+    CHECK(received == 10);
+}
+
+ac::xec::coro<void> echo_prelude(string_io::stream_endpoint ep) {
+    auto ex = co_await ac::xec::executor{};
+    string_io::t_ep io(std::move(ep), ex);
+
+    int i = 0;
+    while (true) {
+        auto fin = co_await io.poll();
+        auto& op = fin.value;
+        if (op == "goto echo") {
+            std::make_shared<echo_session_handler>(ex)->run(io.detach());
+            co_return;
+        }
+        else if (op == "i") {
+            co_await io.push(std::to_string(i++));
+        }
+        else {
+            co_return;
+        }
+    }
+}
+
+TEST_CASE("detach to successor") {
+    ac::xec::context ctx;
+    auto wg = ctx.make_work_guard();
+    astl::multi_thread_runner runner(ctx, 2);
+
+    {
+        auto [local, remote] = string_io::make_channel_endpoints(3, 3);
+        ac::io::blocking_io io(std::move(local));
+        co_spawn(ctx, echo_prelude(std::move(remote)));
+
+        io.push("i");
+        auto f = io.poll();
+        CHECK(f.success());
+        CHECK(f.value == "0");
+
+        io.push("i");
+        f = io.poll();
+        CHECK(f.success());
+        CHECK(f.value == "1");
+
+        io.push("nope");
+        f = io.poll();
+        CHECK(f.closed());
+    }
+
+    {
+        auto [local, remote] = string_io::make_channel_endpoints(3, 3);
+        co_spawn(ctx, echo_prelude(std::move(remote)));
+        ac::io::blocking_io io(std::move(local));
+
+        io.push("i");
+        auto f = io.poll();
+        CHECK(f.success());
+        CHECK(f.value == "0");
+
+        io.push("i");
+        f = io.poll();
+        CHECK(f.success());
+        CHECK(f.value == "1");
+
+        io.push("goto echo");
+        test_echo(io);
+    }
+
+    wg.reset();
 }
