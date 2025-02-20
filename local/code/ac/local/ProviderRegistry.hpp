@@ -39,7 +39,9 @@ public:
     // returns nullptr if all providers rank equal or lower then the denyScore of the scorer
     ProviderData findBestProvider(const ProviderScorer& scorer) const noexcept;
 
-    ProviderData findProvider(std::string_view name) const noexcept;
+
+    ProviderData findProvider(std::string_view matchName) const noexcept;
+    Provider& getProvider(std::string_view matchName) const;
 
     // load model with the first provider whose name matches matchName
     frameio::SessionHandlerPtr createSessionHandler(std::string_view matchName);

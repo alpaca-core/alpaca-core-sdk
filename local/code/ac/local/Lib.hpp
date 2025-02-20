@@ -33,6 +33,8 @@ struct AC_LOCAL_EXPORT Lib {
     static void loadAllPlugins() { return loadPlugins({}); }
 
     static frameio::SessionHandlerPtr createSessionHandler(std::string_view matchName);
+
+    Provider& getProvider(std::string_view nameMatch);
 };
 
 } // namespace ac::local

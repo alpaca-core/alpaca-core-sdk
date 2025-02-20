@@ -65,13 +65,21 @@ ProviderRegistry::ProviderData ProviderRegistry::findBestProvider(const Provider
     return best;
 }
 
-ProviderRegistry::ProviderData ProviderRegistry::findProvider(std::string_view name) const noexcept {
+ProviderRegistry::ProviderData ProviderRegistry::findProvider(std::string_view matchName) const noexcept {
     for (const auto& data : m_providers) {
-        if (data.provider->info().name == name) {
+        if (data.provider->info().name.find(matchName) != std::string::npos) {
             return data;
         }
     }
     return {};
+}
+
+Provider& ProviderRegistry::getProvider(std::string_view matchName) const {
+    auto f = findProvider(matchName);
+    if (!f) {
+        ac::throw_ex{} << "No provider found for: " << matchName;
+    }
+    return *f.provider;
 }
 
 frameio::SessionHandlerPtr ProviderRegistry::createSessionHandler(std::string_view matchName) {

@@ -46,4 +46,8 @@ frameio::SessionHandlerPtr Lib::createSessionHandler(std::string_view matchName)
     return g_providerRegistry.createSessionHandler(matchName);
 }
 
+Provider& getProvider(std::string_view nameMatch) {
+    return g_providerRegistry.getProvider(nameMatch);
+}
+
 } // namespace ac::local
