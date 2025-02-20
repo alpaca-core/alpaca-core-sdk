@@ -6,10 +6,8 @@
 #include "../SessionHandlerPtr.hpp"
 #include "../StreamEndpoint.hpp"
 
-#include <ac/xec/context.hpp>
-#include <ac/xec/context_work_guard.hpp>
-#include <astl/multi_thread_runner.hpp>
-#include <cstdint>
+#include <cstddef>
+#include <memory>
 
 namespace ac::frameio {
 
@@ -38,9 +36,8 @@ public:
 
     void join(bool forceStop = false);
 private:
-    xec::context m_ctx;
-    ac::xec::context_work_guard m_guard;
-    astl::multi_thread_runner m_threads;
+    struct Impl;
+    std::unique_ptr<Impl> m_impl;
 };
 
 } // namespace ac::frameio

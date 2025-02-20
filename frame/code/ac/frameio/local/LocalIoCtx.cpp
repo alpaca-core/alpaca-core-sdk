@@ -6,11 +6,25 @@
 #include "../SessionHandler.hpp"
 #include "../IoExecutor.hpp"
 
+#include <ac/xec/context.hpp>
+#include <ac/xec/context_work_guard.hpp>
+#include <astl/multi_thread_runner.hpp>
+
+
 namespace ac::frameio {
 
+struct LocalIoCtx::Impl {
+    xec::context ctx;
+    ac::xec::context_work_guard guard;
+    astl::multi_thread_runner threads;
+    Impl(uint32_t numThreads)
+        : guard(ctx)
+        , threads(ctx, numThreads)
+    {}
+};
+
 LocalIoCtx::LocalIoCtx(uint32_t numThreads)
-    : m_guard(m_ctx)
-    , m_threads(m_ctx, numThreads)
+    : m_impl(std::make_unique<Impl>(numThreads))
 {}
 
 LocalIoCtx::~LocalIoCtx() {
@@ -25,7 +39,7 @@ ChannelEndpoints LocalIoCtx::getEndpoints(ChannelBufferSizes bufferSizes) {
 }
 
 void LocalIoCtx::connect(SessionHandlerPtr handler, StreamEndpoint ep) {
-    auto strand = m_ctx.make_strand();
+    auto strand = m_impl->ctx.make_strand();
     IoExecutor executor{ strand };
     SessionHandler::init(
         handler,
@@ -48,15 +62,15 @@ void LocalIoCtx::connect(SessionHandlerPtr local, SessionHandlerPtr remote, Chan
 }
 
 void LocalIoCtx::join(bool forceStop) {
-    if (m_threads.empty()) return;
+    if (m_impl->threads.empty()) return;
 
-    m_guard.reset();
+    m_impl->guard.reset();
 
     if (forceStop) {
-        m_ctx.stop();
+        m_impl->ctx.stop();
     }
 
-    m_threads.join();
+    m_impl->threads.join();
 }
 
 } // namespace ac::frameio
