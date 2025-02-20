@@ -404,10 +404,11 @@ TEST_CASE("coro eager") {
 
     ac::xec::context ctx;
     co_spawn(ctx, eager(std::move(remote)));
-    astl::multi_thread_runner runner(ctx, 2);
 
     ac::io::blocking_io io(std::move(local));
     io.push("10");
+
+    astl::multi_thread_runner runner(ctx, 2);
 
     int received = 0;
     while (true) {
