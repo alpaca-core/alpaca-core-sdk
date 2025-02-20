@@ -55,7 +55,6 @@ target_sources(ac-frame
         ac/frameio/local/BufferedChannelStream.hpp
         ac/frameio/local/BlockingIo.hpp
         ac/frameio/local/BlockingSyncIoWrapper.hpp
-        ac/frameio/local/LocalIoCtx.hpp
 
         # schema
         ac/schema/Field.hpp
@@ -73,7 +72,6 @@ target_sources(ac-frame
         ac/frameio/SessionCoro.cpp
 
         ac/frameio/local/BlockingSyncIoWrapper.cpp
-        ac/frameio/local/LocalIoCtx.cpp
 )
 
 install(TARGETS ac-frame

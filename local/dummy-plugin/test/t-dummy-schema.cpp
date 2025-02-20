@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #include <ac/local/Lib.hpp>
-#include <ac/frameio/local/LocalIoCtx.hpp>
+#include <ac/local/IoCtx.hpp>
 #include <ac/schema/BlockingIoHelper.hpp>
 #include <ac/schema/FrameHelpers.hpp>
 
@@ -27,7 +27,7 @@ struct LoadDummyFixture {
 LoadDummyFixture loadDummyFixture;
 
 TEST_CASE("blocking io") {
-    ac::frameio::LocalIoCtx io;
+    ac::local::IoCtx io;
 
     auto dummyHandler = ac::local::Lib::createSessionHandler("dummy");
     ac::schema::BlockingIoHelper dummy(io.connect(std::move(dummyHandler)));

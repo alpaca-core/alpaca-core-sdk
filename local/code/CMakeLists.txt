@@ -39,6 +39,8 @@ target_sources(ac-local
 
         ac/local/ProviderScorer.hpp
         ac/local/CommonProviderScorers.hpp
+
+        ac/local/IoCtx.hpp
     PRIVATE
         ac/local/Logging.hpp
         ac/local/Logging.cpp
@@ -51,6 +53,8 @@ target_sources(ac-local
         ac/local/Lib.cpp
 
         ac/local/CommonProviderScorers.cpp
+
+        ac/local/IoCtx.cpp
 )
 
 install(TARGETS ac-local
