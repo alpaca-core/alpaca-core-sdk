@@ -55,9 +55,7 @@ ChannelEndpoints IoCtx::getEndpoints(IoChannelBufferSizes bufferSizes) {
     );
 }
 
-StreamEndpoint IoCtx::connect(Provider& provider, IoChannelBufferSizes bufferSizes) {
-    auto [local, remote] = getEndpoints(bufferSizes);
-
+void IoCtx::attach(Provider& provider, frameio::StreamEndpoint remote) {
     ProviderSessionContext ctx = {
         .executor = {
             .dispatch = m_impl->dispatch.make_strand(),
@@ -69,9 +67,12 @@ StreamEndpoint IoCtx::connect(Provider& provider, IoChannelBufferSizes bufferSiz
             .system = {},
         },
     };
-
     provider.createSession(std::move(ctx));
+}
 
+StreamEndpoint IoCtx::connect(Provider& provider, IoChannelBufferSizes bufferSizes) {
+    auto [local, remote] = getEndpoints(bufferSizes);
+    attach(provider, std::move(remote));
     return std::move(local);
 }
 

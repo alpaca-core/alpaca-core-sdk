@@ -34,6 +34,7 @@ public:
     static frameio::ChannelEndpoints getEndpoints(IoChannelBufferSizes bufferSizes = {});
 
     frameio::StreamEndpoint connect(Provider& provider, IoChannelBufferSizes bufferSizes = {});
+    void attach(Provider& provider, frameio::StreamEndpoint ep);
 
     void join(bool forceStop = false);
 private:
