@@ -5,13 +5,42 @@
 #include "../../export.h"
 #include "../SessionHandlerPtr.hpp"
 #include "../StreamEndpoint.hpp"
+
 #include <ac/xec/context.hpp>
+#include <ac/xec/context_work_guard.hpp>
+#include <astl/multi_thread_runner.hpp>
+#include <cstdint>
 
 namespace ac::frameio {
 
-class AC_FRAME_EXPORT LocalIoCtx : public xec::context {
+struct ChannelEndpoints;
+
+// ideally this would be a nested type in LocalIoCtx, but then a clang bug is triggered:
+// https://bugs.llvm.org/show_bug.cgi?id=36684
+// to work around this, we have the type external
+struct ChannelBufferSizes {
+    size_t localToRemote = 10;
+    size_t remoteToLocal = 10;
+};
+
+class AC_FRAME_EXPORT LocalIoCtx {
 public:
-    void connect(SessionHandlerPtr handler, StreamEndpoint ep);
+    explicit LocalIoCtx(uint32_t numThreads = 2);
+    LocalIoCtx(const LocalIoCtx&) = delete;
+    LocalIoCtx& operator=(const LocalIoCtx&) = delete;
+    ~LocalIoCtx();
+
+    static ChannelEndpoints getEndpoints(ChannelBufferSizes bufferSizes = {});
+
+    void connect(SessionHandlerPtr remoteHandler, StreamEndpoint ep);
+    StreamEndpoint connect(SessionHandlerPtr remoteHandler, ChannelBufferSizes bufferSizes = {});
+    void connect(SessionHandlerPtr local, SessionHandlerPtr remote, ChannelBufferSizes bufferSizes = {});
+
+    void join(bool forceStop = false);
+private:
+    xec::context m_ctx;
+    ac::xec::context_work_guard m_guard;
+    astl::multi_thread_runner m_threads;
 };
 
 } // namespace ac::frameio
