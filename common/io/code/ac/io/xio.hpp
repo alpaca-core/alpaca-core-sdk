@@ -22,8 +22,8 @@ public:
     template <typename ...Args>
     explicit basic_xio(std::unique_ptr<Stream> stream, Args&&... args)
         requires std::constructible_from<Wobj, Args...>
-        : m_stream(std::move(stream))
-        , m_wobj(std::forward<Args>(args)...)
+        : m_wobj(std::forward<Args>(args)...)
+        , m_stream(std::move(stream))
     {}
 
     template <typename ...Args>
@@ -145,8 +145,8 @@ private:
         return false;
     }
 
-    std::unique_ptr<Stream> m_stream;
     Wobj m_wobj;
+    std::unique_ptr<Stream> m_stream;
 };
 
 template <read_stream_class ReadStream, xec::basic_wait_object_class Wobj>
