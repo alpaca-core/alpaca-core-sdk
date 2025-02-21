@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include "notifiable.hpp"
 #include <astl/warnings.h>
 #include <condition_variable>
 #include <chrono>
@@ -14,7 +13,7 @@ namespace ac::xec {
 PRAGMA_WARNING_PUSH
 DISABLE_MSVC_WARNING(4324) // structure was padded due to alignment specifier
 
-class thread_wobj : public notifiable {
+class atomic_cvar {
     // align to prevent false sharing
     // can't use std::hardware_destructive_interference_size as this is a part of public ABI
 #if !defined(_MSC_VER)
@@ -31,12 +30,7 @@ class thread_wobj : public notifiable {
         return m_flag.exchange(false, std::memory_order_acquire);
     }
 public:
-    void notify_all() final override {
-        m_flag.store(true, std::memory_order_release);
-        m_cvar.notify_all();
-    }
-
-    void notify_one() final override {
+    void notify_one() {
         m_flag.store(true, std::memory_order_release);
         m_cvar.notify_one();
     }

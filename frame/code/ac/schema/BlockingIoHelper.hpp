@@ -13,7 +13,7 @@ namespace ac::schema {
 class BlockingIoHelper {
     frameio::BlockingIo m_io;
 public:
-    explicit BlockingIoHelper(frameio::StreamEndpoint ep) : m_io(std::move(ep)) {}
+    explicit BlockingIoHelper(frameio::StreamEndpoint ep, frameio::BlockingIoCtx& ctx) : m_io(std::move(ep), ctx) {}
 
     frameio::BlockingIo& io() { return m_io; }
 

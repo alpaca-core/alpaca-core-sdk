@@ -5,7 +5,8 @@
 #include "stream_endpoint.hpp"
 #include "value_with_status.hpp"
 #include "xio_endpoint.hpp"
-#include <ac/xec/thread_wobj.hpp>
+#include <ac/xec/notifiable.hpp>
+#include <ac/xec/atomic_cvar.hpp>
 #include <ac/xec/wait_func_invoke.hpp>
 #include <ac/xec/task.hpp>
 
@@ -18,15 +19,29 @@ struct immediate_executor {
 void post(immediate_executor, xec::task t) {
     t();
 }
-struct blocking_wobj : public xec::thread_wobj {
-    using executor_type = immediate_executor;
-    immediate_executor get_executor() const {
+struct cvar_wobj final : public xec::notifiable {
+    xec::atomic_cvar& m_cvar;
+
+    cvar_wobj(xec::atomic_cvar& cvar)
+        : m_cvar(cvar)
+    {}
+
+    void notify_all() {
+        assert(false); // shouldn't happen
+        m_cvar.notify_one();
+    }
+    void notify_one() {
+        m_cvar.notify_one();
+    }
+
+    using executor_type = impl::immediate_executor;
+    impl::immediate_executor get_executor() const {
         return {};
     }
 
     template <xec::wait_func_class Cb>
     void wait(astl::timeout to, Cb&& cb) {
-        auto notified = xec::thread_wobj::wait(to);
+        auto notified = m_cvar.wait(to);
         if (notified) {
             xec::wait_func_invoke_cancelled(cb);
         }
@@ -35,13 +50,28 @@ struct blocking_wobj : public xec::thread_wobj {
         }
     }
 };
-}
+} // namespace impl
 
-template <read_stream_class RS, write_stream_class WS>
-class blocking_io {
+template <typename RS, typename WS>
+class blocking_io;
+
+class blocking_io_ctx {
+    template <typename RS, typename WS>
+    friend class blocking_io;
+    xec::atomic_cvar m_cvar;
+};
+
+template <typename RS, typename WS>
+class blocking_io : private xio_endpoint<RS, WS, impl::cvar_wobj> {
 public:
-    explicit blocking_io(stream_endpoint<RS, WS> endpoint)
-        : m_io(std::move(endpoint))
+    using super = xio_endpoint<RS, WS, impl::cvar_wobj>;
+
+    explicit blocking_io(blocking_io_ctx& ctx)
+        : super(ctx.m_cvar)
+    {}
+
+    blocking_io(stream_endpoint<RS, WS> endpoint, blocking_io_ctx& ctx)
+        : super(std::move(endpoint), ctx.m_cvar)
     {}
 
     using input_value_type = typename RS::read_value_type;
@@ -49,7 +79,7 @@ public:
 
     status poll(input_value_type& val, astl::timeout timeout = astl::timeout::never()) {
         status ret;
-        m_io.poll(val, timeout, [&](input_value_type&, status s) {
+        super::poll(val, timeout, [&](input_value_type&, status s) {
             ret = s;
         });
         return ret;
@@ -62,22 +92,21 @@ public:
 
     status push(output_value_type& val, astl::timeout timeout = astl::timeout::never()) {
         status ret;
-        m_io.push(val, timeout, [&](output_value_type&, status s) {
+        super::push(val, timeout, [&](output_value_type&, status s) {
             ret = s;
         });
         return ret;
     }
-
     status push(output_value_type&& val, astl::timeout timeout = astl::timeout::never()) {
         return push(val, timeout);
     }
 
-    void close() {
-        m_io.close();
-    }
+    using super::get;
+    using super::put;
 
-private:
-    xio_endpoint<RS, WS, impl::blocking_wobj> m_io;
+    using super::attach;
+    using super::detach;
+    using super::close;
 };
 
 } // namespace ac::io

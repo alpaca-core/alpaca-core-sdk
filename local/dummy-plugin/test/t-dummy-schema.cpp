@@ -27,10 +27,11 @@ struct LoadDummyFixture {
 LoadDummyFixture loadDummyFixture;
 
 TEST_CASE("blocking io") {
+    ac::frameio::BlockingIoCtx blockingCtx;
     ac::local::IoCtx io;
 
     auto& dummyProvider = ac::local::Lib::getProvider("dummy");
-    ac::schema::BlockingIoHelper dummy(io.connect(dummyProvider));
+    ac::schema::BlockingIoHelper dummy(io.connect(dummyProvider), blockingCtx);
 
     namespace schema = ac::schema::dummy;
 
