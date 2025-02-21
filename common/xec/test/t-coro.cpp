@@ -64,3 +64,27 @@ TEST_CASE("await respawn") {
     co_spawn(ctx, await_respawn());
     ctx.run();
 }
+
+coro<int> maybe_throw(int level, bool t) {
+    if (level == 0 && t) {
+        throw std::runtime_error("ex");
+    }
+    if (level == 0) {
+        co_return 0;
+    }
+    co_return 1 + co_await maybe_throw(level - 1, t);
+}
+
+coro<void> test_exceptions() {
+    CHECK(co_await maybe_throw(0, false) == 0);
+    CHECK_THROWS_WITH(co_await maybe_throw(0, true), "ex");
+
+    CHECK(co_await maybe_throw(4, false) == 4);
+    CHECK_THROWS_WITH(co_await maybe_throw(4, true), "ex");
+}
+
+TEST_CASE("exceptions") {
+    context ctx;
+    co_spawn(ctx, test_exceptions());
+    ctx.run();
+}
