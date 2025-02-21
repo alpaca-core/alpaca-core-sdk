@@ -36,6 +36,9 @@ target_sources(ac-jalog
         ac/jalog/sinks/AnsiColorSink.hpp
         ac/jalog/sinks/SimpleOStreamSink.hpp
         ac/jalog/sinks/SimpleStdioSink.hpp
+
+        ac/jalog/AsyncLogging.hpp
+        ac/jalog/AsyncLoggingThread.hpp
     PRIVATE
 
         ac/jalog/Scope.cpp
@@ -49,6 +52,8 @@ target_sources(ac-jalog
         ac/jalog/Instance.cpp
 
         ac/jalog/sinks/AnsiColorSink.cpp
+
+        ac/jalog/AsyncLogging.cpp
 )
 
 if(WIN32)
@@ -78,10 +83,11 @@ elseif(APPLE)
     endif()
 endif()
 
-target_compile_definitions(ac-jalog PUBLIC -DAC_JALOG_NO_BUILTIN_ASYNC=1)
+target_compile_definitions(ac-jalog PUBLIC -DAC_JALOG_NO_BUILTIN_ASYNC=0)
 target_link_libraries(ac-jalog
     PUBLIC
         ac::astl
+        ac::xec
 )
 
 install(TARGETS ac-jalog
