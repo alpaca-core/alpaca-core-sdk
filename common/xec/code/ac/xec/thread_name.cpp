@@ -24,7 +24,7 @@ using tid = HANDLE;
 using tid = pthread_t;
 #endif
 
-namespace xec {
+namespace ac::xec {
 
 namespace {
 [[maybe_unused]] bool is_current_thread(tid h) {
@@ -102,11 +102,11 @@ std::string do_get_name(tid h) {
 }
 }
 
-int set_thread_name(std::thread& t, std::string_view name) {
+int set_thread_name(std::thread& t, std::string_view name) noexcept {
     return do_set_name(t.native_handle(), name);
 }
 
-int set_this_thread_name(std::string_view name) {
+int set_this_thread_name(std::string_view name) noexcept {
 #if WIN32_THREADS
     return do_set_name(GetCurrentThread(), name);
 #else
@@ -114,11 +114,11 @@ int set_this_thread_name(std::string_view name) {
 #endif
 }
 
-std::string get_thread_name(std::thread& t) {
+std::string get_thread_name(std::thread& t) noexcept {
     return do_get_name(t.native_handle());
 }
 
-std::string get_this_thread_name() {
+std::string get_this_thread_name() noexcept {
 #if WIN32_THREADS
     return do_get_name(GetCurrentThread());
 #else
