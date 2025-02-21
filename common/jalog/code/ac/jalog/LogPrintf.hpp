@@ -12,7 +12,7 @@
 #include "Printf.hpp"
 
 #define AC_JALOG_PRINTF_SCOPE(scope, lvl, fmt, ...) \
-    if (scope.enabled(::ac::jalog::Level::lvl)) \
+    if ((scope).enabled(::ac::jalog::Level::lvl)) \
         ::ac::jalog::PrintfUnchecked(scope, ::ac::jalog::Level::lvl, fmt, ##__VA_ARGS__)
 
 #define AC_JALOG_PRINTF(lvl, ...) AC_JALOG_PRINTF_SCOPE(::ac::jalog::Default_Scope, lvl, __VA_ARGS__)

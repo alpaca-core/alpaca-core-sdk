@@ -13,7 +13,7 @@
 struct JalogFixture {
     ac::jalog::Instance jl;
     JalogFixture() {
-        jl.setup()
+        jl.setup().async()
             .add<ac::jalog::sinks::DefaultSink>();
     }
 };

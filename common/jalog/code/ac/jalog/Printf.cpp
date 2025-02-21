@@ -5,6 +5,7 @@
 
 #include "Scope.hpp"
 
+#include <vector>
 #include <cstdio>
 #include <cstdarg>
 
