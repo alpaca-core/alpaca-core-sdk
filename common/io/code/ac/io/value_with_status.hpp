@@ -20,6 +20,17 @@ struct value_with_status : public status {
 
     T value;
 
+    explicit operator bool() const { return success(); }
+
+    T& operator*() { return value; }
+    const T& operator*() const { return value; }
+
+    T* operator->() { return &value; }
+    const T* operator->() const { return &value; }
+
+    template <typename U>
+    T value_or(U&& def) const { return success() ? value : T(std::forward<U>(def)); }
+
     void reset(T v = {}) {
         status::reset();
         value = std::move(v);

@@ -58,12 +58,14 @@ TEST_CASE("status") {
 
 TEST_CASE("value with status") {
     ac::io::value_with_status<int> v;
+    CHECK_FALSE(v);
     CHECK(v.value == 0);
     v.value = 432;
     v.reset();
     CHECK(v.value == 0);
     v.reset(42);
     CHECK(v.value == 42);
+    CHECK(*v == 42);
 
     ac::io::status& s = v;
     s.set_aborted();
@@ -74,6 +76,9 @@ TEST_CASE("value with status") {
 
     v2.s() = s;
     CHECK(v2.aborted());
+
+    v2.set_success();
+    CHECK(v2);
 }
 
 ac::io::value_with_status<int> func() {
