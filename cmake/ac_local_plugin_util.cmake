@@ -204,7 +204,7 @@ static_assert(std::is_same_v<decltype(&aclp_get_interface), PluginInterface::Get
     )
 
     install(TARGETS ${pluginTargetName}
-        COMPONENT plugins
+        COMPONENT ac-plugins
         LIBRARY DESTINATION lib/ac-local
     )
 
@@ -397,6 +397,7 @@ function(make_ac_local_plugin_available)
             --install "${binDir}"
             --config $<CONFIG>
             --prefix "${rootBinDir}"
+            --component ac-plugins
         COMMENT "Building AC Plugin ${pluginId}"
     )
 
