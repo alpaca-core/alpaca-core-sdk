@@ -3,6 +3,7 @@
 //
 #include "LocalDummy.hpp"
 #include "DummyInterface.hpp"
+#include "Logging.hpp"
 
 #include "Instance.hpp"
 #include "Model.hpp"
@@ -13,6 +14,7 @@
 #include <ac/local/ProviderSessionContext.hpp>
 
 #include <ac/schema/OpDispatchHelpers.hpp>
+#include <ac/schema/FrameHelpers.hpp>
 
 #include <ac/FrameUtil.hpp>
 #include <ac/frameio/IoEndpoint.hpp>
@@ -53,24 +55,51 @@ struct BasicRunner {
     }
 };
 
+xec::coro<void> Dummy_runStream(IoEndpoint& io, astl::generator<const std::string&> s) {
+    using Schema = sc::StateStreaming;
+    co_await io.push(Frame_stateChange(Schema::id));
+    Frame abortFrame;
+    for (auto& w : s) {
+        if (io.get(abortFrame).success()) {
+            if (abortFrame.op == Schema::OpAbort::id) {
+                co_return;
+            }
+            else {
+                DUMMY_LOG(Warning, "Unexpected frame: ", abortFrame.op);
+            }
+        }
+
+        co_await io.push(Frame_fromStreamType(Schema::StreamToken{}, w));
+    }
+}
+
 xec::coro<void> Dummy_runInstance(IoEndpoint& io, std::unique_ptr<dummy::Instance> instance) {
     using Schema = sc::StateInstance;
 
     struct Runner : public BasicRunner {
+        IoEndpoint& m_io;
         dummy::Instance& m_instance;
 
-        explicit Runner(dummy::Instance& instance) : m_instance(instance) {
+        explicit Runner(IoEndpoint& io, dummy::Instance& instance)
+            : m_io(io)
+            , m_instance(instance)
+
+        {
             schema::registerHandlers<Schema::Ops>(m_dispatcherData, *this);
         }
 
         xec::coro<void> nextState;
 
-        Schema::OpRun::Return on(Schema::OpRun, Schema::OpRun::Params params) {
+        astl::generator<const std::string&> createSession(Schema::StateInstance::InferenceParams& params) {
             dummy::Instance::SessionParams sparams;
             sparams.splice = params.splice;
             sparams.throwOn = params.throwOn;
 
-            auto s = m_instance.newSession(std::move(params.input), sparams);
+            return m_instance.newSession(std::move(params.input), sparams);
+        }
+
+        Schema::OpRun::Return on(Schema::OpRun, Schema::OpRun::Params params) {
+            auto s = createSession(params);
 
             Schema::OpRun::Return ret;
             auto& res = ret.result.materialize();
@@ -85,15 +114,24 @@ xec::coro<void> Dummy_runInstance(IoEndpoint& io, std::unique_ptr<dummy::Instanc
 
             return ret;
         }
+
+        Schema::OpStream::Return on(Schema::OpStream, Schema::OpStream::Params params) {
+            nextState = Dummy_runStream(m_io, createSession(params));
+            return {};
+        }
     };
 
     co_await io.push(Frame_stateChange(Schema::id));
 
-    Runner runner(*instance);
+    Runner runner(io, *instance);
 
     while (true) {
         auto f = co_await io.poll();
         co_await io.push(runner.dispatch(f.value));
+        if (runner.nextState) {
+            co_await runner.nextState;
+            co_await io.push(Frame_stateChange(Schema::id));
+        }
     }
 }
 

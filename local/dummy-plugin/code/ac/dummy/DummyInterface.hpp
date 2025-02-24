@@ -155,7 +155,7 @@ struct StateInstance {
         using Return = nullptr_t;
     };
 
-    using Ops = std::tuple<OpRun>;
+    using Ops = std::tuple<OpRun, OpStream>;
     using Ins = std::tuple<>;
     using Outs = std::tuple<>;
 };

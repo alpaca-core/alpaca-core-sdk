@@ -142,4 +142,69 @@ TEST_CASE("instance") {
         s.push({"run", {{"input", {"a", "b"}}}});
         checkRunResult(s, "a one b two");
     }
+
+    // stream
+    {
+        auto s = createTestSession(d);
+
+        checkStateChange(s, "dummy");
+
+        s.push({ "load_model", {{"file_path", AC_DUMMY_MODEL_SMALL}} });
+        CHECK(s.poll().success());
+        checkStateChange(s, "model_loaded");
+
+        s.push({ "create_instance", {} });
+        CHECK(s.poll().success());
+        checkStateChange(s, "instance");
+
+        s.push({"stream", {{"input", {"a", "b"}}}});
+        auto f = s.poll();
+        CHECK(f.success());
+        CHECK(f.value.op == "stream");
+
+        checkStateChange(s, "streaming");
+
+        f = s.poll();
+        CHECK(f.success());
+        CHECK(f.value.op == "token");
+        CHECK(f.value.data.get<std::string>() == "a");
+
+        f = s.poll();
+        CHECK(f.success());
+        CHECK(f.value.op == "token");
+        CHECK(f.value.data.get<std::string>() == "soco");
+
+        f = s.poll();
+        CHECK(f.success());
+        CHECK(f.value.op == "token");
+        CHECK(f.value.data.get<std::string>() == "b");
+
+        f = s.poll();
+        CHECK(f.success());
+        CHECK(f.value.op == "token");
+        CHECK(f.value.data.get<std::string>() == "bate");
+
+        checkStateChange(s, "instance");
+
+        s.push({"stream", {{"input", {"x", "y"}}}});
+        f = s.poll();
+        CHECK(f.success());
+        CHECK(f.value.op == "stream");
+
+        checkStateChange(s, "streaming");
+
+        f = s.poll();
+        CHECK(f.success());
+        CHECK(f.value.op == "token");
+        CHECK(f.value.data.get<std::string>() == "x");
+
+        s.push({"abort", {}});
+
+        f = s.poll();
+        CHECK(f.success());
+        CHECK(f.value.op == "token");
+        CHECK(f.value.data.get<std::string>() == "soco");
+
+        checkStateChange(s, "instance");
+    }
 }
