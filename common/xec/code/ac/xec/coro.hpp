@@ -98,6 +98,13 @@ struct coro {
 
     coro() noexcept = default;
     coro(coro&& other) noexcept : m_handle(other.take_handle()) {}
+    coro& operator=(coro&& other) noexcept {
+        if (m_handle) {
+            m_handle.destroy();
+        }
+        m_handle = other.take_handle();
+        return *this;
+    }
     ~coro() {
         if (m_handle) {
             m_handle.destroy();
@@ -145,7 +152,7 @@ struct coro {
     }
 
     explicit operator bool() const noexcept {
-        return m_handle;
+        return !!m_handle;
     }
 
 private:
