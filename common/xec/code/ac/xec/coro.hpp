@@ -96,6 +96,7 @@ struct coro {
         coro_result* m_result = nullptr;
     };
 
+    coro() noexcept = default;
     coro(coro&& other) noexcept : m_handle(other.take_handle()) {}
     ~coro() {
         if (m_handle) {
@@ -141,6 +142,10 @@ struct coro {
 
     awaitable operator co_await() {
         return {take_handle()};
+    }
+
+    explicit operator bool() const noexcept {
+        return m_handle;
     }
 
 private:
