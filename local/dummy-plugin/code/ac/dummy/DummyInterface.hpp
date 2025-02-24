@@ -93,6 +93,28 @@ struct StateModelLoaded {
     using Outs = std::tuple<>;
 };
 
+struct StateStreaming {
+    static constexpr auto id = "streaming";
+    static constexpr auto desc = "Streaming state";
+
+    struct OpAbort {
+        static constexpr auto id = "abort";
+        static constexpr auto desc = "Abort the streaming";
+        using Params = nullptr_t;
+        using Return = nullptr_t;
+    };
+
+    struct StreamToken {
+        static constexpr auto id = "token";
+        static constexpr auto desc = "Token stream";
+        using Type = std::string;
+    };
+
+    using Ops = std::tuple<OpAbort>;
+    using Ins = std::tuple<>;
+    using Outs = std::tuple<StreamToken>;
+};
+
 struct StateInstance {
     static constexpr auto id = "instance";
     static constexpr auto desc = "Dummy instance";

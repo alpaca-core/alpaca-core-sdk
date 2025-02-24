@@ -62,6 +62,9 @@ xec::coro<void> Dummy_runInstance(IoEndpoint& io, std::unique_ptr<dummy::Instanc
         explicit Runner(dummy::Instance& instance) : m_instance(instance) {
             schema::registerHandlers<Schema::Ops>(m_dispatcherData, *this);
         }
+
+        xec::coro<void> nextState;
+
         Schema::OpRun::Return on(Schema::OpRun, Schema::OpRun::Params params) {
             dummy::Instance::SessionParams sparams;
             sparams.splice = params.splice;
