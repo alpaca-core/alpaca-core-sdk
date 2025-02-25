@@ -34,6 +34,8 @@ target_sources(ac-local
         ac/local/PluginInfo.hpp
         ac/local/LoadPluginCb.hpp
         ac/local/PluginManager.hpp
+        ac/local/Resource.hpp
+        ac/local/ResourceManager.hpp
 
         ac/local/Lib.hpp
 
@@ -50,6 +52,7 @@ target_sources(ac-local
 
         ac/local/ProviderRegistry.cpp
         ac/local/PluginManager.cpp
+        ac/local/ResourceManager.cpp
 
         ac/local/Lib.cpp
 

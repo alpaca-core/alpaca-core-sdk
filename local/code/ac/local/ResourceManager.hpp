@@ -3,57 +3,78 @@
 //
 #pragma once
 #include "export.h"
+#include "Resource.hpp"
 #include <ac/xec/strand.hpp>
 #include <ac/xec/timer_ptr.hpp>
+#include <ac/xec/completion_cb.hpp>
+#include <mutex>
 #include <string>
 #include <memory>
 #include <chrono>
-#include <deque>
+#include <vector>
 #include <concepts>
+#include <string_view>
 
 namespace ac::local {
 
+using ResourcePtr = std::shared_ptr<Resource>;
+
 class AC_LOCAL_EXPORT ResourceManager {
 public:
-    ResourceManager();
+    ResourceManager(xec::strand ex);
     ~ResourceManager();
 
     ResourceManager(const ResourceManager&) = delete;
     ResourceManager& operator=(const ResourceManager&) = delete;
 
-    template <typename R>
+    template <std::derived_from<Resource> R>
     class ResourceLock {
     public:
-        ~ResourceLock() {
-
-        }
+        explicit operator bool() const noexcept { return !!m_resource; }
 
         R* get() const noexcept { return static_cast<R*>(m_resource.get()); }
         R* operator->() const noexcept { return get(); }
         R& operator*() const noexcept { return *get(); }
 
+        ~ResourceLock() {
+            if (m_resource) {
+                m_manager.unlockResource(std::move(m_resource));
+            }
+        }
     private:
-        ResourceData m_data;
+        friend class ResourceManager;
+        ResourceLock(ResourceManager& manager, const std::shared_ptr<R>& resource)
+            : m_manager(manager)
+            , m_resource(resource)
+        {}
+        ResourceManager& m_manager;
+        std::shared_ptr<R> m_resource;
     };
 
+    template <std::derived_from<Resource> R>
+    ResourceLock<R> lock(std::string_view key) {
+        auto resource = lockResource(key);
+        return {*this, std::static_pointer_cast<R>(resource)};
+    }
+
+    void requestFreeSpace(std::string_view space, xec::completion_cb cb);
+
+    void addResource(ResourcePtr&& resource, std::string key);
 
 private:
-    using ResourcePtr = std::shared_ptr<void>;
-
-    ResourcePtr lockResource(const std::string& key);
+    ResourcePtr lockResource(std::string_view key);
     void unlockResource(ResourcePtr ptr);
 
     struct ResourceData {
         std::string key;
-        std::chrono::steady_clock::duration maxAge;
         std::chrono::steady_clock::time_point expireTime;
         ResourcePtr resource;
+        xec::strand freeExecutor;
     };
 
+    std::mutex m_mutex;
     xec::timer_ptr m_timer;
-
-    // using deque for the stable pointers
-    std::deque<ResourceData> m_resources;
+    std::vector<ResourceData> m_resources; // sparse
 };
 
 } // namespace ac::local
