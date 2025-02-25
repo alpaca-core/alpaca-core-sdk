@@ -25,6 +25,16 @@ inline std::string_view Frame_getStateChange(const Frame& f) {
     return {};
 }
 
+template<typename StreamOp>
+inline bool Frame_getStreamData(const Frame& f, typename StreamOp::Type& out) {
+    if (f.op != StreamOp::id) {
+        return false;
+    }
+
+    out = f.data.get<typename StreamOp::Type>();
+    return true;
+}
+
 inline Frame Frame_error(std::string error) {
     return {"error", std::move(error)};
 }

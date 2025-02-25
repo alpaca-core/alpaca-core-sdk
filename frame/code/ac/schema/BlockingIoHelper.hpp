@@ -64,6 +64,22 @@ public:
         return Frame_toOpReturn(Op{}, std::move(res.value));
     }
 
+    template <typename State, typename StreamOp, typename Cb>
+    void runStream(Cb onResult) {
+        expectState<State>();
+        while (true) {
+            auto res = m_io.poll();
+            pollStatusCheck(res);
+            frameErrorCheck(res.value);
+
+            typename StreamOp::Type data;
+            if (!Frame_getStreamData<StreamOp>(res.value, data)) {
+                break;
+            }
+            onResult(data);
+        }
+    }
+
     void close() { m_io.close(); }
 };
 
