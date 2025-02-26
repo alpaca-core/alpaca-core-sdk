@@ -11,13 +11,17 @@ The following files were copied from external repositories:
 * [iboB/splat](https://github.com/iboB/itlib):
     * `pp_select.h`
     * `symbol_export.h`
+    * `warnings.h`
 * [iboB/itlib](https://github.com/iboB/itlib), namespace changed from `itlib` to `astl`:
     * `expected.hpp`
     * `flat_map.hpp`
     * `generator.hpp`
+    * `make_ptr.hpp`
     * `mem_streambuf.hpp`
+    * `pod_vector.hpp`
     * `qalgorithm.hpp`
     * `sentry.hpp`
+    * `shared_from_.hpp`
     * `small_vector.hpp`
     * `throw_ex.hpp`
     * `time_t.hpp`

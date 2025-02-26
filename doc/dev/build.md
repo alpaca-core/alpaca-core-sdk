@@ -22,10 +22,9 @@ If you want practical steps on for specific environments, check the [developer e
 ### CMake Options
 
 * Advanced and `OFF` by default if the project is a subdir:
-    * `AC_LOCAL_BUILD_TOOLS` - build tools for all components. No finer-grain options are available yet
-    * `AC_LOCAL_BUILD_TESTS` - build tests for all active components. No finer-grain options are available yet. Git LFS is required for some tests
-    * `AC_LOCAL_BUILD_EXAMPLES` - build examples for all active components. No finer-grain options are available yet. Git LFS is required for some examples
-* From ac-build and only available when ac-local is the root project and `OFF` by default:
+    * `AC_BUILD_TESTS` - build tests for all active components. No finer-grain options are available yet. Git LFS is required for some tests
+    * `AC_BUILD_EXAMPLES` - build examples for all active components. No finer-grain options are available yet. Git LFS is required for some examples
+* From ac-build and only available when this is the root project and `OFF` by default:
     * `SAN_ADDR`: enable address sanitizer.
     * `SAN_UB`: enable undefined behavior sanitizer. Not supported on Windows.
     * `SAN_LEAK`: enable leak sanitizer. Only supported on Linux.

@@ -1,3 +1,3 @@
-# Contributing to AC Local
+# Contributing to Alpaca Core SDK
 
 *TBD*
