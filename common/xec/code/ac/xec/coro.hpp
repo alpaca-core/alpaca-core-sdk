@@ -102,6 +102,10 @@ struct coro {
             pop_coro();
         }
 
+        // this doesn't need to be a shared pointer
+        // it could be a unique pointer in the root coroutine and a raw pointer in the ones below
+        // however we would need to create different promise types for the root and the rest and
+        // we decide to keep it simple (for now)
         coro_state_ptr m_state;
         std::coroutine_handle<> m_prev = nullptr;
 
