@@ -1,63 +1,69 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#pragma once
 #include "ResourceManager.hpp"
-#include "ResourceLock.hpp"
 #include "Logging.hpp"
-#include <ac/xec/timer.hpp>
-#include <ac/xec/simple_coro.hpp>
+#include <ac/xec/post.hpp>
 #include <astl/qalgorithm.hpp>
 
 namespace ac::local {
 
-ResourceManager::ResourceManager(xec::strand ex)
-    : m_executor(std::move(ex))
-    , m_timer(xec::timer::create(m_executor))
-{}
-
+ResourceManager::ResourceManager() = default;
 ResourceManager::~ResourceManager() = default;
 
-xec::simple_coro ResourceManager::doResourceQuery(ResourceQueryPtr query) {
-    {
-        auto f = astl::pfind_if(m_resources, [&](const ResourceData& data) {
-            return data && data.key == query->key;
-        });
+ResourcePtr ResourceManager::doFindResource(std::string_view key) const noexcept {
+    std::lock_guard l(m_mutex);
+    auto p = astl::pfind_if(m_resources, [&](const ResourceData& r) { return r && r.key == key; });
+    if (!p) return {};
+    return p->resource;
+}
 
-        if (f) {
-            query->queryCompleteFunc(std::move(f->resource));
-            co_return;
+void ResourceManager::doAddResource(std::string key, ResourcePtr resource) {
+    std::lock_guard l(m_mutex);
+
+    // we intentionally don't check for key duplicates
+    // if someone adds a duplicate key, it is on their head
+
+    auto p = astl::pfind_if(m_resources, [&](const ResourceData& r) { return !r; });
+
+    if (!p) {
+        // no free slot was found
+        p = &m_resources.emplace_back();
+    }
+
+    p->key = std::move(key);
+    p->resource = std::move(resource);
+}
+
+int ResourceManager::garbageCollect(bool force) {
+    std::lock_guard l(m_mutex);
+
+    // if force is true, we set the now to the end of time and now everyone is expired
+    auto now = force ? std::chrono::steady_clock::time_point::max() : std::chrono::steady_clock::now();
+
+    int count = 0;
+    for (auto& rd : m_resources) {
+        if (rd.resource.use_count() != 1) {
+            // either empty or shared
+            continue;
+        }
+        if (rd.resource->expireTime <= now) {
+            rd.reset();
+            ++count;
         }
     }
 
-    // the resource was not found, so we try to create it
-    while (true) {
-        auto result = query->tryCreateFunc();
-        if (result) {
-            // add resource to cache
-            auto resource = result.value();
-            auto& r = m_resources.emplace_back();
-            r.key = std::move(query->key);
-            r.expireTime = std::chrono::steady_clock::now() + resource->maxAge;
-            r.resource = std::move(resource);
-
-            query->queryCompleteFunc(std::move(result));
-            co_return;
-        }
-        else if (!result.error().noSpace()) {
-            // internal error - nothing we can do, propagate and return
-            query->queryCompleteFunc(std::move(result));
-            co_return;
-        }
-
-        // no space, so we need to free some
-        query->queryCompleteFunc(std::move(result));
-        co_return;
-    }
+    return count;
 }
 
-void ResourceManager::queryResource(ResourceQueryPtr query) {
-    doResourceQuery(std::move(query));
+void ResourceManager::touchResourceExpiry(Resource& resource) noexcept {
+    resource.expireTime = std::chrono::steady_clock::now() + resource.maxAge;
 }
+
+namespace impl {
+void Resource_touch(Resource& resource) {
+    ResourceManager::touchResourceExpiry(resource);
+}
+} // namespace impl
 
 } // namespace ac::local

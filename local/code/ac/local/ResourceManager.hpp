@@ -4,39 +4,44 @@
 #pragma once
 #include "export.h"
 #include "Resource.hpp"
-#include "ResourceQuery.hpp"
-#include <ac/xec/strand.hpp>
-#include <ac/xec/timer_ptr.hpp>
-#include <ac/xec/completion_cb.hpp>
+#include "ResourceLock.hpp"
+#include <mutex>
 #include <string>
 #include <memory>
-#include <chrono>
 #include <vector>
 #include <concepts>
 #include <string_view>
-
-namespace ac::xec {
-struct simple_coro;
-}
 
 namespace ac::local {
 
 class AC_LOCAL_EXPORT ResourceManager {
 public:
-    ResourceManager(xec::strand ex);
+    ResourceManager();
     ~ResourceManager();
 
     ResourceManager(const ResourceManager&) = delete;
     ResourceManager& operator=(const ResourceManager&) = delete;
 
-    const xec::strand& executor() const noexcept { return m_executor; }
+    template <std::derived_from<Resource> R = Resource>
+    ResourceLock<R> findResource(std::string_view key) const noexcept {
+        return ResourceLock<R>(doFindResource(key));
+    }
 
-    void queryResource(ResourceQueryPtr query);
+    template <std::derived_from<Resource> R>
+    ResourceLock<R> addResource(std::string key, std::shared_ptr<R>&& resource) {
+        doAddResource(std::move(key), resource);
+        return ResourceLock<R>(std::move(resource));
+    }
 
+    // garbage collect expired resources
+    // force: disregard expire time
+    // return number of resources collected
+    int garbageCollect(bool force = false);
+
+    static void touchResourceExpiry(Resource& resource) noexcept;
 private:
     struct ResourceData {
         std::string key;
-        std::chrono::steady_clock::time_point expireTime;
         ResourcePtr resource;
 
         explicit operator bool() const noexcept { return !!resource; }
@@ -45,11 +50,11 @@ private:
         }
     };
 
-    xec::strand m_executor;
-    xec::timer_ptr m_timer;
+    mutable std::mutex m_mutex;
     std::vector<ResourceData> m_resources; // sparse
 
-    xec::simple_coro doResourceQuery(ResourceQueryPtr query);
+    ResourcePtr doFindResource(std::string_view key) const noexcept;
+    void doAddResource(std::string key, ResourcePtr resource);
 };
 
 } // namespace ac::local
