@@ -8,11 +8,12 @@ If you like our software, consider giving these libraries a star on GitHub, a do
 
 Here's the list in no particular order:
 
-## Embedded in AC Local itself
+## In the SDK code itself
 
 | Library | Usage |
 | --- | --- |
 | [JSON for Modern C++](https://github.com/nlohmann/json) | `ac::Dict` |
+| [Boost.Asio](https://github.com/boostorg/asio) | executors |
 | [splat](https://github.com/iboB/splat) | C and C++ macros |
 | [itlib](https://github.com/iboB/itlib) | C++ STL extensions library |
 | [jalog](https://github.com/iboB/jalog) | logging |

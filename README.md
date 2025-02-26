@@ -1,26 +1,30 @@
-# Alpaca Core Local SDK
+# Alpaca Core SDK
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT) [![Standard](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](https://en.cppreference.com/w/cpp/20) [![Build](https://github.com/alpaca-core/alpaca-core/actions/workflows/build.yml/badge.svg)](https://github.com/alpaca-core/alpaca-core/actions/workflows/build.yml)
 
+> [!IMPORTANT]
+> This project is still in in an alpha stage of development. Significant changes are very likely, or rather, certain, and backwards compatibility is disregarded.
+
+The Alpaca Core SDK is a multi-platform SDK for building applications which include an abstract compute-heavy layer. It is the basis of [acord](https://github.com/alpaca-core/acord) and is designed to be the basis of the future Alpaca Core Ecosystem.
+
 > [!NOTE]
-> This project is still in in an alpha stage of development. Significant changes are very likely and backwards compatibility is disregarded.
+> So, what currently popular thing is a compute-heavy layer? Yes. Its main purpose is AI inference. It doesn't *have* to be used for AI inference, but that's what we build it for. Read more about the company and our mission [here](https://www.alpacacore.com/company/about).
 
-The Alpaca Core Local SDK, or *AC Local* for short, is a multi-platform SDK for local AI Inference.
+The main features of the SDK are:
 
-"Local" here means running on the device which executes the code. This could be a server, a desktop, or a mobile device.
-
-It provides a unified API for doing inference with multiple models. The API itself can be split into two layers:
-
-* Programming language specific (Language API): The API which one calls writing code in a specific programming language. It's just a means to call the:
-* Inference API: A JSON/CBOR/POJO-like API which is used to communicate with the underlying inference engines following their specific API schema.
+* Specifies the Alpaca Core Stateful Session Protocol.
+* An asynchronous socket-like C++ implementation of the protocol.
+* Not-just-C++ tooling and utilities for building and consuming ACSSP-based APIs.
+* Tooling and utilities for building and loading C++ plugins which implement such APIs.
+* Designed to completely abstract away the underlying compute from the application code.
 
 Read the [full introduction here](doc/intro.md).
 
-## Supported models
+## Supported Compute APIs
 
-The SDK on its own does not support any models. It contains the tools for building and loading plugins which provide inference for specific models. 
+The SDK on its own does not implement any computation (and thus no AI models or inference engines). It only contains the utilities for building and loading plugins which implement it. 
 
-Some libraries which have AC Local Plugins include:
+Some libraries which have AC Plugins include:
 
 * By Alpaca Core:
     * [ilib-llama.cpp](https://github.com/alpaca-core/ilib-llama.cpp): Multiple LLM-s by wrapping [ggerganov/llama.cpp](https://github.com/ggerganov/llama.cpp)
@@ -32,43 +36,52 @@ Some libraries which have AC Local Plugins include:
 
 ## Bindings, Wrappers, and Integrations
 
-This repo contains the Inference SDK implementation and Inference API documentation. The Inference SDK is implemented in C++, and thus the C++ Language API and *its* documentation are also hosted here. Additionally there are bindings, wrappers, and integrations for other languages and platforms. Their documentation is hosted in, and accessible from their respective repositories:
+This repo contains the reference implementation of the Stateful Session Protocol. It is implemented in C++, and thus the C++ public libraries and tools and *their* documentation are also hosted here. Additionally there are bindings, wrappers, and integrations for other languages and platforms. Their documentation is hosted in, and accessible from their respective repositories:
 
 * By Alpaca Core:
-    * [C wrapper](https://github.com/alpaca-core/ac-local-c)
-    * [Java wrapper](https://github.com/alpaca-core/ac-local-java)
-    * [Swift wrapper](https://github.com/alpaca-core/ac-local-swift)
-    * [Cocoa DictConverter](https://github.com/alpaca-core/ac-dict-cocoa) - Convert `NSDictionary` to `ac::Dict` and back in Objective-C++
+    * *Coming soon*
 
 ## Minimal Example
 
 ```cpp
-ac::local::Lib::loadAllPlugins();
+ac::local::Lib::loadAllPlugins(); // load all plugins
+ac::frameio::BlockingIoCtx blockingCtx; // context for blocking IO from our side 
+                                        // (easier to write demos in)
+ac::local::IoCtx io; // io context for the plugins
 
-auto model = ac::local::Lib::createModel(
-    {
-        .type = "llama.cpp gguf",
-        .assets = {
-            {.path = "/path/to/model.gguf"}
-        }
-    }, 
-    { /*default params*/ }
-);
+auto& llamaProvider = ac::local::Lib::getProvider("llama"); // get the compute provider
 
-auto instance = model->createInstance("general", { /*default params*/ });
+// create a connection and attach it to a schema-based io helper
+// it being schema based allows us to use strong types below
+ac::schema::BlockingIoHelper llama(io.connect(dummyProvider), blockingCtx); 
 
-auto result = instance->runOp("run", {{"prompt", "If you could travel faster than light,"}});
+namespace schema = ac::schema::llama; // shorthand for the llama schema
 
-std::cout << result << "\n";
+// await the connection and load a model
+llama.expectState<schema::StateInitial>();
+llama.call<schema::StateInitial::OpLoadModel>({.ggufPath = "/path/to/model.gguf"});
+
+// start an inference instance
+llama.expectState<schema::StateModelLoaded>();
+llama.call<schema::StateModelLoaded::OpStartInstance>({.instanceType = "general"});
+
+// run the inference to complete a piece of text
+llama.expectState<schema::StateInstance>();
+auto result = llama.call<schema::StateInstance::OpRun>({
+    .prompt = "If you could travel faster than light,"
+});
+
+std::cout << result.text << "\n";
 ```
 
 ## Demos
 
-Most inference libraries with AC Local plugins have simple examples in their respective repositories. Additionally we have some standalone demos:
+Most inference libraries with AC plugins have simple examples in their respective repositories. Additionally:
 
-* AI Chat (LLM-based chatbot)
-    * Android: [alpaca-core/demo-android-ai-chat](https://github.com/alpaca-core/demo-android-ai-chat)
-    * IOS: [alpaca-core/demo-ios-ai-chat](https://github.com/alpaca-core/demo-ios-ai-chat)
+* [alpaca-core/acord](https://github.com/alpaca-core/acord), our only product so far, makes use of all SDK features.
+* [alpaca-core/tpl-ac-local-app](https://github.com/alpaca-core/tpl-ac-local-app) is a bare-bones template for building a C++ application with the SDK.
+* The plugins listed above demonstrate how to create plugins.
+* We're working on more standalone demos, mainly for mobile, to be made available soon.
 
 ## Usage
 
@@ -84,10 +97,10 @@ Check out the [contributing guide](CONTRIBUTING.md).
 
 This software is distributed under the MIT Software License. See accompanying file LICENSE or copy [here](https://opensource.org/licenses/MIT).
 
-Copyright &copy; 2024-2025 [Alpaca Core, Inc](https://github.com/alpaca-core)
+Copyright &copy; 2024-2025 [Alpaca Core, Inc](https://alpacacore.com).
 
 ## Third Party Libraries
 
 [A list of the third party libraries used here](third-party.md). Please consider supporting them.
 
-Additionally, if you deploy this software as binary, please include `etc/ac-local-deploy-licenses.md` in your deployment.
+Additionally, if you deploy this software as binary, please consider including `etc/ac-local-deploy-licenses.md` in your deployment.
