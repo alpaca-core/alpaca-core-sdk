@@ -12,6 +12,7 @@
 
 #include <ac/local/Provider.hpp>
 #include <ac/local/ProviderSessionContext.hpp>
+#include <ac/local/ResourceManager.hpp>
 
 #include <ac/schema/OpDispatchHelpers.hpp>
 #include <ac/schema/FrameHelpers.hpp>
@@ -135,7 +136,7 @@ xec::coro<void> Dummy_runInstance(IoEndpoint& io, std::unique_ptr<dummy::Instanc
     }
 }
 
-xec::coro<void> Dummy_runModel(IoEndpoint& io, std::unique_ptr<dummy::Model> model) {
+xec::coro<void> Dummy_runModel(IoEndpoint& io, dummy::Model& model) {
     using Schema = sc::StateModelLoaded;
 
     struct Runner : public BasicRunner {
@@ -161,7 +162,7 @@ xec::coro<void> Dummy_runModel(IoEndpoint& io, std::unique_ptr<dummy::Model> mod
 
     co_await io.push(Frame_stateChange(Schema::id));
 
-    Runner runner(*model);
+    Runner runner(model);
 
     while (true) {
         auto f = co_await io.poll();
@@ -172,15 +173,23 @@ xec::coro<void> Dummy_runModel(IoEndpoint& io, std::unique_ptr<dummy::Model> mod
     }
 }
 
-xec::coro<void> Dummy_runSession(StreamEndpoint ep) {
+struct DummyModelResource : public dummy::Model, public Resource{
+    using dummy::Model::Model;
+};
+
+xec::coro<void> Dummy_runSession(StreamEndpoint ep, ResourceManager& rm) {
     using Schema = sc::StateInitial;
 
     struct Runner : public BasicRunner {
-        Runner() {
+        Runner(ResourceManager& rm)
+            : m_resourceManager(rm)
+        {
             schema::registerHandlers<Schema::Ops>(m_dispatcherData, *this);
         }
 
-        std::unique_ptr<dummy::Model> model;
+        ResourceManager& m_resourceManager;
+
+        ResourceLock<DummyModelResource> model;
 
         static dummy::Model::Params ModelParams_fromSchema(sc::StateInitial::OpLoadModel::Params schemaParams) {
             dummy::Model::Params ret;
@@ -189,8 +198,18 @@ xec::coro<void> Dummy_runSession(StreamEndpoint ep) {
             return ret;
         }
 
-        Schema::OpLoadModel::Return on(Schema::OpLoadModel, Schema::OpLoadModel::Params params) {
-            model = std::make_unique<dummy::Model>(ModelParams_fromSchema(params));
+        Schema::OpLoadModel::Return on(Schema::OpLoadModel, Schema::OpLoadModel::Params sparams) {
+            auto mparams = ModelParams_fromSchema(sparams);
+            auto key = mparams.splice + ":" + mparams.path;
+            model = m_resourceManager.findResource<DummyModelResource>(key);
+
+            if (!model) {
+                model = m_resourceManager.addResource(
+                    std::move(key),
+                    std::make_shared<DummyModelResource>(std::move(mparams))
+                );
+            }
+
             return {};
         }
     };
@@ -201,13 +220,13 @@ xec::coro<void> Dummy_runSession(StreamEndpoint ep) {
 
         co_await io.push(Frame_stateChange(Schema::id));
 
-        Runner runner;
+        Runner runner(rm);
 
         while (true) {
             auto f = co_await io.poll();
             co_await io.push(runner.dispatch(f.value));
             if (runner.model) {
-                co_await Dummy_runModel(io, astl::move(runner.model));
+                co_await Dummy_runModel(io, *runner.model);
             }
         }
     }
@@ -226,8 +245,10 @@ public:
         return i;
     }
 
+    ResourceManager m_resourceManager;
+
     virtual void createSession(ProviderSessionContext ctx) override {
-        co_spawn(ctx.executor.cpu, Dummy_runSession(std::move(ctx.endpoint.session)));
+        co_spawn(ctx.executor.cpu, Dummy_runSession(std::move(ctx.endpoint.session), m_resourceManager));
     }
 };
 
