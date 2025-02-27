@@ -7,8 +7,6 @@
 
 namespace ac::local {
 
-class ResourceManager;
-
 namespace impl {
 AC_LOCAL_EXPORT void Resource_touch(Resource& resource);
 } // namespace impl
