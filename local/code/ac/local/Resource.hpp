@@ -2,11 +2,16 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
+#include "export.h"
 #include <chrono>
 #include <string>
 
 namespace ac::local {
-class ResourceManager;
+
+struct Resource;
+namespace impl {
+AC_LOCAL_EXPORT void Resource_touch(Resource& resource);
+} // namespace impl
 
 // Resources are stored type erased in the ResourceManager.
 // They are reified by static_pointer_cast to the correct type.
@@ -19,10 +24,16 @@ struct Resource {
     // see https://github.com/alpaca-core/alpaca-core-sdk/discussions/250
     std::string space = "generic";
 protected:
+
     ~Resource() = default;
 
 private:
-    friend class ResourceManager;
+
+    void touchExpiry() {
+        expireTime = std::chrono::steady_clock::now() + maxAge;
+    }
+
+    friend void impl::Resource_touch(Resource& resource);
     using time_point_t = std::chrono::steady_clock::time_point;
     time_point_t expireTime = time_point_t::min();
 };
