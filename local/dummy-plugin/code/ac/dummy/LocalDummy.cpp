@@ -177,17 +177,17 @@ struct DummyModelResource : public dummy::Model, public Resource{
     using dummy::Model::Model;
 };
 
-xec::coro<void> Dummy_runSession(StreamEndpoint ep, ResourceManager& rm) {
+xec::coro<void> Dummy_runSession(StreamEndpoint ep, ResourceManager<std::string>& rm) {
     using Schema = sc::StateInitial;
 
     struct Runner : public BasicRunner {
-        Runner(ResourceManager& rm)
+        Runner(ResourceManager<std::string>& rm)
             : m_resourceManager(rm)
         {
             schema::registerHandlers<Schema::Ops>(m_dispatcherData, *this);
         }
 
-        ResourceManager& m_resourceManager;
+        ResourceManager<std::string>& m_resourceManager;
 
         ResourceLock<DummyModelResource> model;
 
@@ -245,7 +245,7 @@ public:
         return i;
     }
 
-    ResourceManager m_resourceManager;
+    ResourceManager<std::string> m_resourceManager;
 
     virtual void createSession(ProviderSessionContext ctx) override {
         co_spawn(ctx.executor.cpu, Dummy_runSession(std::move(ctx.endpoint.session), m_resourceManager));
