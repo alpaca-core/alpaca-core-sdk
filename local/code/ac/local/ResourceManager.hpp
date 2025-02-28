@@ -19,7 +19,7 @@
 namespace ac::local {
 
 template<typename ResourceKey>
-class AC_LOCAL_EXPORT ResourceManager {
+class ResourceManager {
 public:
     ResourceManager() = default;
     ~ResourceManager() = default;
@@ -48,16 +48,28 @@ public:
             }
         }
 
+        // create the resource if it doesn't exist
+        // but don't keep a lock while doing so, as it may be a pretty long operation
         ResourcePtr ptr = creationCallback();
 
-        {
-            std::lock_guard l(m_mutex);
-            auto check = doFindResourceL(key);
-            if (!check) {
-                doAddResourceL(key, ptr);
-                return ResourceLock<R>(std::move(ptr));
-            }
+
+        std::lock_guard l(m_mutex); // lock again
+
+        // now, it could be the case that two threads created the same resource at the same time
+        // it is a risk we accept
+        // however to guarantee that they will both end up with the same resource, check again and
+        // throw away the one created by this thread if we find it
+
+        if (auto check = doFindResourceL(key)) {
+            // throw away old value of ptr
+            ptr = check;
         }
+        else {
+            // we created the only copy of the resource, add it to the list
+            doAddResourceL(key, ptr);
+        }
+
+        return ResourceLock<R>(std::move(ptr));
     }
 
     // garbage collect expired resources
@@ -115,8 +127,6 @@ private:
     }
 
     void doAddResourceL(ResourceKey key, ResourcePtr resource) {
-        // we intentionally don't check for key duplicates
-        // if someone adds a duplicate key, it is on their head
 
         auto p = astl::pfind_if(m_resources, [&](const ResourceData& r) { return !r; });
 
