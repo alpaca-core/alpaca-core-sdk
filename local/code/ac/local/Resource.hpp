@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include "Resource.touch.hpp"
+#include "Resource.utils.hpp"
 #include <chrono>
 #include <string>
 
@@ -24,7 +24,8 @@ protected:
 
 private:
     friend void impl::Resource_touch(Resource& resource);
-    using time_point_t = std::chrono::steady_clock::time_point;
+    friend time_point_t impl::Resource_getExpireTime(const Resource& resource);
+    // using time_point_t = std::chrono::steady_clock::time_point;
     time_point_t expireTime = time_point_t::min();
 };
 
