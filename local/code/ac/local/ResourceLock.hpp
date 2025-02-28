@@ -4,7 +4,7 @@
 #pragma once
 #include "export.h"
 #include "ResourcePtr.hpp"
-#include "Resource.touch.hpp"
+#include "Resource.utils.hpp"
 
 namespace ac::local {
 template <typename R>

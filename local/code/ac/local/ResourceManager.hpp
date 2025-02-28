@@ -51,7 +51,6 @@ public:
         // but don't keep a lock while doing so, as it may be a pretty long operation
         ResourcePtr ptr = creationCallback();
 
-
         std::lock_guard l(m_mutex); // lock again
 
         // now, it could be the case that two threads created the same resource at the same time
@@ -86,7 +85,7 @@ public:
                 // either empty or shared
                 continue;
             }
-            if (rd.resource->expireTime <= now) {
+            if (impl::Resource_getExpireTime(*rd.resource) <= now) {
                 rd.reset();
                 ++count;
             }
