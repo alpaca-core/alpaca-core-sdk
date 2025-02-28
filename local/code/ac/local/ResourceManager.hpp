@@ -42,8 +42,7 @@ public:
     ResourceLock<R> findOrCreateResource(ResourceKey key, CreationCallback creationCallback) {
         {
             std::lock_guard l(m_mutex);
-            auto result = doFindResourceL(key);
-            if (result) {
+            if (auto result = doFindResourceL(key)) {
                 return ResourceLock<R>(std::move(result));
             }
         }
