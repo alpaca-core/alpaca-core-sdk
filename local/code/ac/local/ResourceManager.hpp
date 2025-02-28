@@ -18,7 +18,7 @@
 
 namespace ac::local {
 
-template<typename ResourceKey>
+template <typename ResourceKey>
 class ResourceManager {
 public:
     ResourceManager() = default;

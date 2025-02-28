@@ -8,6 +8,8 @@
 
 namespace ac::local {
 
+template <typename> class ResourceManager;
+
 // Resources are stored type erased in the ResourceManager.
 // They are reified by static_pointer_cast to the correct type.
 // That's why you need to inherit from Resource to use the ResourceManager.
@@ -24,6 +26,7 @@ protected:
 
 private:
     friend void impl::Resource_touch(Resource& resource);
+    template <typename> friend class ResourceManager;
     using time_point_t = std::chrono::steady_clock::time_point;
     time_point_t expireTime = time_point_t::min();
 };
