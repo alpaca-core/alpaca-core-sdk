@@ -52,7 +52,7 @@ target_sources(ac-local
 
         ac/local/ProviderRegistry.cpp
         ac/local/PluginManager.cpp
-        ac/local/ResourceManager.cpp
+        ac/local/Resource.cpp
 
         ac/local/Lib.cpp
 

@@ -4,13 +4,9 @@
 #pragma once
 #include "export.h"
 #include "ResourcePtr.hpp"
+#include "Resource.touch.hpp"
 
 namespace ac::local {
-
-namespace impl {
-AC_LOCAL_EXPORT void Resource_touch(Resource& resource);
-} // namespace impl
-
 template <typename R>
 class ResourceLock {
 public:
