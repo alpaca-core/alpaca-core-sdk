@@ -5,7 +5,6 @@ This an almost exact copy of the original [Jalog](https://github.com/iboB/jalog)
 ## Changes
 
 * Namespace changed from `jalog` to `ac::jalog`
-* Async logging removed
 
 ## Why embed?
 
