@@ -274,7 +274,7 @@ function(make_ac_local_plugin_available)
                 NAME ${ARG_NAME}
                 VERSION ${ARG_VERSION}
                 GITHUB_REPOSITORY ${ARG_GITHUB}
-                DOWNLOAD_ONLY # don't add as a subdirectory
+                DOWNLOAD_ONLY TRUE # don't add as a subdirectory
             )
             set(srcDir "${${ARG_NAME}_SOURCE_DIR}")
         endif()
