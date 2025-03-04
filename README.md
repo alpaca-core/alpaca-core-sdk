@@ -5,7 +5,7 @@
 > [!IMPORTANT]
 > This project is still in in an alpha stage of development. Significant changes are very likely, or rather, certain, and backwards compatibility is disregarded.
 
-The Alpaca Core SDK is a multi-platform SDK for building applications which include an abstract compute-heavy layer. It is the basis of [acord](https://github.com/alpaca-core/acord) and is designed to be the basis of the future Alpaca Core Software Suite.
+The Alpaca Core SDK is a multi-platform SDK for building applications which include an abstract compute-heavy layer. It is the basis of [acord](https://github.com/alpaca-core/acord) and is designed to be the basis of the future [Alpaca Core Software Suite](https://www.alpacacore.com/products/overview).
 
 > [!NOTE]
 > So, what currently popular thing is a compute-heavy layer? Yes. Its main purpose is AI inference. It doesn't *have* to be used for AI inference, but that's what we build it for. Read more about the company and our mission [here](https://www.alpacacore.com/company/about).
