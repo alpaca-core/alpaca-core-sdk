@@ -43,11 +43,12 @@ target_sources(ac-frame
         ac/frameio/Io.hpp
         ac/frameio/IoEndpoint.hpp
         ac/frameio/BasicStreamIo.hpp
+        ac/frameio/BlockingIo.hpp
 
         # frameio-local
         ac/frameio/local/BufferedChannel.hpp
         ac/frameio/local/BufferedChannelStream.hpp
-        ac/frameio/local/BlockingIo.hpp
+        ac/frameio/local/ChannelEndpoints.hpp
 
         # schema
         ac/schema/Field.hpp

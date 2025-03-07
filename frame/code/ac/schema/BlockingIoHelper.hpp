@@ -3,7 +3,7 @@
 //
 #pragma once
 #include "FrameHelpers.hpp"
-#include "../frameio/local/BlockingIo.hpp"
+#include "../frameio/BlockingIo.hpp"
 #include "../frameio/StreamEndpoint.hpp"
 #include "../FrameUtil.hpp"
 #include <astl/throw_stdex.hpp>
