@@ -4,7 +4,6 @@
 #pragma once
 #include "stream_result.hpp"
 #include "concepts/stream.hpp"
-#include <ac/xec/notifiable.hpp>
 #include <deque>
 #include <mutex>
 #include <cassert>

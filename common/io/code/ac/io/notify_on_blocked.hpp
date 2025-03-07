@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include <ac/xec/notifiable.hpp>
 
 namespace ac::io {
 
-inline auto notify_on_blocked(xec::notifiable& n) {
+template <typename Notifiable>
+auto notify_one_on_blocked(Notifiable& n) {
     return [&n]() {
         return [&n]() {
             n.notify_one();

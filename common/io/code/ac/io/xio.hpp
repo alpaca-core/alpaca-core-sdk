@@ -135,7 +135,7 @@ protected:
 private:
     template <xio_cb_class<value_type> Cb>
     bool init_async_io(value_type& value, Cb&& cb) {
-        status s = stream_op(*m_stream, value, notify_on_blocked(m_wobj));
+        status s = stream_op(*m_stream, value, notify_one_on_blocked(m_wobj));
         if (s.complete()) {
             post(m_wobj.get_executor(), [cb = std::forward<Cb>(cb), &value, s]() mutable {
                 cb(value, s);

@@ -5,7 +5,6 @@
 #include "stream_endpoint.hpp"
 #include "value_with_status.hpp"
 #include "xio_endpoint.hpp"
-#include <ac/xec/notifiable.hpp>
 #include <ac/xec/atomic_cvar.hpp>
 #include <ac/xec/wait_func_invoke.hpp>
 #include <ac/xec/task.hpp>
@@ -19,17 +18,13 @@ struct immediate_executor {
 void post(immediate_executor, xec::task t) {
     t();
 }
-struct cvar_wobj final : public xec::notifiable {
+struct cvar_wobj final {
     xec::atomic_cvar& m_cvar;
 
     cvar_wobj(xec::atomic_cvar& cvar)
         : m_cvar(cvar)
     {}
 
-    void notify_all() {
-        assert(false); // shouldn't happen
-        m_cvar.notify_one();
-    }
     void notify_one() {
         m_cvar.notify_one();
     }

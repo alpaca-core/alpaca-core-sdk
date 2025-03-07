@@ -2,17 +2,15 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include "notifiable.hpp"
 #include <astl/timeout.hpp>
 #include <system_error>
 #include <concepts>
 
 namespace ac::xec {
 template <typename T>
-concept basic_wait_object_class =
-std::derived_from<T, notifiable>
-&& requires(T wobj) {
+concept basic_wait_object_class = requires(T wobj) {
     typename T::executor_type;
+    wobj.notify_one();
     { wobj.get_executor() } -> std::convertible_to<typename T::executor_type>;
 };
 

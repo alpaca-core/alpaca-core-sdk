@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include "notifiable.hpp"
 #include "post.hpp"
 #include "wait_func.hpp"
 #include "wait_func_invoke.hpp"
@@ -10,17 +9,13 @@
 
 namespace ac::xec {
 
-class strand_wobj final : public notifiable {
+class strand_wobj {
     strand m_strand;
     wait_func m_cb;
 public:
     explicit strand_wobj(const strand& s) : m_strand(s) {}
 
-    void notify_all() override {
-        notify_one();
-    }
-
-    void notify_one() override {
+    void notify_one() {
         post(m_strand, [this] {
             if (m_cb) {
                 auto cb = std::exchange(m_cb, nullptr);

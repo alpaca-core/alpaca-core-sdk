@@ -5,10 +5,6 @@
 #include "../stream_result.hpp"
 #include <ac/xec/task.hpp>
 
-namespace ac::xec {
-class notifiable;
-}
-
 namespace ac::io {
 
 template <typename T>
