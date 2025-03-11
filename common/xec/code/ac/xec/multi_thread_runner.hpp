@@ -1,4 +1,4 @@
-// Copyright (c) Borislav Stanimirov
+// Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
 #pragma once
@@ -8,7 +8,7 @@
 
 // run an asio-like context in multiple threads
 
-namespace astl {
+namespace ac::xec {
 class multi_thread_runner {
     std::vector<std::thread> m_threads; // would use jthread, but apple clang still doesn't support them
 public:
@@ -51,5 +51,4 @@ public:
     }
 };
 
-}
-
+} // namespace ac::xec

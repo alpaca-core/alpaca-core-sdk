@@ -12,10 +12,10 @@
 #include <ac/xec/coro.hpp>
 #include <ac/xec/context.hpp>
 #include <ac/xec/context_work_guard.hpp>
+#include <ac/xec/multi_thread_runner.hpp>
 
 #include <doctest/doctest.h>
 
-#include <astl/multi_thread_runner.hpp>
 #include <astl/shared_from.hpp>
 
 #include <optional>
@@ -98,7 +98,7 @@ TEST_CASE("echo session handler") {
     ac::io::blocking_io_ctx blocking_ctx;
     ac::xec::context xctx;
     auto wg = xctx.make_work_guard();
-    astl::multi_thread_runner runner(xctx, 2);
+    ac::xec::multi_thread_runner runner(xctx, 2);
 
     auto [local, remote] = string_io::make_channel_endpoints(3, 3);
 
@@ -163,7 +163,7 @@ TEST_CASE("multi echo session handler") {
     ac::io::blocking_io_ctx blocking_ctx;
     ac::xec::context xctx;
     auto wg = xctx.make_work_guard();
-    astl::multi_thread_runner runner(xctx, 2);
+    ac::xec::multi_thread_runner runner(xctx, 2);
 
     auto [local, remote] = string_io::make_channel_endpoints(3, 3);
 
@@ -229,7 +229,7 @@ TEST_CASE("coro addition") {
     ac::io::blocking_io_ctx blocking_ctx;
     ac::xec::context xctx;
     co_spawn(xctx, addition_service(std::move(remote)));
-    astl::multi_thread_runner runner(xctx, 2);
+    ac::xec::multi_thread_runner runner(xctx, 2);
 
     ac::io::blocking_io io(std::move(local), blocking_ctx);
 
@@ -294,7 +294,7 @@ TEST_CASE("coro multi") {
     co_spawn(ctx, addition_service(std::move(e_is)));
     co_spawn(ctx, string_addition_service(std::move(e_ss), std::move(e_si)));
 
-    astl::multi_thread_runner runner(ctx, 3);
+    ac::xec::multi_thread_runner runner(ctx, 3);
 
     here.push("1");
     here.push("12");
@@ -382,7 +382,7 @@ TEST_CASE("coro two-side") {
     co_spawn(ctx, side_a(std::move(e_a), asend));
     co_spawn(ctx, side_b(std::move(e_b), bsend));
 
-    astl::multi_thread_runner(ctx, 3);
+    ac::xec::multi_thread_runner(ctx, 3);
 
     CHECK(a_rec_sum == 1000 * bsend + (bsend * (bsend + 1)) / 2);
     CHECK(a_done);
@@ -413,7 +413,7 @@ TEST_CASE("coro eager") {
     ac::io::blocking_io io(std::move(local), blocking_ctx);
     io.push("10");
 
-    astl::multi_thread_runner runner(ctx, 2);
+    ac::xec::multi_thread_runner runner(ctx, 2);
 
     int received = 0;
     while (true) {
@@ -450,7 +450,7 @@ TEST_CASE("detach to successor") {
     ac::io::blocking_io_ctx blocking_ctx;
     ac::xec::context ctx;
     auto wg = ctx.make_work_guard();
-    astl::multi_thread_runner runner(ctx, 2);
+    ac::xec::multi_thread_runner runner(ctx, 2);
 
     {
         auto [local, remote] = string_io::make_channel_endpoints(3, 3);

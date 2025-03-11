@@ -6,3 +6,4 @@ macro(add_xec_test test)
 endmacro()
 
 add_xec_test(coro)
+add_xec_test(multi_thread_runner)

@@ -1,7 +1,7 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include <astl/multi_thread_runner.hpp>
+#include <ac/xec/multi_thread_runner.hpp>
 #include <doctest/doctest.h>
 #include <atomic>
 
@@ -15,7 +15,7 @@ struct fake_ctx {
 TEST_CASE("multi thread runner") {
     fake_ctx ctx;
     {
-        astl::multi_thread_runner runner(ctx, 4);
+        ac::xec::multi_thread_runner runner(ctx, 4);
         CHECK(runner.num_threads() == 4);
         CHECK_FALSE(runner.empty());
     }
@@ -24,7 +24,7 @@ TEST_CASE("multi thread runner") {
 
 TEST_CASE("multi thread runner start/stop") {
     fake_ctx ctx;
-    astl::multi_thread_runner runner;
+    ac::xec::multi_thread_runner runner;
     CHECK(runner.num_threads() == 0);
     CHECK(runner.empty());
 

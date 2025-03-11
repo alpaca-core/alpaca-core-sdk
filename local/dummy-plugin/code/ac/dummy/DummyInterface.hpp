@@ -19,7 +19,7 @@ struct StateInitial {
         static constexpr auto id = "load_model";
         static constexpr auto desc = "Load the dummy model";
 
-        struct Params{
+        struct Params {
             Field<std::string> filePath = std::nullopt;
             Field<std::string> spliceString = std::nullopt;
 

@@ -17,7 +17,6 @@ astl_test(version)
 astl_test(sc_queue)
 astl_test(timeout)
 astl_test(eager_coro_helper)
-astl_test(multi_thread_runner)
 
 icm_add_multiple_build_failure_tests(
     SOURCES

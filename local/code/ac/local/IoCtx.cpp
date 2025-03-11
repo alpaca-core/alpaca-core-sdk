@@ -8,7 +8,7 @@
 
 #include <ac/xec/context.hpp>
 #include <ac/xec/context_work_guard.hpp>
-#include <astl/multi_thread_runner.hpp>
+#include <ac/xec/multi_thread_runner.hpp>
 
 namespace ac::local {
 
@@ -16,8 +16,8 @@ using namespace frameio;
 
 struct XCtx {
     xec::context ctx;
-    ac::xec::context_work_guard guard;
-    astl::multi_thread_runner threads;
+    xec::context_work_guard guard;
+    xec::multi_thread_runner threads;
 
     XCtx()
         : guard(ctx)
