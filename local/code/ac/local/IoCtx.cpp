@@ -19,9 +19,9 @@ struct XCtx {
     xec::context_work_guard guard;
     xec::multi_thread_runner threads;
 
-    XCtx()
+    XCtx(std::string_view name)
         : guard(ctx)
-        , threads(ctx, 1)
+        , threads(ctx, 1, name)
     {}
 
     xec::strand make_strand() {
@@ -37,7 +37,7 @@ struct XCtx {
 };
 
 struct IoCtx::Impl {
-    XCtx dispatch, cpu, gpu;
+    XCtx dispatch{"ac-dsp"}, cpu{"ac-cpu"}, gpu{"ac-gpu"};
 };
 
 IoCtx::IoCtx()
