@@ -3,6 +3,7 @@
 //
 #include <astl/tuple_util.hpp>
 #include <doctest/doctest.h>
+#include <string>
 
 TEST_CASE("type_index") {
     using namespace astl::tuple;
@@ -13,6 +14,16 @@ TEST_CASE("type_index") {
     static_assert(type_index_v<float, t> == 1);
     static_assert(type_index_v<double, t> == 2);
     static_assert(type_index_v<char, t> == -1);
+}
+
+TEST_CASE("find_if") {
+    std::tuple t = { 1, 2.3f, 3.2, 4.1f };
+    auto sum = astl::tuple::find_if(t,
+        [](int, auto& v) { return std::is_integral_v<std::decay_t<decltype(v)>>; },
+        [](auto& v) { return int(v); },
+        [] { return 0; }
+    );
+    CHECK(sum == 1);
 }
 
 TEST_CASE("index_switch") {
@@ -51,4 +62,22 @@ TEST_CASE("ref") {
         []() -> int& { throw 0; }
     ) = 42;
     CHECK(std::get<2>(t) == 42);
+}
+
+
+TEST_CASE("for_each") {
+    std::tuple t = {1, std::string("hello"), 0.5};
+
+    astl::tuple::for_each(t, [](auto& v) {
+        if constexpr (std::is_same_v<std::decay_t<decltype(v)>, std::string>) {
+            v += " world";
+        }
+        else {
+            v *= 2;
+        }
+    });
+
+    CHECK(std::get<0>(t) == 2);
+    CHECK(std::get<1>(t) == "hello world");
+    CHECK(std::get<2>(t) == 1.0);
 }
