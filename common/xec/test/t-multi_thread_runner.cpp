@@ -15,7 +15,7 @@ struct fake_ctx {
 TEST_CASE("multi thread runner") {
     fake_ctx ctx;
     {
-        ac::xec::multi_thread_runner runner(ctx, 4);
+        ac::xec::multi_thread_runner runner(ctx, 4, "test");
         CHECK(runner.num_threads() == 4);
         CHECK_FALSE(runner.empty());
     }
@@ -28,7 +28,7 @@ TEST_CASE("multi thread runner start/stop") {
     CHECK(runner.num_threads() == 0);
     CHECK(runner.empty());
 
-    runner.start(ctx, 3);
+    runner.start(ctx, 3, "three");
     CHECK(runner.num_threads() == 3);
     CHECK_FALSE(runner.empty());
     runner.join();
@@ -37,7 +37,7 @@ TEST_CASE("multi thread runner start/stop") {
     CHECK(runner.num_threads() == 0);
     CHECK(runner.empty());
 
-    runner.start(ctx, 2);
+    runner.start(ctx, 2, "two");
     CHECK(runner.num_threads() == 2);
     CHECK_FALSE(runner.empty());
     runner.join();
