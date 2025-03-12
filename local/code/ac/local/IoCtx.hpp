@@ -3,7 +3,7 @@
 //
 #pragma once
 #include "export.h"
-#include <ac/frameio/StreamEndpoint.hpp>
+#include <ac/frameio/StreamEndpointFwd.hpp>
 
 #include <cstddef>
 #include <memory>

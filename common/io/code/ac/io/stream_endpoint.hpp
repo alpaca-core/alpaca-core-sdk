@@ -7,8 +7,11 @@
 
 namespace ac::io {
 
-template <read_stream_class RS, write_stream_class WS>
+template <typename RS, typename WS>
 struct stream_endpoint {
+    static_assert(read_stream_class<RS>);
+    static_assert(write_stream_class<WS>);
+
     std::unique_ptr<RS> read_stream;
     std::unique_ptr<WS> write_stream;
 };

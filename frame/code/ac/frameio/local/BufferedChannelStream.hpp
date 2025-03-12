@@ -4,7 +4,6 @@
 #pragma once
 #include "BufferedChannel.hpp"
 #include "ChannelEndpoints.hpp"
-#include "../StreamEndpoint.hpp"
 #include "../StreamPtr.hpp"
 #include <ac/io/buffered_channel_endpoints.hpp>
 

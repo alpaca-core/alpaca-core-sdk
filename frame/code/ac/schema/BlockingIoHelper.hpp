@@ -4,7 +4,7 @@
 #pragma once
 #include "FrameHelpers.hpp"
 #include "../frameio/BlockingIo.hpp"
-#include "../frameio/StreamEndpoint.hpp"
+#include "../frameio/StreamEndpointFwd.hpp"
 #include "../FrameUtil.hpp"
 #include <astl/throw_stdex.hpp>
 #include <astl/generator.hpp>
