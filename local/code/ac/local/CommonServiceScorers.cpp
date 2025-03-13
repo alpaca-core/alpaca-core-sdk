@@ -1,8 +1,7 @@
 // Copyright (c) Alpaca Core
 // SPDX-License-Identifier: MIT
 //
-#include "CommonProviderScorers.hpp"
-#include "Provider.hpp"
+#include "CommonServiceScorers.hpp"
 
 namespace ac::local {
 

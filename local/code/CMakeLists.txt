@@ -26,10 +26,6 @@ target_sources(ac-local
         ac/local/export.h
         ac/local/version.h
 
-        ac/local/Provider.hpp
-        ac/local/ProviderPtr.hpp
-        ac/local/ProviderRegistry.hpp
-
         ac/local/PluginInterface.hpp
         ac/local/PluginInfo.hpp
         ac/local/LoadPluginCb.hpp
@@ -37,29 +33,26 @@ target_sources(ac-local
         ac/local/Resource.hpp
         ac/local/ResourceManager.hpp
 
+        ac/local/Backend.hpp
+        ac/local/DefaultBackend.hpp
         ac/local/Lib.hpp
 
-        ac/local/ProviderScorer.hpp
-        ac/local/CommonProviderScorers.hpp
-
-        ac/local/IoCtx.hpp
-        ac/local/BlockingSyncIoHelper.hpp
+        ac/local/ServiceScorer.hpp
+        ac/local/CommonServiceScorers.hpp
     PRIVATE
         ac/local/Logging.hpp
         ac/local/Logging.cpp
 
         ac/local/VtableExports.cpp
 
-        ac/local/ProviderRegistry.cpp
         ac/local/PluginManager.cpp
         ac/local/Resource.cpp
 
+        ac/local/Backend.cpp
+        ac/local/DefaultBackend.cpp
         ac/local/Lib.cpp
 
-        ac/local/CommonProviderScorers.cpp
-
-        ac/local/IoCtx.cpp
-        ac/local/BlockingSyncIoHelper.cpp
+        ac/local/CommonServiceScorers.cpp
 )
 
 install(TARGETS ac-local

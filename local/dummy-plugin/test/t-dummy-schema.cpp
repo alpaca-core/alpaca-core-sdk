@@ -2,11 +2,10 @@
 // SPDX-License-Identifier: MIT
 //
 #include <ac/local/Lib.hpp>
-#include <ac/local/IoCtx.hpp>
+#include <ac/local/DefaultBackend.hpp>
+#include <ac/local/PluginManager.hpp>
 #include <ac/schema/BlockingIoHelper.hpp>
 #include <ac/schema/FrameHelpers.hpp>
-
-#include <ac/local/PluginPlibUtil.inl>
 
 #include <ac/dummy/LocalDummy.hpp>
 #include <ac/dummy/DummyInterface.hpp>
@@ -16,21 +15,17 @@
 #include <doctest/doctest.h>
 
 struct LoadDummyFixture {
-    PlibHelper helper;
-    LoadDummyFixture()
-        : helper(ac::dummy::getPluginInterface())
-    {
-        helper.addProvidersToGlobalRegistry();
+    LoadDummyFixture() {
+        ac::local::Lib::pluginManager().loadPlib(ac::dummy::getPluginInterface());
     }
 };
 
 LoadDummyFixture loadDummyFixture;
 
 TEST_CASE("blocking io") {
-    ac::local::IoCtx io;
+    ac::local::DefaultBackend backend;
 
-    auto& dummyProvider = ac::local::Lib::getProvider("dummy");
-    ac::schema::BlockingIoHelper dummy(io.connect(dummyProvider));
+    ac::schema::BlockingIoHelper dummy(backend.connect("dummy"));
 
     namespace schema = ac::schema::dummy;
 

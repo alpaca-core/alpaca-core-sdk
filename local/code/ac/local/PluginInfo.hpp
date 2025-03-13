@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include "ProviderPtr.hpp"
 #include <astl/version.hpp>
 #include <vector>
+#include <string>
 
 namespace ac::local {
+
+class ServiceFactory;
 
 struct PluginInfo {
     std::string fullPath; // full path to the plugin file, only unique member
@@ -26,7 +28,7 @@ struct PluginInfo {
     // plugin-specific raw data
     void* rawData = nullptr;
 
-    std::vector<ProviderPtr> providers; // provided providers
+    std::vector<const ServiceFactory*> serviceFactories; // provided service factories
 };
 
 } // namespace ac::local

@@ -7,16 +7,16 @@
 
 namespace ac::local {
 
-class Provider;
+struct ServiceInfo;
 struct PluginInfo;
 
-class AC_LOCAL_EXPORT ProviderScorer {
+class AC_LOCAL_EXPORT ServiceScorer {
 public:
     using score_t = int;
 
-    virtual ~ProviderScorer();
+    virtual ~ServiceScorer();
 
-    // ignore the provider if the score is less than or equal to this
+    // ignore the service if the score is less than or equal to this
     virtual score_t denyScore() const noexcept {
         return std::numeric_limits<score_t>::min();
     }
@@ -27,8 +27,8 @@ public:
     }
 
     virtual score_t score(
-        const Provider& provider,
-        const PluginInfo* providerPlugin
+        const ServiceInfo& serviceInfo,
+        const PluginInfo* servicePlugin
     ) const noexcept = 0;
 };
 

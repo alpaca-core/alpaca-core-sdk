@@ -2,24 +2,22 @@
 // SPDX-License-Identifier: MIT
 //
 #include "Lib.hpp"
-#include "ProviderRegistry.hpp"
 #include "PluginManager.hpp"
-#include <ac/Dict.hpp>
 #include <astl/move.hpp>
 
 namespace ac::local {
 
 namespace {
-ProviderRegistry g_providerRegistry("global");
-PluginManager g_pluginManager(g_providerRegistry);
+std::vector<const ServiceFactory*> g_factories;
+PluginManager g_pluginManager("global");
 } // namespace
 
-ProviderRegistry& Lib::providerRegistry() {
-    return g_providerRegistry;
+std::vector<const ServiceFactory*>& Lib::freeServiceFactories() {
+    return g_factories;
 }
 
-void Lib::addProvider(Provider& provider) {
-    g_providerRegistry.addProvider(provider);
+void Lib::registerService(ServiceFactory& factory) {
+    g_factories.push_back(&factory);
 }
 
 PluginManager& Lib::pluginManager() {
@@ -40,10 +38,6 @@ const PluginInfo* Lib::loadPlugin(const std::string& path) {
 
 void Lib::loadPlugins(LoadPluginCb cb) {
     g_pluginManager.loadPlugins(astl::move(cb));
-}
-
-Provider& Lib::getProvider(std::string_view nameMatch) {
-    return g_providerRegistry.getProvider(nameMatch);
 }
 
 } // namespace ac::local

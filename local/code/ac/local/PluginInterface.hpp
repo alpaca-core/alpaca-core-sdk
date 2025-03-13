@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include "ProviderPtr.hpp"
 #include <astl/version.hpp>
 #include <vector>
 
 namespace ac::local {
+
+class ServiceFactory;
 
 struct PluginInterface {
     using GetAcLocalVersionFunc = int(*)();
@@ -25,8 +26,8 @@ struct PluginInterface {
     using InitFunc = void(*)();
     InitFunc init; // optional init function
 
-    using GetProvidersFunc = std::vector<ProviderPtr>(*)();
-    GetProvidersFunc getProviders; // function to get providers
+    using GetServiceFactories = std::vector<const ServiceFactory*>(*)();
+    GetServiceFactories getServiceFactories; // function to get service factories
 };
 
 }

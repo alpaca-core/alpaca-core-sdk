@@ -78,7 +78,7 @@ function(add_ac_local_plugin)
 extern "C"
 #endif
 ACLPLIB_@nameSym@_API
-void add_@nameSym@_to_ac_local_global_registry();
+void add_@nameSym@_to_ac_local_plugin_manager();
 ]=]
         @ONLY
     )
@@ -88,16 +88,11 @@ void add_@nameSym@_to_ac_local_global_registry();
 // Generated file. Do not edit!
 #pragma once
 #include "@aclpName@-plib.h"
-#include <ac/local/ProviderPtr.hpp>
-#include <vector>
 
-namespace ac::local { class ProviderRegistry; }
+namespace ac::local { class PluginManager; }
 
 ACLPLIB_@nameSym@_API
-const std::vector<ac::local::ProviderPtr>& get_@nameSym@_model_providers();
-
-ACLPLIB_@nameSym@_API
-void add_@nameSym@_to_ac_local_registry(ac::local::ProviderRegistry& registry);
+void add_@nameSym@_to_ac_local_plugin_manager(ac::local::PluginManager& manager);
 ]=]
         @ONLY
     )
@@ -107,21 +102,16 @@ void add_@nameSym@_to_ac_local_registry(ac::local::ProviderRegistry& registry);
 // Generated file. Do not edit!
 #include "@aclpName@-plib.hpp"
 #include "@aclpName@-interface.hpp"
-#include <ac/local/PluginPlibUtil.inl>
+#include <ac/local/Lib.hpp>
+#include <ac/local/PluginManager.hpp>
 
-PlibHelper g_helper{ac::@nameSym@::getPluginInterface()};
+void add_@nameSym@_to_ac_local_plugin_manager(ac::local::PluginManager& manager) {
+    manager.loadPlib(ac::@nameSym@::getPluginInterface());
+}
 
 extern "C"
-void add_@nameSym@_to_ac_local_global_registry() {
-    g_helper.addProvidersToGlobalRegistry();
-}
-
-void add_@nameSym@_to_ac_local_registry(ac::local::ProviderRegistry& registry) {
-    g_helper.addProvidersToRegistry(registry);
-}
-
-const std::vector<ac::local::ProviderPtr>& get_@nameSym@_model_providers() {
-    return g_helper.getProviders();
+void add_@nameSym@_to_ac_local_plugin_manager() {
+    add_@nameSym@_to_ac_local_plugin_manager(ac::local::Lib::pluginManager());
 }
 ]=]
     )

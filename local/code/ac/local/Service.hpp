@@ -4,7 +4,7 @@
 #pragma once
 #include "export.h"
 
-#include <frameio/StreamEndpointFwd.hpp>
+#include <ac/frameio/StreamEndpointFwd.hpp>
 
 #include <memory>
 #include <string_view>

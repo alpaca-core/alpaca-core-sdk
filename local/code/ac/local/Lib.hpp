@@ -10,17 +10,14 @@
 #include <string_view>
 
 namespace ac::local {
-class ProviderRegistry;
-class Provider;
-class ProviderScorer;
+class ServiceFactory;
 
 class PluginManager;
 struct PluginInfo;
 
 struct AC_LOCAL_EXPORT Lib {
-    static ProviderRegistry& providerRegistry();
-
-    static void addProvider(Provider& provider);
+    static std::vector<const ServiceFactory*>& freeServiceFactories();
+    static void registerService(ServiceFactory& factory);
 
     static PluginManager& pluginManager();
 
@@ -30,8 +27,6 @@ struct AC_LOCAL_EXPORT Lib {
     static const PluginInfo* loadPlugin(const std::string& path);
     static void loadPlugins(LoadPluginCb cb = {});
     static void loadAllPlugins() { return loadPlugins({}); }
-
-    static Provider& getProvider(std::string_view nameMatch);
 };
 
 } // namespace ac::local

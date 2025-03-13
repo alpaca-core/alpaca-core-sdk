@@ -3,7 +3,6 @@
 //
 #include "PluginManager.hpp"
 #include "PluginInterface.hpp"
-#include "ProviderRegistry.hpp"
 #include "Logging.hpp"
 #include "Version.hpp"
 
@@ -12,6 +11,7 @@
 #include <astl/sentry.hpp>
 
 #include <cstdlib>
+#include <charconv>
 #include <filesystem>
 #include <type_traits>
 
@@ -46,21 +46,20 @@ inline hplugin load_plugin(const char* filename) {
 
 namespace ac::local {
 
-PluginManager::PluginManager(ProviderRegistry& registry)
-    : m_registry(registry)
-{}
+PluginManager::PluginManager(std::string_view name)
+    : m_name(name)
+{
+    if (m_name.empty()) {
+        char hex[20] = "0x";
+        auto r = std::to_chars(hex + 2, hex + sizeof(hex), reinterpret_cast<uintptr_t>(this), 16);
+        m_name = std::string_view(hex, r.ptr - hex);
+    }
+}
 
 PluginManager::~PluginManager() {
     for (auto& plugin : m_plugins) {
-        if (!plugin.providers.empty()) {
-            for (auto& provider : plugin.providers) {
-                m_registry.removeProvider(*provider);
-            }
-        }
-        plugin.providers.clear();
         unload_plugin((hplugin)plugin.nativeHandle);
     }
-    m_plugins.clear();
 }
 
 std::string_view PluginManager::pluginPathToName(std::string_view path) {
@@ -83,15 +82,15 @@ std::string_view PluginManager::pluginPathToName(std::string_view path) {
 }
 
 void PluginManager::addPluginDir(std::string_view dir) {
-    AC_LOCAL_LOG(Info, "Adding plugin directory ", dir);
+    AC_LOCAL_LOG(Info, m_name, ": Adding plugin directory ", dir);
     m_pluginDirs.emplace_back(dir);
 }
 
 void PluginManager::addPluginDirsFromEnvVar(std::string envVar) {
-    AC_LOCAL_LOG(Info, "Adding plugin directories from $", envVar);
+    AC_LOCAL_LOG(Info, m_name, ": Adding plugin directories from $", envVar);
     auto pdirs = std::getenv(envVar.c_str());
     if (!pdirs) {
-        AC_LOCAL_LOG(Info, "Environment variable ", envVar, " not set");
+        AC_LOCAL_LOG(Info, m_name, ": Environment variable ", envVar, " not set");
         return;
     }
 
@@ -119,7 +118,7 @@ const PluginInfo* PluginManager::loadPlugin(const std::string& path, LoadPluginC
 
 void PluginManager::loadPlugins(LoadPluginCb cb) {
     for (auto& dir : m_pluginDirs) {
-        AC_LOCAL_LOG(Info, "Loading plugins from ", dir);
+        AC_LOCAL_LOG(Info, m_name, ": Loading plugins from ", dir);
         for (auto& entry : std::filesystem::directory_iterator(dir)) {
             if (!entry.is_regular_file()) continue; // not a file
             const auto& path = entry.path();
@@ -130,6 +129,13 @@ void PluginManager::loadPlugins(LoadPluginCb cb) {
             tryLoadPlugin(path.string(), cb);
         }
     }
+}
+
+const PluginInfo* PluginManager::loadPlib(const PluginInterface& interface) {
+    LoadPluginCb emptyCb;
+    std::string name = "plib:";
+    name += interface.label;
+    return tryCreatePluginInfo("<in-process>", name, nullptr, interface, emptyCb);
 }
 
 namespace {
@@ -149,24 +155,24 @@ inline jalog::BasicStream& operator,(jalog::BasicStream& s, const astl::version&
 
 const PluginInfo* PluginManager::tryLoadPlugin(const std::string& path, LoadPluginCb& cb) {
     if (cb.pathFilter && !cb.pathFilter(path)) {
-        AC_LOCAL_LOG(Info, "User filtered plugin by path: ", path);
+        AC_LOCAL_LOG(Info, m_name, ": User filtered plugin by path: ", path);
         return nullptr;
     }
 
     auto name = pluginPathToName(path);
     if (cb.nameFilter && !cb.nameFilter(name)) {
-        AC_LOCAL_LOG(Info, "User filtered plugin by name: ", path);
+        AC_LOCAL_LOG(Info, m_name, ": User filtered plugin by name: ", path);
         return nullptr;
     }
 
     if (auto p = findPluginByPath(m_plugins, path)) {
-        AC_LOCAL_LOG(Info, "Plugin ", path, " already loaded");
+        AC_LOCAL_LOG(Info, m_name, ": Plugin ", path, " already loaded");
         return p;
     }
 
     hplugin hplugin = load_plugin(path.c_str());
     if (!hplugin) {
-        AC_LOCAL_LOG(Warning, "Failed to load plugin ", path);
+        AC_LOCAL_LOG(Warning, m_name, ": Failed to load plugin ", path);
         return nullptr;
     }
     astl::sentry close([&] {
@@ -175,25 +181,37 @@ const PluginInfo* PluginManager::tryLoadPlugin(const std::string& path, LoadPlug
 
     auto getVer = (PluginInterface::GetAcLocalVersionFunc)get_proc(hplugin, GetAcLocalVersionFunc_name);
     if (!getVer) {
-        AC_LOCAL_LOG(Warning, "Failed to find ", GetAcLocalVersionFunc_name, " in ", path);
+        AC_LOCAL_LOG(Warning, m_name, ": Failed to find ", GetAcLocalVersionFunc_name, " in ", path);
         return nullptr;
     }
 
     auto pluginVersion = astl::version::from_int(getVer());
     if (pluginVersion != Project_Version) {
-        AC_LOCAL_LOG(Warning, "Plugin ", path, " was built with incompatible ac-local version: ", pluginVersion,
+        AC_LOCAL_LOG(Warning, m_name, ": Plugin ", path, " was built with incompatible ac-local version: ", pluginVersion,
             ". Own version is ", Project_Version);
         return nullptr;
     }
 
     auto load = (PluginInterface::GetFunc)get_proc(hplugin, PluginLoadFunc_name);
     if (!load) {
-        AC_LOCAL_LOG(Warning, "Failed to find ", PluginLoadFunc_name, " in ", path);
+        AC_LOCAL_LOG(Warning, m_name, ": Failed to find ", PluginLoadFunc_name, " in ", path);
         return nullptr;
     }
 
     auto interface = load();
-    AC_LOCAL_LOG(Info, "Loaded plugin ", path,
+    auto ret = tryCreatePluginInfo(path, name, hplugin, interface, cb);
+    hplugin = nullptr; // release sentry
+    return ret;
+}
+
+const PluginInfo* PluginManager::tryCreatePluginInfo(
+    const std::string& path,
+    std::string_view name,
+    void* nativeHandle,
+    const PluginInterface& interface,
+    LoadPluginCb& cb
+) {
+    AC_LOCAL_LOG(Info, m_name, ": Loaded plugin ", path,
         "\n    name: ", name,
         "\n   label: ", interface.label,
         "\n     ver: ", interface.version,
@@ -222,19 +240,14 @@ const PluginInfo* PluginManager::tryLoadPlugin(const std::string& path, LoadPlug
 
     info.fullPath = path;
     info.name = name;
-    info.nativeHandle = hplugin;
-    hplugin = nullptr; // release sentry
+    info.nativeHandle = nativeHandle;
 
     info.rawData = interface.rawData;
-    info.providers = interface.getProviders();
+    info.serviceFactories = interface.getServiceFactories();
 
     info.tags.reserve(interface.numTags);
     for (int i = 0; i < interface.numTags; ++i) {
         info.tags.push_back(interface.tags[i]);
-    }
-
-    for (auto& provider : info.providers) {
-        m_registry.addProvider(*provider, &info);
     }
 
     cb.onPluginLoaded(info);

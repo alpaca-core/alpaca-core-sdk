@@ -10,8 +10,10 @@
 
 #include "aclp-dummy-version.h"
 
-#include <ac/local/Provider.hpp>
-#include <ac/local/ProviderSessionContext.hpp>
+#include <ac/local/Service.hpp>
+#include <ac/local/ServiceFactory.hpp>
+#include <ac/local/ServiceInfo.hpp>
+#include <ac/local/Backend.hpp>
 #include <ac/local/ResourceManager.hpp>
 
 #include <ac/schema/OpDispatchHelpers.hpp>
@@ -235,20 +237,33 @@ xec::coro<void> Dummy_runSession(StreamEndpoint ep, ResourceManager<std::string>
     }
 }
 
-class DummyProvider final : public Provider {
-public:
-    virtual const Info& info() const noexcept override {
-        static Info i = {
-            .name = "ac-local dummy",
-            .vendor = "Alpaca Core",
-        };
-        return i;
-    }
+ServiceInfo g_serviceInfo = {
+    .name = "ac-local dummy",
+    .vendor = "Alpaca Core",
+};
+
+struct DummyService final : public Service {
+    xec::strand cpuStrand;
 
     ResourceManager<std::string> m_resourceManager;
 
-    virtual void createSession(ProviderSessionContext ctx) override {
-        co_spawn(ctx.executor.cpu, Dummy_runSession(std::move(ctx.endpoint.session), m_resourceManager));
+    virtual const ServiceInfo& info() const noexcept override {
+        return g_serviceInfo;
+    }
+
+    virtual void createSession(frameio::StreamEndpoint ep, std::string_view) override {
+        co_spawn(cpuStrand, Dummy_runSession(std::move(ep), m_resourceManager));
+    }
+};
+
+struct DummyServiceFactory final : public ServiceFactory {
+    virtual const ServiceInfo& info() const noexcept override {
+        return g_serviceInfo;
+    }
+    virtual std::unique_ptr<Service> createService(const Backend& backend) const override {
+        auto svc = std::make_unique<DummyService>();
+        svc->cpuStrand = backend.xctx().cpu;
+        return svc;
     }
 };
 
@@ -258,10 +273,9 @@ public:
 
 namespace ac::dummy {
 
-std::vector<ac::local::ProviderPtr> getProviders() {
-    std::vector<ac::local::ProviderPtr> ret;
-    ret.push_back(std::make_unique<local::DummyProvider>());
-    return ret;
+std::vector<const local::ServiceFactory*> getFactories() {
+    static local::DummyServiceFactory factory;
+    return {&factory};
 }
 
 local::PluginInterface getPluginInterface() {
@@ -273,7 +287,7 @@ local::PluginInterface getPluginInterface() {
             ACLP_dummy_VERSION_MAJOR, ACLP_dummy_VERSION_MINOR, ACLP_dummy_VERSION_PATCH
         },
         .init = nullptr,
-        .getProviders = getProviders,
+        .getServiceFactories = getFactories,
     };
 }
 
