@@ -110,8 +110,7 @@ public:
 TEST_CASE("sync io") {
     auto [elocal, eremote] = ac::io::make_buffered_channel_endpoints<frame>(3, 3);
 
-    ac::io::blocking_io_ctx blocking_ctx;
-    ac::io::blocking_io local(std::move(elocal), blocking_ctx);
+    ac::io::blocking_io local(std::move(elocal));
 
     ac::xec::context sync_ctx;
     auto strand = sync_ctx.make_strand();

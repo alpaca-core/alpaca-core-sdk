@@ -13,10 +13,8 @@ TEST_CASE("blocking_io") {
 
     auto [elocal, eremote] = ac::io::make_buffered_channel_endpoints<std::string>(3, 3);
 
-    ac::io::blocking_io_ctx ctx;
-
-    ac::io::blocking_io local(std::move(elocal), ctx);
-    ac::io::blocking_io remote(std::move(eremote), ctx);
+    ac::io::blocking_io local(std::move(elocal));
+    ac::io::blocking_io remote(std::move(eremote));
 
     CHECK(local.push("a").success());
     CHECK(local.push("b", no_wait).success());

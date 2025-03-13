@@ -16,10 +16,9 @@ using namespace frameio;
 
 struct BlockingSyncIoHelper::Impl {
     Impl(StreamEndpoint ep)
-        : blockingIo(std::move(ep), blockingCtx)
+        : blockingIo(std::move(ep))
     {}
 
-    BlockingIoCtx blockingCtx;
     BlockingIo blockingIo;
     xec::context syncCtx;
 

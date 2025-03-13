@@ -95,7 +95,6 @@ void test_echo(ac::io::blocking_io<string_io::read_stream, string_io::write_stre
 }
 
 TEST_CASE("echo session handler") {
-    ac::io::blocking_io_ctx blocking_ctx;
     ac::xec::context xctx;
     auto wg = xctx.make_work_guard();
     ac::xec::multi_thread_runner runner(xctx, 2);
@@ -107,7 +106,7 @@ TEST_CASE("echo session handler") {
         sh->run(std::move(remote));
     }
 
-    ac::io::blocking_io io(std::move(local), blocking_ctx);
+    ac::io::blocking_io io(std::move(local));
 
     test_echo(io);
 
@@ -160,7 +159,6 @@ struct multi_echo_session_handler : public astl::enable_shared_from {
 
 
 TEST_CASE("multi echo session handler") {
-    ac::io::blocking_io_ctx blocking_ctx;
     ac::xec::context xctx;
     auto wg = xctx.make_work_guard();
     ac::xec::multi_thread_runner runner(xctx, 2);
@@ -172,7 +170,7 @@ TEST_CASE("multi echo session handler") {
         sh->run(std::move(remote));
     }
 
-    ac::io::blocking_io io(std::move(local), blocking_ctx);
+    ac::io::blocking_io io(std::move(local));
 
     io.push("1 one");
     auto r = io.poll();
@@ -226,12 +224,11 @@ ac::xec::coro<void> addition_service(int_io::stream_endpoint ep) {
 TEST_CASE("coro addition") {
     auto [local, remote] = int_io::make_channel_endpoints(6, 3);
 
-    ac::io::blocking_io_ctx blocking_ctx;
     ac::xec::context xctx;
     co_spawn(xctx, addition_service(std::move(remote)));
     ac::xec::multi_thread_runner runner(xctx, 2);
 
-    ac::io::blocking_io io(std::move(local), blocking_ctx);
+    ac::io::blocking_io io(std::move(local));
 
     io.push(1);
     io.push(2);
@@ -286,8 +283,7 @@ TEST_CASE("coro multi") {
         std::make_unique<int_io::channel>(3)
     );
 
-    ac::io::blocking_io_ctx blocking_ctx;
-    ac::io::blocking_io here(std::move(e_here), blocking_ctx);
+    ac::io::blocking_io here(std::move(e_here));
 
     ac::xec::context ctx;
 
@@ -409,8 +405,7 @@ TEST_CASE("coro eager") {
     ac::xec::context ctx;
     co_spawn(ctx, eager(std::move(remote)));
 
-    ac::io::blocking_io_ctx blocking_ctx;
-    ac::io::blocking_io io(std::move(local), blocking_ctx);
+    ac::io::blocking_io io(std::move(local));
     io.push("10");
 
     ac::xec::multi_thread_runner runner(ctx, 2);
@@ -447,14 +442,13 @@ ac::xec::coro<void> echo_prelude(string_io::stream_endpoint ep) {
 }
 
 TEST_CASE("detach to successor") {
-    ac::io::blocking_io_ctx blocking_ctx;
     ac::xec::context ctx;
     auto wg = ctx.make_work_guard();
     ac::xec::multi_thread_runner runner(ctx, 2);
 
     {
         auto [local, remote] = string_io::make_channel_endpoints(3, 3);
-        ac::io::blocking_io io(std::move(local), blocking_ctx);
+        ac::io::blocking_io io(std::move(local));
         co_spawn(ctx, echo_prelude(std::move(remote)));
 
         io.push("i");
@@ -475,7 +469,7 @@ TEST_CASE("detach to successor") {
     {
         auto [local, remote] = string_io::make_channel_endpoints(3, 3);
         co_spawn(ctx, echo_prelude(std::move(remote)));
-        ac::io::blocking_io io(std::move(local), blocking_ctx);
+        ac::io::blocking_io io(std::move(local));
 
         io.push("i");
         auto f = io.poll();

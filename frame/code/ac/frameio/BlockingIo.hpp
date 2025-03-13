@@ -6,6 +6,5 @@
 #include <ac/io/blocking_io.hpp>
 
 namespace ac::frameio {
-using BlockingIoCtx = io::blocking_io_ctx;
 using BlockingIo = io::blocking_io<ReadStream, WriteStream>;
 } // namespace ac::frameio
