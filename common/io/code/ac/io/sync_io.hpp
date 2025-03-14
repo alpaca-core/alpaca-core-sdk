@@ -42,6 +42,10 @@ public:
         , m_ep(std::move(ep))
     {}
 
+    ~sync_io() {
+        close();
+    }
+
     using input_value_type = typename RS::value_type;
     using output_value_type = typename WS::value_type;
 
@@ -86,9 +90,20 @@ public:
     }
 
     void close() {
-        m_ep.read_stream->close();
-        m_ep.write_stream->close();
-        m_ctx.run_tasks();
+        // close streams, but don't run tasks if nothing was closed
+        bool work_done = false;
+
+        if (m_ep.read_stream) {
+            m_ep.read_stream->close();
+            work_done = true;
+        }
+        if (m_ep.write_stream) {
+            m_ep.write_stream->close();
+            work_done = true;
+        }
+        if (work_done) {
+            m_ctx.run_tasks();
+        }
     }
 };
 
