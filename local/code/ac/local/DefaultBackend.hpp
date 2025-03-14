@@ -7,17 +7,23 @@
 
 namespace ac::local {
 
-class AC_LOCAL_EXPORT DefaultBackend : public Backend {
+namespace impl {
+struct AC_LOCAL_EXPORT DefaultBackendXctx {
+    DefaultBackendXctx();
+    DefaultBackendXctx(const DefaultBackendXctx&) = delete;
+    DefaultBackendXctx& operator=(const DefaultBackendXctx&) = delete;
+    ~DefaultBackendXctx();
+
+    struct Impl;
+    std::unique_ptr<Impl> m_impl;
+};
+}
+
+class AC_LOCAL_EXPORT DefaultBackend : private impl::DefaultBackendXctx, public Backend {
 public:
     explicit DefaultBackend(std::string_view name = {});
     DefaultBackend(const DefaultBackend&) = delete;
     DefaultBackend& operator=(const DefaultBackend&) = delete;
-    ~DefaultBackend();
-
-    void join(bool forceStop = false);
-private:
-    struct Impl;
-    std::unique_ptr<Impl> m_impl;
 };
 
 } // namespace ac::local

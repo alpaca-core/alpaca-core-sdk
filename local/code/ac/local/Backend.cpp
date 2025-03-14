@@ -18,8 +18,9 @@
 
 namespace ac::local {
 
-Backend::Backend(std::string_view name)
+Backend::Backend(std::string_view name, Xctx xctx)
     : m_name(name)
+    , m_xctx(xctx)
 {
     if (m_name.empty()) {
         char hex[20] = "0x";

@@ -63,9 +63,9 @@ public:
     void registerLibServices();
 
     struct Xctx {
-        xec::context* system;
-        xec::context* io;
-        xec::context* dispatch;
+        xec::context& system;
+        xec::context& io;
+        xec::context& dispatch;
         xec::strand cpu;
         xec::strand gpu;
     };
@@ -78,13 +78,12 @@ public:
     void attach(std::string_view serviceNameMatch, frameio::StreamEndpoint ep);
 
 protected:
-    explicit Backend(std::string_view name);
+    explicit Backend(std::string_view name, Xctx xctx);
     ~Backend();
-
-    Xctx m_xctx;
 
 private:
     std::string m_name;
+    Xctx m_xctx;
 
     Service* getService(std::string_view serviceNameMatch);
     frameio::StreamEndpoint connect(Service& service, BackendIoBufferSizes bufferSizes);
