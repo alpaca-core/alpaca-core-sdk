@@ -6,13 +6,16 @@
 #include "Backend.hpp"
 #include <ac/frameio/StreamEndpoint.hpp>
 #include <ac/io/sync_io.hpp>
+#include <ac/xec/context_work_guard.hpp>
 
 namespace ac::local {
 
 class SyncBackend : private io::sync_io_ctx, private Backend {
+    xec::context_work_guard m_wg;
 public:
     SyncBackend(std::string_view name = {})
         : Backend(name)
+        , m_wg(get_executor())
     {
         m_xctx.system = &get_executor();
         m_xctx.io = &get_executor();

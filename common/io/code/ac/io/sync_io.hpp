@@ -19,6 +19,7 @@ struct sync_io_ctx : private xec::context {
     }
 
     using xec::context::make_strand;
+    using xec::context::make_work_guard;
 
     xec::context& get_executor() {
         return *this;
