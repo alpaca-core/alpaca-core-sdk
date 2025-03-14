@@ -58,7 +58,9 @@ PluginManager::PluginManager(std::string_view name)
 
 PluginManager::~PluginManager() {
     for (auto& plugin : m_plugins) {
-        unload_plugin((hplugin)plugin.nativeHandle);
+        if (plugin.nativeHandle) {
+            unload_plugin((hplugin)plugin.nativeHandle);
+        }
     }
 }
 
