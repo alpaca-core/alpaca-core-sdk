@@ -9,7 +9,7 @@ namespace ac::local {
 
 class AC_LOCAL_EXPORT DefaultBackend : public Backend {
 public:
-    DefaultBackend();
+    explicit DefaultBackend(std::string_view name = {});
     DefaultBackend(const DefaultBackend&) = delete;
     DefaultBackend& operator=(const DefaultBackend&) = delete;
     ~DefaultBackend();

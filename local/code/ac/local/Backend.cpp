@@ -14,10 +14,19 @@
 #include <ac/frameio/StreamEndpoint.hpp>
 
 #include <astl/throw_stdex.hpp>
+#include <charconv>
 
 namespace ac::local {
 
-Backend::Backend() {
+Backend::Backend(std::string_view name)
+    : m_name(name)
+{
+    if (m_name.empty()) {
+        char hex[20] = "0x";
+        auto r = std::to_chars(hex + 2, hex + sizeof(hex), reinterpret_cast<uintptr_t>(this), 16);
+        m_name = std::string_view(hex, r.ptr - hex);
+    }
+
     // temporary here until we have a better way to register services
     registerLibServices();
 }
@@ -66,11 +75,27 @@ void Backend::attach(std::string_view serviceNameMatch, frameio::StreamEndpoint 
     attach(*svc, std::move(ep));
 }
 
+inline jalog::BasicStream& operator,(jalog::BasicStream& s, const std::vector<std::string>& vec) {
+    s, "[";
+    for (const auto& v : vec) {
+        s, v, ", ";
+    }
+    s, "]";
+    return s;
+}
+
 Service* Backend::getService(std::string_view serviceNameMatch) {
     for (auto& sd : m_serviceDatas) {
         if (sd.factory.info().name.find(serviceNameMatch) != std::string::npos) {
             if (!sd.service) {
                 auto& svc = m_instantiatedServices.emplace_back(sd.factory.createService(*this));
+
+                auto& info = svc->info();
+                AC_LOCAL_LOG(Info, "Backend ", m_name, " created service ", info.name,
+                    "\n       vendor: ", info.vendor,
+                    "\n         tags: ", info.tags
+                );
+
                 sd.service = svc.get();
             }
             return sd.service;

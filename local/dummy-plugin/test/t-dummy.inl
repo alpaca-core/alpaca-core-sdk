@@ -14,7 +14,7 @@
 
 #include <astl/move.hpp>
 
-ac::local::SyncBackend backend;
+ac::local::SyncBackend backend("dummy-test");
 
 using Session = ac::local::SyncBackend::Io;
 

@@ -10,6 +10,7 @@
 #include <memory>
 #include <vector>
 #include <span>
+#include <string>
 #include <string_view>
 
 namespace ac::frameio {
@@ -77,12 +78,14 @@ public:
     void attach(std::string_view serviceNameMatch, frameio::StreamEndpoint ep);
 
 protected:
-    Backend();
+    explicit Backend(std::string_view name);
     ~Backend();
 
     Xctx m_xctx;
 
 private:
+    std::string m_name;
+
     Service* getService(std::string_view serviceNameMatch);
     frameio::StreamEndpoint connect(Service& service, BackendIoBufferSizes bufferSizes);
     void attach(Service& service, frameio::StreamEndpoint ep);

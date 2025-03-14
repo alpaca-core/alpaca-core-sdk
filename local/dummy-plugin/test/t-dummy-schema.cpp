@@ -23,7 +23,7 @@ struct LoadDummyFixture {
 LoadDummyFixture loadDummyFixture;
 
 TEST_CASE("blocking io") {
-    ac::local::DefaultBackend backend;
+    ac::local::DefaultBackend backend("dummy-test");
 
     ac::schema::BlockingIoHelper dummy(backend.connect("dummy"));
 

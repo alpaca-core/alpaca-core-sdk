@@ -11,7 +11,9 @@ namespace ac::local {
 
 class SyncBackend : private io::sync_io_ctx, private Backend {
 public:
-    SyncBackend() {
+    SyncBackend(std::string_view name = {})
+        : Backend(name)
+    {
         m_xctx.system = &get_executor();
         m_xctx.io = &get_executor();
         m_xctx.dispatch = &get_executor();

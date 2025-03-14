@@ -40,8 +40,9 @@ struct DefaultBackend::Impl {
         gpu{"ac-gpu"};
 };
 
-DefaultBackend::DefaultBackend()
-    : m_impl(std::make_unique<Impl>())
+DefaultBackend::DefaultBackend(std::string_view name)
+    : Backend(name)
+    , m_impl(std::make_unique<Impl>())
 {
     m_xctx.system = &m_impl->system.ctx;
     m_xctx.io = &m_impl->io.ctx;
