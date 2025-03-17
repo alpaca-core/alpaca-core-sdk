@@ -10,17 +10,17 @@ A rough picture of how an SDK-powered application works is as follows:
 
 ```mermaid
 flowchart LR
-  Application --loads--> Provider --creates--> Sessions
+  Application --loads--> Service --creates--> Sessions
   Session --runs--> Op
   Op -.changes state.-> Session 
   Op --produces--> Result  
 ```
 
-### Plugins and Providers
+### Plugins and Services
 
-The SDK itself doesn't implement any computation. In order to get access to a functionality one needs a provider. Typically providers would come from plugins. A plugin is a shared library which implements one or more providers. 
+The SDK itself doesn't implement any computation. In order to get access to a functionality one needs a service. Typically services would come from plugins. A plugin is a shared library which implements one or more services. 
 
-A provider is a factory for sessions. 
+A service is a factory for sessions. 
 
 ### Sessions and Ops
 
@@ -35,7 +35,7 @@ For example if a session is in a state where it can do X, and you run an op, the
 Now, this is all pretty abstract, so let's give an example. In pseudo-code:
 
 ```python
-session = provider.create_session
+session = service.create_session
 session.load_model("llama-2-7b") # load a model
 session.create_instance() # create an inference instance
 result = session.complete_text("A recipe for rice cakes:") # run and get result
@@ -47,13 +47,13 @@ session.load("stable-diffusion-3")
 
 ## Protocol
 
-The example above is pretty neat, but our goal is to have allow access to multiple providers. Having functions like `.complete_text("text")` simply makes no sense for a provider of image generation.
+The example above is pretty neat, but our goal is to have allow access to multiple services. Having functions like `.complete_text("text")` simply makes no sense for a service for image generation.
 
 As mentioned above, the communication protocol defines *frames*. A frame is a piece of structured data. Some close (but not quite complete) descriptions of it could be duck-typed, or "stringly"-typed, or JSON-typed.
 
-Every provider defines a schema. The schema describes things what ops are possible in the current state and what states are there.
+Every service defines a schema. The schema describes things what ops are possible in the current state and what states are there.
 
-If we know the schema of a provider we can use it like this *(still pseudo-code)*:
+If we know the schema of a service we can use it like this *(still pseudo-code)*:
 
 ```python
 session.push(op = "load", model = "llama-2-7b")
@@ -86,15 +86,11 @@ Code generation is planned for the near future. Until then we only provide C++ u
 
 ```cpp
 ac::local::Lib::loadAllPlugins(); // load all plugins
-ac::frameio::BlockingIoCtx blockingCtx; // context for blocking IO from our side 
-                                        // (easier to write demos in)
-ac::local::IoCtx io; // io context for the plugins
+ac::local::DefaultBackend backend; // plugin backend: executors and connections
 
-auto& llamaProvider = ac::local::Lib::getProvider("llama"); // get the compute provider
-
-// create a connection and attach it to a schema-based io helper
-// it being schema based allows us to use strong types below
-ac::schema::BlockingIoHelper llama(io.connect(dummyProvider), blockingCtx); 
+// create a session and attach it to a schema-based io helper
+// being schema based allows us to use strong types below
+ac::schema::BlockingIoHelper llama(backend.connect("llama.cpp"));
 
 namespace schema = ac::schema::llama; // shorthand for the llama schema
 

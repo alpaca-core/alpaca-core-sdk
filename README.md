@@ -45,15 +45,11 @@ This repo contains the reference implementation of the Stateful Session Protocol
 
 ```cpp
 ac::local::Lib::loadAllPlugins(); // load all plugins
-ac::frameio::BlockingIoCtx blockingCtx; // context for blocking IO from our side 
-                                        // (easier to write demos in)
-ac::local::IoCtx io; // io context for the plugins
+ac::local::DefaultBackend backend; // plugin backend: executors and connections
 
-auto& llamaProvider = ac::local::Lib::getProvider("llama"); // get the compute provider
-
-// create a connection and attach it to a schema-based io helper
-// it being schema based allows us to use strong types below
-ac::schema::BlockingIoHelper llama(io.connect(dummyProvider), blockingCtx); 
+// create a session and attach it to a schema-based io helper
+// being schema based allows us to use strong types below
+ac::schema::BlockingIoHelper llama(backend.connect("llama.cpp"));
 
 namespace schema = ac::schema::llama; // shorthand for the llama schema
 
