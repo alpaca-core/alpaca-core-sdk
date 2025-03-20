@@ -4,6 +4,7 @@
 #pragma once
 #include "export.h"
 #include "Resource.hpp"
+#include <memory>
 
 namespace ac::local {
 template <typename R>
