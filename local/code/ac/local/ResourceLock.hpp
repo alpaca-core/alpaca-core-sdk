@@ -3,8 +3,7 @@
 //
 #pragma once
 #include "export.h"
-#include "ResourcePtr.hpp"
-#include "Resource.touch.hpp"
+#include "Resource.hpp"
 
 namespace ac::local {
 template <typename R>
@@ -12,11 +11,13 @@ class ResourceLock {
 public:
     ResourceLock() = default;
 
+    ResourceLock(const ResourceLock&) = default;
+    ResourceLock& operator=(const ResourceLock&) = default;
+    ResourceLock(ResourceLock&&) noexcept = default;
+    ResourceLock& operator=(ResourceLock&&) noexcept = default;
+
     explicit ResourceLock(std::shared_ptr<R> resource)
         : m_resource(std::move(resource))
-    {}
-    explicit ResourceLock(ResourcePtr resource)
-        : m_resource(std::static_pointer_cast<R>(std::move(resource)))
     {}
 
     explicit operator bool() const noexcept { return !!m_resource; }
@@ -25,13 +26,20 @@ public:
     R* operator->() const noexcept { return get(); }
     R& operator*() const noexcept { return *get(); }
 
-    ~ResourceLock() {
+    void reset() noexcept {
         if (m_resource) {
-            impl::Resource_touch(*m_resource);
+            m_resource->touch();
         }
     }
+
+    ~ResourceLock() {
+        reset();
+    }
+
+    bool operator==(const ResourceLock& other) const noexcept = default;
+    auto operator<=>(const ResourceLock& other) const noexcept = default;
 private:
-    std::shared_ptr<R> m_resource;
+    std::shared_ptr<Resource> m_resource;
 };
 
 } // namespace ac::local

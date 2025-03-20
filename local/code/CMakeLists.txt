@@ -31,6 +31,7 @@ target_sources(ac-local
         ac/local/LoadPluginCb.hpp
         ac/local/PluginManager.hpp
         ac/local/Resource.hpp
+        ac/local/ResourceLock.hpp
         ac/local/ResourceManager.hpp
 
         ac/local/Backend.hpp
@@ -46,7 +47,6 @@ target_sources(ac-local
         ac/local/VtableExports.cpp
 
         ac/local/PluginManager.cpp
-        ac/local/Resource.cpp
 
         ac/local/Backend.cpp
         ac/local/DefaultBackend.cpp

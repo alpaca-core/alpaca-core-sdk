@@ -14,6 +14,8 @@ public:
     struct Params {
         std::string path;   // path to file with data (or empty string for synthetic model)
         std::string splice; // splice string before each data element
+
+        bool operator==(const Params& other) const noexcept = default;
     };
 
     explicit Model(Params params);

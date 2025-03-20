@@ -177,21 +177,24 @@ xec::coro<void> Dummy_runModel(IoEndpoint& io, dummy::Model& model) {
 
 struct DummyModelResource : public dummy::Model, public Resource{
     using dummy::Model::Model;
+
+    using Manager = ResourceManager<dummy::Model::Params, DummyModelResource>;
+    using Lock = ResourceLock<DummyModelResource>;
 };
 
-xec::coro<void> Dummy_runSession(StreamEndpoint ep, ResourceManager<std::string>& rm) {
+xec::coro<void> Dummy_runSession(StreamEndpoint ep, DummyModelResource::Manager& rm) {
     using Schema = sc::StateInitial;
 
     struct Runner : public BasicRunner {
-        Runner(ResourceManager<std::string>& rm)
+        Runner(DummyModelResource::Manager& rm)
             : m_resourceManager(rm)
         {
             schema::registerHandlers<Schema::Ops>(m_dispatcherData, *this);
         }
 
-        ResourceManager<std::string>& m_resourceManager;
+        DummyModelResource::Manager& m_resourceManager;
 
-        ResourceLock<DummyModelResource> model;
+        DummyModelResource::Lock model;
 
         static dummy::Model::Params ModelParams_fromSchema(sc::StateInitial::OpLoadModel::Params schemaParams) {
             dummy::Model::Params ret;
@@ -202,13 +205,12 @@ xec::coro<void> Dummy_runSession(StreamEndpoint ep, ResourceManager<std::string>
 
         Schema::OpLoadModel::Return on(Schema::OpLoadModel, Schema::OpLoadModel::Params sparams) {
             auto mparams = ModelParams_fromSchema(sparams);
-            auto key = mparams.splice + ":" + mparams.path;
-            model = m_resourceManager.findResource<DummyModelResource>(key);
+            model = m_resourceManager.find(mparams);
 
             if (!model) {
-                model = m_resourceManager.addResource(
-                    std::move(key),
-                    std::make_shared<DummyModelResource>(std::move(mparams))
+                model = m_resourceManager.add(
+                    mparams,
+                    std::make_shared<DummyModelResource>(mparams)
                 );
             }
 
@@ -245,7 +247,7 @@ ServiceInfo g_serviceInfo = {
 struct DummyService final : public Service {
     xec::strand cpuStrand;
 
-    ResourceManager<std::string> m_resourceManager;
+    DummyModelResource::Manager m_resourceManager;
 
     virtual const ServiceInfo& info() const noexcept override {
         return g_serviceInfo;

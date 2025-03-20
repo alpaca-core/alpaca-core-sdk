@@ -47,6 +47,10 @@ public:
         m_timer->add_wait_cb(std::move(cb));
     }
 
+    void wait_attach(wait_func cb) {
+        m_timer->add_wait_cb(std::move(cb));
+    }
+
     using executor_type = strand;
     [[nodiscard]] const strand& get_executor() const {
         return m_strand;

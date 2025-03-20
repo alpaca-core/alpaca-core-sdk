@@ -15,7 +15,7 @@ struct basic_wait_awaitable {
 };
 
 template <typename Wobj>
-struct wait_awaitable: basic_wait_awaitable {
+struct wait_awaitable : basic_wait_awaitable {
     Wobj& wobj;
     wait_awaitable(Wobj& w) : wobj(w) {}
     void await_suspend(std::coroutine_handle<> h) {
