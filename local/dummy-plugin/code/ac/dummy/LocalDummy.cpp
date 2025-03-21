@@ -14,7 +14,9 @@
 #include <ac/local/ServiceFactory.hpp>
 #include <ac/local/ServiceInfo.hpp>
 #include <ac/local/Backend.hpp>
+
 #include <ac/local/ResourceManager.hpp>
+#include <ac/local/rsrc/ResourceSvcClient.hpp>
 
 #include <ac/schema/OpDispatchHelpers.hpp>
 #include <ac/schema/FrameHelpers.hpp>
@@ -247,6 +249,7 @@ ServiceInfo g_serviceInfo = {
 struct DummyService final : public Service {
     xec::strand cpuStrand;
 
+    //ac::local::ResourceServiceClient m_resourceServiceClient;
     DummyModelResource::Manager m_resourceManager;
 
     virtual const ServiceInfo& info() const noexcept override {
