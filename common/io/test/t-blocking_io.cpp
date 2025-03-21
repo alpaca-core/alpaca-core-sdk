@@ -21,9 +21,8 @@ TEST_CASE("blocking_io") {
     CHECK(local.push("c", await_completion_for(20ms)).success());
     auto status = local.push("d", no_wait);
 
+    CHECK_FALSE(status.complete());
     CHECK(status.timeout());
-    CHECK(status.aborted());
-    CHECK_FALSE(status.waiting());
 
     auto f = remote.poll();
     CHECK(f.success());
@@ -36,7 +35,6 @@ TEST_CASE("blocking_io") {
     CHECK(f.value == "c");
     f = remote.poll(await_completion_for(10ms));
     CHECK(f.value.empty());
+    CHECK_FALSE(f.complete());
     CHECK(f.timeout());
-    CHECK(f.aborted());
-    CHECK_FALSE(f.waiting());
 }

@@ -39,8 +39,6 @@ TEST_CASE("buffered_channel 1") {
     auto result = channel.read(str, nullptr);
     CHECK(result.blocked());
     CHECK_FALSE(result.value);
-    CHECK_FALSE(result.aborted());
-    CHECK_FALSE(result.waiting());
     CHECK(str.empty());
 
     result = channel.read(str, on_rb);
@@ -75,7 +73,6 @@ TEST_CASE("buffered_channel 1") {
     result = channel.read(str, on_rb);
     CHECK_FALSE(result.value);
     CHECK(result.blocked());
-    CHECK(result.waiting());
     CHECK(str.empty());
 
     str = "yep";
@@ -89,7 +86,6 @@ TEST_CASE("buffered_channel 1") {
     result = channel.write(str, on_wb);
     CHECK_FALSE(result.value);
     CHECK(result.blocked());
-    CHECK(result.waiting());
     CHECK(str == "nope again");
 
     result = channel.read(str, on_rb);
@@ -102,13 +98,10 @@ TEST_CASE("buffered_channel 1") {
     result = channel.read(str, on_rb);
     CHECK_FALSE(result.value);
     CHECK(result.blocked());
-    CHECK(result.waiting());
     CHECK(str.empty());
 
     result = channel.read(str, on_rb2);
     CHECK(result.blocked());
-    CHECK(result.waiting());
-    CHECK(result.aborted());
     CHECK(str.empty());
     REQUIRE(result.value);
     CHECK(read_ns == 2);
@@ -117,8 +110,6 @@ TEST_CASE("buffered_channel 1") {
 
     result = channel.read(str, nullptr);
     CHECK(result.blocked());
-    CHECK_FALSE(result.waiting());
-    CHECK(result.aborted());
     CHECK(str.empty());
     REQUIRE(result.value);
     CHECK(read_ns2 == 0);

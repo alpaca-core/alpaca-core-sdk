@@ -69,7 +69,6 @@ public:
         m_wobj.wait([this, &value, cb = std::forward<Cb>(cb)]([[maybe_unused]] const std::error_code& ec) {
             status s = stream_op(*m_stream, value, nullptr);
             assert(ec);
-            s.set_aborted();
             cb(value, s);
         });
     }
@@ -83,10 +82,7 @@ public:
         m_wobj.wait(to, [this, &value, cb = std::forward<Cb>(cb)](const std::error_code& ec) {
             status s = stream_op(*m_stream, value, nullptr);
 
-            if (ec) {
-                s.set_aborted();
-            }
-            else {
+            if (!ec) {
                 s.set_timeout();
             }
 

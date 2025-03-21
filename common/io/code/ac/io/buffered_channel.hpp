@@ -102,14 +102,7 @@ private:
 
     template <typename OnBlocked>
     stream_result block(OnBlocked&& on_blocked) {
-        stream_result ret(exchange_notify_l(std::forward<OnBlocked>(on_blocked)));
-        if (ret.value) {
-            ret.set_aborted();
-        }
-        if (m_notify) {
-            ret.set_waiting();
-        }
-        return ret;
+        return stream_result(exchange_notify_l(std::forward<OnBlocked>(on_blocked)));
     }
 
     void unlock_notify(std::unique_lock<std::mutex>& lock) {

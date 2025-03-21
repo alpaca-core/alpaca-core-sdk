@@ -11,9 +11,6 @@ struct status {
         SUCCESS,
         CLOSED,
 
-        WAITING,
-        ABORTED,
-
         TIMEOUT,
 
         NUM_BITS
@@ -33,9 +30,6 @@ struct status {
     status& set_success() noexcept { return set(SUCCESS); }
     status& set_closed() noexcept { return set(CLOSED); }
 
-    status& set_aborted() noexcept { return set(ABORTED); }
-    status& set_waiting() noexcept { return set(WAITING); }
-
     status& set_timeout() noexcept { return set(TIMEOUT); }
 
     bool success() const noexcept { return bits[SUCCESS]; }
@@ -43,10 +37,9 @@ struct status {
     bool blocked() const noexcept { return !success() && !closed(); }
     bool complete() const noexcept { return success() || closed(); }
 
-    bool waiting() const noexcept { return bits[WAITING]; }
-    bool aborted() const noexcept { return bits[ABORTED]; }
-
+    // these are only meaningful in a context where a timeout is possible
     bool timeout() const noexcept { return bits[TIMEOUT]; }
+    bool aborted() const noexcept { return bits.none(); }
 
     status& operator|=(const status& other) noexcept {
         bits |= other.bits;
