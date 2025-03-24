@@ -253,7 +253,7 @@ struct DummyService final : public Service {
         return g_serviceInfo;
     }
 
-    virtual void createSession(frameio::StreamEndpoint ep, std::string_view) override {
+    virtual void createSession(frameio::StreamEndpoint ep, Dict) override {
         co_spawn(cpuStrand, Dummy_runSession(std::move(ep), m_resourceManager));
     }
 };

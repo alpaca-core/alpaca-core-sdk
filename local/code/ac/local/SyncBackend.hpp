@@ -29,8 +29,8 @@ public:
 
     using Io = io::sync_io<frameio::ReadStream, frameio::WriteStream>;
 
-    Io connect(std::string_view serviceNameMatch, std::string_view target) {
-        auto ep = Backend::connect(serviceNameMatch, target, {1, 1});
+    Io connect(std::string_view serviceNameMatch, Dict target) {
+        auto ep = Backend::connect(serviceNameMatch, std::move(target), {1, 1});
         return Io(std::move(ep), *this);
     }
 };

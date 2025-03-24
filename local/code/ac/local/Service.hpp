@@ -5,9 +5,9 @@
 #include "export.h"
 
 #include <ac/frameio/StreamEndpointFwd.hpp>
+#include <ac/Dict.hpp>
 
 #include <memory>
-#include <string_view>
 
 namespace ac::local {
 
@@ -18,7 +18,7 @@ public:
     virtual ~Service();
 
     virtual const ServiceInfo& info() const noexcept = 0;
-    virtual void createSession(frameio::StreamEndpoint ep, std::string_view target) = 0;
+    virtual void createSession(frameio::StreamEndpoint ep, Dict target) = 0;
 };
 
 } // namespace ac::local

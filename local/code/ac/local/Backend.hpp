@@ -5,6 +5,8 @@
 #include "export.h"
 
 #include <ac/frameio/StreamEndpointFwd.hpp>
+#include <ac/Dict.hpp>
+
 #include <ac/xec/context.hpp>
 
 #include <memory>
@@ -74,8 +76,8 @@ public:
 
     static frameio::ChannelEndpoints getEndpoints(BackendIoBufferSizes bufferSizes = {});
 
-    frameio::StreamEndpoint connect(std::string_view serviceNameMatch, std::string_view target, BackendIoBufferSizes bufferSizes = {});
-    void attach(std::string_view serviceNameMatch, std::string_view target, frameio::StreamEndpoint ep);
+    frameio::StreamEndpoint connect(std::string_view serviceNameMatch, Dict target, BackendIoBufferSizes bufferSizes = {});
+    void attach(std::string_view serviceNameMatch, Dict target, frameio::StreamEndpoint ep);
 
 protected:
     explicit Backend(std::string_view name, Xctx xctx);
@@ -86,8 +88,8 @@ private:
     Xctx m_xctx;
 
     Service* getService(std::string_view serviceNameMatch);
-    frameio::StreamEndpoint connect(Service& service, std::string_view target, BackendIoBufferSizes bufferSizes);
-    void attach(Service& service, std::string_view target, frameio::StreamEndpoint ep);
+    frameio::StreamEndpoint connect(Service& service, Dict target, BackendIoBufferSizes bufferSizes);
+    void attach(Service& service, Dict target, frameio::StreamEndpoint ep);
 
     std::vector<ServiceData> m_serviceDatas;
     std::vector<std::unique_ptr<Service>> m_instantiatedServices;
