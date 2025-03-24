@@ -14,6 +14,7 @@
 #include <ac/local/ServiceFactory.hpp>
 #include <ac/local/ServiceInfo.hpp>
 #include <ac/local/Backend.hpp>
+#include <ac/local/BackendWorkerStrand.hpp>
 #include <ac/local/ResourceCache.hpp>
 
 #include <ac/schema/OpDispatchHelpers.hpp>
@@ -245,17 +246,17 @@ ServiceInfo g_serviceInfo = {
 };
 
 struct DummyService final : public Service {
-    xec::strand cpuStrand;
+    DummyService(BackendWorkerStrand& ws) : m_workerStrand(ws) {}
 
-    ac::local::ResourceManager m_resourceManager;
-    DummyModelResource::Cache m_resourceCache{m_resourceManager};
+    BackendWorkerStrand& m_workerStrand;
+    DummyModelResource::Cache m_resourceCache{m_workerStrand.resourceManager};
 
     virtual const ServiceInfo& info() const noexcept override {
         return g_serviceInfo;
     }
 
     virtual void createSession(frameio::StreamEndpoint ep, Dict) override {
-        co_spawn(cpuStrand, Dummy_runSession(std::move(ep), m_resourceCache));
+        co_spawn(m_workerStrand.executor(), Dummy_runSession(std::move(ep), m_resourceCache));
     }
 };
 
@@ -263,9 +264,8 @@ struct DummyServiceFactory final : public ServiceFactory {
     virtual const ServiceInfo& info() const noexcept override {
         return g_serviceInfo;
     }
-    virtual std::unique_ptr<Service> createService(const Backend& backend) const override {
-        auto svc = std::make_unique<DummyService>();
-        svc->cpuStrand = backend.xctx().cpu;
+    virtual std::unique_ptr<Service> createService(Backend& backend) const override {
+        auto svc = std::make_unique<DummyService>(backend.cpuWorkerStrand());
         return svc;
     }
 };

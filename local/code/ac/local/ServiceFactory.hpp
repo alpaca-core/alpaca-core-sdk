@@ -15,7 +15,7 @@ class AC_LOCAL_EXPORT ServiceFactory {
 public:
     virtual ~ServiceFactory();
     virtual const ServiceInfo& info() const noexcept = 0;
-    virtual std::unique_ptr<Service> createService(const Backend& backend) const = 0;
+    virtual std::unique_ptr<Service> createService(Backend& backend) const = 0;
 };
 
 } // namespace ac::local
