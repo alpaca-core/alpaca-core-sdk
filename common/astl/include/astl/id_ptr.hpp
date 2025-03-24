@@ -5,6 +5,7 @@
 #include <string>
 #include <string_view>
 #include <charconv>
+#include <cstdint>
 
 namespace astl {
 
