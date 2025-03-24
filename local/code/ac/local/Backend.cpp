@@ -35,6 +35,7 @@ Backend::Backend(std::string_view name, Xctx xctx)
 Backend::~Backend() = default;
 
 void Backend::registerService(const ServiceFactory& factory, const PluginInfo* pluginInfo) {
+    std::lock_guard l(m_mutex);
     m_serviceDatas.emplace_back(factory, pluginInfo);
 }
 
@@ -86,6 +87,7 @@ inline jalog::BasicStream& operator,(jalog::BasicStream& s, const std::vector<st
 }
 
 Service* Backend::getService(std::string_view serviceNameMatch) {
+    std::lock_guard l(m_mutex);
     for (auto& sd : m_serviceDatas) {
         if (sd.factory.info().name.find(serviceNameMatch) != std::string::npos) {
             if (!sd.service) {

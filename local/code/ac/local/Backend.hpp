@@ -14,6 +14,7 @@
 #include <span>
 #include <string>
 #include <string_view>
+#include <mutex>
 
 namespace ac::frameio {
 struct ChannelEndpoints;
@@ -91,6 +92,7 @@ private:
     frameio::StreamEndpoint connect(Service& service, Dict target, BackendIoBufferSizes bufferSizes);
     void attach(Service& service, Dict target, frameio::StreamEndpoint ep);
 
+    std::mutex m_mutex;
     std::vector<ServiceData> m_serviceDatas;
     std::vector<std::unique_ptr<Service>> m_instantiatedServices;
 };
