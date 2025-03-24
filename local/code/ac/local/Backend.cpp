@@ -14,20 +14,14 @@
 #include <ac/frameio/StreamEndpoint.hpp>
 
 #include <astl/throw_stdex.hpp>
-#include <charconv>
+#include <astl/id_ptr.hpp>
 
 namespace ac::local {
 
 Backend::Backend(std::string_view name, Xctx xctx)
-    : m_name(name)
+    : m_name(astl::id_or_ptr(name, this))
     , m_xctx(xctx)
 {
-    if (m_name.empty()) {
-        char hex[20] = "0x";
-        auto r = std::to_chars(hex + 2, hex + sizeof(hex), reinterpret_cast<uintptr_t>(this), 16);
-        m_name = std::string_view(hex, r.ptr - hex);
-    }
-
     // temporary here until we have a better way to register services
     registerLibServices();
 }

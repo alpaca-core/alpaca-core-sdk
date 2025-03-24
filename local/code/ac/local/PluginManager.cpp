@@ -9,6 +9,7 @@
 #include <astl/throw_stdex.hpp>
 #include <astl/qalgorithm.hpp>
 #include <astl/sentry.hpp>
+#include <astl/id_ptr.hpp>
 
 #include <cstdlib>
 #include <charconv>
@@ -47,14 +48,8 @@ inline hplugin load_plugin(const char* filename) {
 namespace ac::local {
 
 PluginManager::PluginManager(std::string_view name)
-    : m_name(name)
-{
-    if (m_name.empty()) {
-        char hex[20] = "0x";
-        auto r = std::to_chars(hex + 2, hex + sizeof(hex), reinterpret_cast<uintptr_t>(this), 16);
-        m_name = std::string_view(hex, r.ptr - hex);
-    }
-}
+    : m_name(astl::id_or_ptr(name, this))
+{}
 
 PluginManager::~PluginManager() {
     for (auto& plugin : m_plugins) {
