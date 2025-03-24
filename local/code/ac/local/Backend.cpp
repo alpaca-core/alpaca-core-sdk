@@ -60,20 +60,20 @@ frameio::ChannelEndpoints Backend::getEndpoints(BackendIoBufferSizes bufferSizes
     );
 }
 
-frameio::StreamEndpoint Backend::connect(std::string_view serviceNameMatch, BackendIoBufferSizes bufferSizes) {
+frameio::StreamEndpoint Backend::connect(std::string_view serviceNameMatch, std::string_view target, BackendIoBufferSizes bufferSizes) {
     auto svc = getService(serviceNameMatch);
     if (!svc) {
         throw_ex{} << "Service not found: " << serviceNameMatch;
     }
-    return connect(*svc, bufferSizes);
+    return connect(*svc, target, bufferSizes);
 }
 
-void Backend::attach(std::string_view serviceNameMatch, frameio::StreamEndpoint ep) {
+void Backend::attach(std::string_view serviceNameMatch, std::string_view target, frameio::StreamEndpoint ep) {
     auto svc = getService(serviceNameMatch);
     if (!svc) {
         throw_ex{} << "Service not found: " << serviceNameMatch;
     }
-    attach(*svc, std::move(ep));
+    attach(*svc, target, std::move(ep));
 }
 
 inline jalog::BasicStream& operator,(jalog::BasicStream& s, const std::vector<std::string>& vec) {
@@ -105,14 +105,14 @@ Service* Backend::getService(std::string_view serviceNameMatch) {
     return nullptr;
 }
 
-frameio::StreamEndpoint Backend::connect(Service& service, BackendIoBufferSizes bufferSizes) {
+frameio::StreamEndpoint Backend::connect(Service& service, std::string_view target, BackendIoBufferSizes bufferSizes) {
     auto [local, remote] = getEndpoints(bufferSizes);
-    attach(service, std::move(remote));
+    attach(service, target, std::move(remote));
     return std::move(local);
 }
 
-void Backend::attach(Service& service, frameio::StreamEndpoint ep) {
-    service.createSession(std::move(ep));
+void Backend::attach(Service& service, std::string_view target, frameio::StreamEndpoint ep) {
+    service.createSession(std::move(ep), target);
 }
 
 } // namespace ac::local

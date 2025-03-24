@@ -25,7 +25,7 @@ LoadDummyFixture loadDummyFixture;
 TEST_CASE("blocking io") {
     ac::local::DefaultBackend backend("dummy-test");
 
-    ac::schema::BlockingIoHelper dummy(backend.connect("dummy"));
+    ac::schema::BlockingIoHelper dummy(backend.connect("dummy", {}));
 
     namespace schema = ac::schema::dummy;
 

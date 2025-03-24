@@ -19,7 +19,7 @@ ac::local::SyncBackend backend("dummy-test");
 using Session = ac::local::SyncBackend::Io;
 
 Session createTestSession() {
-    return backend.connect("dummy");
+    return backend.connect("dummy", {});
 }
 
 void checkError(Session& s, const std::string_view msg) {

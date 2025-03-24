@@ -18,7 +18,7 @@ public:
     virtual ~Service();
 
     virtual const ServiceInfo& info() const noexcept = 0;
-    virtual void createSession(frameio::StreamEndpoint ep, std::string_view target = {}) = 0;
+    virtual void createSession(frameio::StreamEndpoint ep, std::string_view target) = 0;
 };
 
 } // namespace ac::local
