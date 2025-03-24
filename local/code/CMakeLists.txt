@@ -31,8 +31,9 @@ target_sources(ac-local
         ac/local/LoadPluginCb.hpp
         ac/local/PluginManager.hpp
         ac/local/Resource.hpp
-        ac/local/ResourceLock.hpp
         ac/local/ResourceManager.hpp
+        ac/local/ResourceLock.hpp        
+        ac/local/ResourceCache.hpp
 
         ac/local/Backend.hpp
         ac/local/DefaultBackend.hpp

@@ -3,7 +3,7 @@
 //
 #include <doctest/doctest.h>
 
-#include <ac/local/ResourceManager.hpp>
+#include <ac/local/ResourceCache.hpp>
 
 #include <string>
 
@@ -12,23 +12,24 @@ struct StrResource : public std::string, public ac::local::Resource {
 };
 
 TEST_CASE("basic") {
-    ac::local::ResourceManager<std::string, StrResource> rm;
+    ac::local::ResourceManager rm;
+    ac::local::ResourceCache<std::string, StrResource> cache(rm);
     {
         // empty
-        auto res = rm.find("empty");
+        auto res = cache.find("empty");
         CHECK(!res);
     }
 
-    auto orig = rm.add("orig", std::make_shared<StrResource>("orig"));
+    auto orig = cache.add("orig", std::make_shared<StrResource>("orig"));
     CHECK(*orig == "orig");
 
     {
         // not empty
-        auto added = rm.add("some-key", std::make_shared<StrResource>("value"));
+        auto added = cache.add("some-key", std::make_shared<StrResource>("value"));
         CHECK(added != orig);
         added->maxAge = ac::local::Resource::seconds_t::max();
 
-        auto found = rm.find("some-key");
+        auto found = cache.find("some-key");
         CHECK(found);
         CHECK(added == found);
         CHECK(added.get() == found.get());
@@ -36,17 +37,17 @@ TEST_CASE("basic") {
     }
 
     {
-        auto res = rm.findOrCreate("some-key", [](const std::string&) {
+        auto res = cache.findOrCreate("some-key", [](const std::string&) {
             return std::make_shared<StrResource>("value2");
         });
         CHECK(*res == "value");
 
-        auto found = rm.find("some-key");
+        auto found = cache.find("some-key");
         CHECK(res == found);
     }
 
     {
-        auto res = rm.findOrCreate("some-other-key", [](const std::string&) {
+        auto res = cache.findOrCreate("some-other-key", [](const std::string&) {
             return std::make_shared<StrResource>("value2");
         });
 
@@ -58,12 +59,12 @@ TEST_CASE("basic") {
     // Collect resources that expired
     rm.garbageCollect();
 
-    CHECK(rm.find("some-key"));
-    CHECK_FALSE(rm.find("some-other-key"));
+    CHECK(cache.find("some-key"));
+    CHECK_FALSE(cache.find("some-other-key"));
 
     {
         // test that if we hold the resource, it won't be collected
-        auto res = rm.findOrCreate("some-other-key", [](const std::string&) {
+        auto res = cache.findOrCreate("some-other-key", [](const std::string&) {
             return std::make_shared<StrResource>("value3");
         });
 
@@ -74,13 +75,13 @@ TEST_CASE("basic") {
         rm.garbageCollect();
 
         CHECK(*res == "value3");
-        CHECK(res == rm.find("some-other-key"));
+        CHECK(res == cache.find("some-other-key"));
     }
 
     // Force to garbage collect all resources
     rm.garbageCollect(true);
 
     // Check that all resources are collected, but the one we hold is not
-    CHECK(rm.find("orig"));
-    CHECK_FALSE(rm.find("some-key"));
+    CHECK(cache.find("orig"));
+    CHECK_FALSE(cache.find("some-key"));
 }

@@ -14,7 +14,7 @@
 #include <ac/local/ServiceFactory.hpp>
 #include <ac/local/ServiceInfo.hpp>
 #include <ac/local/Backend.hpp>
-#include <ac/local/ResourceManager.hpp>
+#include <ac/local/ResourceCache.hpp>
 
 #include <ac/schema/OpDispatchHelpers.hpp>
 #include <ac/schema/FrameHelpers.hpp>
@@ -178,21 +178,21 @@ xec::coro<void> Dummy_runModel(IoEndpoint& io, dummy::Model& model) {
 struct DummyModelResource : public dummy::Model, public Resource{
     using dummy::Model::Model;
 
-    using Manager = ResourceManager<dummy::Model::Params, DummyModelResource>;
+    using Cache = ResourceCache<dummy::Model::Params, DummyModelResource>;
     using Lock = ResourceLock<DummyModelResource>;
 };
 
-xec::coro<void> Dummy_runSession(StreamEndpoint ep, DummyModelResource::Manager& rm) {
+xec::coro<void> Dummy_runSession(StreamEndpoint ep, DummyModelResource::Cache& rm) {
     using Schema = sc::StateInitial;
 
     struct Runner : public BasicRunner {
-        Runner(DummyModelResource::Manager& rm)
-            : m_resourceManager(rm)
+        Runner(DummyModelResource::Cache& rm)
+            : m_resourceCache(rm)
         {
             schema::registerHandlers<Schema::Ops>(m_dispatcherData, *this);
         }
 
-        DummyModelResource::Manager& m_resourceManager;
+        DummyModelResource::Cache& m_resourceCache;
 
         DummyModelResource::Lock model;
 
@@ -205,10 +205,10 @@ xec::coro<void> Dummy_runSession(StreamEndpoint ep, DummyModelResource::Manager&
 
         Schema::OpLoadModel::Return on(Schema::OpLoadModel, Schema::OpLoadModel::Params sparams) {
             auto mparams = ModelParams_fromSchema(sparams);
-            model = m_resourceManager.find(mparams);
+            model = m_resourceCache.find(mparams);
 
             if (!model) {
-                model = m_resourceManager.add(
+                model = m_resourceCache.add(
                     mparams,
                     std::make_shared<DummyModelResource>(mparams)
                 );
@@ -247,14 +247,15 @@ ServiceInfo g_serviceInfo = {
 struct DummyService final : public Service {
     xec::strand cpuStrand;
 
-    DummyModelResource::Manager m_resourceManager;
+    ac::local::ResourceManager m_resourceManager;
+    DummyModelResource::Cache m_resourceCache{m_resourceManager};
 
     virtual const ServiceInfo& info() const noexcept override {
         return g_serviceInfo;
     }
 
     virtual void createSession(frameio::StreamEndpoint ep, Dict) override {
-        co_spawn(cpuStrand, Dummy_runSession(std::move(ep), m_resourceManager));
+        co_spawn(cpuStrand, Dummy_runSession(std::move(ep), m_resourceCache));
     }
 };
 
