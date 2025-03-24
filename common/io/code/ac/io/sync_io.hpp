@@ -24,6 +24,10 @@ struct sync_io_ctx : private xec::context {
     xec::context& get_executor() {
         return *this;
     }
+
+    ~sync_io_ctx() {
+        run_tasks();
+    }
 };
 
 template <typename RS, typename WS>

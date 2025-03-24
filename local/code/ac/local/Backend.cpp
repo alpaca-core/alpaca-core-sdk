@@ -9,14 +9,33 @@
 #include "PluginManager.hpp"
 #include "Lib.hpp"
 #include "Logging.hpp"
+#include "BackendWorkerStrand.hpp"
 
 #include <ac/frameio/local/BufferedChannelStream.hpp>
 #include <ac/frameio/StreamEndpoint.hpp>
+#include <ac/xec/coro.hpp>
 
 #include <astl/throw_stdex.hpp>
 #include <astl/id_ptr.hpp>
 
 namespace ac::local {
+
+namespace {
+struct BackendWorkerStrandState : public BackendWorkerStrand, public xec::coro_state {
+    BackendWorkerStrandState(Backend& backend, std::string name, const xec::strand& ex)
+        : BackendWorkerStrand(backend, std::move(name), ex)
+        , xec::coro_state(ex)
+    {}
+
+    xec::coro<void> gc() {
+        while (true) {
+            auto aborted = co_await m_wobj.wait(astl::timeout(std::chrono::seconds(10)));
+            if (aborted) co_return;
+            resourceManager.garbageCollect();
+        }
+    }
+};
+}
 
 Backend::Backend(std::string_view name, Xctx xctx)
     : m_name(astl::id_or_ptr(name, this))
@@ -24,9 +43,20 @@ Backend::Backend(std::string_view name, Xctx xctx)
 {
     // temporary here until we have a better way to register services
     registerLibServices();
+
+    auto cpu = std::make_shared<BackendWorkerStrandState>(*this, "cpu", m_xctx.cpu);
+    m_cpuWorkerStrand = cpu;
+    co_spawn(cpu, cpu->gc());
+
+    auto gpu = std::make_shared<BackendWorkerStrandState>(*this, "gpu", m_xctx.gpu);
+    m_gpuWorkerStrand = gpu;
+    co_spawn(gpu, gpu->gc());
 }
 
-Backend::~Backend() = default;
+Backend::~Backend() {
+    m_cpuWorkerStrand->m_wobj.notify_one();
+    m_gpuWorkerStrand->m_wobj.notify_one();
+}
 
 void Backend::registerService(const ServiceFactory& factory, const PluginInfo* pluginInfo) {
     std::lock_guard l(m_mutex);

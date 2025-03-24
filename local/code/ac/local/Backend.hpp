@@ -26,6 +26,7 @@ class Service;
 class ServiceFactory;
 struct PluginInfo;
 class PluginManager;
+class BackendWorkerStrand;
 
 // ideally this would be a nested type in Backend, but then a clang bug is triggered:
 // https://bugs.llvm.org/show_bug.cgi?id=36684
@@ -75,6 +76,9 @@ public:
 
     const Xctx& xctx() const { return m_xctx; }
 
+    BackendWorkerStrand& cpuWorkerStrand() { return *m_cpuWorkerStrand; }
+    BackendWorkerStrand& gpuWorkerStrand() { return *m_gpuWorkerStrand; }
+
     static frameio::ChannelEndpoints getEndpoints(BackendIoBufferSizes bufferSizes = {});
 
     frameio::StreamEndpoint connect(std::string_view serviceNameMatch, Dict target, BackendIoBufferSizes bufferSizes = {});
@@ -87,6 +91,7 @@ protected:
 private:
     std::string m_name;
     Xctx m_xctx;
+    std::shared_ptr<BackendWorkerStrand> m_cpuWorkerStrand, m_gpuWorkerStrand;
 
     Service* getService(std::string_view serviceNameMatch);
     frameio::StreamEndpoint connect(Service& service, Dict target, BackendIoBufferSizes bufferSizes);
