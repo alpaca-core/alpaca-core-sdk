@@ -8,7 +8,9 @@
 #include "ac-test-data-dummy-models.h"
 
 #include <ac/local/SyncBackend.hpp>
-#include <ac/FrameUtil.hpp>
+#include <ac/schema/FrameHelpers.hpp>
+#include <ac/schema/StateChange.hpp>
+#include <ac/schema/Error.hpp>
 
 #include <doctest/doctest.h>
 
@@ -25,9 +27,7 @@ Session createTestSession() {
 void checkError(Session& s, const std::string_view msg) {
     auto res = s.get();
     CHECK(res.success());
-    auto& frame = res.value;
-    CHECK(frame.op == "error");
-    CHECK(frame.data.get<std::string_view>() == msg);
+    CHECK(Frame_optTo(ac::schema::Error{}, std::move(res.value)) == msg);
 }
 
 void checkRunResult(Session& s, const std::string_view msg) {
@@ -41,8 +41,7 @@ void checkRunResult(Session& s, const std::string_view msg) {
 void checkStateChange(Session& s, std::string_view expectedState) {
     auto res = s.get();
     CHECK(res.success());
-    CHECK(Frame_isStateChange(res.value));
-    CHECK(Frame_getStateChange(res.value) == expectedState);
+    CHECK(Frame_optTo(ac::schema::StateChange{}, std::move(res.value)) == expectedState);
 }
 
 TEST_CASE("bad model") {

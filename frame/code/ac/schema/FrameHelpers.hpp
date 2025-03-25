@@ -4,33 +4,50 @@
 #pragma once
 #include "SchemaVisitor.hpp"
 #include "../Frame.hpp"
+#include <cassert>
 
 namespace ac::schema {
 
-template <typename Op>
-Frame Frame_fromOpParams(Op, typename Op::Params p) {
+template <typename T>
+bool Frame_is(T, const Frame& frame) {
+    return frame.op == T::id;
+}
+
+template <typename T>
+Frame Frame_from(T, typename T::Type t) {
     Frame ret;
-    ret.op = Op::id;
-    ret.data = schema::Struct_toDict(std::move(p));
+    ret.op = T::id;
+    ret.data = Struct_toDict(std::move(t));
     return ret;
 }
 
+template <typename T>
+typename T::Type Frame_to(T, Frame f) {
+    if (!Frame_is(T{}, f)) {
+        throw_ex{} << "expected frame " << T::id << ", but got " << f.op;
+    }
+    return Struct_fromDict<typename T::Type>(std::move(f.data));
+}
+
+template <typename T>
+std::optional<typename T::Type> Frame_optTo(T, Frame f) {
+    if (!Frame_is(T{}, f)) {
+        return std::nullopt;
+    }
+    return Struct_fromDict<typename T::Type>(std::move(f.data));
+}
+
 template <typename Op>
-typename Op::Return Frame_toOpReturn(Op, Frame f) {
-    return schema::Struct_fromDict<typename Op::Return>(std::move(f.data));
-}
+struct OpParams {
+    static constexpr auto id = Op::id;
+    using Type = typename Op::Params;
+};
 
-template <typename Stream>
-Frame Frame_fromStreamType(Stream, typename Stream::Type s) {
-    Frame ret;
-    ret.op = Stream::id;
-    ret.data = schema::Struct_toDict(std::move(s));
-    return ret;
-}
+template <typename Op>
+struct OpReturn {
+    static constexpr auto id = Op::id;
+    using Type = typename Op::Return;
+};
 
-template <typename Stream>
-typename Stream::Type Frame_toStreamType(Stream, Frame f) {
-    return schema::Struct_fromDict<typename Stream::Type>(std::move(f.data));
-}
 
 } // namespace ac::schema

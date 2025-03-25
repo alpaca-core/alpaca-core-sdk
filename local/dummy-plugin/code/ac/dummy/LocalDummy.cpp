@@ -19,8 +19,9 @@
 
 #include <ac/schema/OpDispatchHelpers.hpp>
 #include <ac/schema/FrameHelpers.hpp>
+#include <ac/schema/StateChange.hpp>
+#include <ac/schema/Error.hpp>
 
-#include <ac/FrameUtil.hpp>
 #include <ac/frameio/IoEndpoint.hpp>
 
 #include <ac/xec/coro.hpp>
@@ -54,14 +55,14 @@ struct BasicRunner {
             throw;
         }
         catch (std::exception& e) {
-            return {"error", e.what()};
+            return Frame_from(schema::Error{}, e.what());
         }
     }
 };
 
 xec::coro<void> Dummy_runStream(IoEndpoint& io, astl::generator<const std::string&> s) {
     using Schema = sc::StateStreaming;
-    co_await io.push(Frame_stateChange(Schema::id));
+    co_await io.push(Frame_from(schema::StateChange{}, Schema::id));
     Frame abortFrame;
     for (auto& w : s) {
         if (io.get(abortFrame).success()) {
@@ -73,7 +74,7 @@ xec::coro<void> Dummy_runStream(IoEndpoint& io, astl::generator<const std::strin
             }
         }
 
-        co_await io.push(Frame_fromStreamType(Schema::StreamToken{}, w));
+        co_await io.push(Frame_from(Schema::StreamToken{}, w));
     }
 }
 
@@ -125,7 +126,7 @@ xec::coro<void> Dummy_runInstance(IoEndpoint& io, std::unique_ptr<dummy::Instanc
         }
     };
 
-    co_await io.push(Frame_stateChange(Schema::id));
+    co_await io.push(Frame_from(schema::StateChange{}, Schema::id));
 
     Runner runner(io, *instance);
 
@@ -134,7 +135,7 @@ xec::coro<void> Dummy_runInstance(IoEndpoint& io, std::unique_ptr<dummy::Instanc
         co_await io.push(runner.dispatch(f.value));
         if (runner.nextState) {
             co_await runner.nextState;
-            co_await io.push(Frame_stateChange(Schema::id));
+            co_await io.push(Frame_from(schema::StateChange{}, Schema::id));
         }
     }
 }
@@ -163,7 +164,7 @@ xec::coro<void> Dummy_runModel(IoEndpoint& io, dummy::Model& model) {
         }
     };
 
-    co_await io.push(Frame_stateChange(Schema::id));
+    co_await io.push(Frame_from(schema::StateChange{}, Schema::id));
 
     Runner runner(model);
 
@@ -223,7 +224,7 @@ xec::coro<void> Dummy_runSession(StreamEndpoint ep, DummyModelResource::Cache& r
         auto ex = co_await xec::executor{};
         IoEndpoint io(std::move(ep), ex);
 
-        co_await io.push(Frame_stateChange(Schema::id));
+        co_await io.push(Frame_from(schema::StateChange{}, Schema::id));
 
         Runner runner(rm);
 

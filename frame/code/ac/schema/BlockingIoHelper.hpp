@@ -3,9 +3,11 @@
 //
 #pragma once
 #include "FrameHelpers.hpp"
+#include "Error.hpp"
+#include "StateChange.hpp"
+
 #include "../frameio/BlockingIo.hpp"
 #include "../frameio/StreamEndpointFwd.hpp"
-#include "../FrameUtil.hpp"
 #include <astl/throw_stdex.hpp>
 #include <astl/generator.hpp>
 
@@ -25,8 +27,8 @@ public:
     }
 
     static void frameErrorCheck(const Frame& frame) {
-        if (Frame_isError(frame)) {
-            throw_ex{} << "error: " << Frame_getError(frame);
+        if (auto err = Frame_optTo(Error{}, frame)) {
+            throw_ex{} << "error: " << *err;
         }
     }
 
@@ -34,7 +36,8 @@ public:
     void expectState() {
         auto res = m_io.poll();
         pollStatusCheck(res);
-        auto state = Frame_getStateChange(res.value);
+
+        auto state = Frame_to(StateChange{}, std::move(res.value));
         if (state != State::id) {
             throw_ex{} << "unexpected state: " << state;
         }
@@ -46,8 +49,8 @@ public:
             auto res = m_io.poll();
             pollStatusCheck(res);
             frameErrorCheck(res.value);
-            auto state = Frame_getStateChange(res.value);
-            if (state == State::id) {
+
+            if (auto state = Frame_to(StateChange{}, std::move(res.value))) {
                 return;
             }
         }
@@ -55,14 +58,14 @@ public:
 
     template <typename Op>
     typename Op::Return call(typename Op::Params p) {
-        auto status = m_io.push(Frame_fromOpParams(Op{}, std::move(p)));
+        auto status = m_io.push(Frame_from(OpParams<Op>{}, std::move(p)));
         if (!status.success()) {
             throw_ex{} << "push failed: " << status.bits;
         }
         auto res = m_io.poll();
         pollStatusCheck(res);
         frameErrorCheck(res.value);
-        return Frame_toOpReturn(Op{}, std::move(res.value));
+        return Frame_to(OpReturn<Op>{}, std::move(res.value));
     }
 
     template <typename StreamOp, typename EndState = void>
@@ -78,15 +81,14 @@ public:
             pollStatusCheck(res);
             frameErrorCheck(res.value);
 
-            auto stateChange = Frame_getStateChange(res.value);
-            if (!stateChange.empty()) {
+            if (auto stateChange = Frame_optTo(StateChange{}, res.value)) {
                 if (endState.has_value() && stateChange != endState.value()) {
-                    throw_ex{} << "wrong state: " << stateChange << " (expected: " << endState.value() << ")";
+                    throw_ex{} << "wrong state: " << *stateChange << " (expected: " << endState.value() << ")";
                 }
                 co_return;
             }
 
-            auto data = Frame_toStreamType(StreamOp{}, res.value);
+            auto data = Frame_to(StreamOp{}, res.value);
             co_yield data;
         }
     }
