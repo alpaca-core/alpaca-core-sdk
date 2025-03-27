@@ -11,6 +11,7 @@
 #include <ac/schema/FrameHelpers.hpp>
 #include <ac/schema/StateChange.hpp>
 #include <ac/schema/Error.hpp>
+#include <ac/schema/Abort.hpp>
 
 #include <doctest/doctest.h>
 
@@ -27,7 +28,7 @@ Session createTestSession() {
 void checkError(Session& s, const std::string_view msg) {
     auto res = s.get();
     CHECK(res.success());
-    CHECK(Frame_optTo(ac::schema::Error{}, std::move(res.value)) == msg);
+    CHECK(Frame_optTo(ac::schema::Error{}, res.value) == msg);
 }
 
 void checkRunResult(Session& s, const std::string_view msg) {
@@ -41,7 +42,7 @@ void checkRunResult(Session& s, const std::string_view msg) {
 void checkStateChange(Session& s, std::string_view expectedState) {
     auto res = s.get();
     CHECK(res.success());
-    CHECK(Frame_optTo(ac::schema::StateChange{}, std::move(res.value)) == expectedState);
+    CHECK(Frame_optTo(ac::schema::StateChange{}, res.value) == expectedState);
 }
 
 TEST_CASE("bad model") {
@@ -61,7 +62,6 @@ TEST_CASE("bad instance") {
     checkStateChange(s, "dummy");
 
     s.put({"load_model", {{"file_path", AC_DUMMY_MODEL_SMALL}}});
-    CHECK(s.get().success());
     checkStateChange(s, "model_loaded");
 
     s.put({"nope", {}});
@@ -79,11 +79,9 @@ TEST_CASE("instance") {
         checkStateChange(s, "dummy");
 
         s.put({"load_model", {{"file_path", AC_DUMMY_MODEL_SMALL}}});
-        CHECK(s.get().success());
         checkStateChange(s, "model_loaded");
 
         s.put({"create_instance", {}});
-        CHECK(s.get().success());
         checkStateChange(s, "instance");
 
         s.put({"nope", {}});
@@ -109,11 +107,9 @@ TEST_CASE("instance") {
         checkStateChange(s, "dummy");
 
         s.put({"load_model", {{"file_path", AC_DUMMY_MODEL_SMALL}}});
-        CHECK(s.get().success());
         checkStateChange(s, "model_loaded");
 
         s.put({"create_instance", {{"cutoff", 2}}});
-        CHECK(s.get().success());
         checkStateChange(s, "instance");
 
         s.put({ "run", {{"input", {"a", "b", "c"}}} });
@@ -127,11 +123,9 @@ TEST_CASE("instance") {
         checkStateChange(s, "dummy");
 
         s.put({"load_model", {}});
-        CHECK(s.get().success());
         checkStateChange(s, "model_loaded");
 
         s.put({"create_instance", {}});
-        CHECK(s.get().success());
         checkStateChange(s, "instance");
 
         s.put({"run", {{"input", {"a", "b"}}}});
@@ -145,21 +139,14 @@ TEST_CASE("instance") {
         checkStateChange(s, "dummy");
 
         s.put({ "load_model", {{"file_path", AC_DUMMY_MODEL_SMALL}} });
-        CHECK(s.get().success());
         checkStateChange(s, "model_loaded");
 
         s.put({ "create_instance", {} });
-        CHECK(s.get().success());
         checkStateChange(s, "instance");
 
         s.put({"stream", {{"input", {"a", "b"}}}});
+
         auto f = s.get();
-        CHECK(f.success());
-        CHECK(f.value.op == "stream");
-
-        checkStateChange(s, "streaming");
-
-        f = s.get();
         CHECK(f.success());
         CHECK(f.value.op == "token");
         CHECK(f.value.data.get<std::string>() == "a");
@@ -179,27 +166,26 @@ TEST_CASE("instance") {
         CHECK(f.value.op == "token");
         CHECK(f.value.data.get<std::string>() == "bate");
 
-        checkStateChange(s, "instance");
-
-        s.put({"stream", {{"input", {"x", "y"}}}});
         f = s.get();
         CHECK(f.success());
         CHECK(f.value.op == "stream");
 
-        checkStateChange(s, "streaming");
+        s.put({"stream", {{"input", {"x", "y"}}}});
 
         f = s.get();
         CHECK(f.success());
         CHECK(f.value.op == "token");
         CHECK(f.value.data.get<std::string>() == "x");
 
-        s.put({"abort", {}});
+        s.put(Frame_from(ac::schema::Abort{}, {}));
 
         f = s.get();
         CHECK(f.success());
         CHECK(f.value.op == "token");
         CHECK(f.value.data.get<std::string>() == "soco");
 
-        checkStateChange(s, "instance");
+        f = s.get();
+        CHECK(f.success());
+        CHECK(f.value.op == "stream");
     }
 }

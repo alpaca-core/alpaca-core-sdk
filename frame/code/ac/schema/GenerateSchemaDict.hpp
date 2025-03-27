@@ -41,13 +41,13 @@ Dict State_generateSchemaDict(State) {
 template <typename Dict, typename Interface>
 Dict Interface_generateSchemaDict(Interface) {
     Dict dict;
-    dict["id"] = Interface::id;
-    dict["description"] = Interface::desc;
+    //dict["id"] = Interface::id;
+    //dict["description"] = Interface::desc;
 
-    auto& states = dict["states"];
-    astl::tuple::for_each(typename Interface::States{}, [&]<typename State>(State) {
-        states.push_back(State_generateSchemaDict<Dict>(State{}));
-    });
+    //auto& states = dict["states"];
+    //astl::tuple::for_each(typename Interface::States{}, [&]<typename State>(State) {
+    //    states.push_back(State_generateSchemaDict<Dict>(State{}));
+    //});
 
     return dict;
 }

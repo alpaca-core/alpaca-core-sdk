@@ -30,7 +30,7 @@ typename T::Type Frame_to(T, Frame f) {
 }
 
 template <typename T>
-std::optional<typename T::Type> Frame_optTo(T, Frame f) {
+std::optional<typename T::Type> Frame_optTo(T, Frame& f) {
     if (!Frame_is(T{}, f)) {
         return std::nullopt;
     }

@@ -13,12 +13,9 @@
 
 namespace ac::schema {
 
-class BlockingIoHelper {
-    frameio::BlockingIo m_io;
+class BlockingIoHelper : public frameio::BlockingIo {
 public:
-    explicit BlockingIoHelper(frameio::StreamEndpoint ep) : m_io(std::move(ep)) {}
-
-    frameio::BlockingIo& io() { return m_io; }
+    using frameio::BlockingIo::blocking_io;
 
     static void pollStatusCheck(const io::status& s) {
         if (!s.success()) {
@@ -26,18 +23,22 @@ public:
         }
     }
 
-    static void frameErrorCheck(const Frame& frame) {
+    static void frameErrorCheck(Frame& frame) {
         if (auto err = Frame_optTo(Error{}, frame)) {
             throw_ex{} << "error: " << *err;
         }
     }
 
+    Frame safePoll() {
+        auto res = poll();
+        pollStatusCheck(res);
+        frameErrorCheck(*res);
+        return std::move(*res);
+    }
+
     template <typename State>
     void expectState() {
-        auto res = m_io.poll();
-        pollStatusCheck(res);
-
-        auto state = Frame_to(StateChange{}, std::move(res.value));
+        auto state = Frame_to(StateChange{}, safePoll());
         if (state != State::id) {
             throw_ex{} << "unexpected state: " << state;
         }
@@ -46,26 +47,25 @@ public:
     template <typename State>
     void awaitState() {
         while (true) {
-            auto res = m_io.poll();
-            pollStatusCheck(res);
-            frameErrorCheck(res.value);
-
-            if (auto state = Frame_to(StateChange{}, std::move(res.value))) {
+            auto res = safePoll();
+            if (auto state = Frame_optTo(StateChange{}, res)) {
                 return;
             }
         }
     }
 
     template <typename Op>
-    typename Op::Return call(typename Op::Params p) {
-        auto status = m_io.push(Frame_from(OpParams<Op>{}, std::move(p)));
+    void initiate(typename Op::Params p) {
+        auto status = push(Frame_from(OpParams<Op>{}, std::move(p)));
         if (!status.success()) {
             throw_ex{} << "push failed: " << status.bits;
         }
-        auto res = m_io.poll();
-        pollStatusCheck(res);
-        frameErrorCheck(res.value);
-        return Frame_to(OpReturn<Op>{}, std::move(res.value));
+    }
+
+    template <typename Op>
+    typename Op::Return call(typename Op::Params p) {
+        initiate<Op>(std::move(p));
+        return Frame_to(OpReturn<Op>{}, safePoll());
     }
 
     template <typename StreamOp, typename EndState = void>
@@ -77,23 +77,21 @@ public:
         }
 
         while (true) {
-            auto res = m_io.poll();
+            auto res = poll();
             pollStatusCheck(res);
-            frameErrorCheck(res.value);
+            frameErrorCheck(*res);
 
-            if (auto stateChange = Frame_optTo(StateChange{}, res.value)) {
-                if (endState.has_value() && stateChange != endState.value()) {
-                    throw_ex{} << "wrong state: " << *stateChange << " (expected: " << endState.value() << ")";
+            if (auto stateChange = Frame_optTo(StateChange{}, *res)) {
+                if (endState.has_value() && stateChange != *endState) {
+                    throw_ex{} << "wrong state: " << *stateChange << " (expected: " << *endState << ")";
                 }
                 co_return;
             }
 
-            auto data = Frame_to(StreamOp{}, res.value);
+            auto data = Frame_to(StreamOp{}, *res);
             co_yield data;
         }
     }
-
-    void close() { m_io.close(); }
 };
 
 

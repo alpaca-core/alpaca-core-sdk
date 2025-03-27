@@ -3,6 +3,8 @@
 //
 #pragma once
 #include <ac/schema/Field.hpp>
+#include <ac/schema/Progress.hpp>
+#include <ac/schema/Abort.hpp>
 #include <vector>
 #include <string>
 #include <tuple>
@@ -11,7 +13,7 @@ namespace ac::schema {
 
 inline namespace dummy {
 
-struct StateInitial {
+struct StateDummy {
     static constexpr auto id = "dummy";
     static constexpr auto desc = "Initial dummy state";
 
@@ -30,42 +32,11 @@ struct StateInitial {
             }
         };
 
-        using Return = nullptr_t;
+        using Ins = std::tuple<>;
+        using Outs = std::tuple<sys::Progress>;
     };
 
-    using Ops = std::tuple<OpLoadModel>;
-    using Ins = std::tuple<>;
-    using Outs = std::tuple<>;
-};
-
-struct StateLoadingModel {
-    static constexpr auto id = "loading_model";
-    static constexpr auto desc = "Loading the dummy model. After completion the state will transition to Model Loaded";
-
-    struct OpAbort {
-        static constexpr auto id = "abort";
-        static constexpr auto desc = "Abort the model loading";
-        using Params = nullptr_t;
-        using Return = nullptr_t;
-    };
-
-    struct StreamProgress {
-        static constexpr auto id = "progress";
-        static constexpr auto desc = "Progress stream";
-
-        struct Type {
-            Field<int> progress;
-
-            template <typename Visitor>
-            void visitFields(Visitor& v) {
-                v(progress, "progress", "Progress from 0 to 1");
-            };
-        };
-    };
-
-    using Ops = std::tuple<OpAbort>;
-    using Ins = std::tuple<>;
-    using Outs = std::tuple<StreamProgress>;
+    using States = std::tuple<OpLoadModel>;
 };
 
 struct StateModelLoaded {
@@ -84,35 +55,9 @@ struct StateModelLoaded {
                 v(cutoff, "cutoff", "Cut off model data to n-th element (or don't cut if -1)");
             }
         };
-
-        using Return = nullptr_t;
     };
 
-    using Ops = std::tuple<OpCreateInstance>;
-    using Ins = std::tuple<>;
-    using Outs = std::tuple<>;
-};
-
-struct StateStreaming {
-    static constexpr auto id = "streaming";
-    static constexpr auto desc = "Streaming state";
-
-    struct OpAbort {
-        static constexpr auto id = "abort";
-        static constexpr auto desc = "Abort the streaming";
-        using Params = nullptr_t;
-        using Return = nullptr_t;
-    };
-
-    struct StreamToken {
-        static constexpr auto id = "token";
-        static constexpr auto desc = "Token stream";
-        using Type = std::string;
-    };
-
-    using Ops = std::tuple<OpAbort>;
-    using Ins = std::tuple<>;
-    using Outs = std::tuple<StreamToken>;
+    using States = std::tuple<OpCreateInstance>;
 };
 
 struct StateInstance {
@@ -152,19 +97,23 @@ struct StateInstance {
         static constexpr auto desc = "Run the dummy inference and stream the output";
 
         using Params = InferenceParams;
+
+        struct StreamToken {
+            static constexpr auto id = "token";
+            static constexpr auto desc = "Token stream";
+            using Type = std::string;
+        };
+
         using Return = nullptr_t;
+        using Outs = std::tuple<StreamToken>;
     };
 
     using Ops = std::tuple<OpRun, OpStream>;
-    using Ins = std::tuple<>;
-    using Outs = std::tuple<>;
 };
 
 struct Interface {
     static inline constexpr std::string_view id = "dummy";
     static inline constexpr std::string_view desc = "Dummy inference for tests, examples, and experiments.";
-
-    using States = std::tuple<StateInitial, StateLoadingModel, StateModelLoaded, StateInstance>;
 };
 
 } // namespace dummy

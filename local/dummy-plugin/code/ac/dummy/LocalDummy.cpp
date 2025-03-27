@@ -29,6 +29,7 @@
 
 #include <astl/move.hpp>
 #include <astl/throw_stdex.hpp>
+#include <astl/iile.h>
 
 #include <deque>
 
@@ -40,206 +41,182 @@ namespace sc = schema::dummy;
 
 using namespace ac::frameio;
 
-struct BasicRunner {
-    schema::OpDispatcherData m_dispatcherData;
-
-    Frame dispatch(Frame& f) {
-        try {
-            auto ret = m_dispatcherData.dispatch(f.op, std::move(f.data));
-            if (!ret) {
-                throw_ex{} << "dummy: unknown op: " << f.op;
-            }
-            return {f.op, *ret};
-        }
-        catch (io::stream_closed_error&) {
-            throw;
-        }
-        catch (std::exception& e) {
-            return Frame_from(schema::Error{}, e.what());
-        }
-    }
-};
-
-xec::coro<void> Dummy_runStream(IoEndpoint& io, astl::generator<const std::string&> s) {
-    using Schema = sc::StateStreaming;
-    co_await io.push(Frame_from(schema::StateChange{}, Schema::id));
-    Frame abortFrame;
-    for (auto& w : s) {
-        if (io.get(abortFrame).success()) {
-            if (abortFrame.op == Schema::OpAbort::id) {
-                co_return;
-            }
-            else {
-                DUMMY_LOG(Warning, "Unexpected frame: ", abortFrame.op);
-            }
-        }
-
-        co_await io.push(Frame_from(Schema::StreamToken{}, w));
-    }
-}
-
-xec::coro<void> Dummy_runInstance(IoEndpoint& io, std::unique_ptr<dummy::Instance> instance) {
-    using Schema = sc::StateInstance;
-
-    struct Runner : public BasicRunner {
-        IoEndpoint& m_io;
-        dummy::Instance& m_instance;
-
-        explicit Runner(IoEndpoint& io, dummy::Instance& instance)
-            : m_io(io)
-            , m_instance(instance)
-
-        {
-            schema::registerHandlers<Schema::Ops>(m_dispatcherData, *this);
-        }
-
-        xec::coro<void> nextState;
-
-        astl::generator<const std::string&> createSession(Schema::StateInstance::InferenceParams& params) {
-            dummy::Instance::SessionParams sparams;
-            sparams.splice = params.splice;
-            sparams.throwOn = params.throwOn;
-
-            return m_instance.newSession(std::move(params.input), sparams);
-        }
-
-        Schema::OpRun::Return on(Schema::OpRun, Schema::OpRun::Params params) {
-            auto s = createSession(params);
-
-            Schema::OpRun::Return ret;
-            auto& res = ret.result.materialize();
-            for (auto& w : s) {
-                res += w;
-                res += ' ';
-            }
-            if (!res.empty()) {
-                // remove last space
-                res.pop_back();
-            }
-
-            return ret;
-        }
-
-        Schema::OpStream::Return on(Schema::OpStream, Schema::OpStream::Params params) {
-            nextState = Dummy_runStream(m_io, createSession(params));
-            return {};
-        }
-    };
-
-    co_await io.push(Frame_from(schema::StateChange{}, Schema::id));
-
-    Runner runner(io, *instance);
-
-    while (true) {
-        auto f = co_await io.poll();
-        co_await io.push(runner.dispatch(f.value));
-        if (runner.nextState) {
-            co_await runner.nextState;
-            co_await io.push(Frame_from(schema::StateChange{}, Schema::id));
-        }
-    }
-}
-
-xec::coro<void> Dummy_runModel(IoEndpoint& io, dummy::Model& model) {
-    using Schema = sc::StateModelLoaded;
-
-    struct Runner : public BasicRunner {
-        dummy::Model& model;
-
-        explicit Runner(dummy::Model& m) : model(m) {
-            schema::registerHandlers<Schema::Ops>(m_dispatcherData, *this);
-        }
-
-        std::unique_ptr<dummy::Instance> instance;
-
-        static dummy::Instance::InitParams InitParams_fromSchema(sc::StateModelLoaded::OpCreateInstance::Params schemaParams) {
-            dummy::Instance::InitParams ret;
-            ret.cutoff = schemaParams.cutoff;
-            return ret;
-        }
-
-        Schema::OpCreateInstance::Return on(Schema::OpCreateInstance, Schema::OpCreateInstance::Params params) {
-            instance = std::make_unique<dummy::Instance>(model, InitParams_fromSchema(params));
-            return {};
-        }
-    };
-
-    co_await io.push(Frame_from(schema::StateChange{}, Schema::id));
-
-    Runner runner(model);
-
-    while (true) {
-        auto f = co_await io.poll();
-        co_await io.push(runner.dispatch(f.value));
-        if (runner.instance) {
-            co_await Dummy_runInstance(io, astl::move(runner.instance));
-        }
-    }
-}
-
-struct DummyModelResource : public dummy::Model, public Resource{
+struct DummyModelResource : public dummy::Model, public Resource {
     using dummy::Model::Model;
 
     using Cache = ResourceCache<dummy::Model::Params, DummyModelResource>;
     using Lock = ResourceLock<DummyModelResource>;
 };
 
-xec::coro<void> Dummy_runSession(StreamEndpoint ep, DummyModelResource::Cache& rm) {
-    using Schema = sc::StateInitial;
+struct Dummy : public xec::coro_state {
+    DummyModelResource::Cache& m_resourceCache;
+public:
+    Dummy(xec::strand ex, DummyModelResource::Cache& rm)
+        : coro_state(std::move(ex))
+        , m_resourceCache(rm)
+    {}
 
-    struct Runner : public BasicRunner {
-        Runner(DummyModelResource::Cache& rm)
-            : m_resourceCache(rm)
-        {
-            schema::registerHandlers<Schema::Ops>(m_dispatcherData, *this);
-        }
+    Frame unknownOpError(const Frame& f) {
+        return Frame_from(schema::Error{}, "dummy: unknown op: " + f.op);
+    }
 
-        DummyModelResource::Cache& m_resourceCache;
+    xec::coro<Frame> runStream(IoEndpoint& io, astl::generator<const std::string&>& session) {
+        using Schema = sc::StateInstance::OpStream;
 
-        DummyModelResource::Lock model;
+        auto ret = Frame_from(schema::OpReturn<Schema>{}, {});
 
-        static dummy::Model::Params ModelParams_fromSchema(sc::StateInitial::OpLoadModel::Params schemaParams) {
-            dummy::Model::Params ret;
-            ret.path = schemaParams.filePath.valueOr("");
-            ret.splice = astl::move(schemaParams.spliceString.valueOr(""));
-            return ret;
-        }
-
-        Schema::OpLoadModel::Return on(Schema::OpLoadModel, Schema::OpLoadModel::Params sparams) {
-            auto mparams = ModelParams_fromSchema(sparams);
-            model = m_resourceCache.find(mparams);
-
-            if (!model) {
-                model = m_resourceCache.add(
-                    mparams,
-                    std::make_shared<DummyModelResource>(mparams)
-                );
+        Frame abortFrame;
+        for (auto& w : session) {
+            if (io.get(abortFrame).success()) {
+                if (Frame_is(schema::Abort{}, abortFrame)) {
+                    co_return ret;
+                }
+                else {
+                    DUMMY_LOG(Warning, "Unexpected frame: ", abortFrame.op);
+                }
             }
 
-            return {};
+            co_await io.push(Frame_from(Schema::StreamToken{}, w));
         }
-    };
 
-    try {
-        auto ex = co_await xec::executor{};
-        IoEndpoint io(std::move(ep), ex);
+        co_return ret;
+    }
 
+    xec::coro<void> runInstance(IoEndpoint& io, dummy::Model& model, const sc::StateModelLoaded::OpCreateInstance::Params& ciParams) {
+        auto iparams = iile([&] {
+            dummy::Instance::InitParams ret;
+            ret.cutoff = ciParams.cutoff;
+            return ret;
+        });
+        auto instance = std::make_unique<dummy::Instance>(model, iparams);
+
+        using Schema = sc::StateInstance;
         co_await io.push(Frame_from(schema::StateChange{}, Schema::id));
 
-        Runner runner(rm);
+        auto createSession = [&instance](Schema::InferenceParams& params) {
+            dummy::Instance::SessionParams sparams;
+            sparams.splice = params.splice;
+            sparams.throwOn = params.throwOn;
+
+            return instance->newSession(std::move(params.input), sparams);
+        };
 
         while (true) {
             auto f = co_await io.poll();
-            co_await io.push(runner.dispatch(f.value));
-            if (runner.model) {
-                co_await Dummy_runModel(io, *runner.model);
+            Frame fret;
+
+            try {
+                if (auto run = Frame_optTo(schema::OpParams<Schema::OpRun>{}, *f)) {
+                    auto s = createSession(*run);
+
+                    Schema::OpRun::Return ret;
+                    auto& res = ret.result.materialize();
+                    for (auto& w : s) {
+                        res += w;
+                        res += ' ';
+                    }
+                    if (!res.empty()) {
+                        // remove last space
+                        res.pop_back();
+                    }
+
+                    fret = Frame_from(schema::OpReturn<Schema::OpRun>{}, ret);
+                }
+                else if (auto stream = Frame_optTo(schema::OpParams<Schema::OpStream>{}, * f)) {
+                    auto s = createSession(*stream);
+                    fret = co_await runStream(io, s);
+                }
+                else {
+                    fret = unknownOpError(*f);
+                }
             }
+            catch (std::runtime_error& e) {
+                fret = Frame_from(schema::Error{}, e.what());
+            }
+
+            co_await io.push(fret);
         }
     }
-    catch (io::stream_closed_error&) {
-        co_return;
+
+    xec::coro<void> runModel(IoEndpoint& io, const sc::StateDummy::OpLoadModel::Params& lmParams) {
+        auto mparams = iile([&] {
+            dummy::Model::Params ret;
+            ret.path = lmParams.filePath.valueOr("");
+            ret.splice = astl::move(lmParams.spliceString.valueOr(""));
+            return ret;
+        });
+
+        auto model = m_resourceCache.find(mparams);
+
+        if (!model) {
+            model = m_resourceCache.add(
+                mparams,
+                std::make_shared<DummyModelResource>(mparams)
+            );
+        }
+
+        using Schema = sc::StateModelLoaded;
+        co_await io.push(Frame_from(schema::StateChange{}, Schema::id));
+
+        while (true) {
+            auto f = co_await io.poll();
+            Frame err;
+
+            try {
+                if (auto ciParams = Frame_optTo(schema::OpParams<Schema::OpCreateInstance>{}, *f)) {
+                    co_await runInstance(io, *model, *ciParams);
+                }
+                else {
+                    err = unknownOpError(*f);
+                }
+            }
+            catch (std::runtime_error& e) {
+                err = Frame_from(schema::Error{}, e.what());
+            }
+
+            co_await io.push(err);
+        }
     }
-}
+
+    xec::coro<void> runSession(IoEndpoint& io) {
+        using Schema = sc::StateDummy;
+
+
+        co_await io.push(Frame_from(schema::StateChange{}, Schema::id));
+
+        while (true) {
+            auto f = co_await io.poll();
+
+            Frame err;
+
+            try {
+                if (auto lm = Frame_optTo(schema::OpParams<Schema::OpLoadModel>{}, *f)) {
+                    co_await runModel(io, *lm);
+                }
+                else {
+                    err = unknownOpError(*f);
+                }
+            }
+            catch (std::runtime_error& e) {
+                err = Frame_from(schema::Error{}, e.what());
+            }
+
+            co_await io.push(err);
+        }
+    }
+
+    xec::coro<void> run(frameio::StreamEndpoint ep) {
+        try {
+            auto ex = get_executor();
+            IoEndpoint io(std::move(ep), ex);
+
+            co_await runSession(io);
+        }
+        catch (io::stream_closed_error&) {
+            co_return;
+        }
+    }
+};
 
 ServiceInfo g_serviceInfo = {
     .name = "ac-local dummy",
@@ -257,7 +234,8 @@ struct DummyService final : public Service {
     }
 
     virtual void createSession(frameio::StreamEndpoint ep, Dict) override {
-        co_spawn(m_workerStrand.executor(), Dummy_runSession(std::move(ep), m_resourceCache));
+        auto dummy = std::make_shared<Dummy>(m_workerStrand.executor(), m_resourceCache);
+        co_spawn(dummy, dummy->run(std::move(ep)));
     }
 };
 
