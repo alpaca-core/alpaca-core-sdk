@@ -5,6 +5,7 @@
 #include "FrameHelpers.hpp"
 #include "Error.hpp"
 #include "StateChange.hpp"
+#include "OpTraits.hpp"
 
 #include "../frameio/BlockingIo.hpp"
 #include "../frameio/StreamEndpointFwd.hpp"
@@ -13,9 +14,10 @@
 
 namespace ac::schema {
 
-class BlockingIoHelper : public frameio::BlockingIo {
+class BlockingIoHelper : private frameio::BlockingIo {
 public:
-    using frameio::BlockingIo::blocking_io;
+    using super = frameio::BlockingIo;
+    using super::blocking_io;
 
     static void pollStatusCheck(const io::status& s) {
         if (!s.success()) {
@@ -30,28 +32,16 @@ public:
     }
 
     Frame safePoll() {
-        auto res = poll();
+        auto res = frameio::BlockingIo::poll();
         pollStatusCheck(res);
         frameErrorCheck(*res);
         return std::move(*res);
     }
 
-    template <typename State>
-    void expectState() {
-        auto state = Frame_to(StateChange{}, safePoll());
-        if (state != State::id) {
-            throw_ex{} << "unexpected state: " << state;
-        }
-    }
-
-    template <typename State>
-    void awaitState() {
-        while (true) {
-            auto res = safePoll();
-            if (auto state = Frame_optTo(StateChange{}, res)) {
-                return;
-            }
-        }
+    template <typename T>
+    typename T::Type poll() {
+        auto f = safePoll();
+        return Frame_to(T{}, std::move(f));
     }
 
     template <typename Op>
@@ -62,10 +52,16 @@ public:
         }
     }
 
-    template <typename Op>
+    template <typename Op> requires (!Op_isStateTransition<Op>)
     typename Op::Return call(typename Op::Params p) {
         initiate<Op>(std::move(p));
-        return Frame_to(OpReturn<Op>{}, safePoll());
+        return this->poll<OpReturn<Op>>();
+    }
+
+    template <Op_isStateTransition Op>
+    StateChange::Type call(typename Op::Params p) {
+        initiate<Op>(std::move(p));
+        return this->poll<StateChange>();
     }
 
     template <typename StreamOp, typename EndState = void>
@@ -92,6 +88,8 @@ public:
             co_yield data;
         }
     }
+
+    using super::close;
 };
 
 

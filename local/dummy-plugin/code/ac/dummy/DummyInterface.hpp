@@ -5,6 +5,7 @@
 #include <ac/schema/Field.hpp>
 #include <ac/schema/Progress.hpp>
 #include <ac/schema/Abort.hpp>
+#include <ac/schema/StateChange.hpp>
 #include <vector>
 #include <string>
 #include <tuple>
@@ -32,11 +33,13 @@ struct StateDummy {
             }
         };
 
+        using Return = StateChange;
+
         using Ins = std::tuple<>;
         using Outs = std::tuple<sys::Progress>;
     };
 
-    using States = std::tuple<OpLoadModel>;
+    using Ops = std::tuple<OpLoadModel>;
 };
 
 struct StateModelLoaded {
@@ -55,9 +58,11 @@ struct StateModelLoaded {
                 v(cutoff, "cutoff", "Cut off model data to n-th element (or don't cut if -1)");
             }
         };
+
+        using Return = StateChange;
     };
 
-    using States = std::tuple<OpCreateInstance>;
+    using Ops = std::tuple<OpCreateInstance>;
 };
 
 struct StateInstance {

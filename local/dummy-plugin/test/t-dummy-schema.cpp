@@ -29,19 +29,19 @@ TEST_CASE("blocking io") {
 
     namespace schema = ac::schema::dummy;
 
-    dummy.expectState<schema::StateDummy>();
+    auto sid = dummy.poll<ac::schema::StateChange>();
+    CHECK(sid == schema::StateDummy::id);
 
-    dummy.initiate<schema::StateDummy::OpLoadModel>({});
-    dummy.expectState<schema::StateModelLoaded>();
+    sid = dummy.call<schema::StateDummy::OpLoadModel>({});
+    CHECK(sid == schema::StateModelLoaded::id);
 
-    dummy.initiate<schema::StateModelLoaded::OpCreateInstance>({.cutoff = 1000});
     CHECK_THROWS_WITH(
-        dummy.safePoll(),
+        dummy.call<schema::StateModelLoaded::OpCreateInstance>({ .cutoff = 1000 }); ,
         "error: Cutoff 1000 greater than model size 22"
     );
 
-    dummy.initiate<schema::StateModelLoaded::OpCreateInstance>({.cutoff = 2});
-    dummy.expectState<schema::StateInstance>();
+    sid = dummy.call<schema::StateModelLoaded::OpCreateInstance>({.cutoff = 2});
+    CHECK(sid == schema::StateInstance::id);
 
     auto result = dummy.call<schema::StateInstance::OpRun>({
         .input = std::vector<std::string>{"a", "b", "c"}
