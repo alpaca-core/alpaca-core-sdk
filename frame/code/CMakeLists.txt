@@ -55,7 +55,6 @@ target_sources(ac-frame
         ac/schema/SerializeVisitors.hpp
         ac/schema/SchemaVisitors.hpp
         ac/schema/FrameHelpers.hpp
-        ac/schema/OpDispatchHelpers.hpp
         ac/schema/FrameHelpers.hpp
         ac/schema/BlockingIoHelper.hpp
 

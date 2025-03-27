@@ -17,7 +17,6 @@
 #include <ac/local/BackendWorkerStrand.hpp>
 #include <ac/local/ResourceCache.hpp>
 
-#include <ac/schema/OpDispatchHelpers.hpp>
 #include <ac/schema/FrameHelpers.hpp>
 #include <ac/schema/StateChange.hpp>
 #include <ac/schema/Error.hpp>
