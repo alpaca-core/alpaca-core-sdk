@@ -48,5 +48,15 @@ TEST_CASE("blocking io") {
     });
     CHECK(result.result == "a one b two c one");
 
+    auto stream = dummy.stream<schema::StateInstance::OpStream>({
+        .input = std::vector<std::string>{"x", "y"}
+    });
+    CHECK(stream.next() == "x");
+    CHECK(stream.next() == "one");
+    CHECK(stream.next() == "y");
+    CHECK(stream.next() == "two");
+    CHECK_FALSE(stream.next());
+    CHECK(stream.rval() == nullptr);
+
     dummy.close();
 }

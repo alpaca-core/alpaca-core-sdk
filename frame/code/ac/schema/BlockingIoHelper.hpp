@@ -4,6 +4,7 @@
 #pragma once
 #include "FrameHelpers.hpp"
 #include "Error.hpp"
+#include "Abort.hpp"
 #include "StateChange.hpp"
 #include "OpTraits.hpp"
 
@@ -11,6 +12,7 @@
 #include "../frameio/StreamEndpointFwd.hpp"
 #include <astl/throw_stdex.hpp>
 #include <astl/generator.hpp>
+#include <astl/sentry.hpp>
 
 namespace ac::schema {
 
@@ -58,30 +60,35 @@ public:
         return this->poll<OpReturn<Op>>();
     }
 
-    //template <typename Op, size_t StreamIndex = 0> requires (!Op_isStateTransition<Op>)
-    //astl::generator<typename StreamOp::Type> runStream() {
-    //    constexpr bool useEndState = !std::is_same_v<EndState, void>;
-    //    std::optional<std::string_view> endState;
-    //    if constexpr(useEndState) {
-    //        endState = EndState::id;
-    //    }
+    template <typename Op, size_t StreamIndex = 0>
+    astl::generator<
+        typename std::tuple_element<StreamIndex, typename Op::Outs>::type::Type,
+        typename OpReturn<Op>::Type
+    > stream(typename Op::Params params) {
+        initiate<Op>(std::move(params));
 
-    //    while (true) {
-    //        auto res = poll();
-    //        pollStatusCheck(res);
-    //        frameErrorCheck(*res);
+        using Stream = typename std::tuple_element<StreamIndex, typename Op::Outs>::type;
 
-    //        if (auto stateChange = Frame_optTo(StateChange{}, *res)) {
-    //            if (endState.has_value() && stateChange != *endState) {
-    //                throw_ex{} << "wrong state: " << *stateChange << " (expected: " << *endState << ")";
-    //            }
-    //            co_return;
-    //        }
+        bool aborted = true;
+        astl::sentry abortSentry([&] {
+            push(Frame_from(Abort{}, {}));
+        });
 
-    //        auto data = Frame_to(StreamOp{}, *res);
-    //        co_yield data;
-    //    }
-    //}
+        while (true) {
+            auto f = safePoll();
+
+            if (auto s = Frame_optTo(Stream{}, f)) {
+                co_yield std::move(*s);
+            }
+            else if (auto ret = Frame_optTo(OpReturn<Op>{}, f)) {
+                aborted = false;
+                co_return std::move(*ret);
+            }
+            else {
+                throw_ex{} << "unexpected frame: " << f.op;
+            }
+        }
+    }
 
     using super::close;
 };
