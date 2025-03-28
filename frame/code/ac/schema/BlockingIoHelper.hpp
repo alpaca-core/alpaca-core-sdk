@@ -52,42 +52,36 @@ public:
         }
     }
 
-    template <typename Op> requires (!Op_isStateTransition<Op>)
-    typename Op::Return call(typename Op::Params p) {
+    template <typename Op>
+    OpReturn<Op>::Type call(typename Op::Params p) {
         initiate<Op>(std::move(p));
         return this->poll<OpReturn<Op>>();
     }
 
-    template <Op_isStateTransition Op>
-    StateChange::Type call(typename Op::Params p) {
-        initiate<Op>(std::move(p));
-        return this->poll<StateChange>();
-    }
+    //template <typename Op, size_t StreamIndex = 0> requires (!Op_isStateTransition<Op>)
+    //astl::generator<typename StreamOp::Type> runStream() {
+    //    constexpr bool useEndState = !std::is_same_v<EndState, void>;
+    //    std::optional<std::string_view> endState;
+    //    if constexpr(useEndState) {
+    //        endState = EndState::id;
+    //    }
 
-    template <typename StreamOp, typename EndState = void>
-    astl::generator<typename StreamOp::Type> runStream() {
-        constexpr bool useEndState = !std::is_same_v<EndState, void>;
-        std::optional<std::string_view> endState;
-        if constexpr(useEndState) {
-            endState = EndState::id;
-        }
+    //    while (true) {
+    //        auto res = poll();
+    //        pollStatusCheck(res);
+    //        frameErrorCheck(*res);
 
-        while (true) {
-            auto res = poll();
-            pollStatusCheck(res);
-            frameErrorCheck(*res);
+    //        if (auto stateChange = Frame_optTo(StateChange{}, *res)) {
+    //            if (endState.has_value() && stateChange != *endState) {
+    //                throw_ex{} << "wrong state: " << *stateChange << " (expected: " << *endState << ")";
+    //            }
+    //            co_return;
+    //        }
 
-            if (auto stateChange = Frame_optTo(StateChange{}, *res)) {
-                if (endState.has_value() && stateChange != *endState) {
-                    throw_ex{} << "wrong state: " << *stateChange << " (expected: " << *endState << ")";
-                }
-                co_return;
-            }
-
-            auto data = Frame_to(StreamOp{}, *res);
-            co_yield data;
-        }
-    }
+    //        auto data = Frame_to(StreamOp{}, *res);
+    //        co_yield data;
+    //    }
+    //}
 
     using super::close;
 };

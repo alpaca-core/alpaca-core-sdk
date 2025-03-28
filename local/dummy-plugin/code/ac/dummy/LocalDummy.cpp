@@ -20,6 +20,7 @@
 #include <ac/schema/FrameHelpers.hpp>
 #include <ac/schema/StateChange.hpp>
 #include <ac/schema/Error.hpp>
+#include <ac/schema/OpTraits.hpp>
 
 #include <ac/frameio/IoEndpoint.hpp>
 

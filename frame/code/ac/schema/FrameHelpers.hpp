@@ -37,17 +37,4 @@ std::optional<typename T::Type> Frame_optTo(T, Frame& f) {
     return Struct_fromDict<typename T::Type>(std::move(f.data));
 }
 
-template <typename Op>
-struct OpParams {
-    static constexpr auto id = Op::id;
-    using Type = typename Op::Params;
-};
-
-template <typename Op>
-struct OpReturn {
-    static constexpr auto id = Op::id;
-    using Type = typename Op::Return;
-};
-
-
 } // namespace ac::schema
