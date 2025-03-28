@@ -1,10 +1,11 @@
-// itlib-generator v1.03
+// itlib-generator v1.04
 //
-// Simple coroutine generator class for C++20 and later
+// Simple coroutine generator class for C++20 and later, similar to
+// std::generator from C++23, but also allowing return values
 //
 // SPDX-License-Identifier: MIT
 // MIT License:
-// Copyright(c) 2024 Borislav Stanimirov
+// Copyright(c) 2024-2025 Borislav Stanimirov
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files(the
@@ -28,6 +29,9 @@
 //
 //                  VERSION HISTORY
 //
+//
+//  1.04 (2025-03-28) - Allow generator return type (default void)
+//                    - Use std::default_sentinel_t for end iterator
 //  1.03 (2024-09-24) Improve iterator-like interface when yielding
 //                    non-copyable values
 //  1.02 (2024-07-18) Store exception to work around clang's ridiculous
@@ -104,14 +108,38 @@ public:
     explicit operator bool() const noexcept { return has_value(); }
 };
 
-template <typename T>
+namespace gen_impl {
+template <typename R>
+struct ret_promise_helper {
+    generator_value<R> m_ret;
+
+    void return_value(R value) noexcept {
+        if constexpr (std::is_reference_v<R>) {
+            m_ret.emplace(value);
+        }
+        else {
+            m_ret.emplace(std::move(value));
+        }
+    }
+
+    decltype(auto) rval() { return *m_ret; }
+};
+template <>
+struct ret_promise_helper<void> {
+    void return_void() noexcept {}
+    void rval() noexcept {}
+};
+
+} // namespace impl
+
+template <typename T, typename R = void>
 class generator {
 public:
     // return ref in case we're generating values, otherwise keep the ref type
     using value_ret_t = std::conditional_t<std::is_reference_v<T>, T, T&>;
 
-    struct promise_type {
-        generator_value<T> m_val;
+    struct promise_type : public gen_impl::ret_promise_helper<R> {
+        generator_value<T> m_yval;
         std::exception_ptr m_exception;
 
         promise_type() noexcept = default;
@@ -124,26 +152,24 @@ public:
         std::suspend_always final_suspend() noexcept { return {}; }
         std::suspend_always yield_value(T value) noexcept { // assume T is noexcept move constructible
             if constexpr (std::is_reference_v<T>) {
-                m_val.emplace(value);
+                m_yval.emplace(value);
             }
             else {
-                m_val.emplace(std::move(value));
+                m_yval.emplace(std::move(value));
             }
             return {};
         }
-        void return_void() noexcept {}
+
         void unhandled_exception() noexcept {
             m_exception = std::current_exception();
         }
 
-        value_ret_t val() & noexcept {
-            return *m_val;
+        value_ret_t yval() & noexcept {
+            return *m_yval;
         }
-        T&& val() && noexcept {
-            return std::move(*m_val);
-        }
-        void clear_value() noexcept {
-            m_val.reset();
+
+        void clear_yval() noexcept {
+            m_yval.reset();
         }
     };
 
@@ -180,7 +206,12 @@ public:
     generator_value<T> next() {
         if (done()) return {};
         safe_resume(m_handle);
-        return std::move(m_handle.promise().m_val);
+        return std::move(m_handle.promise().m_yval);
+    }
+
+    // NOTE: only valid if done would return true or iteration reached the end
+    decltype(auto) rval() {
+        return m_handle.promise().rval();
     }
 
     // iterator-like/range-for interface
@@ -198,7 +229,7 @@ public:
         explicit pseudo_iterator(handle_t handle) noexcept : m_handle(handle) {}
 
         reference operator*() const noexcept {
-            return m_handle.promise().val();
+            return m_handle.promise().yval();
         }
 
         pseudo_iterator& operator++() {
@@ -206,7 +237,7 @@ public:
             return *this;
         }
 
-        struct end_t {};
+        using end_t = std::default_sentinel_t;
 
         // we're not really an iterator, but we can pretend to be one
         friend bool operator==(const pseudo_iterator& i, end_t) noexcept { return i.m_handle.done(); }
@@ -227,7 +258,7 @@ public:
 private:
     static void safe_resume(handle_t& h) {
         auto& p = h.promise();
-        p.clear_value();
+        p.clear_yval();
         h.resume();
         if (p.m_exception) {
             std::rethrow_exception(p.m_exception);
@@ -238,4 +269,4 @@ private:
     explicit generator(handle_t handle) noexcept : m_handle(handle) {}
 };
 
-} // namespace itlib
+} // namespace astl
