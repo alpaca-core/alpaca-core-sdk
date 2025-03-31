@@ -26,6 +26,8 @@ target_sources(ac-local
         ac/local/export.h
         ac/local/version.h
 
+        ac/local/fs/FsUtil.hpp
+
         ac/local/PluginInterface.hpp
         ac/local/PluginInfo.hpp
         ac/local/LoadPluginCb.hpp
@@ -46,6 +48,8 @@ target_sources(ac-local
     PRIVATE
         ac/local/Logging.hpp
         ac/local/Logging.cpp
+
+        ac/local/fs/FsUtil.cpp
 
         ac/local/VtableExports.cpp
 
