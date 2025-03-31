@@ -69,9 +69,11 @@ public:
 
         using Stream = typename std::tuple_element<StreamIndex, typename Op::Outs>::type;
 
-        bool aborted = true;
+        bool completedNormally = false;
         astl::sentry abortSentry([&] {
-            push(Frame_from(Abort{}, {}));
+            if (!completedNormally) {
+                push(Frame_from(Abort{}, {}));
+            }
         });
 
         while (true) {
@@ -81,7 +83,7 @@ public:
                 co_yield std::move(*s);
             }
             else if (auto ret = Frame_optTo(OpReturn<Op>{}, f)) {
-                aborted = false;
+                completedNormally = true;
                 co_return std::move(*ret);
             }
             else {

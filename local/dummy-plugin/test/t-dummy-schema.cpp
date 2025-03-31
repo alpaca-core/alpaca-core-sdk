@@ -32,7 +32,13 @@ TEST_CASE("blocking io") {
     auto sid = dummy.poll<ac::schema::StateChange>();
     CHECK(sid == schema::StateDummy::id);
 
-    sid = dummy.call<schema::StateDummy::OpLoadModel>({});
+    auto load = dummy.stream<schema::StateDummy::OpLoadModel>({});
+    for (auto p : load) {
+        CHECK(p.progress <= 1.f);
+        CHECK(p.tag->empty());
+        CHECK(p.action == "loading");
+    }
+    sid = load.rval();
     CHECK(sid == schema::StateModelLoaded::id);
 
     CHECK_THROWS_WITH(

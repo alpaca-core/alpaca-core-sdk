@@ -146,9 +146,12 @@ public:
             return ret;
         });
 
+        io.put(Frame_from(schema::Progress{}, {.progress = 0.0f, .tag = mparams.path, .action = "loading"}));
+
         auto model = m_resourceCache.find(mparams);
 
         if (!model) {
+            io.put(Frame_from(schema::Progress{}, {.progress = 0.1f, .tag = mparams.path, .action = "loading"}));
             model = m_resourceCache.add(
                 mparams,
                 std::make_shared<DummyModelResource>(mparams)
