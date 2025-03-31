@@ -32,7 +32,7 @@ target_sources(ac-local
         ac/local/PluginManager.hpp
         ac/local/Resource.hpp
         ac/local/ResourceManager.hpp
-        ac/local/ResourceLock.hpp        
+        ac/local/ResourceLock.hpp
         ac/local/ResourceCache.hpp
 
         ac/local/Backend.hpp
@@ -41,6 +41,8 @@ target_sources(ac-local
 
         ac/local/ServiceScorer.hpp
         ac/local/CommonServiceScorers.hpp
+
+        ac/local/AssetMgrInterface.hpp
     PRIVATE
         ac/local/Logging.hpp
         ac/local/Logging.cpp
@@ -54,6 +56,9 @@ target_sources(ac-local
         ac/local/Lib.cpp
 
         ac/local/CommonServiceScorers.cpp
+
+        ac/local/AssetMgrService.hpp
+        ac/local/AssetMgrService.cpp
 )
 
 install(TARGETS ac-local

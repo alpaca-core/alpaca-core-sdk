@@ -11,6 +11,8 @@
 #include "Logging.hpp"
 #include "BackendWorkerStrand.hpp"
 
+#include "AssetMgrService.hpp"
+
 #include <ac/frameio/local/BufferedChannelStream.hpp>
 #include <ac/frameio/StreamEndpoint.hpp>
 #include <ac/xec/coro.hpp>
@@ -42,7 +44,10 @@ Backend::Backend(std::string_view name, Xctx xctx)
     , m_xctx(xctx)
 {
     // temporary here until we have a better way to register services
-    registerLibServices();
+    {
+        registerAssetMgrService(*this);
+        registerLibServices();
+    }
 
     auto cpu = std::make_shared<BackendWorkerStrandState>(*this, "cpu", m_xctx.cpu);
     m_cpuWorkerStrand = cpu;

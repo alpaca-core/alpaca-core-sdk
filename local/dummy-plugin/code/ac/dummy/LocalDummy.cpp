@@ -56,7 +56,7 @@ public:
         , m_resourceCache(rm)
     {}
 
-    Frame unknownOpError(const Frame& f) {
+    static Frame unknownOpError(const Frame& f) {
         return Frame_from(schema::Error{}, "dummy: unknown op: " + f.op);
     }
 

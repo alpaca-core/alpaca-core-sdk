@@ -32,6 +32,11 @@ public:
         : basic_xio(std::unique_ptr<Stream>{}, std::forward<Args>(args)...)
     {}
 
+    basic_xio(const basic_xio&) = delete;
+    basic_xio& operator=(const basic_xio&) = delete;
+    basic_xio(basic_xio&&) noexcept = default;
+    basic_xio& operator=(basic_xio&&) noexcept = default;
+
     using stream_type = Stream;
     using value_type = typename stream_type::value_type;
     using executor_type = typename Wobj::executor_type;

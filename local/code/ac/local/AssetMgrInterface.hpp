@@ -41,8 +41,8 @@ struct State {
 };
 
 struct Interface {
-    static inline constexpr std::string_view id = "$asset-mgr";
-    static inline constexpr std::string_view desc = "Asset manager interface";
+    static inline constexpr auto id = "$asset-mgr";
+    static inline constexpr auto desc = "Asset manager interface";
 
     using States = std::tuple<State>;
 };
