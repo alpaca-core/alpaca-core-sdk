@@ -7,9 +7,12 @@ set_target_properties(ac-local PROPERTIES
     EXPORT_NAME ac::local
 )
 
+ac_dep(furi)
+
 target_link_libraries(ac-local
     PRIVATE
         ac::jalog
+        furi::furi
     PUBLIC
         ac::frame
         ac::astl
@@ -44,7 +47,7 @@ target_sources(ac-local
         ac/local/ServiceScorer.hpp
         ac/local/CommonServiceScorers.hpp
 
-        ac/local/AssetMgrInterface.hpp
+        ac/local/schema/AssetMgrInterface.hpp
     PRIVATE
         ac/local/Logging.hpp
         ac/local/Logging.cpp

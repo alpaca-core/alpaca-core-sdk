@@ -2,13 +2,15 @@
 // SPDX-License-Identifier: MIT
 //
 #include "AssetMgrService.hpp"
-#include "AssetMgrInterface.hpp"
+#include "schema/AssetMgrInterface.hpp"
 
 #include "Service.hpp"
 #include "ServiceFactory.hpp"
 #include "ServiceInfo.hpp"
 
 #include "Backend.hpp"
+
+#include "fs/FsUtil.hpp"
 
 #include <ac/schema/FrameHelpers.hpp>
 #include <ac/schema/StateChange.hpp>
@@ -18,6 +20,8 @@
 #include <ac/frameio/IoEndpoint.hpp>
 #include <ac/xec/timer_ptr.hpp>
 #include <ac/xec/coro.hpp>
+
+#include <furi/furi.hpp>
 
 namespace ac::local {
 
@@ -44,8 +48,33 @@ public:
 
     using Schema = schema::amgr::State;
 
-    xec::coro<Frame> makeAssetsAvailable(const Schema::OpMakeAssetsAvailable::Params& params) {
-        co_return {};
+    xec::coro<Frame> makeAssetsAvailable(frameio::IoEndpoint& io, Schema::OpMakeAssetsAvailable::Params assets) {
+        for (auto& asset : assets) {
+            schema::Progress::Type progress = {.progress = 0.f, .tag = asset.uri.value(), .action = "fetch"};
+            io.put(Frame_from(schema::Progress{}, progress));
+
+            auto split = furi::uri_split::from_uri(asset.uri.value());
+            if (split.scheme == "file") {
+                auto p = split.path;
+                if (p.empty() || p.front() != '/') {
+                    throw_ex{} << "asset-mgr: file URI must be absolute: " << asset.uri.value();
+                }
+#ifdef _WIN32
+                p = p.substr(1); // remove leading '/'
+#endif
+                auto stat = fs::basicStat(std::string(p));
+                if (!stat.file()) {
+                    throw_ex{} << "asset-mgr: file not found: " << asset.uri.value();
+                }
+            }
+            else {
+                throw_ex{} << "asset-mgr: unsupported URI scheme: " << asset.uri.value();
+            }
+
+            progress.progress = 1.f;
+            io.put(Frame_from(schema::Progress{}, progress));
+        }
+        co_return Frame_from(schema::OpReturn<Schema::OpMakeAssetsAvailable>{}, std::move(assets));
     }
 
     xec::coro<void> runSession(frameio::IoEndpoint io) {
@@ -59,7 +88,7 @@ public:
 
                 try {
                     if (auto aa = Frame_optTo(schema::OpParams<Schema::OpMakeAssetsAvailable>{}, *f)) {
-                        ret = co_await makeAssetsAvailable(*aa);
+                        ret = co_await makeAssetsAvailable(io, *aa);
                     }
                     else {
                         ret = Frame_from(schema::Error{}, "asset-mgr: unknown op: " + f->op);

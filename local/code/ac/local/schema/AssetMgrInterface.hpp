@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
+#include "AssetInfo.hpp"
 #include <ac/schema/Field.hpp>
 #include <ac/schema/Progress.hpp>
 #include <vector>
@@ -16,23 +17,12 @@ struct State {
     static constexpr auto id = "asset-mgr";
     static constexpr auto desc = "Asset manager state";
 
-    struct AssetInfo {
-        Field<std::string> tag;
-        Field<std::string> uri;
-
-        template <typename Visitor>
-        void visitFields(Visitor& v) {
-            v(tag, "tag", "Asset tag/name");
-            v(uri, "uri", "Asset URI");
-        }
-    };
-
     struct OpMakeAssetsAvailable {
         static constexpr auto id = "make-assets-available";
         static constexpr auto desc = "Make assets available";
 
-        using Params = std::vector<AssetInfo>;
-        using Return = std::vector<AssetInfo>;
+        using Params = AssetInfos;
+        using Return = AssetInfos;
 
         using Outs = std::tuple<sys::Progress>;
     };

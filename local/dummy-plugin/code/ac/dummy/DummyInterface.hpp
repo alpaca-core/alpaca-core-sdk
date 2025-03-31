@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
+#include <ac/local/schema/AssetInfo.hpp>
 #include <ac/schema/Field.hpp>
 #include <ac/schema/Progress.hpp>
 #include <ac/schema/Abort.hpp>
