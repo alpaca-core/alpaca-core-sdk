@@ -5,7 +5,6 @@
 #include <ac/local/schema/AssetInfo.hpp>
 #include <ac/schema/Field.hpp>
 #include <ac/schema/Progress.hpp>
-#include <ac/schema/Abort.hpp>
 #include <ac/schema/StateChange.hpp>
 #include <vector>
 #include <string>

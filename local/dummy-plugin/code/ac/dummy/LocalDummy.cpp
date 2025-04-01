@@ -135,7 +135,7 @@ public:
         }
     }
 
-    xec::coro<void> runModel(IoEndpoint& io, const sc::StateDummy::OpLoadModel::Params& lmParams) {
+    xec::coro<void> runModel(IoEndpoint& io, sc::StateDummy::OpLoadModel::Params& lmParams) {
         dummy::Model::Params mparams;
 
         if (lmParams.assets.hasValue() && !lmParams.assets->empty()) {
