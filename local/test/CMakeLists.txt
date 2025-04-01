@@ -7,6 +7,8 @@ endmacro()
 
 add_local_test(resource-manager)
 
+add_local_test(FileUri)
+
 configure_file(test-assets.in.h test-assets.h @ONLY)
 add_library(ac-local-test-assets INTERFACE)
 target_include_directories(ac-local-test-assets INTERFACE ${CMAKE_CURRENT_BINARY_DIR})

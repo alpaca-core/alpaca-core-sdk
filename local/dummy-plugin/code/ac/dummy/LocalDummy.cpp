@@ -17,6 +17,8 @@
 #include <ac/local/BackendWorkerStrand.hpp>
 #include <ac/local/ResourceCache.hpp>
 
+#include <ac/local/schema/AssetMgrInterface.hpp>
+
 #include <ac/schema/FrameHelpers.hpp>
 #include <ac/schema/StateChange.hpp>
 #include <ac/schema/Error.hpp>
@@ -49,10 +51,12 @@ struct DummyModelResource : public dummy::Model, public Resource {
 };
 
 struct Dummy : public xec::coro_state {
+    Backend& m_backend;
     DummyModelResource::Cache& m_resourceCache;
 public:
-    Dummy(xec::strand ex, DummyModelResource::Cache& rm)
+    Dummy(Backend& backend, xec::strand ex, DummyModelResource::Cache& rm)
         : coro_state(std::move(ex))
+        , m_backend(backend)
         , m_resourceCache(rm)
     {}
 
@@ -138,13 +142,39 @@ public:
         }
     }
 
+    xec::coro<schema::AssetInfos> fetchAssetInfos(IoEndpoint& io, std::vector<schema::AssetInfo> assets) {
+        IoEndpoint amgrio(m_backend.connect(schema::amgr::Interface::id, {}), io.get_executor());
+        co_await amgrio.poll(); // state change
+
+        using AmgrSchema = schema::amgr::State;
+
+        co_await amgrio.push(Frame_from(schema::OpParams<AmgrSchema::OpMakeAssetsAvailable>{}, std::move(assets)));
+
+        while (true) {
+            auto res = co_await amgrio.poll();
+            if (auto f = Frame_optTo(schema::Error{}, *res)) {
+                throw std::runtime_error(*f);
+            }
+            else if (Frame_is(schema::Progress{}, *res)) {
+                io.put(*res);
+            }
+            else if (auto ret = Frame_optTo(schema::OpReturn<AmgrSchema::OpMakeAssetsAvailable>{}, *res)) {
+                co_return std::move(*ret);
+            }
+        }
+    }
+
     xec::coro<void> runModel(IoEndpoint& io, const sc::StateDummy::OpLoadModel::Params& lmParams) {
-        auto mparams = iile([&] {
-            dummy::Model::Params ret;
-            ret.path = lmParams.filePath.valueOr("");
-            ret.splice = astl::move(lmParams.spliceString.valueOr(""));
-            return ret;
-        });
+        dummy::Model::Params mparams;
+
+        if (lmParams.assets.hasValue() && !lmParams.assets->empty()) {
+            auto assets = co_await fetchAssetInfos(io, std::move(lmParams.assets.value()));
+            if (!assets.empty()) {
+                mparams.path = std::move(assets.front().uri.value());
+            }
+        }
+
+        mparams.splice = astl::move(lmParams.spliceString.valueOr(""));
 
         io.put(Frame_from(schema::Progress{}, {.progress = 0.0f, .tag = mparams.path, .action = "loading"}));
 
@@ -237,7 +267,7 @@ struct DummyService final : public Service {
     }
 
     virtual void createSession(frameio::StreamEndpoint ep, Dict) override {
-        auto dummy = std::make_shared<Dummy>(m_workerStrand.executor(), m_resourceCache);
+        auto dummy = std::make_shared<Dummy>(m_workerStrand.backend, m_workerStrand.executor(), m_resourceCache);
         co_spawn(dummy, dummy->run(std::move(ep)));
     }
 };

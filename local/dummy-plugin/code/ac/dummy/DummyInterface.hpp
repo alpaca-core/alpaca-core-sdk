@@ -24,12 +24,12 @@ struct StateDummy {
         static constexpr auto desc = "Load the dummy model";
 
         struct Params {
-            Field<std::string> filePath = std::nullopt;
+            Field<AssetInfos> assets = std::nullopt;
             Field<std::string> spliceString = std::nullopt;
 
             template <typename Visitor>
             void visitFields(Visitor& v) {
-                v(filePath, "file_path", "Optional path to the file with model data. Empty for synthetic data");
+                v(assets, "assets", "Model assets. Synthetic model if empty");
                 v(spliceString, "splice_string", "String to splice between model data elements");
             }
         };

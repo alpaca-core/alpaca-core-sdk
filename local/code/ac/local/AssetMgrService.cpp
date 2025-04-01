@@ -11,6 +11,7 @@
 #include "Backend.hpp"
 
 #include "fs/FsUtil.hpp"
+#include "fs/FileUri.hpp"
 
 #include <ac/schema/FrameHelpers.hpp>
 #include <ac/schema/StateChange.hpp>
@@ -53,19 +54,16 @@ public:
             schema::Progress::Type progress = {.progress = 0.f, .tag = asset.uri.value(), .action = "fetch"};
             io.put(Frame_from(schema::Progress{}, progress));
 
-            auto split = furi::uri_split::from_uri(asset.uri.value());
-            if (split.scheme == "file") {
-                auto p = split.path;
-                if (p.empty() || p.front() != '/') {
-                    throw_ex{} << "asset-mgr: file URI must be absolute: " << asset.uri.value();
-                }
-#ifdef _WIN32
-                p = p.substr(1); // remove leading '/'
-#endif
-                auto stat = fs::basicStat(std::string(p));
+            auto scheme = furi::uri_split::get_scheme_from_uri(asset.uri.value());
+            if (scheme == "file") {
+                auto path = fs::FileUri_toPath(asset.uri.value());
+
+                auto stat = fs::basicStat(path);
                 if (!stat.file()) {
-                    throw_ex{} << "asset-mgr: file not found: " << asset.uri.value();
+                    throw_ex{} << "asset-mgr: file not found: " << path;
                 }
+
+                asset.uri = path;
             }
             else {
                 throw_ex{} << "asset-mgr: unsupported URI scheme: " << asset.uri.value();

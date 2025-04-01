@@ -8,10 +8,12 @@
 #include "ac-test-data-dummy-models.h"
 
 #include <ac/local/SyncBackend.hpp>
+#include <ac/local/fs/FileUri.hpp>
 #include <ac/schema/FrameHelpers.hpp>
 #include <ac/schema/StateChange.hpp>
 #include <ac/schema/Error.hpp>
 #include <ac/schema/Abort.hpp>
+#include <ac/schema/Progress.hpp>
 
 #include <doctest/doctest.h>
 
@@ -21,14 +23,30 @@ ac::local::SyncBackend backend("dummy-test");
 
 using Session = ac::local::SyncBackend::Io;
 
+ac::Dict makeAssetsDict(std::string_view path) {
+    return ac::Dict::array({
+        {{"tag", "model"}, {"uri", ac::local::fs::FileUri_fromPath(path)}}
+    });
+}
+
 Session createTestSession() {
     return backend.connect("dummy", {});
+}
+
+void pollProgress(Session& s, int n) {
+    for (int i = 0; i < n; ++i) {
+        auto res = s.get();
+        CHECK(res.success());
+        auto prog = Frame_optTo(ac::schema::Progress{}, res.value);
+        REQUIRE(prog);
+    }
 }
 
 void checkError(Session& s, const std::string_view msg) {
     auto res = s.get();
     CHECK(res.success());
-    CHECK(Frame_optTo(ac::schema::Error{}, res.value) == msg);
+    auto err = Frame_optTo(ac::schema::Error{}, res.value);
+    CHECK(err == msg);
 }
 
 void checkRunResult(Session& s, const std::string_view msg) {
@@ -52,8 +70,9 @@ TEST_CASE("bad model") {
     s.put({"nope", {}});
     checkError(s, "dummy: unknown op: nope");
 
-    s.put({"load_model", {{"file_path", "nope"}}});
-    checkError(s, "Failed to open file: nope");
+    s.put({"load_model", {{"assets", makeAssetsDict("/nope.txt")}}});
+    pollProgress(s, 1);
+    checkError(s, "asset-mgr: file not found: /nope.txt");
 }
 
 TEST_CASE("bad instance") {
@@ -61,7 +80,8 @@ TEST_CASE("bad instance") {
 
     checkStateChange(s, "dummy");
 
-    s.put({"load_model", {{"file_path", AC_DUMMY_MODEL_SMALL}}});
+    s.put({"load_model", {{"assets", makeAssetsDict(AC_DUMMY_MODEL_SMALL)}}});
+    pollProgress(s, 1);
     checkStateChange(s, "model_loaded");
 
     s.put({"nope", {}});
@@ -78,7 +98,8 @@ TEST_CASE("instance") {
 
         checkStateChange(s, "dummy");
 
-        s.put({"load_model", {{"file_path", AC_DUMMY_MODEL_SMALL}}});
+        s.put({"load_model", {{"assets", makeAssetsDict(AC_DUMMY_MODEL_SMALL)}}});
+        pollProgress(s, 1);
         checkStateChange(s, "model_loaded");
 
         s.put({"create_instance", {}});
@@ -106,7 +127,8 @@ TEST_CASE("instance") {
 
         checkStateChange(s, "dummy");
 
-        s.put({"load_model", {{"file_path", AC_DUMMY_MODEL_SMALL}}});
+        s.put({"load_model", {{"assets", makeAssetsDict(AC_DUMMY_MODEL_SMALL)}}});
+        pollProgress(s, 1);
         checkStateChange(s, "model_loaded");
 
         s.put({"create_instance", {{"cutoff", 2}}});
@@ -123,6 +145,7 @@ TEST_CASE("instance") {
         checkStateChange(s, "dummy");
 
         s.put({"load_model", {}});
+        pollProgress(s, 1);
         checkStateChange(s, "model_loaded");
 
         s.put({"create_instance", {}});
@@ -138,7 +161,8 @@ TEST_CASE("instance") {
 
         checkStateChange(s, "dummy");
 
-        s.put({ "load_model", {{"file_path", AC_DUMMY_MODEL_SMALL}} });
+        s.put({"load_model", {{"assets", makeAssetsDict(AC_DUMMY_MODEL_SMALL)}}});
+        pollProgress(s, 1);
         checkStateChange(s, "model_loaded");
 
         s.put({ "create_instance", {} });
