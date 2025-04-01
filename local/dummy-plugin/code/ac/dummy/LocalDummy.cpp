@@ -64,6 +64,17 @@ public:
         return Frame_from(schema::Error{}, "dummy: unknown op: " + f.op);
     }
 
+    static bool checkAbort(IoEndpoint& io) {
+        auto res = io.get();
+        if (!res.success()) {
+            return false;
+        }
+        if (Frame_is(schema::Abort{}, *res)) {
+            return true;
+        }
+        throw std::runtime_error("Unexpected frame: " + res->op);
+    }
+
     xec::coro<Frame> runStream(IoEndpoint& io, astl::generator<const std::string&>& session) {
         using Schema = sc::StateInstance::OpStream;
 
@@ -71,15 +82,7 @@ public:
 
         Frame abortFrame;
         for (auto& w : session) {
-            if (io.get(abortFrame).success()) {
-                if (Frame_is(schema::Abort{}, abortFrame)) {
-                    co_return ret;
-                }
-                else {
-                    DUMMY_LOG(Warning, "Unexpected frame: ", abortFrame.op);
-                }
-            }
-
+            if (checkAbort(io)) break;
             co_await io.push(Frame_from(Schema::StreamToken{}, w));
         }
 
@@ -160,6 +163,10 @@ public:
             }
             else if (auto ret = Frame_optTo(schema::OpReturn<AmgrSchema::OpMakeAssetsAvailable>{}, *res)) {
                 co_return std::move(*ret);
+            }
+
+            if (checkAbort(io)) {
+                throw std::runtime_error("aborted");
             }
         }
     }
