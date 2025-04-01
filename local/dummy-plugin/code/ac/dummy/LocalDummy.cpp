@@ -16,6 +16,7 @@
 #include <ac/local/Backend.hpp>
 #include <ac/local/BackendWorkerStrand.hpp>
 #include <ac/local/ResourceCache.hpp>
+#include <ac/local/AssetMgrCoroUtil.hpp>
 
 #include <ac/local/schema/AssetMgrInterface.hpp>
 
@@ -64,17 +65,6 @@ public:
         return Frame_from(schema::Error{}, "dummy: unknown op: " + f.op);
     }
 
-    static bool checkAbort(IoEndpoint& io) {
-        auto res = io.get();
-        if (!res.success()) {
-            return false;
-        }
-        if (Frame_is(schema::Abort{}, *res)) {
-            return true;
-        }
-        throw std::runtime_error("Unexpected frame: " + res->op);
-    }
-
     xec::coro<Frame> runStream(IoEndpoint& io, astl::generator<const std::string&>& session) {
         using Schema = sc::StateInstance::OpStream;
 
@@ -82,7 +72,7 @@ public:
 
         Frame abortFrame;
         for (auto& w : session) {
-            if (checkAbort(io)) break;
+            if (schema::Abort_check(io)) break;
             co_await io.push(Frame_from(Schema::StreamToken{}, w));
         }
 
@@ -145,37 +135,11 @@ public:
         }
     }
 
-    xec::coro<schema::AssetInfos> fetchAssetInfos(IoEndpoint& io, std::vector<schema::AssetInfo> assets) {
-        IoEndpoint amgrio(m_backend.connect(schema::amgr::Interface::id, {}), io.get_executor());
-        co_await amgrio.poll(); // state change
-
-        using AmgrSchema = schema::amgr::State;
-
-        co_await amgrio.push(Frame_from(schema::OpParams<AmgrSchema::OpMakeAssetsAvailable>{}, std::move(assets)));
-
-        while (true) {
-            auto res = co_await amgrio.poll();
-            if (auto f = Frame_optTo(schema::Error{}, *res)) {
-                throw std::runtime_error(*f);
-            }
-            else if (Frame_is(schema::Progress{}, *res)) {
-                io.put(*res);
-            }
-            else if (auto ret = Frame_optTo(schema::OpReturn<AmgrSchema::OpMakeAssetsAvailable>{}, *res)) {
-                co_return std::move(*ret);
-            }
-
-            if (checkAbort(io)) {
-                throw std::runtime_error("aborted");
-            }
-        }
-    }
-
     xec::coro<void> runModel(IoEndpoint& io, const sc::StateDummy::OpLoadModel::Params& lmParams) {
         dummy::Model::Params mparams;
 
         if (lmParams.assets.hasValue() && !lmParams.assets->empty()) {
-            auto assets = co_await fetchAssetInfos(io, std::move(lmParams.assets.value()));
+            auto assets = co_await AssetMgr_makeAssetsAvailable(m_backend, io, std::move(lmParams.assets.value()));
             if (!assets.empty()) {
                 mparams.path = std::move(assets.front().uri.value());
             }
@@ -220,7 +184,6 @@ public:
 
     xec::coro<void> runSession(IoEndpoint& io) {
         using Schema = sc::StateDummy;
-
 
         co_await io.push(Frame_from(schema::StateChange{}, Schema::id));
 
