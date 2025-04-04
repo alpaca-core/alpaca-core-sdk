@@ -4,7 +4,7 @@
 #include "DefaultBackend.hpp"
 
 #include <ac/xec/context_work_guard.hpp>
-#include <ac/xec/multi_thread_runner.hpp>
+#include <ac/xec/thread_runner.hpp>
 
 namespace ac::local {
 namespace impl {
@@ -12,7 +12,7 @@ namespace {
 struct XctxHelper {
     xec::context ctx;
     xec::context_work_guard guard;
-    xec::multi_thread_runner threads;
+    xec::thread_runner threads;
 
     explicit XctxHelper(std::string_view name, size_t numThreads = 1)
         : guard(ctx)

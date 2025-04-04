@@ -11,7 +11,7 @@
 #include <ac/xec/coro.hpp>
 #include <ac/xec/context.hpp>
 #include <ac/xec/context_work_guard.hpp>
-#include <ac/xec/multi_thread_runner.hpp>
+#include <ac/xec/thread_runner.hpp>
 #include <ac/xec/co_spawn.hpp>
 
 #include <doctest/doctest.h>
@@ -169,7 +169,7 @@ struct worker_service_session {
 TEST_CASE("broadcast") {
     ac::xec::context xctx;
     auto wg = xctx.make_work_guard();
-    ac::xec::multi_thread_runner runner(xctx, 5, "test");
+    ac::xec::thread_runner runner(xctx, 5, "test");
 
     wg.reset();
 }
