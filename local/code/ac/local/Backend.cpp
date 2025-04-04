@@ -16,6 +16,7 @@
 #include <ac/frameio/local/BufferedChannelStream.hpp>
 #include <ac/frameio/StreamEndpoint.hpp>
 #include <ac/xec/coro.hpp>
+#include <ac/xec/co_spawn.hpp>
 
 #include <astl/throw_stdex.hpp>
 #include <astl/id_ptr.hpp>
@@ -23,13 +24,12 @@
 namespace ac::local {
 
 namespace {
-struct BackendWorkerStrandState : public BackendWorkerStrand, public xec::coro_state {
+struct BackendWorkerStrandState : public BackendWorkerStrand {
     BackendWorkerStrandState(Backend& backend, std::string name, const xec::strand& ex)
         : BackendWorkerStrand(backend, std::move(name), ex)
-        , xec::coro_state(ex)
     {}
 
-    xec::coro<void> gc() {
+    xec::coro<void> gc(std::shared_ptr<void> self) {
         while (true) {
             auto aborted = co_await m_wobj.wait(astl::timeout(std::chrono::seconds(10)));
             if (aborted) co_return;
@@ -51,11 +51,11 @@ Backend::Backend(std::string_view name, Xctx xctx)
 
     auto cpu = std::make_shared<BackendWorkerStrandState>(*this, "cpu", m_xctx.cpu);
     m_cpuWorkerStrand = cpu;
-    co_spawn(cpu, cpu->gc());
+    co_spawn(m_xctx.cpu, cpu->gc(cpu));
 
     auto gpu = std::make_shared<BackendWorkerStrandState>(*this, "gpu", m_xctx.gpu);
     m_gpuWorkerStrand = gpu;
-    co_spawn(gpu, gpu->gc());
+    co_spawn(m_xctx.gpu, gpu->gc(gpu));
 }
 
 Backend::~Backend() {

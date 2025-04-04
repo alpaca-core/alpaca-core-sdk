@@ -13,6 +13,7 @@
 #include <ac/xec/context.hpp>
 #include <ac/xec/context_work_guard.hpp>
 #include <ac/xec/multi_thread_runner.hpp>
+#include <ac/xec/co_spawn.hpp>
 
 #include <doctest/doctest.h>
 

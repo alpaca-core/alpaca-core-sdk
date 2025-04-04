@@ -12,6 +12,7 @@
 #include <ac/xec/context.hpp>
 #include <ac/xec/context_work_guard.hpp>
 #include <ac/xec/multi_thread_runner.hpp>
+#include <ac/xec/co_spawn.hpp>
 
 #include <doctest/doctest.h>
 
@@ -41,20 +42,19 @@ public:
     };
     std::deque<broadcast_data> broadcast_queue;
 
-    struct session : public ac::xec::coro_state, public astl::enable_shared_from {
+    struct session : public astl::enable_shared_from {
         std::shared_ptr<broadcast_service> service;
         xio_ep io;
         int last_responded_id;
         bool dead = false;
 
         session(stream_ep ep, const std::shared_ptr<broadcast_service>& service)
-            : ac::xec::coro_state(service->ex)
-            , service(service)
+            : service(service)
             , io(std::move(ep), service->ex)
             , last_responded_id(service->broadcast_id)
         {}
 
-        ac::xec::coro<void> run() {
+        ac::xec::coro<void> run(std::shared_ptr<void> self) {
             try {
                 service->sessions.push_back(shared_from(this));
                 auto& queue = service->broadcast_queue;
@@ -134,7 +134,7 @@ public:
 
     void connect(stream_ep ep) {
         auto s = std::make_shared<session>(std::move(ep), shared_from(this));
-        co_spawn(s, s->run());
+        co_spawn(ex, s->run(s));
     }
 };
 

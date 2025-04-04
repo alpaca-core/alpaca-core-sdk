@@ -5,6 +5,7 @@
 #include <ac/xec/timer_wobj.hpp>
 #include <ac/xec/strand_wobj.hpp>
 #include <ac/xec/context.hpp>
+#include <ac/xec/co_spawn.hpp>
 #include <doctest/doctest.h>
 
 using namespace ac::xec;
@@ -87,28 +88,4 @@ TEST_CASE("exceptions") {
     context ctx;
     co_spawn(ctx, test_exceptions());
     ctx.run();
-}
-
-struct TestCoro : public coro_state {
-    using coro_state::coro_state;
-
-    int value = 0;
-    int result = 0;
-
-    coro<int> get_value() {
-        co_return 10;
-    }
-
-    coro<void> entry() {
-        result = co_await get_value() + co_await five();
-    }
-};
-
-TEST_CASE("coro state") {
-    context ctx;
-    auto state = std::make_shared<TestCoro>(ctx.make_strand());
-    state->value = 10;
-    co_spawn(state, state->entry());
-    ctx.run();
-    CHECK(state->result == 15);
 }

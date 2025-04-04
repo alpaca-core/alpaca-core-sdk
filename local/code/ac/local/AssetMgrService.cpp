@@ -21,6 +21,7 @@
 #include <ac/frameio/IoEndpoint.hpp>
 #include <ac/xec/timer_ptr.hpp>
 #include <ac/xec/coro.hpp>
+#include <ac/xec/co_spawn.hpp>
 
 #include <furi/furi.hpp>
 
@@ -33,16 +34,15 @@ ServiceInfo g_serviceInfo = {
     .vendor = "Alpaca Core",
 };
 
-class AssetManager : public xec::coro_state {
+class AssetManager {
 public:
     ac::xec::timer_wobj wobj;
 
     AssetManager(const xec::strand& ex)
-        : coro_state(ex)
-        , wobj(ex)
+        : wobj(ex)
     {}
 
-    xec::coro<void> runService() {
+    xec::coro<void> runService(std::shared_ptr<void> self) {
         [[maybe_unused]] auto aborted = co_await wobj.wait();
         assert(aborted);
     }
@@ -117,7 +117,7 @@ struct AssetMgrService final : public Service {
     AssetMgrService(const xec::strand& s)
         : m_assetManager(std::make_shared<AssetManager>(s))
     {
-        co_spawn(m_assetManager, m_assetManager->runService());
+        co_spawn(s, m_assetManager->runService(m_assetManager));
     }
 
     ~AssetMgrService() override {

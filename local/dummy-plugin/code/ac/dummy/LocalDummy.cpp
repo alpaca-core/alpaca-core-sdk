@@ -28,6 +28,7 @@
 #include <ac/frameio/IoEndpoint.hpp>
 
 #include <ac/xec/coro.hpp>
+#include <ac/xec/co_spawn.hpp>
 #include <ac/io/exception.hpp>
 
 #include <astl/move.hpp>
@@ -51,13 +52,12 @@ struct DummyModelResource : public dummy::Model, public Resource {
     using Lock = ResourceLock<DummyModelResource>;
 };
 
-struct Dummy : public xec::coro_state {
+struct Dummy {
     Backend& m_backend;
     DummyModelResource::Cache& m_resourceCache;
 public:
-    Dummy(Backend& backend, xec::strand ex, DummyModelResource::Cache& rm)
-        : coro_state(std::move(ex))
-        , m_backend(backend)
+    Dummy(Backend& backend, DummyModelResource::Cache& rm)
+        : m_backend(backend)
         , m_resourceCache(rm)
     {}
 
@@ -208,9 +208,9 @@ public:
         }
     }
 
-    xec::coro<void> run(frameio::StreamEndpoint ep) {
+    xec::coro<void> run(std::shared_ptr<void> self, frameio::StreamEndpoint ep) {
         try {
-            auto ex = get_executor();
+            auto ex = co_await xec::executor{};
             IoEndpoint io(std::move(ep), ex);
 
             co_await runSession(io);
@@ -237,8 +237,8 @@ struct DummyService final : public Service {
     }
 
     virtual void createSession(frameio::StreamEndpoint ep, Dict) override {
-        auto dummy = std::make_shared<Dummy>(m_workerStrand.backend, m_workerStrand.executor(), m_resourceCache);
-        co_spawn(dummy, dummy->run(std::move(ep)));
+        auto dummy = std::make_shared<Dummy>(m_workerStrand.backend, m_resourceCache);
+        co_spawn(m_workerStrand.executor(), dummy->run(dummy, std::move(ep)));
     }
 };
 
