@@ -7,3 +7,6 @@ endmacro()
 
 add_xec_test(coro)
 add_xec_test(multi_thread_runner)
+
+ac_dep(b_stacktrace)
+add_xec_test(coro-stack LIBRARIES b_stacktrace::b_stacktrace)
