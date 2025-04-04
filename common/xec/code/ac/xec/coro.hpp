@@ -104,10 +104,10 @@ struct coro {
         return std::exchange(m_handle, nullptr);
     }
 
-    struct awaitable {
+    struct basic_awaitable {
         handle hcoro;
 
-        awaitable(handle h) noexcept : hcoro(h) {}
+        basic_awaitable(handle h) noexcept : hcoro(h) {}
 
         // instead of making optional of expected, we can use the value error=nullptr to indicate that
         // the result is empty (hacky, but works and saves indirections)
@@ -122,18 +122,33 @@ struct coro {
             hcoro.promise().m_prev = caller;
             return hcoro;
         }
+    };
+
+    struct throwing_awaitable : public basic_awaitable {
+        using basic_awaitable::basic_awaitable;
 
         Ret await_resume() noexcept(false) {
-            if (result) {
-                return std::move(result).value();
+            if (this->result) {
+                return std::move(this->result).value();
             }
             else {
-                std::rethrow_exception(result.error());
+                std::rethrow_exception(this->result.error());
             }
         }
     };
 
-    awaitable operator co_await() {
+    throwing_awaitable operator co_await() {
+        return {m_handle};
+    }
+
+    struct result_awaitable : public basic_awaitable {
+        using basic_awaitable::basic_awaitable;
+        coro_result await_resume() noexcept {
+            return std::move(this->result);
+        }
+    };
+
+    [[nodiscard]] result_awaitable safe_result() {
         return {m_handle};
     }
 

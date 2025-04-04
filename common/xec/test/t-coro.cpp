@@ -6,6 +6,7 @@
 #include <ac/xec/strand_wobj.hpp>
 #include <ac/xec/context.hpp>
 #include <ac/xec/co_spawn.hpp>
+#include <ac/xec/co_execute.hpp>
 #include <doctest/doctest.h>
 
 using namespace ac::xec;
@@ -88,4 +89,10 @@ TEST_CASE("exceptions") {
     context ctx;
     co_spawn(ctx, test_exceptions());
     ctx.run();
+}
+
+TEST_CASE("co_execute") {
+    CHECK(co_execute(five()) == 5);
+    CHECK(co_execute(maybe_throw(6, false)) == 6);
+    CHECK_THROWS_WITH(co_execute(maybe_throw(3, true)), "ex");
 }
