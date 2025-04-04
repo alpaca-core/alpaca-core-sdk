@@ -19,7 +19,7 @@ struct AC_IO_API stream_closed_error : public std::exception {
     stream_closed_error(type t) : t(t) {}
     ~stream_closed_error();
 
-    virtual const char* what() const override;
+    virtual const char* what() const _NOEXCEPT override;
 
     static void throw_if_closed(const io::status& status) {
         if (status.closed()) {
