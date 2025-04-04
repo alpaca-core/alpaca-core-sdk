@@ -82,19 +82,30 @@ struct coro {
         }
 
         std::suspend_always initial_suspend() noexcept { return {}; }
-        std::suspend_never final_suspend() noexcept {
-            m_state->set_coro(m_prev);
 
-            if (m_prev) {
-                m_state->post_resume();
-            }
-
-            return {};
+        auto final_suspend() noexcept {
+            // what we do here is that we make the top coroutine have an eager return (not-suspending)
+            // the top coroutine must be detached from its object (on co_spawn)
+            // the others wont: they will be suspended here and destroyed from the caller
+            struct final_awaitable {
+                std::coroutine_handle<> prev;
+                bool await_ready() const noexcept {
+                    // eager when no prev
+                    return !prev;
+                }
+                std::coroutine_handle<> await_suspend(handle) noexcept {
+                    // resume with caller
+                    return prev;
+                }
+                void await_resume() noexcept {}
+            };
+            m_state->set_coro(m_prev); // fixup new top in the state
+            return final_awaitable{ m_prev };
         }
 
         void unhandled_exception() noexcept {
             if (!m_result) {
-                std::terminate(); // can't throw exceptions from the top coroutine
+                std::terminate(); // can't throw exceptions from a naked top coroutine
             }
             *m_result = astl::unexpected(std::current_exception());
         }
@@ -163,7 +174,7 @@ struct coro {
     };
 
     awaitable operator co_await() {
-        return {take_handle()};
+        return {m_handle};
     }
 
     explicit operator bool() const noexcept {
