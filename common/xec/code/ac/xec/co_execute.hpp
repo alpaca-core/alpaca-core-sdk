@@ -15,7 +15,7 @@ T co_execute(coro<T> c) {
     // but a gcc asan bug prevents us from using it (it wrongly assumens ref-captures are post-destroy uses)
     struct execute_helper {
         coro<T> cr;
-        typename coro<T>::coro_result result = astl::unexpected();
+        typename coro<T>::result_type result = astl::unexpected();
         context_work_guard guard;
 
         execute_helper(coro<T> cr, context& ctx)

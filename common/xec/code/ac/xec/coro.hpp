@@ -10,9 +10,10 @@
 
 namespace ac::xec {
 
-namespace impl {
 template <typename T>
 using coro_result = astl::expected<T, std::exception_ptr>;
+
+namespace impl {
 
 template <typename T, typename Self>
 struct ret_promise_helper {
@@ -40,13 +41,13 @@ struct coro {
     using return_type = Ret;
 
     struct promise_type;
-    using handle = std::coroutine_handle<promise_type>;
+    using handle_type = std::coroutine_handle<promise_type>;
 
-    using coro_result = impl::coro_result<Ret>;
+    using result_type = coro_result<Ret>;
 
     struct promise_type : impl::ret_promise_helper<Ret, promise_type> {
         coro get_return_object() noexcept {
-            return coro{handle::from_promise(*this)};
+            return coro{handle_type::from_promise(*this)};
         }
 
         std::suspend_always initial_suspend() noexcept { return {}; }
@@ -61,7 +62,7 @@ struct coro {
                     // eager when no prev
                     return !prev;
                 }
-                std::coroutine_handle<> await_suspend(handle) noexcept {
+                std::coroutine_handle<> await_suspend(handle_type) noexcept {
                     // resume with caller
                     return prev;
                 }
@@ -82,7 +83,7 @@ struct coro {
 
         // points to the result in the awaitable which is on the stack
         // null if this is the top coroutine
-        coro_result* m_result = nullptr;
+        result_type* m_result = nullptr;
     };
 
     coro() noexcept = default;
@@ -100,18 +101,18 @@ struct coro {
         }
     }
 
-    handle take_handle() noexcept {
+    handle_type take_handle() noexcept {
         return std::exchange(m_handle, nullptr);
     }
 
     struct basic_awaitable {
-        handle hcoro;
+        handle_type hcoro;
 
-        basic_awaitable(handle h) noexcept : hcoro(h) {}
+        basic_awaitable(handle_type h) noexcept : hcoro(h) {}
 
         // instead of making optional of expected, we can use the value error=nullptr to indicate that
         // the result is empty (hacky, but works and saves indirections)
-        coro_result result = astl::unexpected();
+        result_type result = astl::unexpected();
 
         bool await_ready() const noexcept { return false; }
 
@@ -143,7 +144,7 @@ struct coro {
 
     struct result_awaitable : public basic_awaitable {
         using basic_awaitable::basic_awaitable;
-        coro_result await_resume() noexcept {
+        result_type await_resume() noexcept {
             return std::move(this->result);
         }
     };
@@ -157,23 +158,23 @@ struct coro {
     }
 
 private:
-    handle m_handle;
-    coro(handle h) noexcept : m_handle(h) {}
+    handle_type m_handle;
+    coro(handle_type h) noexcept : m_handle(h) {}
 };
 
 // awaitable to get the coroutine's executor from the coroutine itself
 // co_await executor{}
 struct executor {
-    strand m_exeecutor;
+    strand m_executor;
 
     // awaitable interface
     bool await_ready() const noexcept { return false; }
     template <typename PromiseType>
     bool await_suspend(std::coroutine_handle<PromiseType> h) noexcept {
-        m_exeecutor = h.promise().m_executor;
+        m_executor = h.promise().m_executor;
         return false;
     }
-    strand await_resume() noexcept { return std::move(m_exeecutor); }
+    strand await_resume() noexcept { return std::move(m_executor); }
 };
 
 } // namespace ac::xec
