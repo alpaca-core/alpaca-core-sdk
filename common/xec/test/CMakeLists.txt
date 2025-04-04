@@ -6,6 +6,7 @@ macro(add_xec_test test)
 endmacro()
 
 add_xec_test(coro)
+add_xec_test(generator)
 add_xec_test(multi_thread_runner)
 
 ac_dep(b_stacktrace)
