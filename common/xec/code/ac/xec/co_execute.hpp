@@ -12,7 +12,7 @@ template <typename T>
 T co_execute(coro<T> c) {
 
     // ideally we would have a simple coroutine lambda here,
-    // but a gcc asan bug prevents us from using it (it wrongly assumens ref-captures are post-destroy uses)
+    // but a gcc asan bug prevents us from using it (it wrongly assumes ref-captures are post-destroy uses)
     struct execute_helper {
         coro<T> cr;
         typename coro<T>::result_type result = astl::unexpected();

@@ -1,7 +1,7 @@
-    // Copyright (c) Alpaca Core
-    // SPDX-License-Identifier: MIT
-    //
-    #pragma once
+// Copyright (c) Alpaca Core
+// SPDX-License-Identifier: MIT
+//
+#pragma once
 #include "concepts/channel.hpp"
 #include "concepts/stream.hpp"
 #include <memory>
@@ -10,8 +10,9 @@ namespace ac::io {
 
 // convert function as template arg? (default std::move)
 // channel payload as template arg? (default shared_ptr)
-template <channel_class Channel>
+template <typename Channel>
 class channel_read_stream {
+    static_assert(channel_class<Channel>);
     std::shared_ptr<Channel> m_channel;
 public:
     using channel_type = Channel;
@@ -33,8 +34,9 @@ public:
     }
 };
 
-template <channel_class Channel>
+template <typename Channel>
 class channel_write_stream {
+    static_assert(channel_class<Channel>);
     std::shared_ptr<Channel> m_channel;
 public:
     using channel_type = Channel;

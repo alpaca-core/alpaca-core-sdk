@@ -2,7 +2,11 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include <ac/io/stream_endpoint_fwd.hpp>
+
+namespace ac::io {
+template <typename RS, typename WS>
+struct stream_endpoint;
+} // namespace ac::io
 
 namespace ac::frameio {
 class ReadStream;

@@ -126,4 +126,4 @@ std::string get_this_thread_name() noexcept {
 #endif
 }
 
-}
+} // namespace ac::xec

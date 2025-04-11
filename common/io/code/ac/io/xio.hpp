@@ -16,8 +16,10 @@
 
 namespace ac::io {
 
-template <stream_class Stream, xec::basic_wait_object_class Wobj>
+template <class Stream, class Wobj>
 class basic_xio {
+    static_assert(stream_class<Stream>);
+    static_assert(xec::basic_wait_object_class<Wobj>);
 public:
     template <typename ...Args>
     explicit basic_xio(std::unique_ptr<Stream> stream, Args&&... args)
@@ -150,8 +152,9 @@ private:
     std::unique_ptr<Stream> m_stream;
 };
 
-template <read_stream_class ReadStream, xec::basic_wait_object_class Wobj>
+template <class ReadStream, class Wobj>
 class xinput : public basic_xio<ReadStream, Wobj> {
+    static_assert(read_stream_class<ReadStream>);
 public:
     using super = basic_xio<ReadStream, Wobj>;
     using super::basic_xio;
@@ -210,8 +213,9 @@ public:
     }
 };
 
-template <write_stream_class WriteStream, xec::basic_wait_object_class Wobj>
+template <class WriteStream, class Wobj>
 class xoutput : public basic_xio<WriteStream, Wobj> {
+    static_assert(write_stream_class<WriteStream>);
 public:
     using super = basic_xio<WriteStream, Wobj>;
     using super::basic_xio;
