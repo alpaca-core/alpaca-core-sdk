@@ -39,10 +39,10 @@ target_sources(ac-frame
         ac/frameio/Stream.hpp
         ac/frameio/StreamPtr.hpp
         ac/frameio/StreamEndpoint.hpp
+        ac/frameio/StreamEndpointFwd.hpp
         ac/frameio/FrameWithStatus.hpp
         ac/frameio/Io.hpp
         ac/frameio/IoEndpoint.hpp
-        ac/frameio/BasicStreamIo.hpp
         ac/frameio/BlockingIo.hpp
 
         # frameio-local
@@ -53,7 +53,7 @@ target_sources(ac-frame
         # schema
         ac/schema/Field.hpp
         ac/schema/SerializeVisitors.hpp
-        ac/schema/SchemaVisitors.hpp
+        ac/schema/SchemaVisitor.hpp
         ac/schema/FrameHelpers.hpp
         ac/schema/FrameHelpers.hpp
         ac/schema/BlockingIoHelper.hpp
