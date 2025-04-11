@@ -6,9 +6,6 @@
 
 namespace ac::frameio {
 
-class Stream;
-using StreamPtr = std::unique_ptr<Stream>;
-
 class ReadStream;
 using ReadStreamPtr = std::unique_ptr<ReadStream>;
 

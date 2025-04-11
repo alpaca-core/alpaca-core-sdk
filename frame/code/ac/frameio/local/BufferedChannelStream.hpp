@@ -22,7 +22,7 @@ public:
         : m_stream(channel)
     {}
 
-    virtual io::stream_result read(Frame& f, OnBlockedFunc onBlocked) override {
+    virtual io::stream_result read(Frame& f, Stream_OnBlockedFunc onBlocked) override {
         return m_stream.read(f, std::move(onBlocked));
     }
 
@@ -39,7 +39,7 @@ public:
         : m_stream(channel)
     {}
 
-    virtual io::stream_result write(Frame& f, OnBlockedFunc onBlocked) override {
+    virtual io::stream_result write(Frame& f, Stream_OnBlockedFunc onBlocked) override {
         return m_stream.write(f, std::move(onBlocked));
     }
 
